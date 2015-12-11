@@ -70,6 +70,41 @@
     </table>
   </section>
 
+  <t:my as=$kyuureki x="
+    use Kyuureki qw(gregorian_to_kyuureki);
+    [gregorian_to_kyuureki $value->year, $value->month, $value->day];
+  ">
+  <section id=calendars>
+    <h1>Calendars</h1>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Gregorian calendar
+          <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+        <tr>
+          <th><i lang=ja>Kyuureki</i>
+          <td>
+            <t:if x="defined $kyuureki->[0]">
+              <t:attr name="'lang'" value="'ja'">
+              <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                              $kyuureki->[0],
+                              $kyuureki->[1],
+                              $kyuureki->[2] ? q{'} : '',
+                              $kyuureki->[3]" rel=bookmark><t:text value="
+                sprintf '%s年%s%s月%s日',
+                    $kyuureki->[0],
+                    $kyuureki->[2] ? '閏' : '',
+                    $kyuureki->[1] == 1 ? '正' : $kyuureki->[1],
+                    $kyuureki->[3] == 1 ? '朔' : $kyuureki->[3];
+              "></a>
+            <t:else>
+              <t:attr name="'lang'" value="'en'">
+              Unknown
+            </t:if>
+    </table>
+  </section>
+
   <section id=components>
     <h1>Components</>
 
@@ -107,34 +142,30 @@
     </table>
   </section>
 
-  <section id=calendars>
-    <h1>Calendars</h1>
+  <section id=props>
+    <h1>Properties</>
 
     <table>
       <tbody>
         <tr>
-          <th>Gregorian calendar
-          <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+          <th>Day of week (number)
+          <td><t:text value="$value->day_of_week">
+        <tr lang=en>
+          <th>Day of week (English)
+          <td><t:text value="qw(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)[$value->day_of_week]">
         <tr>
-          <th><i lang=ja>Kyuureki</i>
-          <td lang=ja>
-            <t:my as=$kyuureki x="
-              use Kyuureki qw(gregorian_to_kyuureki);
-              [gregorian_to_kyuureki $value->year, $value->month, $value->day];
-            ">
+          <th>Day of week (日本語)
+          <td lang=ja><t:text value="use utf8; qw(日 月 火 水 木 金 土)[$value->day_of_week]">曜日
+        <tr lang=ja>
+          <th>六曜
+          <td>
             <t:if x="defined $kyuureki->[0]">
-              <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
-                              $kyuureki->[0],
-                              $kyuureki->[1],
-                              $kyuureki->[2] ? q{'} : '',
-                              $kyuureki->[3]" rel=bookmark><t:text value="
-                sprintf '%s年%s%s月%s日',
-                    $kyuureki->[0],
-                    $kyuureki->[2] ? '閏' : '',
-                    $kyuureki->[1] == 1 ? '正' : $kyuureki->[1],
-                    $kyuureki->[3] == 1 ? '朔' : $kyuureki->[3];
-              "></a>
+              <t:text value="
+                use utf8;
+                qw(大安 赤口 先勝 友引 先負 仏滅)[($kyuureki->[1] + $kyuureki->[3]) % 6];
+              ">
             <t:else>
+              <t:attr name="'lang'" value="'en'">
               Unknown
             </t:if>
     </table>

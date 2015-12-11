@@ -2,6 +2,7 @@ package SWD::Web;
 use strict;
 use warnings;
 use Path::Tiny;
+use Time::HiRes qw(time);
 use Promise;
 use Promised::File;
 use JSON::PS;
@@ -152,7 +153,7 @@ sub main ($$$) {
 
   if (@$path == 2 and $path->[0] eq 'datetime') {
     my $dt;
-    if ($path->[1] =~ /\A[0-9]+(?:\.[0-9]+|)\z/) {
+    if ($path->[1] =~ /\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
       $dt = Web::DateTime->new_from_unix_time ($path->[1]);
     } elsif ($path->[1] =~ /\Akyuureki:([0-9]+)-([0-9]+)('?)-([0-9]+)\z/) {
       my $parser = Web::DateTime::Parser->new;
@@ -160,6 +161,8 @@ sub main ($$$) {
       $dt = $parser->parse_date_string
           (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
               if defined $d->[0];
+    } elsif ($path->[1] eq 'now') {
+      $dt = Web::DateTime->new_from_unix_time (time);
     } else {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($path->[1]);
