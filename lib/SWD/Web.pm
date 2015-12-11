@@ -76,7 +76,23 @@ sub main ($$$) {
   }
 
   if (@$path == 2 and $path->[0] eq 'css' and $path->[1] eq 'common.css') {
+    # /css/common.css
     return static $app, 'text/css; charset=utf-8', 'css/common.css';
+  }
+
+  if (@$path == 2 and $path->[0] eq 'number') {
+    if ($path->[1] =~ /\A[0-9]+\z/) {
+      # /number/{integer}
+      return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
+    }
+  }
+
+  if (@$path == 2 and $path->[0] eq 'boolean') {
+    if ($path->[1] eq 'true' or $path->[1] eq 'false') {
+      # /boolean/true
+      # /boolean/false
+      return temma $app, ['boolean.html.tm'], {value => $path->[1] eq 'true'};
+    }
   }
 
   return $app->send_error (404);

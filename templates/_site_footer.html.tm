@@ -1,20 +1,6 @@
-<head>
-  <t:include path=_head.html.tm />
-<body>
-  <t:include path=_site_header.html.tm />
-
-  <section>
-    <hgroup>
-      <h1>Data types</h1>
-    </hgroup>
-
-    <ul>
-      <li><a href=/boolean/true>Booleans</a>
-      <li><a href=/number/0>Numbers</a>
-    </ul>
-  </section>
-
-  <t:include path=_site_footer.html.tm />
+<footer class=site>
+  <a href=/ rel=top>Data.SuikaWiki.org</a>
+</footer>
 
 <!--
 

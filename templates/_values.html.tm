@@ -1,20 +1,14 @@
-<head>
-  <t:include path=_head.html.tm />
-<body>
-  <t:include path=_site_header.html.tm />
+<t:macro name=boolean t:params=$value>
+  <t:if x=$value>
+    <a href=/boolean/true><data>true</></a>
+  <t:else>
+    <a href=/boolean/false><data>false</></a>
+  </t:if>
+</t:macro>
 
-  <section>
-    <hgroup>
-      <h1>Data types</h1>
-    </hgroup>
-
-    <ul>
-      <li><a href=/boolean/true>Booleans</a>
-      <li><a href=/number/0>Numbers</a>
-    </ul>
-  </section>
-
-  <t:include path=_site_footer.html.tm />
+<t:macro name=number t:params=$value>
+  <a pl:href="'/number/' . $value"><data><t:text value=$value></data></a>
+</t:macro>
 
 <!--
 

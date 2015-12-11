@@ -1,20 +1,6 @@
-<head>
-  <t:include path=_head.html.tm />
-<body>
-  <t:include path=_site_header.html.tm />
-
-  <section>
-    <hgroup>
-      <h1>Data types</h1>
-    </hgroup>
-
-    <ul>
-      <li><a href=/boolean/true>Booleans</a>
-      <li><a href=/number/0>Numbers</a>
-    </ul>
-  </section>
-
-  <t:include path=_site_footer.html.tm />
+<header class=site itemscope itemtype=http://schema.org/WebSite>
+  <h1 itemprop=name><a href=/ rel=top itemprop=url>Data.</a><a href=//suikawiki.org><img src=//wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
+</header>
 
 <!--
 

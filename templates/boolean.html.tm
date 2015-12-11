@@ -1,18 +1,34 @@
+<html t:params="$app $value">
+<t:include path=_values.html.tm />
 <head>
-  <t:include path=_head.html.tm />
+  <t:include path=_head.html.tm>
+    <t:field name=title><t:text value="$value ? 'true' : 'false'"> (boolean)
+  </t:include>
 <body>
   <t:include path=_site_header.html.tm />
 
-  <section>
-    <hgroup>
-      <h1>Data types</h1>
-    </hgroup>
+<section>
+  <hgroup>
+    <h1><data><t:text value="$value ? 'true' : 'false'"></></h1>
+    <h2>Boolean</h2>
+  </>
 
-    <ul>
-      <li><a href=/boolean/true>Booleans</a>
-      <li><a href=/number/0>Numbers</a>
-    </ul>
-  </section>
+  <table>
+    <caption>Serializations</caption>
+    <tbody>
+      <tr>
+        <th>JSON
+        <td><code><t:text value="$value ? 'true' : 'false'"></>
+  </table>
+
+  <table>
+    <caption>Operations</caption>
+    <tbody>
+      <tr>
+        <th>not
+        <td><m:boolean m:value=!$value />
+  </table>
+</section>
 
   <t:include path=_site_footer.html.tm />
 
