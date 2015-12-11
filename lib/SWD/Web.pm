@@ -108,10 +108,12 @@ sub main ($$$) {
       ($path->[0] eq 'lat' or
        $path->[0] eq 'lon' or
        $path->[0] eq 'latlon')) {
+    use utf8;
     my @value = map {
+      s/\s+//g;
       if (/\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
         0+$_;
-      } elsif (/\A([0-9]+)(?:\.([0-9]+)(?:\.([0-9]+(?:\.[0-9]+|))|)|)([NnSsEeWw])\z/) {
+      } elsif (/\A([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([NnSsEeWw])\z/) {
         (($4 eq 'S' or $4 eq 's' or $4 eq 'W' or $4 eq 'w') ? -1 : +1) *
          ($1 +
           ($2 || 0) / 60 +
@@ -135,6 +137,14 @@ sub main ($$$) {
       return temma $app, ['latlon.html.tm'], {lat => $value[0], lon => $value[1]}
           if -90 <= $value[0] and $value[0] <= +90;
     }
+  }
+
+  if (@$path == 2 and $path->[0] eq 'tzoffset' and
+      $path->[1] =~ /\A([+-])([0-9]+):([0-9]+)(?::([0-9]+(?:\.[0-9]+|))|)\z/) {
+    # /tzoffset/{offset}
+    my $seconds = $2 * 3600 + $3 * 60 + ($4 || 0);
+    $seconds *= -1 if $1 eq '-';
+    return temma $app, ['tzoffset.html.tm'], {value => $seconds};
   }
 
   return $app->send_error (404);

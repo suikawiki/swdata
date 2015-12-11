@@ -14,26 +14,36 @@
     <h2>Longitude</h2>
   </>
 
-  <table>
-    <tbody>
-      <tr>
-        <th>Normalized
-        <td><m:lon m:value="
-          my $v = $value > 0 ? $value : -$value;
-          my $w = $v - int $v;
-          $v = (int $v) % 360;
-          my $sign = $value < 0 ? -1 : 1;
-          if ($v > 180) {
-            $v -= 360;
-            $v *= -1;
-            $sign *= -1;
-          }
-          $sign * ($v + $w);
-        "/>
-  </table>
+  <section id=props>
+    <h1>Properties</>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Normalized
+          <td><m:lon m:value="
+            my $v = $value > 0 ? $value : -$value;
+            my $w = $v - int $v;
+            $v = (int $v) % 360;
+            my $sign = $value < 0 ? -1 : 1;
+            if ($v > 180) {
+              $v -= 360;
+              $v *= -1;
+              $sign *= -1;
+            }
+            $sign * ($v + $w);
+          "/>
+        <tr>
+          <th>Local time
+          <td><m:tzoffset m:value="$value * 3600 / 15"/>
+    </table>
+
+  </section>
+
+  <section id=serializations>
+    <h1>Serializations</h1>
 
   <table>
-    <caption>Serializations</>
     <tbody>
       <tr>
         <th>DEG
@@ -64,13 +74,19 @@
         "></a>
   </table>
 
+  </section>
+
+  <section id=cast>
+    <h1>Cast</h1>
+
   <table>
-    <caption>Cast</>
     <tbody>
       <tr>
         <th>Number
         <td><m:number m:value="$value"/>
   </table>
+
+  </section>
 </section>
 
   <m:ads />

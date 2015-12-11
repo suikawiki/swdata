@@ -12,9 +12,10 @@
     <ul>
       <li><a href=/boolean/true>Booleans</a>
       <li><a href=/number/0>Numbers</a>
-      <li><a href=/lat/0>Latitude</a>
-      <li><a href=/lon/0>Longitude</a>
-      <li><a href=/latlon/0,0>Latitude and longitude</a>
+      <li><a href=/lat/0>Latitudes</a>
+      <li><a href=/lon/0>Longitudes</a>
+      <li><a href=/latlon/0,0>Latitudes and longitudes</a>
+      <li><a href=/tzoffset/+00:00>Time zone offsets</a>
     </ul>
   </section>
 

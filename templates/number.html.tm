@@ -15,6 +15,9 @@
     <h2>Number</h2>
   </>
 
+  <section id=serializations>
+    <h1>Serializations</h1>
+
   <table>
     <tbody>
       <t:if x=$is_integer>
@@ -38,21 +41,27 @@
       <tr>
         <th>Scientific notation
         <td><data><t:text value="sprintf '%e', $value"></>
-    <tbody>
-      <tr>
-        <th>Is integer?
-        <td><m:boolean m:value=$is_integer />
-  </table>
+    </table>
+  </section>
+
+  <section id=props>
+    <h1>Properties</>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Sign
+          <td><t:text value="$value < 0 ? '-' : '+'">
+        <tr>
+          <th>Is integer?
+          <td><m:boolean m:value=$is_integer />
+    </table>
+  </section>
+
+  <section id=links>
+    <h1>Links</>
 
   <table>
-    <tbody>
-      <tr>
-        <th>Integer
-        <td><m:number m:value="int $value"/>
-  </table>
-
-  <table>
-    <caption>Links</caption>
     <tbody>
       <t:if x=$is_integer>
         <tr>
@@ -62,10 +71,17 @@
           <th>Next integer
           <td><m:number m:value="$value+1"/>
       </t:if>
+      <tr>
+        <th>Integer
+        <td><m:number m:value="int $value"/>
   </table>
 
+  </section>
+
+  <section id=cast>
+    <h1>Cast</>
+
   <table>
-    <caption>Cast</caption>
     <tbody>
       <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
         <tr>
@@ -81,6 +97,8 @@
         <th>Longitude
         <td><m:lon m:value="$value"/>
   </table>
+  </section>
+
 </section>
 
   <m:ads />

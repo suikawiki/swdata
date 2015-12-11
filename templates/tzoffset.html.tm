@@ -1,31 +1,13 @@
-<t:macro name=boolean t:params=$value>
-  <t:if x=$value>
-    <a href=/boolean/true><data>true</></a>
-  <t:else>
-    <a href=/boolean/false><data>false</></a>
-  </t:if>
-</t:macro>
-
-<t:macro name=number t:params=$value>
-  <a pl:href="'/number/' . $value"><data><t:text value=$value></data></a>
-</t:macro>
-
-<t:macro name=lat t:params=$value>
-  <a pl:href="'/lat/' . $value"><data><t:text value=$value></data></a>
-</t:macro>
-
-<t:macro name=lon t:params=$value>
-  <a pl:href="'/lon/' . $value"><data><t:text value=$value></data></a>
-</t:macro>
-
-<t:macro name=tzoffset t:params=$value>
+<html t:params="$app $value">
+<t:include path=_macro.html.tm />
+<t:include path=_values.html.tm />
     <t:my as=$serialized x="
             my $v = $value < 0 ? -$value : $value;
             my $h = int ($v / 3600);
             my $m = int (($v - $h*3600) / 60);
             my $s = $v - $h*3600 - $m*60;
             if ($s == 0) {
-              sprintf '%s%02d:%02d',
+              sprintf '%s%02d:%02d:%02d',
                   $value < 0 ? '-' : '+',
                   int $h,
                   int $m;
@@ -43,12 +25,51 @@
               $x;
             }
     ">
-  <a pl:href="'/tzoffset/' . $serialized"><data><t:text value=$serialized></data></a>
-</t:macro>
+<head>
+  <t:include path=_head.html.tm>
+    <t:field name=title><t:text value=$serialized> (time zone offset)
+  </t:include>
+<body>
+  <t:include path=_site_header.html.tm />
 
-<t:macro name=codepoint t:params=$value>
-  <a pl:href="sprintf '//chars.suikawiki.org/char/%04X', $value"><data><t:text value="$value <= 0x10FFFF ? sprintf 'U+%04X', $value : sprintf 'U-%08X', $value"></data></a>
-</t:macro>
+<section>
+  <t:my as=$is_integer x="$value == int $value">
+  <hgroup>
+    <h1><data><t:text value=$serialized></></h1>
+    <h2>Time zone offset</h2>
+  </>
+
+  <section id=serializations>
+    <h1>Serializations</h1>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Offset
+          <td><a pl:href="sprintf '/tzoffset/%s', $serialized" rel=bookmark><data><t:text value="$serialized"></></a>
+    </table>
+  </section>
+
+  <section id=props>
+    <h1>Properties</>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Seconds
+          <td><t:text value="$value">
+        <tr>
+          <th>Longitude
+          <td><m:lon m:value="
+            $value * 15 / 3600;
+          "/>
+    </table>
+  </section>
+
+</section>
+
+  <m:ads />
+  <t:include path=_site_footer.html.tm />
 
 <!--
 
