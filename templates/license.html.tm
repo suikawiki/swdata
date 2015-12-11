@@ -18,11 +18,11 @@
 
     <p>Copyright 2015 Wakaba &lt;wakaba@suikawiki.org>.
 
-    <p>This program is free software: you can redistribute it and/or
-    modify it under the terms of the <cite>GNU Affero General Public
-    License</cite> as published by the Free Software Foundation,
-    either version 3 of the License, or (at your option) any later
-    version.
+    <p><a href=https://github.com/suikawiki/swdata>This program</a> is
+    free software: you can redistribute it and/or modify it under the
+    terms of the <cite>GNU Affero General Public License</cite> as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
 
     <p>This program is distributed in the hope that it will be useful,
     but <strong>WITHOUT ANY WARRANTY</strong>; without even the
