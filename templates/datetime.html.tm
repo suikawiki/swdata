@@ -17,7 +17,7 @@
   <section id=serializations>
     <h1>Serializations</h1>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Global date and time string (time zone offset preserved)
@@ -72,7 +72,7 @@
     <section id=serializations-browser pl:data-input="$value->to_time_zoned_global_date_and_time_string">
       <h1>Your browser</h1>
 
-      <table>
+      <table class=nv>
         <tbody>
           <tr>
             <th><code>toString</code>
@@ -123,7 +123,7 @@
   <section id=calendars>
     <h1>Calendars</h1>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Gregorian calendar
@@ -154,7 +154,7 @@
   <section id=components>
     <h1>Components</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Year
@@ -191,7 +191,7 @@
   <section id=props>
     <h1>Properties</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Day of week (number)
@@ -220,7 +220,7 @@
   <section id=cast>
     <h1>Cast</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Unix number

@@ -42,7 +42,7 @@
   <section id=serializations>
     <h1>Serializations</h1>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Offset
@@ -53,7 +53,7 @@
   <section id=props>
     <h1>Properties</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Seconds

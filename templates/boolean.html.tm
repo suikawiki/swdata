@@ -14,21 +14,28 @@
     <h2>Boolean</h2>
   </>
 
-  <table>
-    <caption>Serializations</caption>
-    <tbody>
-      <tr>
-        <th>JSON
-        <td><code><t:text value="$value ? 'true' : 'false'"></>
-  </table>
+  <section id=serializations>
+    <h1>Serializations</h1>
 
-  <table>
-    <caption>Operations</caption>
-    <tbody>
-      <tr>
-        <th>not
-        <td><m:boolean m:value=!$value />
-  </table>
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>JSON
+          <td><code><t:text value="$value ? 'true' : 'false'"></>
+    </table>
+  </section>
+
+  <section id=operations>
+    <h1>Operations</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>not
+          <td><m:boolean m:value=!$value />
+    </table>
+  </section>
+
 </section>
 
   <m:ads />

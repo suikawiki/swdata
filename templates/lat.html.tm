@@ -14,45 +14,51 @@
     <h2>Latitude</h2>
   </>
 
-  <table>
-    <caption>Serializations</>
-    <tbody>
-      <tr>
-        <th>DEG
-        <td><a pl:href="sprintf '/lat/%f', $value" rel=bookmark><t:text value="sprintf '%f', $value"></a>
-      </tr>
-      <t:my as=$dms x="
-        my $v = $value > 0 ? $value : -$value;
-        my $w = ($v - int $v) * 60;
-        [$value < 0 ? -1 : 1, int $v, int $w, ($w - int $w) * 60];
-      ">
-      <tr lang=en>
-        <th>DMS (English)
-        <td><a pl:href="sprintf '/lat/%d.%d.%f%s', $dms->[1], $dms->[2], $dms->[3], $dms->[0] < 0 ? 'S' : 'N'" rel=bookmark><t:text value="
-          sprintf q{%s° %s' %s'' %s},
-              $dms->[1],
-              $dms->[2],
-              ($dms->[3] == int $dms->[3] ? sprintf '%d', $dms->[3] : sprintf '%f', $dms->[3]),
-              $dms->[0] < 0 ? 'S' : 'N';
-        "></a>
-      <tr lang=ja>
-        <th>DMS (日本語)
-        <td><a pl:href="sprintf '/lat/%d.%d.%f%s', $dms->[1], $dms->[2], $dms->[3], $dms->[0] < 0 ? 'S' : 'N'" rel=bookmark><t:text value="
-          sprintf q{%s%s度%s分%s秒},
-              $dms->[0] < 0 ? '南緯' : '北緯',
-              $dms->[1],
-              $dms->[2],
-              ($dms->[3] == int $dms->[3] ? sprintf '%d', $dms->[3] : sprintf '%f', $dms->[3]);
-        "></a>
-  </table>
+  <section id=serializations>
+    <h1>Serializations</>
 
-  <table>
-    <caption>Cast</>
-    <tbody>
-      <tr>
-        <th>Number
-        <td><m:number m:value="$value"/>
-  </table>
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>DEG
+          <td><a pl:href="sprintf '/lat/%f', $value" rel=bookmark><t:text value="sprintf '%f', $value"></a>
+        </tr>
+        <t:my as=$dms x="
+          my $v = $value > 0 ? $value : -$value;
+          my $w = ($v - int $v) * 60;
+          [$value < 0 ? -1 : 1, int $v, int $w, ($w - int $w) * 60];
+        ">
+        <tr lang=en>
+          <th>DMS (English)
+          <td><a pl:href="sprintf '/lat/%d.%d.%f%s', $dms->[1], $dms->[2], $dms->[3], $dms->[0] < 0 ? 'S' : 'N'" rel=bookmark><t:text value="
+            sprintf q{%s° %s' %s'' %s},
+                $dms->[1],
+                $dms->[2],
+                ($dms->[3] == int $dms->[3] ? sprintf '%d', $dms->[3] : sprintf '%f', $dms->[3]),
+                $dms->[0] < 0 ? 'S' : 'N';
+          "></a>
+        <tr lang=ja>
+          <th>DMS (日本語)
+          <td><a pl:href="sprintf '/lat/%d.%d.%f%s', $dms->[1], $dms->[2], $dms->[3], $dms->[0] < 0 ? 'S' : 'N'" rel=bookmark><t:text value="
+            sprintf q{%s%s度%s分%s秒},
+                $dms->[0] < 0 ? '南緯' : '北緯',
+                $dms->[1],
+                $dms->[2],
+                ($dms->[3] == int $dms->[3] ? sprintf '%d', $dms->[3] : sprintf '%f', $dms->[3]);
+          "></a>
+    </table>
+  </section>
+
+  <section id=cast>
+    <h1>Cast</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Number
+          <td><m:number m:value="$value"/>
+    </table>
+  </section>
 </section>
 
   <m:ads />
