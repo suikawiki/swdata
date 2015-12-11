@@ -81,22 +81,25 @@
   <section id=cast>
     <h1>Cast</>
 
-  <table>
-    <tbody>
-      <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
+    <table>
+      <tbody>
+        <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
+          <tr>
+            <th>Code point
+            <td><m:codepoint m:value="$value"/>
+        </t:if>
+        <t:if x="-90 <= $value and $value <= 90">
+          <tr>
+            <th>Latitude
+            <td><m:lat m:value="$value"/>
+        </t:if>
         <tr>
-          <th>Code point
-          <td><m:codepoint m:value="$value"/>
-      </t:if>
-      <t:if x="-90 <= $value and $value <= 90">
+          <th>Longitude
+          <td><m:lon m:value="$value"/>
         <tr>
-          <th>Latitude
-          <td><m:lat m:value="$value"/>
-      </t:if>
-      <tr>
-        <th>Longitude
-        <td><m:lon m:value="$value"/>
-  </table>
+          <th>Time
+          <td><m:unixtime m:value="$value"/>
+    </table>
   </section>
 
 </section>

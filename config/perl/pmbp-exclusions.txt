@@ -21,5 +21,6 @@
 - "../../modules/promised-command" tests
 - "../../modules/promised-plackup" tests
 - "../../modules/twiggy-packed" tests
+- "../../modules/kyuureki" tests
 - "../../t_deps/modules/test-x1" tests
 - "../../t_deps/modules/promised-mysqld" tests

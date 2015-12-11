@@ -7,7 +7,7 @@
             my $m = int (($v - $h*3600) / 60);
             my $s = $v - $h*3600 - $m*60;
             if ($s == 0) {
-              sprintf '%s%02d:%02d:%02d',
+              sprintf '%s%02d:%02d',
                   $value < 0 ? '-' : '+',
                   int $h,
                   int $m;

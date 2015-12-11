@@ -5,6 +5,9 @@ use Path::Tiny;
 use Promise;
 use Promised::File;
 use JSON::PS;
+use Web::DateTime;
+use Web::DateTime::Parser;
+use Kyuureki qw(kyuureki_to_gregorian);
 use Wanage::HTTP;
 use Warabe::App;
 use Temma;
@@ -145,6 +148,25 @@ sub main ($$$) {
     my $seconds = $2 * 3600 + $3 * 60 + ($4 || 0);
     $seconds *= -1 if $1 eq '-';
     return temma $app, ['tzoffset.html.tm'], {value => $seconds};
+  }
+
+  if (@$path == 2 and $path->[0] eq 'datetime') {
+    my $dt;
+    if ($path->[1] =~ /\A[0-9]+(?:\.[0-9]+|)\z/) {
+      $dt = Web::DateTime->new_from_unix_time ($path->[1]);
+    } elsif ($path->[1] =~ /\Akyuureki:([0-9]+)-([0-9]+)('?)-([0-9]+)\z/) {
+      my $parser = Web::DateTime::Parser->new;
+      my $d = [kyuureki_to_gregorian $1, $2, $3, $4];
+      $dt = $parser->parse_date_string
+          (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
+              if defined $d->[0];
+    } else {
+      my $parser = Web::DateTime::Parser->new;
+      $dt = $parser->parse_html_datetime_value ($path->[1]);
+    }
+    if (defined $dt and $dt->is_date_time) {
+      return temma $app, ['datetime.html.tm'], {value => $dt};
+    }
   }
 
   return $app->send_error (404);

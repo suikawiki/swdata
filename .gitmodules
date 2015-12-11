@@ -50,3 +50,11 @@
 	path = modules/promised-file
 	url = git://github.com/wakaba/perl-promised-file
 	track = master
+[submodule "modules/kyuureki"]
+	path = modules/kyuureki
+	url = git://github.com/wakaba/perl-kyuureki
+	track = master
+[submodule "modules/web-datetime"]
+	path = modules/web-datetime
+	url = git://github.com/manakai/perl-web-datetime
+	track = master

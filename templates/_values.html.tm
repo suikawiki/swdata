@@ -18,6 +18,18 @@
   <a pl:href="'/lon/' . $value"><data><t:text value=$value></data></a>
 </t:macro>
 
+<t:macro name=unixtime t:params="$value $formatted?">
+  <a pl:href="'/datetime/' . $value">
+    <t:if x=$formatted>
+      <time><t:text value="
+        Web::DateTime->new_from_unix_time ($value)->to_global_date_and_time_string;
+      "></time>
+    <t:else>
+      <data><t:text value=$value></data>
+    </t:if>
+  </a>
+</t:macro>
+
 <t:macro name=tzoffset t:params=$value>
     <t:my as=$serialized x="
             my $v = $value < 0 ? -$value : $value;
