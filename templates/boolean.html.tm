@@ -1,4 +1,5 @@
 <html t:params="$app $value">
+<t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
   <t:include path=_head.html.tm>
@@ -30,6 +31,7 @@
   </table>
 </section>
 
+  <m:ads />
   <t:include path=_site_footer.html.tm />
 
 <!--

@@ -37,13 +37,14 @@ footer.site a[rel~=top] {
 }
 
 body > section {
-  padding-right: 1rem;
+  padding-right: 316px;
   padding-left: 1rem;
   padding-bottom: 1rem;
+  min-height: 410px;
 }
 
 body > section > hgroup {
-  margin: 0.5rem -1rem 1rem -1rem;
+  margin: 0.5rem -316px 1rem -1rem;
   padding: 0.6rem 150px 0.3rem 0.3rem;
   border-bottom: 0.2rem solid;
   min-height: 65px;
@@ -56,6 +57,18 @@ body > section > hgroup > h1 {
 body > section > hgroup > h2 {
   margin-top: 0.3rem;
   font-size: 120%;
+}
+
+.ads-rectangle {
+  position: absolute;
+  top: 100px;
+  right: 1rem;
+}
+
+a[rel~=bookmark] {
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
 }
 
 /*

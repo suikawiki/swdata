@@ -84,6 +84,12 @@ sub main ($$$) {
     if ($path->[1] =~ /\A[0-9]+\z/) {
       # /number/{integer}
       return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
+    } elsif ($path->[1] =~ /\A0x[0-9A-Fa-f]+\z/) {
+      # /number/0x{hex}
+      return temma $app, ['number.html.tm'], {value => hex $path->[1]};
+    } elsif ($path->[1] =~ /\A0b[01]+\z/) {
+      # /number/0b{binary}
+      return temma $app, ['number.html.tm'], {value => eval $path->[1]};
     }
   }
 

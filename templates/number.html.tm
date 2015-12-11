@@ -1,4 +1,5 @@
 <html t:params="$app $value">
+<t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
   <t:include path=_head.html.tm>
@@ -18,16 +19,16 @@
     <tbody>
       <tr>
         <th>Decimal
-        <td><data><t:text value="sprintf '%d', $value"></>
+        <td><a pl:href="sprintf '/number/%d', $value" rel=bookmark><data><t:text value="sprintf '%d', $value"></></a>
       <tr>
         <th>Hexadecimal
-        <td><data><t:text value="sprintf '%X', $value"></>
+        <td><a pl:href="sprintf '/number/0x%X', $value" rel=bookmark><data><t:text value="sprintf '%X', $value"></></a>
       <tr>
         <th>Octal
         <td><data><t:text value="sprintf '%o', $value"></>
       <tr>
         <th>Binary
-        <td><data><t:text value="sprintf '%b', $value"></>
+        <td><a pl:href="sprintf '/number/0b%b', $value" rel=bookmark><data><t:text value="sprintf '%b', $value"></></a>
     <tbody>
       <tr>
         <th>Is integer?
@@ -35,6 +36,14 @@
   </table>
 
   <table>
+    <tbody>
+      <tr>
+        <th>Integer
+        <td><m:number m:value="int $value"/>
+  </table>
+
+  <table>
+    <caption>Links</caption>
     <tbody>
       <t:if x=$is_integer>
         <tr>
@@ -44,12 +53,20 @@
           <th>Next integer
           <td><m:number m:value="$value+1"/>
       </t:if>
-      <tr>
-        <th>Integer
-        <td><m:number m:value="int $value"/>
+  </table>
+
+  <table>
+    <caption>Cast</caption>
+    <tbody>
+      <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
+        <tr>
+          <th>Code point
+          <td><m:codepoint m:value="$value"/>
+      </t:if>
   </table>
 </section>
 
+  <m:ads />
   <t:include path=_site_footer.html.tm />
 
 <!--
