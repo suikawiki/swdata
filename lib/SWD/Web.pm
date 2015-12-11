@@ -81,8 +81,8 @@ sub main ($$$) {
   }
 
   if (@$path == 2 and $path->[0] eq 'number') {
-    if ($path->[1] =~ /\A[0-9]+\z/) {
-      # /number/{integer}
+    if ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
+      # /number/{sign}{integer}
       return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
     } elsif ($path->[1] =~ /\A0x[0-9A-Fa-f]+\z/) {
       # /number/0x{hex}
@@ -90,6 +90,9 @@ sub main ($$$) {
     } elsif ($path->[1] =~ /\A0b[01]+\z/) {
       # /number/0b{binary}
       return temma $app, ['number.html.tm'], {value => eval $path->[1]};
+    } elsif ($path->[1] =~ /\A[+-]?[0-9]+\.[0-9]+\z/) {
+      # /number/{sign}{integer}.{integer}
+      return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
     }
   }
 
@@ -98,6 +101,39 @@ sub main ($$$) {
       # /boolean/true
       # /boolean/false
       return temma $app, ['boolean.html.tm'], {value => $path->[1] eq 'true'};
+    }
+  }
+
+  if (@$path == 2 and
+      ($path->[0] eq 'lat' or
+       $path->[0] eq 'lon' or
+       $path->[0] eq 'latlon')) {
+    my @value = map {
+      if (/\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
+        0+$_;
+      } elsif (/\A([0-9]+)(?:\.([0-9]+)(?:\.([0-9]+(?:\.[0-9]+|))|)|)([NnSsEeWw])\z/) {
+        (($4 eq 'S' or $4 eq 's' or $4 eq 'W' or $4 eq 'w') ? -1 : +1) *
+         ($1 +
+          ($2 || 0) / 60 +
+          ($3 || 0) / 3600);
+      } else {
+        undef;
+      }
+    } split /,/, $path->[1], -1;
+
+    if (@value == 1 and defined $value[0] and $path->[0] eq 'lat') {
+      return temma $app, ['lat.html.tm'], {value => $value[0]}
+          if -90 <= $value[0] and $value[0] <= +90;
+    }
+
+    if (@value == 1 and defined $value[0] and $path->[0] eq 'lon') {
+      return temma $app, ['lon.html.tm'], {value => $value[0]};
+    }
+
+    if (@value == 2 and defined $value[0] and defined $value[1] and
+        $path->[0] eq 'latlon') {
+      return temma $app, ['latlon.html.tm'], {lat => $value[0], lon => $value[1]}
+          if -90 <= $value[0] and $value[0] <= +90;
     }
   }
 

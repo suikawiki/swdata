@@ -17,18 +17,27 @@
 
   <table>
     <tbody>
+      <t:if x=$is_integer>
+        <tr>
+          <th>Decimal
+          <td><a pl:href="sprintf '/number/%d', $value" rel=bookmark><data><t:text value="sprintf '%d', $value"></></a>
+        <tr>
+          <th>Hexadecimal
+          <td><a pl:href="sprintf '/number/0x%X', $value" rel=bookmark><data><t:text value="sprintf '%X', $value"></></a>
+        <tr>
+          <th>Octal
+          <td><data><t:text value="sprintf '%o', $value"></>
+        <tr>
+          <th>Binary
+          <td><a pl:href="sprintf '/number/0b%b', $value" rel=bookmark><data><t:text value="sprintf '%b', $value"></></a>
+      <t:else>
+        <tr>
+          <th>Decimal notation
+          <td><a pl:href="sprintf '/number/%f', $value" rel=bookmark><data><t:text value="sprintf '%f', $value"></></a>
+      </t:if>
       <tr>
-        <th>Decimal
-        <td><a pl:href="sprintf '/number/%d', $value" rel=bookmark><data><t:text value="sprintf '%d', $value"></></a>
-      <tr>
-        <th>Hexadecimal
-        <td><a pl:href="sprintf '/number/0x%X', $value" rel=bookmark><data><t:text value="sprintf '%X', $value"></></a>
-      <tr>
-        <th>Octal
-        <td><data><t:text value="sprintf '%o', $value"></>
-      <tr>
-        <th>Binary
-        <td><a pl:href="sprintf '/number/0b%b', $value" rel=bookmark><data><t:text value="sprintf '%b', $value"></></a>
+        <th>Scientific notation
+        <td><data><t:text value="sprintf '%e', $value"></>
     <tbody>
       <tr>
         <th>Is integer?
@@ -63,6 +72,14 @@
           <th>Code point
           <td><m:codepoint m:value="$value"/>
       </t:if>
+      <t:if x="-90 <= $value and $value <= 90">
+        <tr>
+          <th>Latitude
+          <td><m:lat m:value="$value"/>
+      </t:if>
+      <tr>
+        <th>Longitude
+        <td><m:lon m:value="$value"/>
   </table>
 </section>
 

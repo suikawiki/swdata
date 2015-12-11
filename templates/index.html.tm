@@ -12,6 +12,9 @@
     <ul>
       <li><a href=/boolean/true>Booleans</a>
       <li><a href=/number/0>Numbers</a>
+      <li><a href=/lat/0>Latitude</a>
+      <li><a href=/lon/0>Longitude</a>
+      <li><a href=/latlon/0,0>Latitude and longitude</a>
     </ul>
   </section>
 

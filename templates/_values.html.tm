@@ -10,6 +10,14 @@
   <a pl:href="'/number/' . $value"><data><t:text value=$value></data></a>
 </t:macro>
 
+<t:macro name=lat t:params=$value>
+  <a pl:href="'/lat/' . $value"><data><t:text value=$value></data></a>
+</t:macro>
+
+<t:macro name=lon t:params=$value>
+  <a pl:href="'/lon/' . $value"><data><t:text value=$value></data></a>
+</t:macro>
+
 <t:macro name=codepoint t:params=$value>
   <a pl:href="sprintf '//chars.suikawiki.org/char/%04X', $value"><data><t:text value="$value <= 0x10FFFF ? sprintf 'U+%04X', $value : sprintf 'U-%08X', $value"></data></a>
 </t:macro>
