@@ -68,6 +68,52 @@
           <th>Shortest time string
           <td><a pl:href="sprintf '/datetime/%s', $value->to_shortest_time_string" rel=bookmark><time pl:datetime="$value->to_shortest_time_string"><t:text value="$value->to_shortest_time_string"></></a>
     </table>
+
+    <section id=serializations-browser pl:data-input="$value->to_time_zoned_global_date_and_time_string">
+      <h1>Your browser</h1>
+
+      <table>
+        <tbody>
+          <tr>
+            <th><code>toString</code>
+            <td><output/>
+          <tr>
+            <th><code>toDateString</code>
+            <td><output/>
+          <tr>
+            <th><code>toTimeString</code>
+            <td><output/>
+          <tr>
+            <th><code>toGMTString</code>
+            <td><output/>
+          <tr>
+            <th><code>toUTCString</code>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleString</code>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleDateString</code>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleTimeString</code>
+            <td><output/>
+          <tr>
+            <th><code>toJSON</code>
+            <td><output/>
+      </table>
+      <script>
+        var section = document.querySelector ('#serializations-browser');
+        var date = new Date (section.getAttribute ('data-input'));
+        Array.prototype.forEach.call (section.querySelectorAll ('tr'), function (tr) {
+          var code = tr.querySelector ('th code');
+          var output = tr.querySelector ('output');
+          if (!code || !output) return;
+          var method = code.textContent;
+          output.textContent = date[method] ();
+        });
+      </script>
+    </section>
   </section>
 
   <t:my as=$kyuureki x="
@@ -112,7 +158,7 @@
       <tbody>
         <tr>
           <th>Year
-          <td><t:text value="$value->year">
+          <td><m:year m:value="$value->year"/>
         <tr>
           <th>Month
           <td><t:text value="$value->month">

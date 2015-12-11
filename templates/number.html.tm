@@ -83,11 +83,6 @@
 
     <table>
       <tbody>
-        <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
-          <tr>
-            <th>Code point
-            <td><m:codepoint m:value="$value"/>
-        </t:if>
         <t:if x="-90 <= $value and $value <= 90">
           <tr>
             <th>Latitude
@@ -97,8 +92,19 @@
           <th>Longitude
           <td><m:lon m:value="$value"/>
         <tr>
-          <th>Time
+          <th>Time (seconds)
           <td><m:unixtime m:value="$value"/>
+        </tr>
+        <t:if x="$is_integer">
+          <tr>
+            <th>Year
+            <td><m:year m:value="$value"/>
+        </t:if>
+        <t:if x="$is_integer and 0 <= $value and $value <= 0x7FFFFFFF">
+          <tr>
+            <th>Code point
+            <td><m:codepoint m:value="$value"/>
+        </t:if>
     </table>
   </section>
 

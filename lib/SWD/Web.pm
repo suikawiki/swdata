@@ -163,6 +163,9 @@ sub main ($$$) {
               if defined $d->[0];
     } elsif ($path->[1] eq 'now') {
       $dt = Web::DateTime->new_from_unix_time (time);
+    } elsif ($path->[1] =~ /\Ayear:([-]?[0-9]+)\z/) {
+      my $parser = Web::DateTime::Parser->new;
+      $dt = $parser->parse_html_datetime_value ($1);
     } else {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($path->[1]);
