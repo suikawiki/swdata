@@ -1,3 +1,29 @@
+<script>
+  Array.prototype.forEach.call (document.querySelectorAll ('table.nv'), function (table) {
+    Array.prototype.forEach.call (table.querySelectorAll ('tbody tr'), function (tr) {
+      if (tr.children.length === 2) {
+        var data = tr.lastElementChild;
+        data = data.querySelector ('data, time, code') || data;
+        var td = document.createElement ('td');
+        td.className = 'copy';
+        var button = document.createElement ('button');
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.onclick = function () {
+          var range = document.createRange ();
+          range.selectNode (data);
+          getSelection ().empty ();
+          getSelection ().addRange (range);
+          document.execCommand ('copy')
+        };
+        td.appendChild (button);
+        tr.appendChild (td);
+      }
+    });
+  });
+
+</script>
+
 <footer class=site>
   <a href=/ rel=top>Data.SuikaWiki.org</a>
   <a href=/license rel=license>&copy;</a>

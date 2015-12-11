@@ -115,6 +115,25 @@ td > a:only-child {
   display: block;
 }
 
+td.copy {
+  width: 2em;
+  text-align: right;
+}
+
+td.copy button {
+  font-size: 80%;
+  cursor: pointer;
+  border-style: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  line-height: 1.4;
+}
+
+td.copy button:not(:hover) {
+  background: transparent;
+  color: gray;
+}
+
 .ads-rectangle {
   position: absolute;
   top: 100px;
@@ -136,7 +155,7 @@ a[rel~=bookmark] {
   text-decoration: none;
 }
 
-a:not([rel~=bookmark]):hover {
+a:not([rel~=bookmark]):hover, button:hover {
   background-color: #ffa;
   color: black;
   text-decoration: underline;

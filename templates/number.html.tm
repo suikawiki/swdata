@@ -18,7 +18,7 @@
   <section id=serializations>
     <h1>Serializations</h1>
 
-  <table>
+  <table class=nv>
     <tbody>
       <t:if x=$is_integer>
         <tr>
@@ -41,13 +41,62 @@
       <tr>
         <th>Scientific notation
         <td><data><t:text value="sprintf '%e', $value"></>
+      <tr>
+        <th>JSON
+        <td><code><t:text value="JSON::PS::perl2json_chars $value"></code>
     </table>
+
+    <section id=serializations-browser pl:data-input="$value">
+      <h1>Your browser</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th><code>toString</code>
+            <td><output/>
+          <tr>
+            <th><code>toString</code> (<code>2</code>)
+            <td><output/>
+          <tr>
+            <th><code>toString</code> (<code>8</code>)
+            <td><output/>
+          <tr>
+            <th><code>toString</code> (<code>16</code>)
+            <td><output/>
+          <tr>
+            <th><code>toFixed</code>
+            <td><output/>
+          <tr>
+            <th><code>toExponential</code>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleString</code>
+            <td><output/>
+      </table>
+      <script>
+        var section = document.querySelector ('#serializations-browser');
+        var data = parseFloat (section.getAttribute ('data-input'));
+        Array.prototype.forEach.call (section.querySelectorAll ('tr'), function (tr) {
+          var code = tr.querySelector ('th code');
+          var arg = tr.querySelector ('th code:nth-of-type(2)');
+          var output = tr.querySelector ('output');
+          if (!code || !output) return;
+          var method = code.textContent;
+          if (arg) {
+            arg = parseFloat (arg.textContent);
+            output.textContent = data[method] (arg);
+          } else {
+            output.textContent = data[method] ();
+          }
+        });
+      </script>
+    </section>
   </section>
 
   <section id=props>
     <h1>Properties</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <tr>
           <th>Sign
@@ -61,7 +110,7 @@
   <section id=links>
     <h1>Links</>
 
-  <table>
+  <table class=nv>
     <tbody>
       <t:if x=$is_integer>
         <tr>
@@ -81,7 +130,7 @@
   <section id=cast>
     <h1>Cast</>
 
-    <table>
+    <table class=nv>
       <tbody>
         <t:if x="-90 <= $value and $value <= 90">
           <tr>

@@ -17,7 +17,7 @@
   <section id=components>
     <h1>Components</h1>
 
-  <table>
+  <table class=nv>
     <tbody>
       <tr>
         <th>Latitude
@@ -32,7 +32,7 @@
   <section id=serializations>
     <h1>Serializations</h1>
 
-  <table>
+  <table class=nv>
     <tbody>
       <tr>
         <th>DEG
