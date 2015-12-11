@@ -175,6 +175,11 @@ sub main ($$$) {
     }
   }
 
+  if (@$path == 1 and $path->[0] eq 'license') {
+    # /license
+    return temma $app, ['license.html.tm'], {};
+  }
+
   return $app->send_error (404);
 } # main
 

@@ -1,4 +1,4 @@
-<html t:params="$app $value">
+<html t:params="$app $value" lang=en>
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
