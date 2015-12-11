@@ -28,3 +28,8 @@ deployment:
     branch: nightly
     commands:
       - curl -f -s -S --request POST --header "Authorization:token $GITHUB_ACCESS_TOKEN" --header "Content-Type:application/json" --data-binary "{\"base\":\"nightly\",\"head\":\"`git rev-parse HEAD`\",\"commit_message\":\"auto-merge nightly into nightly\"}" "https://api.github.com/repos/suikawiki/swdata/merges"
+
+  staging:
+    branch: staging
+    commands:
+      - curl -f -s -S --request POST --header "Authorization:token $GITHUB_ACCESS_TOKEN" --header "Content-Type:application/json" --data-binary "{\"base\":\"staging\",\"head\":\"`git rev-parse HEAD`\",\"commit_message\":\"auto-merge staging into staging\"}" "https://api.github.com/repos/suikawiki/swdata/merges"

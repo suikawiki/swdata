@@ -11,7 +11,7 @@ ADD templates/ /app/templates/
 ADD css/ /app/css/
 
 RUN cd /app && \
-    make deps-server PMBP_OPTIONS=--execute-system-package-installer && \
+    make deps-docker PMBP_OPTIONS=--execute-system-package-installer && \
     echo '#!/bin/bash' > /server && \
     echo 'cd /app' >> /server && \
     echo 'exec ./plackup -s Twiggy -p 8080 bin/server.psgi' >> /server && \
