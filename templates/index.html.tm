@@ -1,3 +1,4 @@
+<html lang=en>
 <t:include path=_macro.html.tm />
 <head>
   <t:include path=_head.html.tm />

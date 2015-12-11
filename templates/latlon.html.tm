@@ -1,4 +1,4 @@
-<html t:params="$app $lat $lon">
+<html t:params="$app $lat $lon" lang=en>
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>

@@ -31,7 +31,8 @@ footer.site {
   text-align: center;
 }
 
-footer.site a[rel~=top] {
+footer.site a[rel~=top],
+footer.site a[rel~=license] {
   color: inherit;
   text-decoration: none;
 }
