@@ -33,7 +33,7 @@
 
     <p>You does not have received a copy of the <cite>GNU Affero
     General Public License</cite> along with this program, see
-    &lt;<a href=http://www.gnu.org/licenses/>http://www.gnu.org/licenses/</a>>.
+    &lt;<a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>>.
 
   </section>
 
@@ -68,6 +68,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Affero General Public License for more details.
 
 You does not have received a copy of the GNU Affero General Public
-License along with this program, see <http://www.gnu.org/licenses/>.
+License along with this program, see <https://www.gnu.org/licenses/>.
 
 -->

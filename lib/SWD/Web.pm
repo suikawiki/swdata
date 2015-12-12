@@ -32,6 +32,9 @@ sub psgi_app ($) {
     warn sprintf "Access: [%s] %s %s\n",
         scalar gmtime, $app->http->request_method, $app->http->url->stringify;
 
+    $http->set_response_header
+        ('Strict-Transport-Security' => 'max-age=10886400; includeSubDomains; preload');
+
     return $app->execute_by_promise (sub {
       return $class->main ($app);
     });
