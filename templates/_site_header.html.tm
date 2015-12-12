@@ -1,5 +1,5 @@
 <header class=site itemscope itemtype=http://schema.org/WebSite>
-  <h1 itemprop=name><a href=/ rel=top itemprop=url>Data.</a><a href=//suikawiki.org><img src=//wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
+  <h1 itemprop=name><a href=/ rel=top itemprop=url>Data.</a><a href=https://suikawiki.org><img src=https://wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
 </header>
 
 <!--
@@ -17,6 +17,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Affero General Public License for more details.
 
 You does not have received a copy of the GNU Affero General Public
-License along with this program, see <http://www.gnu.org/licenses/>.
+License along with this program, see <https://www.gnu.org/licenses/>.
 
 -->
