@@ -129,7 +129,7 @@
           <th>Gregorian calendar
           <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
         <tr>
-          <th><i lang=ja>Kyuureki</i>
+          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt><i lang=ja>Kyuureki</i></a>
           <td>
             <t:if x="defined $kyuureki->[0]">
               <t:attr name="'lang'" value="'ja'">
