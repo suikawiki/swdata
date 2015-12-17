@@ -1,4 +1,4 @@
-all:
+all: build
 
 WGET = wget
 CURL = curl
@@ -32,6 +32,18 @@ pmbp-install: pmbp-upgrade
             --create-perl-command-shortcut @perl \
             --create-perl-command-shortcut @prove \
             --create-perl-command-shortcut @plackup=perl\ modules/twiggy-packed/script/plackup
+
+## ------ Build ------
+
+build: local/jp-holidays.json local/ryukyu-holidays.json \
+    local/jp-flagdays.json
+
+local/jp-holidays.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-holidays.json
+local/ryukyu-holidays.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/ryukyu-holidays.json
+local/jp-flagdays.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-flagdays.json
 
 ## ------ Tests ------
 
