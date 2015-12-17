@@ -258,29 +258,43 @@
                   Normal day
                 <t:elsif x="$kyuureki->[1] == 1 and
                             not $kyuureki->[2] and
+                            $kyuureki->[3] == 1">
+                  <span style=color:red>歳首</span>
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 1 and
+                            not $kyuureki->[2] and
                             $kyuureki->[3] == 7">
                   <span style=color:red>人日</span>
                 <t:elsif x="$kyuureki->[1] == 1 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 15">
                   <span style=color:red>小正月</span>
-                <t:elsif x="$kyuureki->[1] == 3 and
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 3 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 3">
                   <span style=color:red>上巳</span>
-                <t:elsif x="$kyuureki->[1] == 5 and
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 5 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 5">
                   <span style=color:red>端午</span>
-                <t:elsif x="$kyuureki->[1] == 7 and
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 7 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 7">
                   <span style=color:red>七夕</span>
-                <t:elsif x="$kyuureki->[1] == 8 and
+                <t:elsif x="$kyuureki->[1] == 7 and
+                            not $kyuureki->[2] and
+                            $kyuureki->[3] == 15">
+                  <span style=color:red>盆</span>
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 8 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 1">
                   <span style=color:red>八朔</span>
-                <t:elsif x="$kyuureki->[1] == 9 and
+                <t:elsif x="$kyuureki->[0] >= 1616 and
+                            $kyuureki->[1] == 9 and
                             not $kyuureki->[2] and
                             $kyuureki->[3] == 9">
                   <span style=color:red>重陽</span>
