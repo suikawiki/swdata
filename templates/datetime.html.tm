@@ -1,4 +1,5 @@
 <html t:params="$app $value" lang=en>
+<t:call x="require SWD::Holidays">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -214,6 +215,47 @@
               <t:attr name="'lang'" value="'en'">
               Unknown
             </t:if>
+    </table>
+  </section>
+
+  <section id=holidays>
+    <t:my as=$day x="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+    <h1>Holidays</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Japan</a>
+          <td>
+            <t:if x="$SWD::Holidays::JPFlagdays->{$day}">
+              <span class=flag>&#x1F1EF;&#x1F1F5;</span>
+            </t:if>
+            <t:if x="defined $SWD::Holidays::JPHolidays->{$day}">
+              <span style=color:red lang=ja>
+                <t:text value="$SWD::Holidays::JPHolidays->{$day}">
+              </span>
+            <t:elsif x="$value->day_of_week == 0">
+              <span style=color:red>Sunday</span>
+            <t:elsif x="$value->day_of_week == 6">
+              <span style=color:blue>Saturday</span>
+            <t:else>
+              Normal day
+            </t:if>
+        </tr>
+        <t:if x="1945 <= $value->year and $value->year <= 1972">
+          <tr>
+            <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Ryukyu</a>
+            <td>
+              <t:if x="defined $SWD::Holidays::RyukyuHolidays->{$day}">
+                <span style=color:red lang=ja>
+                  <t:text value="$SWD::Holidays::RyukyuHolidays->{$day}">
+                </span>
+              <t:elsif x="$value->day_of_week == 0">
+                <span style=color:red>Sunday</span>
+              <t:else>
+                Normal day
+              </t:if>
+        </t:if>
     </table>
   </section>
 

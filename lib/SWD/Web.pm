@@ -5,7 +5,6 @@ use Path::Tiny;
 use Time::HiRes qw(time);
 use Promise;
 use Promised::File;
-use JSON::PS;
 use Web::DateTime;
 use Web::DateTime::Parser;
 use Kyuureki qw(kyuureki_to_gregorian);
