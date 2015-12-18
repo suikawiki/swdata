@@ -79,6 +79,9 @@
             <th><code>toString</code>
             <td><output/>
           <tr>
+            <th><code>toISOString</code>
+            <td><output/>
+          <tr>
             <th><code>toDateString</code>
             <td><output/>
           <tr>
