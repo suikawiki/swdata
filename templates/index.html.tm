@@ -17,7 +17,7 @@
       <li><a href=/lon/0>Longitudes</a>
       <li><a href=/latlon/0,0>Latitudes and longitudes</a>
       <li><a href=/tzoffset/+00:00>Time zone offsets</a>
-      <li><a href=/datetime/2000-01-01T00:00:00Z>Date and time</a>
+      <li><a href=/datetime/now>Date and time</a>
     </ul>
   </section>
 
