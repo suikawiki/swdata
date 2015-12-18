@@ -35,14 +35,17 @@ pmbp-install: pmbp-upgrade
 
 ## ------ Build ------
 
-build: local/jp-holidays.json local/ryukyu-holidays.json \
-    local/jp-flagdays.json
+build: local/data \
+    local/data/jp-holidays.json local/data/ryukyu-holidays.json \
+    local/data/jp-flagdays.json
+local/data:
+	mkdir -p local/data
 
-local/jp-holidays.json:
+local/data/jp-holidays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-holidays.json
-local/ryukyu-holidays.json:
+local/data/ryukyu-holidays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/ryukyu-holidays.json
-local/jp-flagdays.json:
+local/data/jp-flagdays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-flagdays.json
 
 ## ------ Tests ------

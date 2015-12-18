@@ -6,9 +6,9 @@ use Path::Tiny;
 
 my $RootPath = path (__FILE__)->parent->parent->parent;
 
-our $JPHolidays = json_bytes2perl $RootPath->child ('local/jp-holidays.json')->slurp;
-our $RyukyuHolidays = json_bytes2perl $RootPath->child ('local/ryukyu-holidays.json')->slurp;
-our $JPFlagdays = json_bytes2perl $RootPath->child ('local/jp-flagdays.json')->slurp;
+our $JPHolidays = json_bytes2perl $RootPath->child ('local/data/jp-holidays.json')->slurp;
+our $RyukyuHolidays = json_bytes2perl $RootPath->child ('local/data/ryukyu-holidays.json')->slurp;
+our $JPFlagdays = json_bytes2perl $RootPath->child ('local/data/jp-flagdays.json')->slurp;
 
 1;
 
