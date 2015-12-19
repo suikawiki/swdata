@@ -1,4 +1,5 @@
 <html t:params="$app $value" lang=en>
+<t:call x="require JSON::PS">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
