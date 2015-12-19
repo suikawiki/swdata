@@ -247,6 +247,8 @@
                 <t:else>
                   Normal day
                 </t:if>
+              <t:else>
+                Normal day
               </t:if>
             </t:if>
         </tr>
