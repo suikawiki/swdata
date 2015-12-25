@@ -6,8 +6,11 @@
   </t:if>
 </t:macro>
 
-<t:macro name=number t:params=$value>
-  <a pl:href="'/number/' . $value"><data><t:text value=$value></data></a>
+<t:macro name=number t:params="$value $inline?">
+  <a pl:href="'/number/' . $value">
+    <t:if x=$inline><t:class name="'inline'"></t:if>
+    <data><t:text value=$value></data>
+  </a>
 </t:macro>
 
 <t:macro name=lat t:params=$value>
@@ -20,6 +23,14 @@
 
 <t:macro name=year t:params=$value>
   <a pl:href="'/datetime/year:' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
+</t:macro>
+
+<t:macro name=jd t:params=$value>
+  <a pl:href="'/datetime/jd:' . $value"><data><t:text value=$value></data></a>
+</t:macro>
+
+<t:macro name=mjd t:params=$value>
+  <a pl:href="'/datetime/mjd:' . $value"><data><t:text value=$value></data></a>
 </t:macro>
 
 <t:macro name=unixtime t:params="$value $formatted?">

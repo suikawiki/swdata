@@ -1,5 +1,5 @@
 <html t:params="$app $value" lang=en>
-<t:call x="require JSON::PS">
+<t:call x="require JSON::PS; require POSIX">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -122,7 +122,13 @@
           <td><m:number m:value="$value+1"/>
       </t:if>
       <tr>
-        <th>Integer
+        <th>POSIX <code>floor</code>
+        <td><m:number m:value="POSIX::floor $value"/>
+      <tr>
+        <th>POSIX <code>ceil</code>
+        <td><m:number m:value="POSIX::ceil $value"/>
+      <tr>
+        <th>Perl <code>int</code>
         <td><m:number m:value="int $value"/>
   </table>
 
