@@ -13,11 +13,52 @@
     <ul>
       <li><a href=/boolean/true>Booleans</a>
       <li><a href=/number/0>Numbers</a>
+        <form action=javascript: onsubmit="
+          location.href = '/number/' + elements.number.value;
+          return false;
+        ">
+          <input type=number name=number step=any value=0 required>
+          <button type=submit>Go</button>
+        </form>
       <li><a href=/lat/0>Latitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/lat/' + elements.number.value;
+          return false;
+        ">
+          <input type=number name=number step=any value=0 min=0 max=90 required>
+          <button type=submit>Go</button>
+        </form>
       <li><a href=/lon/0>Longitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/lon/' + elements.number.value;
+          return false;
+        ">
+          <input type=number name=number step=any value=0 min=-180 max=180 required>
+          <button type=submit>Go</button>
+        </form>
       <li><a href=/latlon/0,0>Latitudes and longitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/latlon/' + elements.lat.value + ',' + elements.lon.value;
+          return false;
+        ">
+          <input type=number name=lat step=any value=0 min=0 max=90 required title=Latitude>
+          <input type=number name=lon step=any value=0 min=-180 max=180 required title=Longitude>
+          <button type=submit>Go</button>
+        </form>
       <li><a href=/tzoffset/+00:00>Time zone offsets</a>
       <li><a href=/datetime/now>Dates and times</a>
+        <form action=javascript: onsubmit="
+          location.href = '/datetime/' + elements.number.value;
+          return false;
+        ">
+          <input type=date name=number step=any required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=https://chars.suikawiki.org>Characters</a>
+        <form action=https://chars.suikawiki.org/string>
+          <input name=s required>
+          <button type=submit>Go</button>
+        </form>
     </ul>
   </section>
 
