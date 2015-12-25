@@ -66,10 +66,28 @@
     <table class=nv>
       <tbody>
         <tr>
-          <th>Gregorian calendar
+          <th>Proleptic Gregorian calendar
           <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
         <tr>
-          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt><i lang=ja>Kyuureki</i></a>
+          <th>Proleptic Julian calendar
+          <td><t:my as=$jul x="
+            require POSIX;
+            my $jd = $value->to_unix_number / (24*60*60) + 2440587.5;
+            my $mjd = $jd - 2400000.5;
+            my $n = $mjd + 678883;
+            my $e = 4 * $n + 3;
+            my $h = 5 * POSIX::floor ( ($e % 1461) / 4 ) + 2;
+            my $D = POSIX::floor (($h % 153) / 5) + 1;
+            my $M = POSIX::floor ($h / 153) + 3;
+            my $Y = POSIX::floor ($e / 1461);
+            if ($M > 12) {
+              $M -= 12;
+              $Y++;
+            }
+            sprintf '%04d-%02d-%02d', $Y, $M, $D;
+          "><a pl:href="'/datetime/julian:' . $jul"><t:text value=$jul></a>
+        <tr>
+          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a>
           <td>
             <t:if x="defined $kyuureki->[0]">
               <t:attr name="'lang'" value="'ja'">
@@ -169,6 +187,48 @@
 
   </section>
 
+  <section id=year>
+    <t:my as=$year x="$value->year">
+    <h1>Year (<t:text value="sprintf '%04d', $year">)</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>AD
+          <td>
+            <t:if x="$year > 0">
+              <m:number m:value="$year"/>
+            <t:else>
+              <m:number m:value="-$year + 1" m:inline=1 /> BC
+            </t:if>
+        <tr>
+          <th lang=ja>神武天皇即位紀元
+          <td>
+            <m:number m:value="$year + 660"/>
+        <tr>
+          <th lang=zh>民国紀元
+          <td>
+            <t:if x="$year >= 1912">
+              民国<m:number m:value="$year - 1911" m:inline=1 />年
+            <t:else>
+              -
+            </t:if>
+        <tr>
+          <th lang=ko>주체력
+          <td>
+            <t:if x="$year >= 1912">
+              <m:number m:value="$year - 1911" m:inline=1 />
+            <t:else>
+              -
+            </t:if>
+        <tr>
+          <th>Proleptic <span lang=zh>干支</span>
+          <td lang=zh>
+            <t:text value="qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]"><!--
+         --><t:text value="qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]">
+    </table>
+  </section>
+
   <section id=cast>
     <h1>Cast</>
 
@@ -192,6 +252,9 @@
         <tr>
           <th>Modified Julian date
           <td><m:mjd m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 2400000.5"/>
+        <tr>
+          <th>Rata Die
+          <td><m:number m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 1721424.5"/>
     </table>
   </section>
 

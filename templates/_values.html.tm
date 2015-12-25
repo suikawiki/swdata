@@ -6,8 +6,11 @@
   </t:if>
 </t:macro>
 
-<t:macro name=number t:params=$value>
-  <a pl:href="'/number/' . $value"><data><t:text value=$value></data></a>
+<t:macro name=number t:params="$value $inline?">
+  <a pl:href="'/number/' . $value">
+    <t:if x=$inline><t:class name="'inline'"></t:if>
+    <data><t:text value=$value></data>
+  </a>
 </t:macro>
 
 <t:macro name=lat t:params=$value>
