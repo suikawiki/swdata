@@ -15,6 +15,186 @@
     <h2>Date and time</h2>
   </>
 
+  <section id=components>
+    <h1>Components</>
+
+    <table class="nv">
+      <tbody>
+        <tr>
+          <th>Year
+          <td><m:year m:value="$value->year"/>
+        <tr>
+          <th>Month
+          <td><t:text value="$value->month">
+        <tr>
+          <th>Day
+          <td><t:text value="$value->day">
+        <tr>
+          <th>Hour
+          <td><t:text value="$value->hour">
+        <tr>
+          <th>Minute
+          <td><t:text value="$value->minute">
+        <tr>
+          <th>Second (integer part)
+          <td><t:text value="$value->second">
+        <tr>
+          <th>Second (fraction part)
+          <td><t:text value="'0'.$value->second_fraction_string">
+        <tr>
+          <th>Time zone offset
+          <td>
+            <t:if x="defined $value->time_zone">
+              <m:tzoffset m:value="$value->time_zone->offset_as_seconds"/>
+            <t:else>
+              None
+            </t:if>
+    </table>
+  </section>
+
+  <t:my as=$kyuureki x="
+    use Kyuureki qw(gregorian_to_kyuureki);
+    [gregorian_to_kyuureki $value->year, $value->month, $value->day];
+  ">
+  <section id=day>
+    <t:my as=$day x="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+    <h1>Day (<time><t:text value=$day></time>)</h1>
+
+  <section id=calendars>
+    <h1>Calendars</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Gregorian calendar
+          <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+        <tr>
+          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt><i lang=ja>Kyuureki</i></a>
+          <td>
+            <t:if x="defined $kyuureki->[0]">
+              <t:attr name="'lang'" value="'ja'">
+              <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                              $kyuureki->[0],
+                              $kyuureki->[1],
+                              $kyuureki->[2] ? q{'} : '',
+                              $kyuureki->[3]" rel=bookmark><t:text value="
+                sprintf '%s年%s%s月%s日',
+                    $kyuureki->[0],
+                    $kyuureki->[2] ? '閏' : '',
+                    $kyuureki->[1] == 1 ? '正' : $kyuureki->[1],
+                    $kyuureki->[3] == 1 ? '朔' : $kyuureki->[3];
+              "></a>
+            <t:else>
+              <t:attr name="'lang'" value="'en'">
+              Unknown
+            </t:if>
+    </table>
+  </section>
+
+  <section id=holidays>
+    <h1>Holidays</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Japan</a>
+          <td>
+            <t:if x="$SWD::Holidays::JPFlagdays->{$day}">
+              <span class=flag>&#x1F1EF;&#x1F1F5;</span>
+            </t:if>
+            <t:if x="defined $SWD::Holidays::JPHolidays->{$day}">
+              <span style=color:red lang=ja>
+                <t:text value="$SWD::Holidays::JPHolidays->{$day}">
+              </span>
+            <t:else>
+              <t:if x="$value->year > 1876 or
+                     ($value->year == 1876 and $value->month >= 4)">
+                <t:if x="$value->day_of_week == 0">
+                  <span style=color:red>Sunday</span>
+                <t:elsif x="$value->day_of_week == 6">
+                  <span style=color:blue>Saturday</span>
+                <t:else>
+                  Normal day
+                </t:if>
+              <t:else>
+                Normal day
+              </t:if>
+            </t:if>
+        </tr>
+        <t:if x="1945 <= $value->year and $value->year <= 1972">
+          <tr>
+            <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Ryukyu</a>
+            <td>
+              <t:if x="defined $SWD::Holidays::RyukyuHolidays->{$day}">
+                <span style=color:red lang=ja>
+                  <t:text value="$SWD::Holidays::RyukyuHolidays->{$day}">
+                </span>
+              <t:elsif x="$value->day_of_week == 0">
+                <span style=color:red>Sunday</span>
+              <t:else>
+                Normal day
+              </t:if>
+        </t:if>
+    </table>
+  </section>
+
+  <section id=props>
+    <h1>Properties</>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Day of week (number)
+          <td><t:text value="$value->day_of_week">
+        <tr lang=en>
+          <th>Day of week (English)
+          <td><t:text value="qw(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)[$value->day_of_week]">
+        <tr>
+          <th>Day of week (日本語)
+          <td lang=ja><t:text value="use utf8; qw(日 月 火 水 木 金 土)[$value->day_of_week]">曜日
+        <tr lang=ja>
+          <th>六曜
+          <td>
+            <t:if x="defined $kyuureki->[0]">
+              <t:text value="
+                use utf8;
+                qw(大安 赤口 先勝 友引 先負 仏滅)[($kyuureki->[1] + $kyuureki->[3]) % 6];
+              ">
+            <t:else>
+              <t:attr name="'lang'" value="'en'">
+              Unknown
+            </t:if>
+    </table>
+  </section>
+
+  </section>
+
+  <section id=cast>
+    <h1>Cast</>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Unix number
+          <td><m:number m:value="$value->to_unix_number"/>
+        <tr>
+          <th>Unix integer
+          <td><m:number m:value="$value->to_unix_integer"/>
+        <tr>
+          <th>HTML number
+          <td><m:number m:value="$value->to_html_number"/>
+        <tr>
+          <th>HTML month number
+          <td><m:number m:value="$value->to_html_month_number"/>
+        <tr>
+          <th>Julian date
+          <td><m:jd m:value="$value->to_unix_number / (24*60*60) + 2440587.5"/>
+        <tr>
+          <th>Modified Julian date
+          <td><m:mjd m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 2400000.5"/>
+    </table>
+  </section>
+
   <section id=serializations>
     <h1>Serializations</h1>
 
@@ -118,175 +298,6 @@
         });
       </script>
     </section>
-  </section>
-
-  <t:my as=$kyuureki x="
-    use Kyuureki qw(gregorian_to_kyuureki);
-    [gregorian_to_kyuureki $value->year, $value->month, $value->day];
-  ">
-  <section id=calendars>
-    <h1>Calendars</h1>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>Gregorian calendar
-          <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
-        <tr>
-          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt><i lang=ja>Kyuureki</i></a>
-          <td>
-            <t:if x="defined $kyuureki->[0]">
-              <t:attr name="'lang'" value="'ja'">
-              <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
-                              $kyuureki->[0],
-                              $kyuureki->[1],
-                              $kyuureki->[2] ? q{'} : '',
-                              $kyuureki->[3]" rel=bookmark><t:text value="
-                sprintf '%s年%s%s月%s日',
-                    $kyuureki->[0],
-                    $kyuureki->[2] ? '閏' : '',
-                    $kyuureki->[1] == 1 ? '正' : $kyuureki->[1],
-                    $kyuureki->[3] == 1 ? '朔' : $kyuureki->[3];
-              "></a>
-            <t:else>
-              <t:attr name="'lang'" value="'en'">
-              Unknown
-            </t:if>
-    </table>
-  </section>
-
-  <section id=components>
-    <h1>Components</>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>Year
-          <td><m:year m:value="$value->year"/>
-        <tr>
-          <th>Month
-          <td><t:text value="$value->month">
-        <tr>
-          <th>Day
-          <td><t:text value="$value->day">
-        <tr>
-          <th>Hour
-          <td><t:text value="$value->hour">
-        <tr>
-          <th>Minute
-          <td><t:text value="$value->minute">
-        <tr>
-          <th>Second (integer part)
-          <td><t:text value="$value->second">
-        <tr>
-          <th>Second (fraction part)
-          <td><t:text value="'0'.$value->second_fraction_string">
-        <tr>
-          <th>Time zone offset
-          <td>
-            <t:if x="defined $value->time_zone">
-              <m:tzoffset m:value="$value->time_zone->offset_as_seconds"/>
-            <t:else>
-              None
-            </t:if>
-    </table>
-  </section>
-
-  <section id=props>
-    <h1>Properties</>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>Day of week (number)
-          <td><t:text value="$value->day_of_week">
-        <tr lang=en>
-          <th>Day of week (English)
-          <td><t:text value="qw(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)[$value->day_of_week]">
-        <tr>
-          <th>Day of week (日本語)
-          <td lang=ja><t:text value="use utf8; qw(日 月 火 水 木 金 土)[$value->day_of_week]">曜日
-        <tr lang=ja>
-          <th>六曜
-          <td>
-            <t:if x="defined $kyuureki->[0]">
-              <t:text value="
-                use utf8;
-                qw(大安 赤口 先勝 友引 先負 仏滅)[($kyuureki->[1] + $kyuureki->[3]) % 6];
-              ">
-            <t:else>
-              <t:attr name="'lang'" value="'en'">
-              Unknown
-            </t:if>
-    </table>
-  </section>
-
-  <section id=holidays>
-    <t:my as=$day x="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
-    <h1>Holidays</h1>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Japan</a>
-          <td>
-            <t:if x="$SWD::Holidays::JPFlagdays->{$day}">
-              <span class=flag>&#x1F1EF;&#x1F1F5;</span>
-            </t:if>
-            <t:if x="defined $SWD::Holidays::JPHolidays->{$day}">
-              <span style=color:red lang=ja>
-                <t:text value="$SWD::Holidays::JPHolidays->{$day}">
-              </span>
-            <t:else>
-              <t:if x="$value->year > 1876 or
-                     ($value->year == 1876 and $value->month >= 4)">
-                <t:if x="$value->day_of_week == 0">
-                  <span style=color:red>Sunday</span>
-                <t:elsif x="$value->day_of_week == 6">
-                  <span style=color:blue>Saturday</span>
-                <t:else>
-                  Normal day
-                </t:if>
-              <t:else>
-                Normal day
-              </t:if>
-            </t:if>
-        </tr>
-        <t:if x="1945 <= $value->year and $value->year <= 1972">
-          <tr>
-            <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Ryukyu</a>
-            <td>
-              <t:if x="defined $SWD::Holidays::RyukyuHolidays->{$day}">
-                <span style=color:red lang=ja>
-                  <t:text value="$SWD::Holidays::RyukyuHolidays->{$day}">
-                </span>
-              <t:elsif x="$value->day_of_week == 0">
-                <span style=color:red>Sunday</span>
-              <t:else>
-                Normal day
-              </t:if>
-        </t:if>
-    </table>
-  </section>
-
-  <section id=cast>
-    <h1>Cast</>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>Unix number
-          <td><m:number m:value="$value->to_unix_number"/>
-        <tr>
-          <th>Unix integer
-          <td><m:number m:value="$value->to_unix_integer"/>
-        <tr>
-          <th>HTML number
-          <td><m:number m:value="$value->to_html_number"/>
-        <tr>
-          <th>HTML month number
-          <td><m:number m:value="$value->to_html_month_number"/>
-    </table>
   </section>
 
   <section id=links>

@@ -22,6 +22,14 @@
   <a pl:href="'/datetime/year:' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>
 
+<t:macro name=jd t:params=$value>
+  <a pl:href="'/datetime/jd:' . $value"><data><t:text value=$value></data></a>
+</t:macro>
+
+<t:macro name=mjd t:params=$value>
+  <a pl:href="'/datetime/mjd:' . $value"><data><t:text value=$value></data></a>
+</t:macro>
+
 <t:macro name=unixtime t:params="$value $formatted?">
   <a pl:href="'/datetime/' . $value">
     <t:if x=$formatted>

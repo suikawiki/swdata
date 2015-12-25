@@ -88,6 +88,17 @@ section > section > h1 {
   font-size: 150%;
 }
 
+section > section > section > h1 {
+  font-size: 120%;
+  margin-bottom: .5rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+section > section > section > h1::after {
+  content: ":";
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

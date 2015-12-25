@@ -168,6 +168,12 @@ sub main ($$$) {
     } elsif ($path->[1] =~ /\Ayear:([-]?[0-9]+)\z/) {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($1);
+    } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
+      $dt = Web::DateTime->new_from_unix_time
+          (($1 - 2440587.5) * 24 * 60 * 60);
+    } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
+      $dt = Web::DateTime->new_from_unix_time
+          (($1 + 2400000.5 - 2440587.5) * 24 * 60 * 60);
     } else {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($path->[1]);
