@@ -206,6 +206,22 @@
           <td>
             <m:number m:value="$year + 660"/>
         <tr>
+          <th>Proleptic <span lang=ja>明治</span>
+          <td>
+            <m:number m:value="$year - 1867"/>
+        <tr>
+          <th>Proleptic <span lang=ja>大正</span>
+          <td>
+            <m:number m:value="$year - 1911"/>
+        <tr>
+          <th>Proleptic <span lang=ja>昭和</span>
+          <td>
+            <m:number m:value="$year - 1925"/>
+        <tr>
+          <th>Proleptic <span lang=ja>平成</span>
+          <td>
+            <m:number m:value="$year - 1988"/>
+        <tr>
           <th lang=zh>民国紀元
           <td>
             <t:if x="$year >= 1912">
@@ -247,10 +263,10 @@
           <th>HTML month number
           <td><m:number m:value="$value->to_html_month_number"/>
         <tr>
-          <th>Julian date
+          <th>Julian Day
           <td><m:jd m:value="$value->to_unix_number / (24*60*60) + 2440587.5"/>
         <tr>
-          <th>Modified Julian date
+          <th>Modified Julian Day
           <td><m:mjd m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 2400000.5"/>
         <tr>
           <th>Rata Die

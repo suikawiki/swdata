@@ -90,7 +90,8 @@ sub main ($$$) {
   if (@$path == 2 and $path->[0] eq 'number') {
     if ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
       # /number/{sign}{integer}
-      return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
+      my $v = $path->[1] eq '-0' ? (1/"-inf") : 0+$path->[1];
+      return temma $app, ['number.html.tm'], {value => $v};
     } elsif ($path->[1] =~ /\A0x[0-9A-Fa-f]+\z/) {
       # /number/0x{hex}
       return temma $app, ['number.html.tm'], {value => hex $path->[1]};
