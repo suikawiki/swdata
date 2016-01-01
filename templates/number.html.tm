@@ -47,7 +47,7 @@
         <td><code><t:text value="JSON::PS::perl2json_chars $value"></code>
     </table>
 
-    <section id=serializations-browser pl:data-input="$value">
+    <section id=serializations-browser pl:data-input="sprintf '%e', $value">
       <h1>Your browser</h1>
 
       <table class=nv>
@@ -101,7 +101,7 @@
       <tbody>
         <tr>
           <th>Sign
-          <td><t:text value="$value < 0 ? '-' : '+'">
+          <td><t:text value="(sprintf '%e', $value) =~ /^-/ ? '-' : '+'">
         <tr>
           <th>Is integer?
           <td><m:boolean m:value=$is_integer />
