@@ -1,8 +1,8 @@
 Scalar::Util~1.42
-Pod::Usage~1.67
+Pod::Usage~1.68
 File::Spec~3.60
 Types::Serialiser~1.0
-Pod::Text~4.03
+Pod::Text~4.04
 IO::Handle~1.28
 JSON::XS~3.01
 Test::NoWarnings~1.04
