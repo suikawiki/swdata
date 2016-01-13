@@ -1,6 +1,6 @@
 Scalar::Util~1.42
 Pod::Usage~1.68
-File::Spec~3.60
+File::Spec~3.62
 Types::Serialiser~1.0
 Pod::Text~4.04
 IO::Handle~1.28
