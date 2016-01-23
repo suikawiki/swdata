@@ -6,7 +6,7 @@ Pod::Text~4.05
 IO::Handle~1.28
 JSON::XS~3.01
 Test::NoWarnings~1.04
-Encode~2.78
+Encode~2.79
 Unicode::Normalize~1.25
 AnyEvent::Util
 File::Path~2.12
