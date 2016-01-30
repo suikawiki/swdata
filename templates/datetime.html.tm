@@ -1,5 +1,5 @@
 <html t:params="$app $value" lang=en>
-<t:call x="require SWD::Holidays">
+<t:call x="require SWD::Holidays; require SWD::Eras">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -63,14 +63,68 @@
   <section id=calendars>
     <h1>Calendars</h1>
 
-    <table class=nv>
+    <t:macro name=gengou-y t:params="$unix $year $context">
+      <t:text value="
+        my ($era, $era_year) = SWD::Eras::get_era_and_era_year
+            ($context, $unix, $year);
+        sprintf '%s%s年', $era, $era_year == 1 ? '元' : $era_year;
+      ">
+    </>
+
+    <t:macro name=kyuureki-ymd t:params=$value>
+      <t:if x="defined $value->[0]">
+        <t:attr name="'lang'" value="'ja'">
+        <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                    $value->[0],
+                    $value->[1],
+                    $value->[2] ? q{'} : '',
+                    $value->[3]" rel=bookmark><t:text value="
+          sprintf '%s年%s%s月%s日',
+              $value->[0],
+              $value->[2] ? '閏' : '',
+              $value->[1] == 1 ? '正' : $value->[1],
+              $value->[3] == 1 ? '朔' : $value->[3];
+        "></a>
+      <t:else>
+        <t:attr name="'lang'" value="'en'">
+          Unknown
+      </t:if>
+    </>
+
+    <t:macro name=kyuureki-gengou-ymd t:params="$value $unix $context">
+      <t:if x="defined $value->[0]">
+        <t:attr name="'lang'" value="'ja'">
+        <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                    $value->[0],
+                    $value->[1],
+                    $value->[2] ? q{'} : '',
+                    $value->[3]" rel=bookmark><m:gengou-y m:unix=$unix m:year="$value->[0]" m:context=$context /><t:text value="
+          sprintf '%s%s月%s日',
+              $value->[2] ? '閏' : '',
+              $value->[1] == 1 ? '正' : $value->[1],
+              $value->[3] == 1 ? '朔' : $value->[3];
+        "></a>
+      <t:else>
+        <t:attr name="'lang'" value="'en'">
+          Unknown
+      </t:if>
+    </>
+
+    <table class=nnv>
       <tbody>
         <tr>
-          <th>Proleptic Gregorian calendar
+          <th rowspan=3>Proleptic Gregorian calendar
+          <th>AD
           <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
         <tr>
-          <th>Proleptic Julian calendar
-          <td><t:my as=$jul x="
+          <th>Japan
+          <td><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
+        <tr>
+          <th>Ryuukyuu
+          <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
+        </tr>
+
+        <t:my as=$jul x="
             require POSIX;
             my $jd = $value->to_unix_number / (24*60*60) + 2440587.5;
             my $mjd = $jd - 2400000.5;
@@ -84,28 +138,43 @@
               $M -= 12;
               $Y++;
             }
-            sprintf '%04d-%02d-%02d', $Y, $M, $D;
-          "><a pl:href="'/datetime/julian:' . $jul"><t:text value=$jul></a>
+            [$Y, $M, $D];
+          ">
         <tr>
-          <th><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a>
-          <td>
-            <t:if x="defined $kyuureki->[0]">
-              <t:attr name="'lang'" value="'ja'">
-              <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
-                              $kyuureki->[0],
-                              $kyuureki->[1],
-                              $kyuureki->[2] ? q{'} : '',
-                              $kyuureki->[3]" rel=bookmark><t:text value="
-                sprintf '%s年%s%s月%s日',
-                    $kyuureki->[0],
-                    $kyuureki->[2] ? '閏' : '',
-                    $kyuureki->[1] == 1 ? '正' : $kyuureki->[1],
-                    $kyuureki->[3] == 1 ? '朔' : $kyuureki->[3];
-              "></a>
-            <t:else>
-              <t:attr name="'lang'" value="'en'">
-              Unknown
-            </t:if>
+          <th rowspan=3>Proleptic Julian calendar
+          <th>AD
+          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><t:text value="sprintf '%04d-%02d-%02d', @$jul"></a>
+        <tr>
+          <th>Japan
+          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$jul->[0]" /><t:text value="$jul->[1]">月<t:text value="$jul->[2]">日
+        <tr>
+          <th>Ryuukyuu
+          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$jul->[0]" /><t:text value="$jul->[1]">月<t:text value="$jul->[2]">日
+
+        <tr>
+          <th rowspan=3><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Japan)
+          <th>AD
+          <td><m:kyuureki-ymd m:value=$kyuureki />
+        <tr>
+          <th>Japan (北朝)
+          <td><m:kyuureki-gengou-ymd m:value=$kyuureki m:context="'jp-north'" m:unix="$value->to_unix_number"/>
+        <tr>
+          <th>Japan (南朝)
+          <td><m:kyuureki-gengou-ymd m:value=$kyuureki m:context="'jp-south'" m:unix="$value->to_unix_number"/>
+        </tr>
+
+        <t:my as=$rkyuureki x="
+          require Kyuureki::Ryuukyuu;
+          [Kyuureki::Ryuukyuu::gregorian_to_rkyuureki
+               $value->year, $value->month, $value->day];
+        " />
+        <tr>
+          <th rowspan=2><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Ryuukyuu)
+          <th>AD
+          <td><m:kyuureki-ymd m:value=$rkyuureki />
+        <tr>
+          <th>Ryuukyuu
+          <td><m:kyuureki-gengou-ymd m:value=$rkyuureki m:context="'ryuukyuu'" m:unix="$value->to_unix_number"/>
     </table>
   </section>
 
@@ -171,7 +240,7 @@
           <th>Day of week (日本語)
           <td lang=ja><t:text value="use utf8; qw(日 月 火 水 木 金 土)[$value->day_of_week]">曜日
         <tr lang=ja>
-          <th>六曜
+          <th>六曜 (Japan)
           <td>
             <t:if x="defined $kyuureki->[0]">
               <t:text value="
@@ -238,7 +307,7 @@
               -
             </t:if>
         <tr>
-          <th>Proleptic <span lang=zh>干支</span>
+          <th><span lang=zh>干支</span>
           <td lang=zh>
             <t:text value="qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]"><!--
          --><t:text value="qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]">
