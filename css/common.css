@@ -118,8 +118,12 @@ tbody th {
   text-align: right;
 }
 
-tbody th::after {
+tbody th:last-of-type::after {
   content: ": ";
+}
+
+table.nnv > tbody > tr > th {
+  width: auto;
 }
 
 td > a:only-child:not(.inline) {

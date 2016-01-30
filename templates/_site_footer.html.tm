@@ -1,7 +1,7 @@
 <script>
-  Array.prototype.forEach.call (document.querySelectorAll ('table.nv'), function (table) {
+  Array.prototype.forEach.call (document.querySelectorAll ('table.nv, table.nnv'), function (table) {
     Array.prototype.forEach.call (table.querySelectorAll ('tbody tr'), function (tr) {
-      if (tr.children.length === 2) {
+      if (tr.children.length === 2 || tr.children.length === 3) {
         var data = tr.lastElementChild;
         data = data.querySelector ('data, time, code') || data;
         var td = document.createElement ('td');
