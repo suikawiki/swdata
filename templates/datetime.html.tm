@@ -422,27 +422,72 @@
             <th><code>toUTCString</code>
             <td><output/>
           <tr>
-            <th><code>toLocaleString</code>
-            <td><output/>
-          <tr>
-            <th><code>toLocaleDateString</code>
-            <td><output/>
-          <tr>
-            <th><code>toLocaleTimeString</code>
-            <td><output/>
-          <tr>
             <th><code>toJSON</code>
             <td><output/>
       </table>
       <script>
         var section = document.querySelector ('#serializations-browser');
         var date = new Date (section.getAttribute ('data-input'));
-        Array.prototype.forEach.call (section.querySelectorAll ('tr'), function (tr) {
+        Array.prototype.forEach.call (section.querySelectorAll ('.nv tr'), function (tr) {
           var code = tr.querySelector ('th code');
           var output = tr.querySelector ('output');
           if (!code || !output) return;
           var method = code.textContent;
-          output.textContent = date[method] ();
+          try {
+            output.textContent = date[method] ();
+          } catch (e) {
+            output.classList.add ('error');
+            output.textContent = e;
+          }
+        });
+      </script>
+
+      <table class=nnv>
+        <tbody>
+          <t:my as=$locales x="[qw(en en-US en-GB fr fr-CA es es-US it de ja ja-JP ja-JP-u-ca-japanese zh zh-CN zh-TW zh-HK zh-MO zh-SG zh-Hant zh-Hani zh-u-ca-chinese zh-TW-u-ca-roc ko th th-u-ca-buddhist-nu-thai ar-EG ar-SA ar-SA-u-ca-islamic-nu-latn)]">
+          <tr>
+            <th pl:rowspan=1+@$locales><code>toLocaleString</code>
+            <th><m:undefined/>
+            <td><output/>
+          </tr>
+          <t:for as=$locale x=$locales>
+            <tr>
+              <th><code><t:text value=$locale></code>
+              <td pl:lang=$locale><output/>
+          </t:for>
+          <tr>
+            <th><code>toLocaleDateString</code>
+            <th><m:undefined/>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleTimeString</code>
+            <th><m:undefined/>
+            <td><output/>
+      </table>
+      <script>
+        var section = document.querySelector ('#serializations-browser');
+        var date = new Date (section.getAttribute ('data-input'));
+        var method;
+        Array.prototype.forEach.call (section.querySelectorAll ('.nnv tbody tr'), function (tr) {
+          var output = tr.querySelector ('output');
+          var locale = undefined;
+          if (tr.cells.length === 3) {
+            var code = tr.cells[0].querySelector ('code');
+            if (!code || !output) return;
+            method = code.textContent;
+            var code = tr.cells[1].querySelector ('code');
+            if (code) locale = code.textContent;
+          } else {
+            var code = tr.cells[0].querySelector ('code');
+            if (!code || !output) return;
+            locale = code.textContent;
+          }
+          try {
+            output.textContent = date[method] (locale);
+          } catch (e) {
+            output.classList.add ('error');
+            output.textContent = e;
+          }
         });
       </script>
     </section>
@@ -458,6 +503,18 @@
           <th>Previous
           <th>Next
       <tbody>
+        <tr>
+          <th>365 days
+          <td><m:unixtime m:value="$value->to_unix_number - 365*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 365*24*60*60" m:formatted=1 />
+        <tr>
+          <th>30 days
+          <td><m:unixtime m:value="$value->to_unix_number - 30*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 30*24*60*60" m:formatted=1 />
+        <tr>
+          <th>7 days
+          <td><m:unixtime m:value="$value->to_unix_number - 7*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 7*24*60*60" m:formatted=1 />
         <tr>
           <th>Day
           <td><m:unixtime m:value="$value->to_unix_number - 24*60*60" m:formatted=1 />
@@ -480,7 +537,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

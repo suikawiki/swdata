@@ -1,3 +1,11 @@
+<t:macro name=undefined>
+  <data>undefined</data>
+</t:macro>
+
+<t:macro name=null>
+  <data>null</data>
+</t:macro>
+
 <t:macro name=boolean t:params=$value>
   <t:if x=$value>
     <a href=/boolean/true><data>true</></a>

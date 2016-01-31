@@ -116,6 +116,7 @@ th, td {
 tbody th {
   width: 30%;
   text-align: right;
+  vertical-align: top;
 }
 
 tbody th:last-of-type::after {
@@ -128,6 +129,10 @@ table.nnv > tbody > tr > th {
 
 td > a:only-child:not(.inline) {
   display: block;
+}
+
+output:lang(ar) {
+  direction: rtl;
 }
 
 td.copy {
@@ -176,9 +181,13 @@ a:not([rel~=bookmark]):hover, button:hover {
   text-decoration: underline;
 }
 
+.error {
+  color: red;
+}
+
 /*
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
