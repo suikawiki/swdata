@@ -166,7 +166,7 @@
         <t:my as=$rkyuureki x="
           require Kyuureki::Ryuukyuu;
           [Kyuureki::Ryuukyuu::gregorian_to_rkyuureki
-               $value->year, $value->month, $value->day];
+              ($value->year, $value->month, $value->day)];
         " />
         <tr>
           <th rowspan=2><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Ryuukyuu)
