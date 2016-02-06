@@ -16,7 +16,7 @@
   <section id=site>
     <h1>The site</h1>
 
-    <p>Copyright 2015 Wakaba &lt;wakaba@suikawiki.org>.
+    <p>Copyright 2015-2016 Wakaba &lt;wakaba@suikawiki.org>.
 
     <p><a href=https://github.com/suikawiki/swdata>This program</a> is
     free software: you can redistribute it and/or modify it under the

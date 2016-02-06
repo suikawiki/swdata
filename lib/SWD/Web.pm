@@ -169,21 +169,17 @@ sub main ($$$) {
       $dt = Web::DateTime->new_from_unix_time (time);
     } elsif ($path->[1] =~ /\Ayear:([+-]?[0-9]+)\z/) {
       my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_html_datetime_value (sprintf '%04d', $1);
+      $dt = $parser->parse_manakai_year_string ($1);
     } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-      $dt = Web::DateTime->new_from_unix_time
-          (($1 - 2440587.5) * 24 * 60 * 60);
+      $dt = Web::DateTime->new_from_jd ($1);
     } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-      $dt = Web::DateTime->new_from_unix_time
-          (($1 + 2400000.5 - 2440587.5) * 24 * 60 * 60);
-    } elsif ($path->[1] =~ /\Ajulian:([+-]?[0-9]+)-([0-9]+)-([0-9]+)\z/) {
-      my $y = $1 + floor (($2 - 3) / 12);
-      my $m = ($2 - 3) % 12;
-      my $d = $3 - 1;
-      my $n = $d + floor ((153 * $m + 2) / 5) + 365 * $y + floor ($y / 4);
-      my $mjd = $n - 678883;
-      $dt = Web::DateTime->new_from_unix_time
-          (($mjd + 2400000.5 - 2440587.5) * 24 * 60 * 60);
+      $dt = Web::DateTime->new_from_mjd ($1);
+    } elsif ($path->[1] =~ /\Ajulian:(.+)\z/) {
+      my $parser = Web::DateTime::Parser->new;
+      $dt = $parser->parse_julian_ymd_string ($1);
+    } elsif ($path->[1] =~ /\A([+-]?[0-9]+-[0-9]+-[0-9]+)\z/) {
+      my $parser = Web::DateTime::Parser->new;
+      $dt = $parser->parse_ymd_string ($1);
     } else {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($path->[1]);
