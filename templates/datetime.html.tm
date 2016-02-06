@@ -115,7 +115,7 @@
         <tr>
           <th rowspan=3>Proleptic Gregorian calendar
           <th>AD
-          <td><t:text value="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+          <td><t:text value="$value->to_ymd_string">
         <tr>
           <th>Japan
           <td><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
@@ -124,32 +124,16 @@
           <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
         </tr>
 
-        <t:my as=$jul x="
-            require POSIX;
-            my $jd = $value->to_unix_number / (24*60*60) + 2440587.5;
-            my $mjd = $jd - 2400000.5;
-            my $n = $mjd + 678883;
-            my $e = 4 * $n + 3;
-            my $h = 5 * POSIX::floor ( ($e % 1461) / 4 ) + 2;
-            my $D = POSIX::floor (($h % 153) / 5) + 1;
-            my $M = POSIX::floor ($h / 153) + 3;
-            my $Y = POSIX::floor ($e / 1461);
-            if ($M > 12) {
-              $M -= 12;
-              $Y++;
-            }
-            [$Y, $M, $D];
-          ">
         <tr>
           <th rowspan=3>Proleptic Julian calendar
           <th>AD
-          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><t:text value="sprintf '%04d-%02d-%02d', @$jul"></a>
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><t:text value="$value->to_julian_ymd_string"></a>
         <tr>
           <th>Japan
-          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$jul->[0]" /><t:text value="$jul->[1]">月<t:text value="$jul->[2]">日
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->julian_year" /><t:text value="$value->julian_month">月<t:text value="$value->julian_day">日</a>
         <tr>
           <th>Ryuukyuu
-          <td><a pl:href="'/datetime/julian:' . sprintf '%04d-%02d-%02d', @$jul" rel=bookmark><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$jul->[0]" /><t:text value="$jul->[1]">月<t:text value="$jul->[2]">日
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->julian_year" /><t:text value="$value->julian_month">月<t:text value="$value->julian_day">日</a>
 
         <tr>
           <th rowspan=3><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Japan)
@@ -258,7 +242,7 @@
 
   <section id=year>
     <t:my as=$year x="$value->year">
-    <h1>Year (<t:text value="sprintf '%04d', $year">)</h1>
+    <h1>Year (<t:text value="$value->to_manakai_year_string">)</h1>
 
     <table class=nv>
       <tbody>
@@ -293,19 +277,11 @@
         <tr>
           <th lang=zh>民国紀元
           <td>
-            <t:if x="$year >= 1912">
-              民国<m:number m:value="$year - 1911" m:inline=1 />年
-            <t:else>
-              -
-            </t:if>
+            民国<m:number m:value="$year - 1911" m:inline=1 />年
         <tr>
           <th lang=ko>주체력
           <td>
-            <t:if x="$year >= 1912">
-              <m:number m:value="$year - 1911" m:inline=1 />
-            <t:else>
-              -
-            </t:if>
+            <m:number m:value="$year - 1911" m:inline=1 />
         <tr>
           <th><span lang=zh>干支</span>
           <td lang=zh>
@@ -333,13 +309,13 @@
           <td><m:number m:value="$value->to_html_month_number"/>
         <tr>
           <th>Julian Day
-          <td><m:jd m:value="$value->to_unix_number / (24*60*60) + 2440587.5"/>
+          <td><m:jd m:value="$value->to_jd"/>
         <tr>
           <th>Modified Julian Day
-          <td><m:mjd m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 2400000.5"/>
+          <td><m:mjd m:value="$value->to_mjd"/>
         <tr>
           <th>Rata Die
-          <td><m:number m:value="$value->to_unix_number / (24*60*60) + 2440587.5 - 1721424.5"/>
+          <td><m:number m:value="$value->to_rd"/>
     </table>
   </section>
 
@@ -444,7 +420,7 @@
 
       <table class=nnv>
         <tbody>
-          <t:my as=$locales x="[qw(en en-US en-GB fr fr-CA es es-US it de ja ja-JP ja-JP-u-ca-japanese zh zh-CN zh-TW zh-HK zh-MO zh-SG zh-Hant zh-Hani zh-u-ca-chinese zh-TW-u-ca-roc ko th th-u-ca-buddhist-nu-thai ar-EG ar-SA ar-SA-u-ca-islamic-nu-latn)]">
+          <t:my as=$locales x="[qw(en en-US en-GB fr fr-CA es es-US it de ja ja-JP ja-JP-u-ca-japanese zh zh-CN zh-TW zh-HK zh-MO zh-SG zh-Hant zh-Hani zh-u-ca-chinese zh-TW-u-ca-roc ko th th-u-ca-buddhist-nu-thai th-u-nu-arab ar-EG ar-SA ar-SA-u-ca-islamic-nu-latn)]">
           <tr>
             <th pl:rowspan=1+@$locales><code>toLocaleString</code>
             <th><m:undefined/>
