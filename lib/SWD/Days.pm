@@ -1,20 +1,18 @@
-# -*- perl -*-
+package SWD::Days;
 use strict;
 use warnings;
-use SWD::Web;
+use JSON::PS;
+use Path::Tiny;
 
-use SWD::Eras;
-use SWD::Holidays;
-use SWD::Days;
+my $RootPath = path (__FILE__)->parent->parent->parent;
 
-$ENV{LANG} = 'C';
-$ENV{TZ} = 'UTC';
+our $Data = json_bytes2perl $RootPath->child ('local/data/days.json')->slurp;
 
-return SWD::Web->psgi_app;
+1;
 
 =head1 LICENSE
 
-Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

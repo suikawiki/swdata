@@ -46,6 +46,14 @@
     waived all copyright and related or neighboring rights to the data
     on this site.
 
+    <p>Data in the <a href="/datetime/now#yearless-date"><i>day in
+    year</i></a> section are
+    <a href=https://github.com/geocol/data-days>extracted from
+    Wikipedia</a> such
+    that <a href="https://ja.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License"><cite>Text
+    of Creative Commons Attribution-ShareAlike 3.0 Unported
+    License</cite></a> is applied.
+
   </section>
 
 </section>
@@ -55,7 +63,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
