@@ -3,6 +3,7 @@ all: build
 WGET = wget
 CURL = curl
 GIT = git
+PERL = ./perl
 
 updatenightly: local/bin/pmbp.pl
 	$(CURL) -s -S -L https://gist.githubusercontent.com/wakaba/34a71d3137a52abb562d/raw/gistfile1.txt | sh
@@ -39,7 +40,8 @@ build: local/data \
     local/data/jp-holidays.json local/data/ryukyu-holidays.json \
     local/data/jp-flagdays.json \
     local/data/calendar-era-defs.json \
-    local/data/calendar-era-systems.json
+    local/data/calendar-era-systems.json \
+    local/data/days.json
 local/data:
 	mkdir -p local/data
 
@@ -53,6 +55,11 @@ local/data/calendar-era-defs.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-defs.json
 local/data/calendar-era-systems.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-systems.json
+
+local/data/days-orig.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json
+local/data/days.json: bin/generate-days.pl local/data/days-orig.json
+	$(PERL) $< > $@
 
 ## ------ Tests ------
 

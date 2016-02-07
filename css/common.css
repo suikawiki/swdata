@@ -154,6 +154,40 @@ td.copy button:not(:hover) {
   color: gray;
 }
 
+#yearless-date ul {
+  padding: 0;
+}
+
+#birthday ul {
+  -webkit-column-width: 10em;
+  column-width: 10em;
+}
+
+#events ul {
+  -webkit-column-width: 15em;
+  column-width: 15em;
+}
+
+#yearless-date ul > li {
+  display: block;
+}
+
+#events ul > li {
+  font-size: 80%;
+}
+
+#yearless-date ul > li > a:first-child {
+  font-weight: bolder;
+}
+
+#events ul > li > a:first-child {
+  font-weight: normal;
+}
+
+#yearless-date ul > li > .desc {
+  font-size: 80%;
+}
+
 .ads-rectangle {
   position: absolute;
   top: 100px;

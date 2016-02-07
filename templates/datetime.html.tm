@@ -1,5 +1,5 @@
 <html t:params="$app $value" lang=en>
-<t:call x="require SWD::Holidays; require SWD::Eras">
+<t:call x="require SWD::Holidays; require SWD::Eras; use Wanage::URL">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -466,6 +466,48 @@
           }
         });
       </script>
+    </section>
+  </section>
+
+  <section id=yearless-date>
+    <h1>Day in year (<t:text value="$value->to_yearless_date_string">)</h1>
+    <t:my as=$data x="$SWD::Days::Data->{sprintf '%02d-%02d', $value->month, $value->day}">
+
+    <section id=memorials>
+      <h1>Memorial days</h1>
+      <ul>
+        <t:for as=$item x="[@{$data->{memorials} || []}]">
+          <li><a pl:href="'https://ja.wikipedia.org/wiki/' . percent_encode_c ($item->{wref} // $item->{name})" pl:title="$item->{desc}"><t:text value="$item->{name}"></a>
+            <t:if x="defined $item->{desc}">
+              : <span class=desc><t:text value="$item->{desc}"></>
+            </t:if>
+        </t:for>
+      </ul>
+    </section>
+
+    <section id=birthday>
+      <h1>Birthday</h1>
+      <ul>
+        <t:for as=$item x="[@{$data->{birthdays} || []}, @{$data->{fictional_birthdays} || []}]">
+          <li><a pl:href="'https://ja.wikipedia.org/wiki/' . percent_encode_c ($item->{wref} // $item->{name})" pl:title="$item->{desc}"><t:text value="$item->{name}"></a>
+            <t:if x="defined $item->{date_gregorian}" t:space=preserve>
+              (<a pl:href="'/datetime/' . $item->{date_gregorian}"><t:text value="[split /-/, $item->{date_gregorian}]->[0]"></a>)
+            </t:if>
+        </t:for>
+      </ul>
+    </section>
+
+    <section id=events>
+      <h1>Events</h1>
+      <ul>
+        <t:for as=$item x="[@{$data->{historicals} || []}, @{$data->{jp_towns} || []}, @{$data->{fictionals} || []}]">
+          <li>
+            <t:if x="defined $item->{date_gregorian}" t:space=preserve>
+              <a pl:href="'/datetime/' . $item->{date_gregorian}"><t:text value="[split /-/, $item->{date_gregorian}]->[0]"></a>:
+            </t:if>
+            <t:text value="$item->{desc}">
+        </t:for>
+      </ul>
     </section>
   </section>
 
