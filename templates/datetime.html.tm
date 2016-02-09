@@ -374,7 +374,7 @@
           <td><a pl:href="sprintf '/datetime/%s', $value->to_shortest_time_string" rel=bookmark><time pl:datetime="$value->to_shortest_time_string"><t:text value="$value->to_shortest_time_string"></></a>
     </table>
 
-    <section id=serializations-browser pl:data-input="$value->to_time_zoned_global_date_and_time_string">
+    <section id=serializations-browser pl:data-input="$value->to_html_number">
       <h1>Your browser</h1>
 
       <table class=nv>
@@ -403,7 +403,7 @@
       </table>
       <script>
         var section = document.querySelector ('#serializations-browser');
-        var date = new Date (section.getAttribute ('data-input'));
+        var date = new Date (parseFloat (section.getAttribute ('data-input')));
         Array.prototype.forEach.call (section.querySelectorAll ('.nv tr'), function (tr) {
           var code = tr.querySelector ('th code');
           var output = tr.querySelector ('output');
@@ -442,7 +442,7 @@
       </table>
       <script>
         var section = document.querySelector ('#serializations-browser');
-        var date = new Date (section.getAttribute ('data-input'));
+        var date = new Date (parseFloat (section.getAttribute ('data-input')));
         var method;
         Array.prototype.forEach.call (section.querySelectorAll ('.nnv tbody tr'), function (tr) {
           var output = tr.querySelector ('output');
