@@ -1,4 +1,4 @@
-Scalar::Util~1.42
+Scalar::Util~1.43
 Pod::Usage~1.68
 File::Spec~3.62
 Types::Serialiser~1.0
