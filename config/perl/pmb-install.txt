@@ -4,7 +4,7 @@ File::Spec~3.62
 Types::Serialiser~1.0
 Pod::Text~4.06
 IO::Handle~1.28
-JSON::XS~3.01
+JSON::XS~3.02
 Test::NoWarnings~1.04
 Encode~2.82
 Unicode::Normalize~1.25
