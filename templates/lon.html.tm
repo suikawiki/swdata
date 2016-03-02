@@ -14,6 +14,8 @@
     <h2>Longitude</h2>
   </>
 
+  <menu class=toc />
+
   <section id=props>
     <h1>Properties</>
 

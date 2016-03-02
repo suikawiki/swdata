@@ -14,6 +14,10 @@
     <h2>Boolean</h2>
   </>
 
+  <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c ($value ? 'true' : 'false')">Notes</a></menu>
+
+  <menu class=toc />
+
   <section id=serializations>
     <h1>Serializations</h1>
 
