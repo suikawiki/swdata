@@ -59,8 +59,10 @@
     [gregorian_to_kyuureki $value->year, $value->month, $value->day];
   ">
   <section id=day>
-    <t:my as=$day x="sprintf '%04d-%02d-%02d', $value->year, $value->month, $value->day">
+    <t:my as=$day x="$value->to_ymd_string">
     <h1>Day (<time><t:text value=$day></time>)</h1>
+
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value->to_ymd_string">Notes</a></menu>
 
   <section id=calendars>
     <h1>Calendars</h1>
@@ -245,6 +247,8 @@
   <section id=year>
     <t:my as=$year x="$value->year">
     <h1>Year (<t:text value="$value->to_manakai_year_string">)</h1>
+
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value->to_manakai_year_string">Notes</a></menu>
 
     <table class=nv>
       <tbody>
@@ -474,6 +478,8 @@
   <section id=yearless-date>
     <h1>Day in year (<t:text value="$value->to_yearless_date_string">)</h1>
     <t:my as=$data x="$SWD::Days::Data->{sprintf '%02d-%02d', $value->month, $value->day}">
+
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value->to_yearless_date_string">Notes</a></menu>
 
     <section id=memorials>
       <h1>Memorial days</h1>

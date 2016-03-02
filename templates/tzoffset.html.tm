@@ -39,6 +39,8 @@
     <h2>Time zone offset</h2>
   </>
 
+  <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $serialized">Notes</a></menu>
+
   <menu class=toc />
 
   <section id=serializations>

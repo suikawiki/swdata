@@ -84,6 +84,7 @@ section > section {
 section > section > h1 {
   margin-top: 0.5rem;
   margin-left: -1rem;
+  margin-bottom: 0.5rem;
   border-bottom: .1rem solid;
   padding-bottom: .2rem;
   font-size: 150%;
@@ -245,6 +246,12 @@ a:not([rel~=bookmark]):hover, button:hover {
 
 .toc > li > a:hover {
   text-decoration: none;
+}
+
+.nearby {
+  margin: 0;
+  text-align: right;
+  font-size: 90%;
 }
 
 /*
