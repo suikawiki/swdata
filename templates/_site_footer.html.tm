@@ -21,7 +21,20 @@
       }
     });
   });
-
+</script>
+<script>
+  var toc = document.querySelector ('.toc');
+  if (toc)
+    Array.prototype.forEach.call (document.querySelectorAll ('body > section > section'), function (section) {
+      var header = section.querySelector ('h1');
+      if (!header) return;
+      var link = document.createElement ('a');
+      link.href = '#' + encodeURIComponent (section.id);
+      link.textContent = header.textContent;
+      var li = document.createElement ('li');
+      li.appendChild (link);
+      toc.appendChild (li);
+    });
 </script>
 
 <footer class=site>
@@ -41,7 +54,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

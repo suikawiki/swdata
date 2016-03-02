@@ -15,6 +15,8 @@
     <h2>Date and time</h2>
   </>
 
+  <menu class=toc />
+
   <section id=components>
     <h1>Components</>
 

@@ -16,6 +16,8 @@
     <h2>Number</h2>
   </>
 
+  <menu class=toc />
+
   <section id=serializations>
     <h1>Serializations</h1>
 

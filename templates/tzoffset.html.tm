@@ -39,6 +39,8 @@
     <h2>Time zone offset</h2>
   </>
 
+  <menu class=toc />
+
   <section id=serializations>
     <h1>Serializations</h1>
 

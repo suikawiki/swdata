@@ -14,6 +14,8 @@
     <h2>Latitude and longitude</h2>
   </>
 
+  <menu class=toc />
+
   <section id=components>
     <h1>Components</h1>
 

@@ -14,6 +14,8 @@
     <h2>Boolean</h2>
   </>
 
+  <menu class=toc />
+
   <section id=serializations>
     <h1>Serializations</h1>
 
