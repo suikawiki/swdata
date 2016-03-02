@@ -181,6 +181,7 @@ sub main ($$$) {
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_ymd_string ($1);
     } else {
+      $path->[1] =~ s/\s+([+-][0-9]{2}:[0-9]{2})$/$1/;
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_html_datetime_value ($path->[1]);
     }
