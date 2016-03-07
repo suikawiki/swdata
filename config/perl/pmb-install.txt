@@ -1,6 +1,5 @@
 Scalar::Util~1.43
 Pod::Usage~1.68
-File::Spec~3.62
 Types::Serialiser~1.0
 Pod::Text~4.06
 IO::Handle~1.28
@@ -11,7 +10,7 @@ Unicode::Normalize~1.25
 AnyEvent::Util
 File::Path~2.12
 Time::Local~1.2300
-Path::Tiny~0.076
+Path::Tiny~0.084
 parent~0.234
 Exporter::Lite~0.08
 Test::Tester~0.114
@@ -23,4 +22,5 @@ MIME::Base64~3.15
 File::Temp~0.2304
 Path::Class~0.36
 common::sense~3.74
+Cwd~3.62
 Unicode::Stringprep~1.105
