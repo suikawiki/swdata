@@ -3,42 +3,34 @@
 <t:include path=_values.html.tm />
 <head>
   <t:include path=_head.html.tm>
-    <t:field name=title>Eras
+    <t:field name=title>Era systems
   </t:include>
 <body>
   <t:include path=_site_header.html.tm />
 
 <section>
   <hgroup>
-    <h1>Eras</h1>
+    <h1>Era systems</h1>
   </>
 
-  <menu class=nearby><a href="https://wiki.suikawiki.org/n/紀年法">Notes</a></menu>
+  <menu class=nearby><a href="https://wiki.suikawiki.org/n/元号">Notes</a></menu>
 
   <menu class=toc />
 
   <section id=list>
-    <h1>List of eras</h1>
+    <h1>List of era systems</h1>
 
     <ul class=era-list>
-      <t:for as=$key x="[sort { $a cmp $b } keys %{$SWD::Eras::Defs->{eras}}]">
-        <li><m:era m:key=$key />
+      <t:for as=$key x="[sort { $a cmp $b } keys %{$SWD::Eras::Systems->{systems}}]">
+        <li><m:era-system m:key=$key />
       </t:for>
     </ul>
   </section>
 
-  <section id=links>
-    <h1>Link</h1>
-
-    <ul>
-      <li><a href=/era/system>List of era systems</a>
-    </ul>
-  </section>
-
   <p>Extracted from
-  <a href=https://github.com/manakai/data-locale/blob/master/data/calendar/era-defs.json>a
+  <a href=https://github.com/manakai/data-locale/blob/master/data/calendar/era-systems.json>a
   JSON data file</a>
-  (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-defs.txt>documentation</a>).
+  (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-systems.txt>documentation</a>).
 
 </section>
 

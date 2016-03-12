@@ -315,6 +315,31 @@ nav.nearby ul > li > a {
   padding: 0;
 }
 
+#eras tbody tr:nth-child(6n-5),
+#eras tbody tr:nth-child(6n-4),
+#eras tbody tr:nth-child(6n-3) {
+  background: #eee;
+  color: black;
+}
+
+#eras tbody th {
+  width: auto;
+  text-align: center;
+}
+
+#eras tbody th::after {
+  content: none;
+}
+
+#eras td[colspan] {
+  text-align: center;
+}
+
+#eras td a {
+  color: inherit;
+  text-decoration: none;
+}
+
 /*
 
 Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
