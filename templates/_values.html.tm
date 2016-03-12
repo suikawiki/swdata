@@ -42,8 +42,16 @@
   <a pl:href="'/datetime/' . $value"><time><t:text value=$value></time></a>
 </t:macro>
 
-<t:macro name=jd t:params=$value>
-  <a pl:href="'/datetime/jd:' . $value"><data><t:text value=$value></data></a>
+<t:macro name=jd t:params="$value $formatted?">
+  <a pl:href="'/datetime/jd:' . $value">
+    <t:if x=$formatted>
+      <time><t:text value="
+        Web::DateTime->new_from_jd ($value)->to_global_date_and_time_string;
+      "></time>
+    <t:else>
+      <data><t:text value=$value></data>
+    </t:if>
+  </a>
 </t:macro>
 
 <t:macro name=mjd t:params=$value>
@@ -95,6 +103,13 @@
   <a pl:href="'/era/' . $def->{id}">
     <t:if x=$inline><t:class name="'inline'"></t:if>
     <data pl:value="$def->{name}"><t:text value="$text // $def->{name}"></data>
+  </a>
+</t:macro>
+
+<t:macro name=era-system t:params="$key $text? $inline?">
+  <a pl:href="'/era/system/' . $key">
+    <t:if x=$inline><t:class name="'inline'"></t:if>
+    <data pl:value="$key"><t:text value="$text // $key"></data>
   </a>
 </t:macro>
 

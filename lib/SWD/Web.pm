@@ -191,12 +191,23 @@ sub main ($$$) {
     }
   }
 
+  if (@$path == 3 and $path->[0] eq 'era' and $path->[1] eq 'system') {
+    # /era/system/{key}
+    my $def = $SWD::Eras::Systems->{systems}->{$path->[2]};
+    return $app->throw_error (404) unless defined $def;
+    return temma $app, ['era.system.html.tm'], {system => $def, key => $path->[2]};
+  } elsif (@$path == 2 and $path->[0] eq 'era' and $path->[1] eq 'system') {
+    # /era/system
+    return temma $app, ['era.system-list.html.tm'], {};
+  }
+
   if (@$path == 2 and $path->[0] eq 'era') {
     # /era/{string}
     my $def = SWD::Eras::get_era_by_string ($path->[1]);
     return $app->throw_error (404) unless defined $def;
     return temma $app, ['era.html.tm'], {era => $def};
   } elsif (@$path == 1 and $path->[0] eq 'era') {
+    # /era
     return temma $app, ['era-list.html.tm'], {};
   }
 
