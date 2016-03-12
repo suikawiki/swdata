@@ -67,12 +67,13 @@
   <section id=calendars>
     <h1>Calendars</h1>
 
-    <t:macro name=gengou-y t:params="$unix $year $context">
-      <t:text value="
-        my ($era, $era_year) = SWD::Eras::get_era_and_era_year
-            ($context, $unix, $year);
-        sprintf '%s%s年', $era, $era_year == 1 ? '元' : $era_year;
-      ">
+    <t:macro name=gengou-y t:params="$unix $year $context $link?">
+      <t:my as=$x x="[SWD::Eras::get_era_and_era_year ($context, $unix, $year)]">
+      <t:if x=$link>
+        <m:era m:key="$x->[0]" m:inline=1 />
+      <t:else>
+        <t:text value="$x->[0]">
+      </t:if><t:text value="$x->[1] == 1 ? '元' : $x->[1]">年
     </>
 
     <t:macro name=kyuureki-ymd t:params=$value>
@@ -122,10 +123,10 @@
           <td><t:text value="$value->to_ymd_string">
         <tr>
           <th>Japan
-          <td><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
+          <td><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 /><t:text value="$value->month">月<t:text value="$value->day">日
         <tr>
           <th>Ryuukyuu
-          <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" /><t:text value="$value->month">月<t:text value="$value->day">日
+          <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 /><t:text value="$value->month">月<t:text value="$value->day">日
         </tr>
 
         <tr>
@@ -291,8 +292,7 @@
         <tr>
           <th><span lang=zh>干支</span>
           <td lang=zh>
-            <t:text value="qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]"><!--
-         --><t:text value="qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]">
+            <m:ykanshi m:year=$year />
     </table>
   </section>
 

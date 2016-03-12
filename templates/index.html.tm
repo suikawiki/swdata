@@ -54,6 +54,7 @@
           <input type=date name=number step=any required>
           <button type=submit>Go</button>
         </form>
+      <li><a href=/era>Eras</a>
       <li><a href=https://chars.suikawiki.org>Characters</a>
         <form action=https://chars.suikawiki.org/string>
           <input name=s required>

@@ -29,8 +29,17 @@
   <a pl:href="'/lon/' . $value"><data><t:text value=$value></data></a>
 </t:macro>
 
-<t:macro name=year t:params=$value>
+<t:macro name=year t:params="$value">
   <a pl:href="'/datetime/year:' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
+</t:macro>
+
+<t:macro name=ykanshi t:params=$year>
+   <t:text value="qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]"><!--
+--><t:text value="qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]">
+</t:macro>
+
+<t:macro name=day t:params=$value>
+  <a pl:href="'/datetime/' . $value"><time><t:text value=$value></time></a>
 </t:macro>
 
 <t:macro name=jd t:params=$value>
@@ -79,6 +88,14 @@
             }
     ">
   <a pl:href="'/tzoffset/' . $serialized"><data><t:text value=$serialized></data></a>
+</t:macro>
+
+<t:macro name=era t:params="$key $text? $inline?">
+  <t:my as=$def x="SWD::Eras::get_era_by_string ($key)">
+  <a pl:href="'/era/' . $def->{id}">
+    <t:if x=$inline><t:class name="'inline'"></t:if>
+    <data pl:value="$def->{name}"><t:text value="$text // $def->{name}"></data>
+  </a>
 </t:macro>
 
 <t:macro name=codepoint t:params=$value>
