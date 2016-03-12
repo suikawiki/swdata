@@ -14,12 +14,12 @@
     <h2>Era</h2>
   </>
 
-  <t:my as=$nearby_keys x="SWD::Eras::get_era_keys_by_string ($era->{name})">
-  <t:if x="@$nearby_keys > 1">
+  <t:my as=$nearby_keys x="SWD::Eras::get_nearby_era_keys ($era)">
+  <t:if x="@$nearby_keys">
     <nav class=nearby>
       There are other eras with similar name:
       <ul>
-        <t:for as=$key x="[grep { $_ ne $era->{key} } @$nearby_keys]">
+        <t:for as=$key x=$nearby_keys>
           <li><m:era m:key=$key />
         </t:for>
       </ul>
@@ -50,7 +50,7 @@
           ['name_tw', 'Name (正體中文)', 'zh-tw'],
           ['name_ko', 'Name (한국어)', 'ko'],
           ['name_vi', 'Name (Tiếng Việt)', 'vi'],
-          ['name_en', 'Name (Latin)', undef],
+          ['name_latn', 'Name (Latin)', undef],
           ['short_name', 'Short form', undef],
           ['abbr', 'Abbreviated form', undef],
           ['abbr_latn', 'Abbreviated form (Latin)', undef],
@@ -89,7 +89,7 @@
         ['jp_north_era', 'Japan (北朝)'],
         ['jp_south_era', 'Japan (南朝)'],
         ['cn_ryuukyuu_era', 'Chinese era used in Ryuukyuu, Japan'],
-        ['jp_emperor_era', 'Earlier emperor era of Japan'],
+        ['jp_emperor_era', 'Early emperor era of Japan'],
         ['jp_private_era', 'Unofficial era in Japan'],
       ]">
         <t:if x="$era->{$cat->[0]}">
