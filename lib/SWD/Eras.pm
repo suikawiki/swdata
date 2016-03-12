@@ -26,9 +26,17 @@ sub get_era_by_string ($) {
   return undef;
 } # get_era_by_string
 
-sub get_era_keys_by_string ($) {
-  return [keys %{$Defs->{name_to_keys}->{$_[0]} || {}}];
-} # get_era_keys_by_string
+sub get_nearby_era_keys ($) {
+  my $era = $_[0];
+  my $all = {};
+  for (keys %{$era->{names}}) {
+    for (keys %{$Defs->{name_to_keys}->{$_}}) {
+      $all->{$_} = 1;
+    }
+  }
+  delete $all->{$era->{key}};
+  return [keys %$all];
+} # get_nearby_era_keys
 
 sub get_era_and_era_year ($$$) {
   my ($def, $unix, $year) = @_;
