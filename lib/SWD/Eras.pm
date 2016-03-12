@@ -9,6 +9,27 @@ my $RootPath = path (__FILE__)->parent->parent->parent;
 our $Defs = json_bytes2perl $RootPath->child ('local/data/calendar-era-defs.json')->slurp;
 our $Systems = json_bytes2perl $RootPath->child ('local/data/calendar-era-systems.json')->slurp;
 
+my $EraIdToKey = [];
+for (values %{$Defs->{eras}}) {
+  $EraIdToKey->[$_->{id}] = $_->{key};
+}
+
+sub get_era_by_string ($) {
+  if ($_[0] =~ /\A[0-9]+\z/) {
+    return $Defs->{eras}->{$EraIdToKey->[$_[0]] // return undef}; # or undef
+  } else {
+    my $def = $Defs->{eras}->{$_[0]};
+    return $def if defined $def;
+  }
+  my $key = $Defs->{name_to_key}->{jp}->{$_[0]};
+  return $Defs->{eras}->{$key} if defined $key;
+  return undef;
+} # get_era_by_string
+
+sub get_era_keys_by_string ($) {
+  return [keys %{$Defs->{name_to_keys}->{$_[0]} || {}}];
+} # get_era_keys_by_string
+
 sub get_era_and_era_year ($$$) {
   my ($def, $unix, $year) = @_;
   my $jd = $unix / (24*60*60) + 2440587.5;

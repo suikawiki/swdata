@@ -12,6 +12,7 @@ use Kyuureki qw(kyuureki_to_gregorian);
 use Wanage::HTTP;
 use Warabe::App;
 use Temma;
+use SWD::Eras;
 
 sub psgi_app ($) {
   my ($class) = @_;
@@ -188,6 +189,15 @@ sub main ($$$) {
     if (defined $dt and $dt->is_date_time) {
       return temma $app, ['datetime.html.tm'], {value => $dt};
     }
+  }
+
+  if (@$path == 2 and $path->[0] eq 'era') {
+    # /era/{string}
+    my $def = SWD::Eras::get_era_by_string ($path->[1]);
+    return $app->throw_error (404) unless defined $def;
+    return temma $app, ['era.html.tm'], {era => $def};
+  } elsif (@$path == 1 and $path->[0] eq 'era') {
+    return temma $app, ['era-list.html.tm'], {};
   }
 
   if (@$path == 1 and $path->[0] eq 'license') {

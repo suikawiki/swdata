@@ -190,6 +190,26 @@ td.copy button:not(:hover) {
   font-size: 80%;
 }
 
+table.years {
+  display: block;
+  margin: 1em;
+}
+
+table.years > tbody {
+  display: block;
+}
+
+table.years > tbody > tr {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+table.years > tbody > tr > th,
+table.years > tbody > tr > td {
+  display: inline;
+  width: auto;
+}
+
 .ads-rectangle {
   position: absolute;
   top: 100px;
@@ -252,6 +272,47 @@ a:not([rel~=bookmark]):hover, button:hover {
   margin: 0;
   text-align: right;
   font-size: 90%;
+}
+
+nav.nearby {
+  margin-left: auto;
+  margin-right: auto;
+  border: #ccc 1px solid;
+  border-radius: .2rem;
+  padding: .2rem .5rem;
+  max-width: 25em;
+  text-align: left;
+  background: #eee;
+  color: black;
+}
+
+nav.nearby ul {
+  margin: 0;
+  text-align: right;
+}
+
+nav.nearby ul > li {
+  display: inline-block;
+  margin: 0 0.5em;
+  padding: 0;
+}
+
+nav.nearby ul > li > a {
+  display: block;
+  min-width: 5em;
+  text-align: center;
+}
+
+.era-list {
+  padding: 0;
+  -webkit-column-width: 5em;
+  column-width: 5em;
+}
+
+.era-list > li {
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 /*
