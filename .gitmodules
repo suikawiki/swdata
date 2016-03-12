@@ -58,3 +58,6 @@
 	path = modules/web-datetime
 	url = git://github.com/manakai/perl-web-datetime
 	track = master
+[submodule "modules/web-langtag"]
+	path = modules/web-langtag
+	url = git://github.com/manakai/perl-web-langtag
