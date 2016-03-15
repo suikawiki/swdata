@@ -8,8 +8,10 @@
 
 <t:macro name=boolean t:params=$value>
   <t:if x=$value>
+    <t:class name="'boolean-true'">
     <a href=/boolean/true><data>true</></a>
   <t:else>
+    <t:class name="'boolean-false'">
     <a href=/boolean/false><data>false</></a>
   </t:if>
 </t:macro>
@@ -115,6 +117,10 @@
 
 <t:macro name=codepoint t:params=$value>
   <a pl:href="sprintf '//chars.suikawiki.org/char/%04X', $value"><data><t:text value="$value <= 0x10FFFF ? sprintf 'U+%04X', $value : sprintf 'U-%08X', $value"></data></a>
+</t:macro>
+
+<t:macro name=lang t:params=$value>
+  <a pl:href="'/lang/' . Wanage::URL::percent_encode_c $value"><t:text value=$value></a>
 </t:macro>
 
 <!--
