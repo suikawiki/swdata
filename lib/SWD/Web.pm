@@ -211,6 +211,14 @@ sub main ($$$) {
     return temma $app, ['era-list.html.tm'], {};
   }
 
+  if ((@$path == 2 and $path->[0] eq 'lang') or
+      (@$path == 1 and $path->[0] eq 'lang')) {
+    # /lang/{langtag}
+    # /lang?tag={langtag}
+    my $tag = $path->[1] // $app->text_param ('tag') // '';
+    return temma $app, ['lang.html.tm'], {tag => $tag};
+  }
+
   if (@$path == 1 and $path->[0] eq 'license') {
     # /license
     return temma $app, ['license.html.tm'], {};

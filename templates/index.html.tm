@@ -61,6 +61,11 @@
           <input name=s required>
           <button type=submit>Go</button>
         </form>
+      <li><a href=/lang>Language tags</a>
+        <form action=/lang>
+          <input name=tag required>
+          <button type=submit>Go</>
+        </form>
     </ul>
   </section>
 
