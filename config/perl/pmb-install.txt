@@ -17,7 +17,7 @@ File::Temp~0.2304
 Path::Class~0.36
 common::sense~3.74
 Unicode::Stringprep~1.105
-Scalar::Util~1.43
+Scalar::Util~1.44
 Types::Serialiser~1.0
 IO::Handle~1.28
 Unicode::Normalize~1.25
