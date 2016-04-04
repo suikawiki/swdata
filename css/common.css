@@ -322,16 +322,20 @@ nav.nearby ul > li > a {
   text-align: center;
 }
 
-.era-list {
+.item-list {
   padding: 0;
   -webkit-column-width: 5em;
   column-width: 5em;
 }
 
-.era-list > li {
+.item-list > li {
   display: block;
   margin: 0;
   padding: 0;
+}
+
+.item-list > li > a {
+  display: block;
 }
 
 #eras tbody tr:nth-child(6n-5),
