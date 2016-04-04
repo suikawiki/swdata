@@ -41,7 +41,7 @@ build: local/data \
     local/data/jp-flagdays.json \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
-    local/data/days.json
+    local/data/days.json local/data/numbers-kanshi.json
 local/data:
 	mkdir -p local/data
 
@@ -55,6 +55,8 @@ local/data/calendar-era-defs.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-defs.json
 local/data/calendar-era-systems.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-systems.json
+local/data/numbers-kanshi.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/numbers/kanshi.json
 
 local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json

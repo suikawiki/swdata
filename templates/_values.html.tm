@@ -35,9 +35,12 @@
   <a pl:href="'/datetime/year:' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>
 
-<t:macro name=ykanshi t:params=$year>
-   <t:text value="qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]"><!--
---><t:text value="qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]">
+<t:macro name=ykanshi t:params="$year $inline?">
+  <m:kanshi m:value="
+    qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]
+    .
+    qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]
+  " m:inline=$inline />
 </t:macro>
 
 <t:macro name=day t:params=$value>
@@ -112,6 +115,16 @@
   <a pl:href="'/era/system/' . $key">
     <t:if x=$inline><t:class name="'inline'"></t:if>
     <data pl:value="$key"><t:text value="$text // $key"></data>
+  </a>
+</t:macro>
+
+<t:macro name=kanshi t:params="$value $inline?">
+  <a pl:href="'/kanshi/' . Wanage::URL::percent_encode_c $value">
+    <t:if x=$inline><t:class name="'inline'"></t:if>
+    <t:text value="
+      my $def = $SWD::Kanshi::ValueToDef->{$value};
+      $def->{name};
+    ">
   </a>
 </t:macro>
 

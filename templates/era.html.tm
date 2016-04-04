@@ -153,7 +153,7 @@
                 <t:text value="$era->{name}"><t:text value="$y == 1 ? '元' : $y">年
               <td><m:era m:key="'AD'" m:text="'AD'" m:inline=1 /><m:year m:value=$year m:inline=1 />
               <td><m:era m:key="'神武天皇'" m:text="'皇紀'" m:inline=1 /><m:number m:value="$year+660" m:inline=1 />
-              <td><m:ykanshi m:year=$year />
+              <td><m:ykanshi m:year=$year m:inline=1 />
           </t:for>
       </table>
     </t:if>

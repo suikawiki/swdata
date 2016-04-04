@@ -3,42 +3,52 @@
 <t:include path=_values.html.tm />
 <head>
   <t:include path=_head.html.tm>
-    <t:field name=title>Eras
+    <t:field name=title>Stems and branches
   </t:include>
 <body>
   <t:include path=_site_header.html.tm />
 
 <section>
   <hgroup>
-    <h1>Eras</h1>
+    <h1>Stems and branches</h1>
   </>
-
-  <menu class=nearby><a href="https://wiki.suikawiki.org/n/紀年法">Notes</a></menu>
 
   <menu class=toc />
 
-  <section id=list>
-    <h1>List of eras</h1>
+  <section id=stems>
+    <h1>Heavenly stems (十干, celestial stems)</h1>
 
     <ul class=item-list>
-      <t:for as=$key x="[sort { $a cmp $b } keys %{$SWD::Eras::Defs->{eras}}]">
-        <li><m:era m:key=$key />
+      <t:for as=$def x="$SWD::Kanshi::Defs->{heavenly_stems}">
+        <li><m:kanshi m:value="$def->{name}" />
       </t:for>
     </ul>
   </section>
 
-  <section id=links>
-    <h1>Link</h1>
+  <section id=branches>
+    <h1>Earthly branches (十二支, 地支)</h1>
 
-    <ul>
-      <li><a href=/era/system>List of era systems</a>
+    <ul class=item-list>
+      <t:for as=$def x="$SWD::Kanshi::Defs->{earthly_branches}">
+        <li><m:kanshi m:value="$def->{name}" />
+      </t:for>
+    </ul>
+  </section>
+
+  <section id=kanshi>
+    <h1>Kanshi (干支, 十干十二支, 六十花甲, sexagenary cycle)</h1>
+
+    <ul class=item-list>
+      <t:for as=$def x="$SWD::Kanshi::Defs->{kanshi}">
+        <li><m:kanshi m:value="$def->{name}" />
+      </t:for>
     </ul>
   </section>
 
   <p>Extracted from
-  <a href=https://github.com/manakai/data-locale/blob/master/data/calendar/era-defs.json>a
+  <a href=https://github.com/manakai/data-locale/blob/master/data/numbers/kanshi.json>a
   JSON data file</a>
-  (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-defs.txt>documentation</a>).
+  (<a href=https://github.com/manakai/data-locale/blob/master/doc/numbers-kanshi.txt>documentation</a>).
 
 </section>
 

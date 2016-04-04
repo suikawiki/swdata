@@ -61,6 +61,7 @@
           <input name=s required>
           <button type=submit>Go</button>
         </form>
+      <li><a href=/kanshi>Stems and branches</a>
       <li><a href=/lang>Language tags</a>
         <form action=/lang>
           <input name=tag required>
