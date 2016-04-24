@@ -24,7 +24,7 @@ Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
 Path::Tiny~0.088
 Test::Tester~0.114
-Time::HiRes~1.9732
+Time::HiRes~1.9733
 Exporter~5.72
 Carp~1.38
 Proc::Wait3~0.05
