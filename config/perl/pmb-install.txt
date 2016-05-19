@@ -10,7 +10,7 @@ Time::Local~1.2300
 parent~0.234
 Exporter::Lite~0.08
 Data::Dumper~2.154
-Test::More~1.302015
+Test::More~1.302019
 Text::Diff~1.44
 Test::Differences~0.64
 File::Temp~0.2304
@@ -18,14 +18,13 @@ Path::Class~0.36
 common::sense~3.74
 Unicode::Stringprep~1.105
 Scalar::Util~1.45
-IO::Handle~1.28
 Types::Serialiser~1.0
+IO::Handle~1.28
 Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
 Path::Tiny~0.090
-Test::Tester~1.302015
+Test::Tester~1.302019
 Time::HiRes~1.9733
-Exporter~5.72
 Carp~1.38
 Proc::Wait3~0.05
 MIME::Base64~3.15
