@@ -1,5 +1,5 @@
-Capture::Tiny~0.36
-Pod::Usage~1.68
+Capture::Tiny~0.40
+Pod::Usage~1.69
 Pod::Text~4.07
 JSON::XS~3.02
 Test::NoWarnings~1.04
@@ -22,7 +22,7 @@ Types::Serialiser~1.0
 IO::Handle~1.28
 Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
-Path::Tiny~0.090
+Path::Tiny~0.094
 Test::Tester~1.302019
 Time::HiRes~1.9733
 Carp~1.38
