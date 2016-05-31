@@ -10,7 +10,7 @@ Time::Local~1.2300
 parent~0.234
 Exporter::Lite~0.08
 Data::Dumper~2.154
-Test::More~1.302019
+Test::More~1.302022
 Text::Diff~1.44
 Test::Differences~0.64
 File::Temp~0.2304
@@ -23,7 +23,7 @@ IO::Handle~1.28
 Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
 Path::Tiny~0.094
-Test::Tester~1.302019
+Test::Tester~1.302022
 Time::HiRes~1.9733
 Carp~1.38
 Proc::Wait3~0.05
