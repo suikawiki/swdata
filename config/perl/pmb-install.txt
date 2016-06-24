@@ -24,7 +24,7 @@ Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
 Path::Tiny~0.094
 Test::Tester~1.302031
-Time::HiRes~1.9736
+Time::HiRes~1.9737
 Carp~1.38
 Proc::Wait3~0.05
 MIME::Base64~3.15
