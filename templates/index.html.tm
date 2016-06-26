@@ -16,7 +16,7 @@
         <form action=javascript: onsubmit="
           location.href = '/number/' + elements.number.value;
           return false;
-        ">
+        " class=input>
           <input type=number name=number step=any value=0 required>
           <button type=submit>Go</button>
         </form>
@@ -24,7 +24,7 @@
         <form action=javascript: onsubmit="
           location.href = '/lat/' + elements.number.value;
           return false;
-        ">
+        " class=input>
           <input type=number name=number step=any value=0 min=0 max=90 required>
           <button type=submit>Go</button>
         </form>
@@ -32,7 +32,7 @@
         <form action=javascript: onsubmit="
           location.href = '/lon/' + elements.number.value;
           return false;
-        ">
+        " class=input>
           <input type=number name=number step=any value=0 min=-180 max=180 required>
           <button type=submit>Go</button>
         </form>
@@ -40,7 +40,7 @@
         <form action=javascript: onsubmit="
           location.href = '/latlon/' + elements.lat.value + ',' + elements.lon.value;
           return false;
-        ">
+        " class=input>
           <input type=number name=lat step=any value=0 min=0 max=90 required title=Latitude>
           <input type=number name=lon step=any value=0 min=-180 max=180 required title=Longitude>
           <button type=submit>Go</button>
@@ -50,7 +50,7 @@
         <form action=javascript: onsubmit="
           location.href = '/datetime/' + elements.number.value;
           return false;
-        ">
+        " class=input>
           <input type=date name=number step=any required>
           <button type=submit>Go</button>
         </form>
@@ -59,20 +59,20 @@
         <form action=javascript: onsubmit="
           location.href = '/year/' + elements.number.value;
           return false;
-        ">
+        " class=input>
           <input type=number name=number step=any value=2000 required>
           <button type=submit>Go</button>
         </form>
       <li><a href=/era>Eras</a>
       <li><a href=/era/system>Era systems</a>
       <li><a href=https://chars.suikawiki.org>Characters</a>
-        <form action=https://chars.suikawiki.org/string>
+        <form action=https://chars.suikawiki.org/string class=input>
           <input name=s required>
           <button type=submit>Go</button>
         </form>
       <li><a href=/kanshi>Stems and branches</a>
       <li><a href=/lang>Language tags</a>
-        <form action=/lang>
+        <form action=/lang class=input>
           <input name=tag required>
           <button type=submit>Go</>
         </form>
