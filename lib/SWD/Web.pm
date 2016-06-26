@@ -201,7 +201,11 @@ sub main ($$$) {
     }
 
     if (defined $dt and $dt->is_date_time) {
-      return temma $app, ['datetime.html.tm'], {value => $dt};
+      if ($dt->has_component ('month')) {
+        return temma $app, ['datetime.html.tm'], {value => $dt};
+      } else {
+        return temma $app, ['year.html.tm'], {value => $dt};
+      }
     }
   }
 
