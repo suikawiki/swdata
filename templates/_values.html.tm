@@ -35,6 +35,10 @@
   <a pl:href="'/year/' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>
 
+<t:macro name=yearmonth t:params="$year $month">
+  <a pl:href="'/datetime/' . sprintf '%04d-%02d', $year, $month"><time><t:text value="sprintf '%04d-%02d', $year, $month"></time></a>
+</t:macro>
+
 <t:macro name=ykanshi t:params="$year $inline?">
   <m:kanshi m:value="
     qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]
