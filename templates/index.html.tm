@@ -45,7 +45,7 @@
           <input type=number name=lon step=any value=0 min=-180 max=180 required title=Longitude>
           <button type=submit>Go</button>
         </form>
-      <li><a href=/tzoffset/+00:00>Time zone offsets</a>
+      <li><a href=/tzoffset>Time zone offsets</a>
       <li><a href=/datetime/now>Dates and times</a>
         <form action=javascript: onsubmit="
           location.href = '/datetime/' + elements.number.value;

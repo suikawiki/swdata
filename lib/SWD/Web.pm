@@ -155,6 +155,9 @@ sub main ($$$) {
     my $seconds = $2 * 3600 + $3 * 60 + ($4 || 0);
     $seconds *= -1 if $1 eq '-';
     return temma $app, ['tzoffset.html.tm'], {value => $seconds};
+  } elsif (@$path == 1 and $path->[0] eq 'tzoffset') {
+    # /tzoffset
+    return temma $app, ['tzoffset.list.html.tm'], {};
   }
 
   if (@$path == 2 and $path->[0] eq 'datetime') {
