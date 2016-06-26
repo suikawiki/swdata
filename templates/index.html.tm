@@ -54,6 +54,7 @@
           <input type=date name=number step=any required>
           <button type=submit>Go</button>
         </form>
+      <li><a href=/datetime/--mm-dd>Yearless dates</a>
       <li><a href=/year>Years</a>
         <form action=javascript: onsubmit="
           location.href = '/year/' + elements.number.value;

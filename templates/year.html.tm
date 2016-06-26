@@ -4,14 +4,15 @@
 <t:include path=_values.html.tm />
 <head>
   <t:include path=_head.html.tm>
-    <t:field name=title><t:text value="$value->to_year_string"> (Year)
+    <t:field name=title><t:text value="$value->to_manakai_year_string"> (Year)
   </t:include>
+  <link rel=canonical pl:href="'/year/' . $value->to_manakai_year_string">
 <body>
   <t:include path=_site_header.html.tm />
 
 <section>
   <hgroup>
-    <h1><data><t:text value="$value->to_year_string"></></h1>
+    <h1><data><t:text value="$value->to_manakai_year_string"></></h1>
     <h2><a href=/year rel=up>Year</a></h2>
   </>
 
@@ -112,6 +113,9 @@
 
     <table class=nv>
       <tbody>
+        <tr>
+          <th>Date and time
+          <td><m:unixtime m:value="$value->to_unix_number" m:formatted=1 />
         <tr>
           <th>Year number
           <td><m:number m:value="$value->year"/>
