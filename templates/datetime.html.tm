@@ -220,6 +220,10 @@
     <table class=nv>
       <tbody>
         <tr>
+          <th>Yearless date
+          <td><m:yearless-date m:value="$value->to_unix_number"/>
+
+        <tr>
           <th>Day of week (number)
           <td><t:text value="$value->day_of_week">
         <tr lang=en>
@@ -243,57 +247,6 @@
     </table>
   </section>
 
-  </section>
-
-  <section id=year>
-    <t:my as=$year x="$value->year">
-    <h1>Year (<t:text value="$value->to_manakai_year_string">)</h1>
-
-    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value->to_manakai_year_string">Notes</a></menu>
-
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>AD
-          <td>
-            <t:if x="$year > 0">
-              <m:number m:value="$year"/>
-            <t:else>
-              <m:number m:value="-$year + 1" m:inline=1 /> BC
-            </t:if>
-        <tr>
-          <th lang=ja>神武天皇即位紀元
-          <td>
-            <m:number m:value="$year + 660"/>
-        <tr>
-          <th>Proleptic <span lang=ja>明治</span>
-          <td>
-            <m:number m:value="$year - 1867"/>
-        <tr>
-          <th>Proleptic <span lang=ja>大正</span>
-          <td>
-            <m:number m:value="$year - 1911"/>
-        <tr>
-          <th>Proleptic <span lang=ja>昭和</span>
-          <td>
-            <m:number m:value="$year - 1925"/>
-        <tr>
-          <th>Proleptic <span lang=ja>平成</span>
-          <td>
-            <m:number m:value="$year - 1988"/>
-        <tr>
-          <th lang=zh>民国紀元
-          <td>
-            民国<m:number m:value="$year - 1911" m:inline=1 />年
-        <tr>
-          <th lang=ko>주체력
-          <td>
-            <m:number m:value="$year - 1911" m:inline=1 />
-        <tr>
-          <th><span lang=zh>干支</span>
-          <td lang=zh>
-            <m:ykanshi m:year=$year />
-    </table>
   </section>
 
   <section id=cast>
@@ -472,50 +425,6 @@
           }
         });
       </script>
-    </section>
-  </section>
-
-  <section id=yearless-date>
-    <h1>Day in year (<t:text value="$value->to_yearless_date_string">)</h1>
-    <t:my as=$data x="$SWD::Days::Data->{sprintf '%02d-%02d', $value->month, $value->day}">
-
-    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value->to_yearless_date_string">Notes</a></menu>
-
-    <section id=memorials>
-      <h1>Memorial days</h1>
-      <ul>
-        <t:for as=$item x="[@{$data->{memorials} || []}]">
-          <li><a pl:href="'https://ja.wikipedia.org/wiki/' . percent_encode_c ($item->{wref} // $item->{name})" pl:title="$item->{desc}"><t:text value="$item->{name}"></a>
-            <t:if x="defined $item->{desc}">
-              : <span class=desc><t:text value="$item->{desc}"></>
-            </t:if>
-        </t:for>
-      </ul>
-    </section>
-
-    <section id=birthday>
-      <h1>Birthday</h1>
-      <ul>
-        <t:for as=$item x="[@{$data->{birthdays} || []}, @{$data->{fictional_birthdays} || []}]">
-          <li><a pl:href="'https://ja.wikipedia.org/wiki/' . percent_encode_c ($item->{wref} // $item->{name})" pl:title="$item->{desc}"><t:text value="$item->{name}"></a>
-            <t:if x="defined $item->{date_gregorian}" t:space=preserve>
-              (<a pl:href="'/datetime/' . $item->{date_gregorian}"><t:text value="[split /-/, $item->{date_gregorian}]->[0]"></a>)
-            </t:if>
-        </t:for>
-      </ul>
-    </section>
-
-    <section id=events>
-      <h1>Events</h1>
-      <ul>
-        <t:for as=$item x="[@{$data->{historicals} || []}, @{$data->{jp_towns} || []}, @{$data->{fictionals} || []}]">
-          <li>
-            <t:if x="defined $item->{date_gregorian}" t:space=preserve>
-              <a pl:href="'/datetime/' . $item->{date_gregorian}"><t:text value="[split /-/, $item->{date_gregorian}]->[0]"></a>:
-            </t:if>
-            <t:text value="$item->{desc}">
-        </t:for>
-      </ul>
     </section>
   </section>
 

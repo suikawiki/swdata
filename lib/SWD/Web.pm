@@ -160,6 +160,11 @@ sub main ($$$) {
     return temma $app, ['tzoffset-list.html.tm'], {};
   }
 
+  if (@$path == 2 and $path->[0] eq 'datetime' and $path->[1] eq '--mm-dd') {
+    # /datetime/--mm-dd
+    return temma $app, ['yearless-date-list.html.tm'], {};
+  }
+
   {
     my $dt;
     if (@$path == 2 and $path->[0] eq 'datetime') {
@@ -201,10 +206,15 @@ sub main ($$$) {
     }
 
     if (defined $dt and $dt->is_date_time) {
-      if ($dt->has_component ('month')) {
-        return temma $app, ['datetime.html.tm'], {value => $dt};
-      } else {
+      if ($dt->has_component ('year') and
+          not $dt->has_component ('month')) {
         return temma $app, ['year.html.tm'], {value => $dt};
+      } elsif (not $dt->has_component ('year') and
+               $dt->has_component ('month') and
+               $dt->has_component ('day')) {
+        return temma $app, ['yearless-date.html.tm'], {value => $dt};
+      } else {
+        return temma $app, ['datetime.html.tm'], {value => $dt};
       }
     }
   }

@@ -35,16 +35,31 @@
   <a pl:href="'/year/' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>
 
-<t:macro name=yearmonth t:params="$year $month">
-  <a pl:href="'/datetime/' . sprintf '%04d-%02d', $year, $month"><time><t:text value="sprintf '%04d-%02d', $year, $month"></time></a>
-</t:macro>
-
 <t:macro name=ykanshi t:params="$year $inline?">
   <m:kanshi m:value="
     qw(庚 辛 壬 癸 甲 乙 丙 丁 戊 己)[$year % 10]
     .
     qw(申 酉 戌 亥 子 丑 寅 卯 辰 巳 午 未)[$year % 12]
   " m:inline=$inline />
+</t:macro>
+
+<t:macro name=yearmonth t:params="$year $month">
+  <a pl:href="'/datetime/' . sprintf '%04d-%02d', $year, $month"><time><t:text value="sprintf '%04d-%02d', $year, $month"></time></a>
+</t:macro>
+
+<t:macro name=yearless-date t:params="$value">
+  <t:my as=$date x="
+    my (undef, undef, undef, $d, $m, undef) = gmtime $value;
+    sprintf '--%02d-%02d', $m+1, $d;
+  ">
+  <a pl:href="'/datetime/' . $date"><time><t:text value=$date></time></a>
+</t:macro>
+
+<t:macro name=yearless-date-md t:params="$month $day">
+  <t:my as=$date x="
+    sprintf '--%02d-%02d', $month, $day;
+  ">
+  <a pl:href="'/datetime/' . $date"><time><t:text value=$date></time></a>
 </t:macro>
 
 <t:macro name=day t:params=$value>
