@@ -36,7 +36,7 @@
   <t:my as=$is_integer x="$value == int $value">
   <hgroup>
     <h1><data><t:text value=$serialized></></h1>
-    <h2>Time zone offset</h2>
+    <h2><a href=/tzoffset rel=up>Time zone offset</a></h2>
   </>
 
   <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $serialized">Notes</a></menu>
