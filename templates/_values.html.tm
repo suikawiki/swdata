@@ -32,7 +32,7 @@
 </t:macro>
 
 <t:macro name=year t:params="$value">
-  <a pl:href="'/datetime/year:' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
+  <a pl:href="'/year/' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>
 
 <t:macro name=ykanshi t:params="$year $inline?">
