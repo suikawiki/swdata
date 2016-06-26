@@ -157,42 +157,57 @@ sub main ($$$) {
     return temma $app, ['tzoffset.html.tm'], {value => $seconds};
   } elsif (@$path == 1 and $path->[0] eq 'tzoffset') {
     # /tzoffset
-    return temma $app, ['tzoffset.list.html.tm'], {};
+    return temma $app, ['tzoffset-list.html.tm'], {};
   }
 
-  if (@$path == 2 and $path->[0] eq 'datetime') {
+  {
     my $dt;
-    if ($path->[1] =~ /\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
-      $dt = Web::DateTime->new_from_unix_time ($path->[1]);
-    } elsif ($path->[1] =~ /\Akyuureki:([0-9]+)-([0-9]+)('?)-([0-9]+)\z/) {
-      my $parser = Web::DateTime::Parser->new;
-      my $d = [kyuureki_to_gregorian $1, $2, $3, $4];
-      $dt = $parser->parse_date_string
-          (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
-              if defined $d->[0];
-    } elsif ($path->[1] eq 'now') {
-      $dt = Web::DateTime->new_from_unix_time (time);
-    } elsif ($path->[1] =~ /\Ayear:([+-]?[0-9]+)\z/) {
-      my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_manakai_year_string ($1);
-    } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-      $dt = Web::DateTime->new_from_jd ($1);
-    } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-      $dt = Web::DateTime->new_from_mjd ($1);
-    } elsif ($path->[1] =~ /\Ajulian:(.+)\z/) {
-      my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_julian_ymd_string ($1);
-    } elsif ($path->[1] =~ /\A([+-]?[0-9]+-[0-9]+-[0-9]+)\z/) {
-      my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_ymd_string ($1);
-    } else {
-      $path->[1] =~ s/\s+([+-][0-9]{2}:[0-9]{2})$/$1/;
-      my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_html_datetime_value ($path->[1]);
+    if (@$path == 2 and $path->[0] eq 'datetime') {
+      # /datetime/{...}
+      if ($path->[1] =~ /\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
+        $dt = Web::DateTime->new_from_unix_time ($path->[1]);
+      } elsif ($path->[1] =~ /\Akyuureki:([0-9]+)-([0-9]+)('?)-([0-9]+)\z/) {
+        my $parser = Web::DateTime::Parser->new;
+        my $d = [kyuureki_to_gregorian $1, $2, $3, $4];
+        $dt = $parser->parse_date_string
+            (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
+                if defined $d->[0];
+      } elsif ($path->[1] eq 'now') {
+        $dt = Web::DateTime->new_from_unix_time (time);
+      } elsif ($path->[1] =~ /\Ayear:([+-]?[0-9]+)\z/) {
+        my $parser = Web::DateTime::Parser->new;
+        $dt = $parser->parse_manakai_year_string ($1);
+      } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
+        $dt = Web::DateTime->new_from_jd ($1);
+      } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
+        $dt = Web::DateTime->new_from_mjd ($1);
+      } elsif ($path->[1] =~ /\Ajulian:(.+)\z/) {
+        my $parser = Web::DateTime::Parser->new;
+        $dt = $parser->parse_julian_ymd_string ($1);
+      } elsif ($path->[1] =~ /\A([+-]?[0-9]+-[0-9]+-[0-9]+)\z/) {
+        my $parser = Web::DateTime::Parser->new;
+        $dt = $parser->parse_ymd_string ($1);
+      } else {
+        $path->[1] =~ s/\s+([+-][0-9]{2}:[0-9]{2})$/$1/;
+        my $parser = Web::DateTime::Parser->new;
+        $dt = $parser->parse_html_datetime_value ($path->[1]);
+      }
     }
+
+    if (@$path == 2 and $path->[0] eq 'year') {
+      # /year/{year}
+      my $parser = Web::DateTime::Parser->new;
+      $dt = $parser->parse_manakai_year_string ($path->[1]);
+    }
+
     if (defined $dt and $dt->is_date_time) {
       return temma $app, ['datetime.html.tm'], {value => $dt};
     }
+  }
+
+  if (@$path == 1 and $path->[0] eq 'year') {
+    # /year
+    return temma $app, ['year-list.html.tm'], {};
   }
 
   if (@$path == 3 and $path->[0] eq 'era' and $path->[1] eq 'system') {

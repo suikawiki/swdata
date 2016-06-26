@@ -54,6 +54,14 @@
           <input type=date name=number step=any required>
           <button type=submit>Go</button>
         </form>
+      <li><a href=/year>Years</a>
+        <form action=javascript: onsubmit="
+          location.href = '/year/' + elements.number.value;
+          return false;
+        ">
+          <input type=number name=number step=any value=2000 required>
+          <button type=submit>Go</button>
+        </form>
       <li><a href=/era>Eras</a>
       <li><a href=/era/system>Era systems</a>
       <li><a href=https://chars.suikawiki.org>Characters</a>
