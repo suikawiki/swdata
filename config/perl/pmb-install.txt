@@ -22,7 +22,7 @@ Types::Serialiser~1.0
 IO::Handle~1.28
 Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
-Path::Tiny~0.094
+Path::Tiny~0.096
 Test::Tester~1.302035
 Time::HiRes~1.9739
 Carp~1.38
