@@ -11,7 +11,7 @@ parent~0.234
 Exporter::Lite~0.08
 Data::Dumper~2.161
 Text::Diff~1.44
-Test::More~1.302040
+Test::More~1.302045
 Test::Differences~0.64
 File::Temp~0.2304
 Path::Class~0.36
@@ -23,7 +23,7 @@ Types::Serialiser~1.0
 Unicode::Normalize~1.25
 Algorithm::Diff~1.1903
 Path::Tiny~0.096
-Test::Tester~1.302040
+Test::Tester~1.302045
 Time::HiRes~1.9739
 Carp~1.38
 Proc::Wait3~0.05
