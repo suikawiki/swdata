@@ -25,7 +25,7 @@
           location.href = '/lat/' + elements.number.value;
           return false;
         " class=input>
-          <input type=number name=number step=any value=0 min=0 max=90 required>
+          <input type=number name=number step=any value=0 min=-90 max=90 required>
           <button type=submit>Go</button>
         </form>
       <li><a href=/lon/0>Longitudes</a>
@@ -41,7 +41,7 @@
           location.href = '/latlon/' + elements.lat.value + ',' + elements.lon.value;
           return false;
         " class=input>
-          <input type=number name=lat step=any value=0 min=0 max=90 required title=Latitude>
+          <input type=number name=lat step=any value=0 min=-90 max=90 required title=Latitude>
           <input type=number name=lon step=any value=0 min=-180 max=180 required title=Longitude>
           <button type=submit>Go</button>
         </form>
@@ -85,7 +85,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
