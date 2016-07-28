@@ -2,6 +2,7 @@
 <t:include path=_macro.html.tm />
 <head>
   <t:include path=_head.html.tm />
+  <meta name="msvalidate.01" content="A78C1310E551890C5529A2EC7BFD6D51" />
 <body>
   <t:include path=_site_header.html.tm />
 
