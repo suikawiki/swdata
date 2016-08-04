@@ -4,7 +4,7 @@ Capture::Tiny~0.42
 Carp~1.38
 Cwd~3.62
 Data::Dumper~2.161
-Encode~2.84
+Encode~2.85
 Exporter::Lite~0.08
 File::Path~2.12
 File::Temp~0.2304
