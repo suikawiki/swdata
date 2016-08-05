@@ -1,6 +1,6 @@
 Algorithm::Diff~1.1903
 AnyEvent::Util
-Capture::Tiny~0.42
+Capture::Tiny~0.44
 Carp~1.38
 Cwd~3.62
 Data::Dumper~2.161
