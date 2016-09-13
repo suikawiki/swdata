@@ -19,9 +19,9 @@ Pod::Usage~1.69
 Proc::Wait3~0.05
 Scalar::Util~1.45
 Test::Differences~0.64
-Test::More~1.302052
+Test::More~1.302056
 Test::NoWarnings~1.04
-Test::Tester~1.302052
+Test::Tester~1.302056
 Text::Diff~1.44
 Time::HiRes~1.9739
 Time::Local~1.24
