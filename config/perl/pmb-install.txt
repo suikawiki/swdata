@@ -20,12 +20,9 @@ Proc::Wait3~0.05
 Scalar::Util~1.46
 Test::Differences~0.64
 Test::More~1.302059
-Test::NoWarnings~1.04
-Test::Tester~1.302059
 Text::Diff~1.44
 Time::HiRes~1.9740
 Time::Local~1.24
 Types::Serialiser~1.0
-Unicode::Stringprep~1.105
 common::sense~3.74
 parent~0.234
