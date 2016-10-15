@@ -1,5 +1,5 @@
 Algorithm::Diff~1.1903
-AnyEvent::Util
+AnyEvent~7.13
 Capture::Tiny~0.44
 Carp~1.38
 Cwd~3.62
@@ -13,7 +13,7 @@ JSON~2.90
 JSON::XS~3.02
 MIME::Base64~3.15
 Path::Class~0.37
-Path::Tiny~0.096
+Path::Tiny~0.098
 Pod::Text~4.08
 Pod::Usage~1.69
 Proc::Wait3~0.05
@@ -25,4 +25,4 @@ Time::HiRes~1.9740
 Time::Local~1.24
 Types::Serialiser~1.0
 common::sense~3.74
-parent~0.234
+parent~0.236
