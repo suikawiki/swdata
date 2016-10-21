@@ -1,5 +1,5 @@
 Algorithm::Diff~1.1903
-AnyEvent~7.13
+AnyEvent::Util
 Capture::Tiny~0.44
 Carp~1.38
 Cwd~3.62
@@ -19,7 +19,7 @@ Pod::Usage~1.69
 Proc::Wait3~0.05
 Scalar::Util~1.46
 Test::Differences~0.64
-Test::More~1.302059
+Test::More~1.302062
 Text::Diff~1.44
 Time::HiRes~1.9740
 Time::Local~1.24
