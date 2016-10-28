@@ -1,10 +1,10 @@
 Algorithm::Diff~1.1903
-AnyEvent::IO
+AnyEvent::Util
 Capture::Tiny~0.44
 Carp~1.38
 Cwd~3.62
 Data::Dumper~2.161
-Encode~2.86
+Encode~2.87
 Exporter::Lite~0.08
 File::Path~2.12
 File::Temp~0.2304
