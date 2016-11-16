@@ -10,7 +10,7 @@ File::Path~2.12
 File::Temp~0.2304
 IO::Handle~1.28
 JSON~2.90
-JSON::XS~3.02
+JSON::XS~3.03
 MIME::Base64~3.15
 Path::Class~0.37
 Path::Tiny~0.098
