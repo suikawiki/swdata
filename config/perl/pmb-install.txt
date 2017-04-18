@@ -21,7 +21,7 @@ Scalar::Util~1.47
 Test::Differences~0.64
 Test::More~1.302083
 Text::Diff~1.44
-Time::HiRes~1.9741
+Time::HiRes~1.9742
 Time::Local~1.25
 Types::Serialiser~1.0
 common::sense~3.74
