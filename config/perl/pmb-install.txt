@@ -1,5 +1,5 @@
 Algorithm::Diff~1.1903
-AnyEvent::IO
+AnyEvent~7.13
 Capture::Tiny~0.46
 Carp~1.38
 Cwd~3.62
@@ -9,7 +9,7 @@ Exporter::Lite~0.08
 File::Path~2.12
 File::Temp~0.2304
 IO::Handle~1.28
-JSON~2.90
+JSON~2.92
 JSON::XS~3.03
 MIME::Base64~3.15
 Path::Class~0.37
