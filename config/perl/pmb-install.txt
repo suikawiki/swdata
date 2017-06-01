@@ -6,10 +6,10 @@ Cwd~3.62
 Data::Dumper~2.161
 Encode~2.89
 Exporter::Lite~0.08
-File::Path~2.12
+File::Path~2.13
 File::Temp~0.2304
 IO::Handle~1.28
-JSON~2.93
+JSON~2.94
 JSON::XS~3.03
 MIME::Base64~3.15
 Path::Class~0.37
