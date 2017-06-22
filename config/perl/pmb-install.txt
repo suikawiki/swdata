@@ -4,7 +4,7 @@ Capture::Tiny~0.46
 Carp~1.38
 Cwd~3.62
 Data::Dumper~2.161
-Encode~2.90
+Encode~2.91
 Exporter::Lite~0.08
 File::Path~2.14
 File::Temp~0.2304
@@ -19,7 +19,7 @@ Pod::Usage~1.69
 Proc::Wait3~0.05
 Scalar::Util~1.47
 Test::Differences~0.64
-Test::More~1.302085
+Test::More~1.302086
 Text::Diff~1.44
 Time::HiRes~1.9742
 Time::Local~1.25
