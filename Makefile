@@ -28,11 +28,17 @@ pmbp-upgrade: local/bin/pmbp.pl
 	perl local/bin/pmbp.pl $(PMBP_OPTIONS) --update-pmbp-pl
 pmbp-update: git-submodules pmbp-upgrade
 	perl local/bin/pmbp.pl $(PMBP_OPTIONS) --update
-pmbp-install: pmbp-upgrade
+pmbp-install: pmbp-upgrade ./lserver
 	perl local/bin/pmbp.pl $(PMBP_OPTIONS) --install \
             --create-perl-command-shortcut @perl \
-            --create-perl-command-shortcut @prove \
-            --create-perl-command-shortcut @plackup=perl\ modules/twiggy-packed/script/plackup
+            --create-perl-command-shortcut @prove
+
+./lserver:
+	echo '#!/bin/bash' > $@
+	echo 'cd `dirname $$0`' >> $@
+	echo 'echo http://localhost:6653' >> $@
+	echo './perl bin/sarze-server.pl 6653' >> $@
+	chmod u+x $@
 
 ## ------ Build ------
 
