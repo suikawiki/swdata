@@ -36,8 +36,9 @@ pmbp-install: pmbp-upgrade ./lserver
 
 ./lserver:
 	echo '#!/bin/bash' > $@
-	echo 'echo http://localhost:5511' >> $@
-	echo './perl bin/sarze-server.pl 5511' >> $@
+	echo 'cd `dirname $$0`' >> $@
+	echo 'echo http://localhost:6653' >> $@
+	echo './perl bin/sarze-server.pl 6653' >> $@
 	chmod u+x $@
 
 ## ------ Build ------
