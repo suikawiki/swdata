@@ -22,11 +22,8 @@
     <table class=nv>
       <tbody>
         <tr>
-          <th>Normalized
-          <td><m:lon m:value="$lonvalue->normalized->to_deg"/>
-        <tr>
           <th>Local time
-          <td><m:tzoffset m:value="$value * 3600 / 15"/>
+          <td><m:tzoffset m:value="$lonvalue->to_tzoffset->seconds"/>
     </table>
 
   </section>
@@ -72,6 +69,9 @@
 
     <table class=nv>
       <tbody>
+        <tr>
+          <th>Normalized
+          <td><m:lon m:value="$lonvalue->normalized->to_deg"/>
         <tr>
           <th>Sign inverted
           <td><m:lon m:value="$lonvalue->sign_inverted->to_deg"/>

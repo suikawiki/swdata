@@ -105,7 +105,7 @@
       <tbody>
         <tr>
           <th>Sign
-          <td><t:text value="(sprintf '%e', $value) =~ /^-/ ? '-' : '+'">
+          <td><m:number m:value="$nvalue->sign"/>
         <tr>
           <th>Is integer?
           <td><m:boolean m:value=$is_integer />
@@ -133,7 +133,10 @@
         <td><m:number m:value="$nvalue->ceil->to_perl"/>
       <tr>
         <th>Perl <code>int</code>
-        <td><m:number m:value="int $value"/>
+        <td><m:number m:value="int $nvalue->to_perl"/>
+      <tr>
+        <th>Absolute
+        <td><m:number m:value="$nvalue->absolute->to_perl"/>
   </table>
 
   </section>

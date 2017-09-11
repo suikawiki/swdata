@@ -1,30 +1,7 @@
-<html t:params="$app $value" lang=en>
+<html t:params="$app $tzvalue" lang=en>
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
-    <t:my as=$serialized x="
-            my $v = $value < 0 ? -$value : $value;
-            my $h = int ($v / 3600);
-            my $m = int (($v - $h*3600) / 60);
-            my $s = $v - $h*3600 - $m*60;
-            if ($s == 0) {
-              sprintf '%s%02d:%02d',
-                  $value < 0 ? '-' : '+',
-                  int $h,
-                  int $m;
-            } else {
-              my $x = sprintf '%s%02d:%02d:%02d',
-                  $value < 0 ? '-' : '+',
-                  int $h,
-                  int $m,
-                  int $s;
-              if ($s) {
-                $s -= int $s;
-                $s =~ s/^0//;
-                $x .= $s;
-              }
-              $x;
-            }
-    ">
+<t:my as=$serialized x="$tzvalue->to_string">
 <head>
   <t:include path=_head.html.tm>
     <t:field name=title><t:text value=$serialized> (time zone offset)
@@ -33,7 +10,6 @@
   <t:include path=_site_header.html.tm />
 
 <section>
-  <t:my as=$is_integer x="$value == int $value">
   <hgroup>
     <h1><data><t:text value=$serialized></></h1>
     <h2><a href=/tzoffset rel=up>Time zone offset</a></h2>
@@ -60,13 +36,25 @@
     <table class=nv>
       <tbody>
         <tr>
+          <th>Sign
+          <td><m:number m:value="$tzvalue->sign"/>
+        <tr>
           <th>Seconds
-          <td><t:text value="$value">
+          <td><t:text value="$tzvalue->seconds">
         <tr>
           <th>Longitude
-          <td><m:lon m:value="
-            $value * 15 / 3600;
-          "/>
+          <td><m:lon m:value="$tzvalue->longitude->to_deg"/>
+    </table>
+  </section>
+
+  <section id=cast>
+    <h1>Cast</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Number
+          <td><m:number m:value="$tzvalue->seconds"/>
     </table>
   </section>
 
@@ -77,7 +65,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -90,6 +78,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Affero General Public License for more details.
 
 You does not have received a copy of the GNU Affero General Public
-License along with this program, see <http://www.gnu.org/licenses/>.
+License along with this program, see <https://www.gnu.org/licenses/>.
 
 -->

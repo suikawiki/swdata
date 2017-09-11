@@ -2,6 +2,7 @@ package Longitude;
 use strict;
 use warnings;
 use Number;
+use TZOffset;
 
 sub new_from_number ($$) {
   return bless {number => $_[1]}, $_[0];
@@ -24,6 +25,11 @@ sub sign_inverted ($) {
   return ref ($self)->new_from_number
       (Number->new_from_perl (-$self->{number}->to_perl));
 } # sign_inverted
+
+sub to_tzoffset ($) {
+  my $self = $_[0];
+  return TZOffset->new_from_seconds ($self->{number}->to_perl * 3600 / 15);
+} # to_tzoffset
 
 sub to_deg ($) {
   return $_[0]->{number}->to_perl;
