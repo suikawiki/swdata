@@ -23,7 +23,7 @@
       <tbody>
         <tr>
           <th>Local time
-          <td><m:tzoffset m:value="$lonvalue->to_tzoffset->seconds"/>
+          <td><m:tzoffset m:tzvalue="$lonvalue->to_tzoffset"/>
     </table>
 
   </section>
