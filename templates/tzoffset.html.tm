@@ -4,7 +4,8 @@
 <t:my as=$serialized x="$tzvalue->to_string">
 <head>
   <t:include path=_head.html.tm>
-    <t:field name=title><t:text value=$serialized> (time zone offset)
+    <t:field name=title>
+      <t:text value=$serialized> (time zone offset)
   </t:include>
 <body>
   <t:include path=_site_header.html.tm />
@@ -45,6 +46,114 @@
           <th>Longitude
           <td><m:lon m:value="$tzvalue->longitude->to_deg"/>
     </table>
+  </section>
+
+  <section id=comparison>
+    <h1>Comparison</h1>
+
+    <t:my as=$tzoffsets x="[map { TZOffset->parse ($_) || TZOffset->new_from_seconds (0) } @{$app->bare_param_list ('compare')}]">
+    <table class=nv>
+      <tbody>
+        <t:for as=$tzoffset x=$tzoffsets>
+          <tr>
+            <th t:space=preserve>
+              <m:tzoffset m:tzvalue="$tzoffset"/>
+            <td>
+              <t:text value="
+                my $delta = TZOffset->new_from_seconds
+                    ($tzoffset->seconds - $tzvalue->seconds);
+                $delta->to_string;
+              ">
+        </t:for>
+      <tfoot>
+        <tr>
+          <t:for as=$tzoffset x=$tzoffsets>
+            <input type=hidden name=compare pl:value="$tzoffset->to_string" form=compare-form>
+          </t:for>
+          <t:for as=$time x="$app->bare_param_list ('time')">
+            <input type=hidden name=time pl:value=$time form=compare-form>
+          </t:for>
+          <td colspan=2>
+            <form method=get id=compare-form action=#comparison>
+              <input name=compare>
+              <button type=submit>Compare</button>
+            </form>
+    </table>
+
+    <table>
+      <t:my as=$tzs x="
+        my @list;
+        push @list, Web::DateTime::TimeZone->new_from_offset ($tzvalue->seconds);
+        push @list, map {
+          Web::DateTime::TimeZone->new_from_offset ($_->seconds);
+        } @$tzoffsets;
+        push @list, Web::DateTime::TimeZone->new_from_offset (0);
+        \@list;
+      ">
+      <thead>
+        <tr>
+          <th><m:tzoffset m:tzvalue="$tzvalue"/></th>
+          <t:for as=$tzoffset x=$tzoffsets>
+            <th><m:tzoffset m:tzvalue="$tzoffset"/>
+          </t:for>
+          <th>UTC
+        <tbody>
+          <t:for as=$date x="
+            my @d;
+            push @d, map {
+              Web::DateTime->new_from_unix_time ($_ + 12*3600 - $tzvalue->seconds);
+            }
+            -24  *3600,
+            -12  *3600,
+            -10  *3600,
+             -9  *3600,
+             -1  *3600,
+             -0.5*3600,
+              0  *3600,
+              0.5*3600,
+              1  *3600,
+              9  *3600,
+             10  *3600,
+             12  *3600,
+             24  *3600,
+            ;
+            push @d, map {
+              my $d = Web::DateTime::Parser->new->parse_time_string ($_);
+              $d = Web::DateTime->new_from_unix_time
+                  ((defined $d ? $d->to_unix_number : 0) - $tzvalue->seconds);
+              $d;
+            } @{$app->bare_param_list ('time')};
+            \@d;
+          ">
+            <tr>
+              <t:for as=$tz x=$tzs>
+                <td><t:text value="
+                  $date->set_time_zone ($tz);
+                  sprintf '%02d:%02d:%02d', $date->hour, $date->minute, $date->second;
+                ">
+                <t:if x="not ($date->day == 1 and $date->month == 1 and $date->year == 1970)" t:space=preserve>
+                  (Δday = <t:text value="
+                    my $d = Web::DateTime->new_from_components
+                        ($date->year, $date->month, $date->day);
+                    Number->new_from_perl ($d->to_jd - 2440587.5)->floor->to_perl;
+                  ">)
+                </t:if>
+              </t:for>
+          </t:for>
+        <tfoot>
+          <tr>
+            <t:for as=$tzoffset x=$tzoffsets>
+              <input type=hidden name=compare pl:value="$tzoffset->to_string" form=compare-time-form>
+            </t:for>
+            <t:for as=$time x="$app->bare_param_list ('time')">
+              <input type=hidden name=time pl:value=$time form=compare-time-form>
+            </t:for>
+            <td><input type=time name=time form=compare-time-form step=1>
+            <td pl:colspan="@$tzoffsets + 1">
+              <form method=get id=compare-time-form action=#comparison>
+                <button type=submit>Compare</button>
+              </form>
+      </table>
   </section>
 
   <section id=cast>

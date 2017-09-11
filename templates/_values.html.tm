@@ -94,9 +94,7 @@
   </a>
 </t:macro>
 
-<t:macro name=tzoffset t:params=$tzvalue>
-  <a pl:href="'/tzoffset/' . $tzvalue->to_string"><data><t:text value="$tzvalue->to_string"></data></a>
-</t:macro>
+<t:macro name=tzoffset t:params=$tzvalue><a pl:href="'/tzoffset/' . $tzvalue->to_string"><data><t:text value="$tzvalue->to_string"></data></a></t:macro>
 
 <t:macro name=era t:params="$key $text? $inline?">
   <t:my as=$def x="SWD::Eras::get_era_by_string ($key)">
