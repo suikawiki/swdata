@@ -94,32 +94,8 @@
   </a>
 </t:macro>
 
-<t:macro name=tzoffset t:params=$value>
-    <t:my as=$serialized x="
-            my $v = $value < 0 ? -$value : $value;
-            my $h = int ($v / 3600);
-            my $m = int (($v - $h*3600) / 60);
-            my $s = $v - $h*3600 - $m*60;
-            if ($s == 0) {
-              sprintf '%s%02d:%02d',
-                  $value < 0 ? '-' : '+',
-                  int $h,
-                  int $m;
-            } else {
-              my $x = sprintf '%s%02d:%02d:%02d',
-                  $value < 0 ? '-' : '+',
-                  int $h,
-                  int $m,
-                  int $s;
-              if ($s) {
-                $s -= int $s;
-                $s =~ s/^0//;
-                $x .= $s;
-              }
-              $x;
-            }
-    ">
-  <a pl:href="'/tzoffset/' . $serialized"><data><t:text value=$serialized></data></a>
+<t:macro name=tzoffset t:params=$tzvalue>
+  <a pl:href="'/tzoffset/' . $tzvalue->to_string"><data><t:text value="$tzvalue->to_string"></data></a>
 </t:macro>
 
 <t:macro name=era t:params="$key $text? $inline?">

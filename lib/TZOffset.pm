@@ -51,6 +51,7 @@ sub to_string ($) {
     my $x = sprintf '%s%02d:%02d:%02d',
         $sign < 0 ? '-' : '+', $h, $m, $s;
     # XXX
+    $delta = sprintf '%f', $delta;
     $delta =~ s/^0\././;
     $delta = '' if $delta eq '0';
     return $x . $delta;
