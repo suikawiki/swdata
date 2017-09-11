@@ -42,10 +42,6 @@
 	path = modules/promise
 	url = https://github.com/wakaba/perl-promise
 	track = master
-[submodule "modules/twiggy-packed"]
-	path = modules/twiggy-packed
-	url = https://github.com/wakaba/perl-twiggy-packed
-	track = master
 [submodule "modules/promised-file"]
 	path = modules/promised-file
 	url = https://github.com/wakaba/perl-promised-file
