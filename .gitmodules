@@ -1,63 +1,76 @@
 [submodule "modules/wanage"]
 	path = modules/wanage
-	url = git://github.com/wakaba/wanage
+	url = https://github.com/wakaba/wanage
 	track = master
 [submodule "modules/charclass"]
 	path = modules/charclass
-	url = git://github.com/wakaba/perl-charclass
+	url = https://github.com/wakaba/perl-charclass
 	track = master
 [submodule "modules/ooutils"]
 	path = modules/ooutils
-	url = git://github.com/wakaba/perl-ooutils
+	url = https://github.com/wakaba/perl-ooutils
 	track = master
 [submodule "modules/json-functions-xs"]
 	path = modules/json-functions-xs
-	url = git://github.com/wakaba/perl-json-functions-xs
+	url = https://github.com/wakaba/perl-json-functions-xs
 	track = master
 [submodule "modules/web-encodings"]
 	path = modules/web-encodings
-	url = git://github.com/manakai/perl-web-encodings
+	url = https://github.com/manakai/perl-web-encodings
 	track = master
 [submodule "modules/web-url"]
 	path = modules/web-url
-	url = git://github.com/manakai/perl-web-url
+	url = https://github.com/manakai/perl-web-url
 	track = master
 [submodule "modules/json-ps"]
 	path = modules/json-ps
-	url = git://github.com/wakaba/perl-json-ps
+	url = https://github.com/wakaba/perl-json-ps
 	track = master
 [submodule "modules/temma"]
 	path = modules/temma
-	url = git://github.com/wakaba/temma
+	url = https://github.com/wakaba/temma
 	track = master
 [submodule "modules/web-dom"]
 	path = modules/web-dom
-	url = git://github.com/manakai/perl-web-dom
+	url = https://github.com/manakai/perl-web-dom
 	track = master
 [submodule "modules/web-markup"]
 	path = modules/web-markup
-	url = git://github.com/manakai/perl-web-markup
+	url = https://github.com/manakai/perl-web-markup
 	track = master
 [submodule "modules/promise"]
 	path = modules/promise
-	url = git://github.com/wakaba/perl-promise
+	url = https://github.com/wakaba/perl-promise
 	track = master
 [submodule "modules/twiggy-packed"]
 	path = modules/twiggy-packed
-	url = git://github.com/wakaba/perl-twiggy-packed
+	url = https://github.com/wakaba/perl-twiggy-packed
 	track = master
 [submodule "modules/promised-file"]
 	path = modules/promised-file
-	url = git://github.com/wakaba/perl-promised-file
+	url = https://github.com/wakaba/perl-promised-file
 	track = master
 [submodule "modules/kyuureki"]
 	path = modules/kyuureki
-	url = git://github.com/wakaba/perl-kyuureki
+	url = https://github.com/wakaba/perl-kyuureki
 	track = master
 [submodule "modules/web-datetime"]
 	path = modules/web-datetime
-	url = git://github.com/manakai/perl-web-datetime
+	url = https://github.com/manakai/perl-web-datetime
 	track = master
 [submodule "modules/web-langtag"]
 	path = modules/web-langtag
-	url = git://github.com/manakai/perl-web-langtag
+	url = https://github.com/manakai/perl-web-langtag
+	track = master
+[submodule "modules/sarze"]
+	path = modules/sarze
+	url = https://github.com/wakaba/sarze
+	track = transport
+[submodule "modules/web-resource"]
+	path = modules/web-resource
+	url = https://github.com/manakai/perl-web-resource
+	track = transport
+[submodule "modules/streams"]
+	path = modules/streams
+	url = https://github.com/manakai/perl-streams
+	track = master
