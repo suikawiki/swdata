@@ -153,7 +153,37 @@
               <form method=get id=compare-time-form action=#comparison>
                 <button type=submit>Compare</button>
               </form>
-      </table>
+    </table>
+
+    <hr>
+
+    <p t:space=preserve>If
+    <time>12:00</time> <m:tzoffset m:tzvalue=$tzvalue /> is
+    <var>hour</var>, <var>hour</var>'s <var>offset</var> is...
+
+    <table class=nv>
+      <thead>
+        <tr>
+          <th><var>hour</var>
+          <th colspan=2><var>offset</var>
+      <tbody>
+        <t:for as=$time x="
+          [map {
+            my $d = Web::DateTime::Parser->new->parse_time_string ($_);
+            $d = Web::DateTime->new_from_unix_time
+                (defined $d ? $d->to_unix_number : 0);
+            $d;
+          } '12:00', @{$app->bare_param_list ('time')}];
+        ">
+          <tr>
+            <td><t:text value="
+              sprintf '%02d:%02d:%02d', $time->hour, $time->minute, $time->second;
+            ">
+            <td><m:tzoffset m:tzvalue="
+              TZOffset->new_from_seconds ($time->to_unix_number - 12*60*60 + $tzvalue->seconds);
+            "/>
+        </t:for>
+    </table>
   </section>
 
   <section id=cast>
