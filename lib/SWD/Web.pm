@@ -16,6 +16,7 @@ use SWD::Eras;
 use SWD::Kanshi;
 use Number;
 use Longitude;
+use TZOffset;
 
 sub psgi_app ($) {
   my ($class) = @_;
@@ -160,12 +161,10 @@ sub main ($$$) {
     }
   }
 
-  if (@$path == 2 and $path->[0] eq 'tzoffset' and
-      $path->[1] =~ /\A([+-])([0-9]+):([0-9]+)(?::([0-9]+(?:\.[0-9]+|))|)\z/) {
+  if (@$path == 2 and $path->[0] eq 'tzoffset') {
     # /tzoffset/{offset}
-    my $seconds = $2 * 3600 + $3 * 60 + ($4 || 0);
-    $seconds *= -1 if $1 eq '-';
-    return temma $app, ['tzoffset.html.tm'], {value => $seconds};
+    my $tz = TZOffset->parse ($path->[1]);
+    return temma $app, ['tzoffset.html.tm'], {tzvalue => $tz} if defined $tz;
   } elsif (@$path == 1 and $path->[0] eq 'tzoffset') {
     # /tzoffset
     return temma $app, ['tzoffset-list.html.tm'], {};

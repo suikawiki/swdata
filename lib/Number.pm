@@ -7,6 +7,14 @@ sub new_from_perl ($$) {
   return bless {value => $_[1]}, $_[0];
 } # new_from_perl
 
+sub sign ($) {
+  return $_[0]->{value} < 0 ? '-1' : '+1';
+} # sign
+
+sub absolute ($) {
+  return ref ($_[0])->new_from_perl (abs $_[0]->{value});
+} # absolute
+
 sub floor ($) {
   return ref ($_[0])->new_from_perl (POSIX::floor ($_[0]->{value}));
 } # floor
