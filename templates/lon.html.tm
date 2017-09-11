@@ -1,4 +1,4 @@
-<html t:params="$app $value" lang=en>
+<html t:params="$app $value $lonvalue" lang=en>
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -23,18 +23,7 @@
       <tbody>
         <tr>
           <th>Normalized
-          <td><m:lon m:value="
-            my $v = $value > 0 ? $value : -$value;
-            my $w = $v - int $v;
-            $v = (int $v) % 360;
-            my $sign = $value < 0 ? -1 : 1;
-            if ($v > 180) {
-              $v -= 360;
-              $v *= -1;
-              $sign *= -1;
-            }
-            $sign * ($v + $w);
-          "/>
+          <td><m:lon m:value="$lonvalue->normalized->to_deg"/>
         <tr>
           <th>Local time
           <td><m:tzoffset m:value="$value * 3600 / 15"/>
@@ -76,6 +65,17 @@
         "></a>
   </table>
 
+  </section>
+
+  <section id=links>
+    <h1>Links</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Sign inverted
+          <td><m:lon m:value="$lonvalue->sign_inverted->to_deg"/>
+    </table>
   </section>
 
   <section id=cast>

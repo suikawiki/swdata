@@ -14,19 +14,13 @@ use Warabe::App;
 use Temma;
 use SWD::Eras;
 use SWD::Kanshi;
+use Number;
+use Longitude;
 
 sub psgi_app ($) {
   my ($class) = @_;
 
   return sub {
-    ## This is necessary so that different forked siblings have
-    ## different seeds.
-    srand;
-
-    ## XXX Parallel::Prefork (?)
-    delete $SIG{CHLD};
-    delete $SIG{CLD};
-
     my $http = Wanage::HTTP->new_from_psgi_env ($_[0]);
     my $app = Warabe::App->new_from_http ($http);
 
@@ -93,16 +87,28 @@ sub main ($$$) {
     if ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
       # /number/{sign}{integer}
       my $v = $path->[1] eq '-0' ? (1/"-inf") : 0+$path->[1];
-      return temma $app, ['number.html.tm'], {value => $v};
+      return temma $app, ['number.html.tm'], {
+        value => $v,
+        nvalue => Number->new_from_perl ($v),
+      };
     } elsif ($path->[1] =~ /\A0x[0-9A-Fa-f]+\z/) {
       # /number/0x{hex}
-      return temma $app, ['number.html.tm'], {value => hex $path->[1]};
+      return temma $app, ['number.html.tm'], {
+        value => hex $path->[1],
+        nvalue => Number->new_from_perl (hex path->[1]),
+      };
     } elsif ($path->[1] =~ /\A0b[01]+\z/) {
       # /number/0b{binary}
-      return temma $app, ['number.html.tm'], {value => eval $path->[1]};
+      return temma $app, ['number.html.tm'], {
+        value => eval $path->[1],
+        nvalue => Number->new_from_perl (eval $path->[1]),
+      };
     } elsif ($path->[1] =~ /\A[+-]?[0-9]+\.[0-9]+\z/) {
       # /number/{sign}{integer}.{integer}
-      return temma $app, ['number.html.tm'], {value => 0+$path->[1]};
+      return temma $app, ['number.html.tm'], {
+        value => 0+$path->[1],
+        nvalue => Number->new_from_perl (0+$path->[1]),
+      };
     }
   }
 
@@ -139,7 +145,12 @@ sub main ($$$) {
     }
 
     if (@value == 1 and defined $value[0] and $path->[0] eq 'lon') {
-      return temma $app, ['lon.html.tm'], {value => $value[0]};
+      my $n = Number->new_from_perl ($value[0]);
+      my $lon = Longitude->new_from_number ($n);
+      return temma $app, ['lon.html.tm'], {
+        value => $value[0],
+        lonvalue => $lon,
+      };
     }
 
     if (@value == 2 and defined $value[0] and defined $value[1] and
@@ -293,7 +304,7 @@ sub DESTROY {
 
 =head1 LICENSE
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -306,6 +317,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Affero General Public License for more details.
 
 You does not have received a copy of the GNU Affero General Public
-License along with this program, see <http://www.gnu.org/licenses/>.
+License along with this program, see <https://www.gnu.org/licenses/>.
 
 =cut

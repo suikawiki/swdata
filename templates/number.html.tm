@@ -1,5 +1,5 @@
-<html t:params="$app $value" lang=en>
-<t:call x="require JSON::PS; require POSIX">
+<html t:params="$app $value $nvalue" lang=en>
+<t:call x="require JSON::PS">
 <t:include path=_macro.html.tm />
 <t:include path=_values.html.tm />
 <head>
@@ -127,10 +127,10 @@
       </t:if>
       <tr>
         <th>POSIX <code>floor</code>
-        <td><m:number m:value="POSIX::floor $value"/>
+        <td><m:number m:value="$nvalue->floor->to_perl"/>
       <tr>
         <th>POSIX <code>ceil</code>
-        <td><m:number m:value="POSIX::ceil $value"/>
+        <td><m:number m:value="$nvalue->ceil->to_perl"/>
       <tr>
         <th>Perl <code>int</code>
         <td><m:number m:value="int $value"/>
@@ -175,7 +175,7 @@
 
 <!--
 
-Copyright 2015 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -188,6 +188,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Affero General Public License for more details.
 
 You does not have received a copy of the GNU Affero General Public
-License along with this program, see <http://www.gnu.org/licenses/>.
+License along with this program, see <https://www.gnu.org/licenses/>.
 
 -->
