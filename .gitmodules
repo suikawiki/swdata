@@ -2,17 +2,9 @@
 	path = modules/wanage
 	url = https://github.com/wakaba/wanage
 	track = master
-[submodule "modules/charclass"]
-	path = modules/charclass
-	url = https://github.com/wakaba/perl-charclass
-	track = master
 [submodule "modules/ooutils"]
 	path = modules/ooutils
 	url = https://github.com/wakaba/perl-ooutils
-	track = master
-[submodule "modules/json-functions-xs"]
-	path = modules/json-functions-xs
-	url = https://github.com/wakaba/perl-json-functions-xs
 	track = master
 [submodule "modules/web-encodings"]
 	path = modules/web-encodings
