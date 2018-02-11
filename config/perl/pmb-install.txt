@@ -1,14 +1,13 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.14
 AnyEvent::Fork~1.31
-AnyEvent::Util
 Canary::Stability~2012
 Capture::Tiny~0.46
 Carp~1.38
 Cwd~3.62
 Data::Dumper~2.161
 Digest::SHA~6.01
-Encode~2.95
+Encode~2.96
 Exporter::Lite~0.08
 File::Path~2.15
 File::Temp~0.2304
