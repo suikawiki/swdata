@@ -26,10 +26,6 @@ sub psgi_app ($) {
     my $http = Wanage::HTTP->new_from_psgi_env ($_[0]);
     my $app = Warabe::App->new_from_http ($http);
 
-    # XXX accesslog
-    warn sprintf "Access: [%s] %s %s\n",
-        scalar gmtime, $app->http->request_method, $app->http->url->stringify;
-
     $http->set_response_header
         ('Strict-Transport-Security' => 'max-age=10886400; includeSubDomains; preload');
 
@@ -276,6 +272,11 @@ sub main ($$$) {
   if (@$path == 1 and $path->[0] eq 'license') {
     # /license
     return temma $app, ['license.html.tm'], {};
+  }
+
+  if (@$path == 1 and $path->[0] eq 'robots.txt') {
+    # /robots.txt
+    return $app->send_plain_text ('');
   }
 
   return $app->send_error (404);
