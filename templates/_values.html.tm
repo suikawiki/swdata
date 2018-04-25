@@ -31,6 +31,10 @@
   <a pl:href="'/lon/' . $value"><data><t:text value=$value></data></a>
 </t:macro>
 
+<t:macro name=latlon t:params="$lat $lon">
+  <a pl:href="'/latlon/' . $lat . ',' . $lon"><data>(<t:text value=$lat>, <t:text value=$lon>)</data></a>
+</t:macro>
+
 <t:macro name=year t:params="$value">
   <a pl:href="'/year/' . sprintf '%04d', $value"><time><t:text value=$value></time></a>
 </t:macro>

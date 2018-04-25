@@ -75,6 +75,16 @@
         <tr>
           <th>Sign inverted
           <td><m:lon m:value="$lonvalue->sign_inverted->to_deg"/>
+      <tbody>
+        <tr>
+          <th>90°N
+          <td><m:latlon m:lat=90 m:lon="$lonvalue->to_deg"/>
+        <tr>
+          <th>0°
+          <td><m:latlon m:lat=0 m:lon="$lonvalue->to_deg"/>
+        <tr>
+          <th>90°S
+          <td><m:latlon m:lat=-90 m:lon="$lonvalue->to_deg"/>
     </table>
   </section>
 
