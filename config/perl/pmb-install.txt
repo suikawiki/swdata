@@ -1,7 +1,6 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.14
 AnyEvent::Fork~1.31
-AnyEvent::Util
 Canary::Stability~2012
 Capture::Tiny~0.48
 Carp~1.38
@@ -26,5 +25,5 @@ Test::Differences~0.64
 Test::More~1.302136
 Text::Diff~1.45
 Time::HiRes~1.9758
-Time::Local~1.27
+Time::Local~1.28
 common::sense~3.74
