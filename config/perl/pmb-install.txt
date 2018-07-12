@@ -1,7 +1,7 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.14
 AnyEvent::Fork~1.31
-AnyEvent::Util
+AnyEvent::IO
 Canary::Stability~2012
 Capture::Tiny~0.48
 Carp~1.38
@@ -11,7 +11,7 @@ Digest::SHA~6.02
 Encode~2.98
 Exporter::Lite~0.08
 File::Path~2.15
-File::Temp~0.2306
+File::Temp~0.2308
 IO::FDPass~1.2
 IO::Handle~1.39
 JSON~2.97001
@@ -23,7 +23,7 @@ Proc::FastSpawn~1.2
 Scalar::Util~1.50
 Socket~2.027
 Test::Differences~0.64
-Test::More~1.302136
+Test::More~1.302138
 Text::Diff~1.45
 Time::HiRes~1.9758
 Time::Local~1.28
