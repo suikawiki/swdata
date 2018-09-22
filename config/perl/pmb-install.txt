@@ -1,12 +1,12 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.14
 AnyEvent::Fork~1.31
-AnyEvent::Socket
+AnyEvent::Util
 Canary::Stability~2012
 Capture::Tiny~0.48
 Carp~1.50
 Cwd~3.75
-Data::Dumper~2.161
+Data::Dumper~2.172
 Digest::SHA~6.02
 Encode~2.98
 Exporter::Lite~0.08
