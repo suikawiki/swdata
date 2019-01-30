@@ -1,7 +1,6 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.14
 AnyEvent::Fork~1.31
-AnyEvent::IO
 Canary::Stability~2012
 Capture::Tiny~0.48
 Carp~1.50
