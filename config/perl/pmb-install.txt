@@ -14,7 +14,7 @@ File::Path~2.16
 File::Temp~0.2309
 IO::FDPass~1.2
 IO::Handle~1.39
-JSON~4.01
+JSON~4.02
 MIME::Base64~3.15
 Net::SSLeay~1.85
 Path::Class~0.37
