@@ -1,7 +1,7 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.15
 AnyEvent::Fork~1.31
-AnyEvent::Util
+AnyEvent::Socket
 Canary::Stability~2012
 Capture::Tiny~0.48
 Carp~1.50
@@ -21,7 +21,7 @@ Path::Tiny~0.108
 Proc::FastSpawn~1.2
 Scalar::Util~1.50
 Socket~2.029
-Test::Differences~0.65
+Test::Differences~0.66
 Test::More~1.302162
 Text::Diff~1.45
 Time::HiRes~1.9760
