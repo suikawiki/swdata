@@ -1,6 +1,7 @@
 Algorithm::Diff~1.1903
 AnyEvent~7.15
 AnyEvent::Fork~1.31
+AnyEvent::Util
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -14,7 +15,7 @@ IO::FDPass~1.2
 IO::Handle~1.39
 JSON~4.02
 MIME::Base64~3.15
-Net::SSLeay~1.85
+Net::SSLeay~1.88
 Path::Class~0.37
 Path::Tiny~0.108
 Proc::FastSpawn~1.2
