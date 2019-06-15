@@ -13,7 +13,7 @@
 
     <ul>
       <li><a href=/boolean/true>Booleans</a>
-      <li><a href=/number/0>Numbers</a>
+      <li><a href=/number/>Numbers</a>
         <form action=javascript: onsubmit="
           location.href = '/number/' + elements.number.value;
           return false;
