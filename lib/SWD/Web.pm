@@ -10,6 +10,7 @@ use Web::DateTime;
 use Web::DateTime::TimeZone;
 use Web::DateTime::Parser;
 use Kyuureki qw(kyuureki_to_gregorian);
+use Number::CJK::Parser;
 use Wanage::HTTP;
 use Warabe::App;
 use Temma;
@@ -82,7 +83,10 @@ sub main ($$$) {
   }
 
   if (@$path == 2 and $path->[0] eq 'number') {
-    if ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
+    if ($path->[1] eq '') {
+      # /number/
+      return temma $app, ['number.index.html.tm'], {};
+    } elsif ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
       # /number/{sign}{integer}
       my $v = $path->[1] eq '-0' ? (1/"-inf") : 0+$path->[1];
       return temma $app, ['number.html.tm'], {
@@ -93,7 +97,7 @@ sub main ($$$) {
       # /number/0x{hex}
       return temma $app, ['number.html.tm'], {
         value => hex $path->[1],
-        nvalue => Number->new_from_perl (hex path->[1]),
+        nvalue => Number->new_from_perl (hex $path->[1]),
       };
     } elsif ($path->[1] =~ /\A0b[01]+\z/) {
       # /number/0b{binary}
@@ -107,6 +111,13 @@ sub main ($$$) {
         value => 0+$path->[1],
         nvalue => Number->new_from_perl (0+$path->[1]),
       };
+    } elsif ($path->[1] =~ s/\Acjk://) {
+      # /number/cjk:{number}
+      my $number = parse_cjk_number $path->[1];
+      return temma $app, ['number.html.tm'], {
+        value => $number,
+        nvalue => Number->new_from_perl ($number),
+      } if defined $number;
     }
   }
 
