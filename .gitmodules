@@ -53,11 +53,11 @@
 [submodule "modules/sarze"]
 	path = modules/sarze
 	url = https://github.com/wakaba/sarze
-	track = transport
+	track = master
 [submodule "modules/web-resource"]
 	path = modules/web-resource
 	url = https://github.com/manakai/perl-web-resource
-	track = transport
+	track = master
 [submodule "modules/streams"]
 	path = modules/streams
 	url = https://github.com/manakai/perl-streams
