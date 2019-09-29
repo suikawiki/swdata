@@ -232,6 +232,9 @@
         <tr>
           <th>Day of week (日本語)
           <td lang=ja><t:text value="use utf8; qw(日 月 火 水 木 金 土)[$value->day_of_week]">曜日
+          <tr>
+            <th><a href=/kanshi>Kanshi</a>
+            <td><m:dkanshi m:value="(POSIX::floor ($value->to_jd + 0.5) + 49) % 60"/>
         <tr lang=ja>
           <th>六曜 (Japan)
           <td>
@@ -269,6 +272,9 @@
         <tr>
           <th>Julian Day
           <td><m:jd m:value="$value->to_jd"/>
+        <tr>
+          <th>Julian Day (integer of day)
+          <td><m:number m:value="POSIX::floor ($value->to_jd + 0.5)"/>
         <tr>
           <th>Modified Julian Day
           <td><m:mjd m:value="$value->to_mjd"/>
