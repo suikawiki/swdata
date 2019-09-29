@@ -72,6 +72,10 @@
     <table class=nv>
       <tbody>
         <tr>
+          <th>Number (0-indexed)
+          <td><m:number m:value="$def->{value}-1" />
+        </tr>
+        <tr>
           <th>Number (1-indexed)
           <td><m:number m:value="$def->{value}" />
         </tr>
