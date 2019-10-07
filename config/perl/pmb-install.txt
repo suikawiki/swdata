@@ -1,5 +1,5 @@
 Algorithm::Diff~1.1903
-AnyEvent~7.16
+AnyEvent~7.17
 AnyEvent::Fork~1.31
 AnyEvent::Socket
 Canary::Stability~2013
@@ -20,10 +20,10 @@ Net::SSLeay~1.88
 Path::Class~0.37
 Path::Tiny~0.108
 Proc::FastSpawn~1.2
-Scalar::Util~1.51
+Scalar::Util~1.52
 Socket~2.029
 Test::Differences~0.67
-Test::More~1.302164
+Test::More~1.302168
 Text::Diff~1.45
 Time::HiRes~1.9760
 Time::Local~1.28
