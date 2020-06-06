@@ -82,6 +82,13 @@ sub main ($$$) {
     return static $app, 'text/css; charset=utf-8', 'css/common.css';
   }
 
+  if (@$path == 2 and $path->[0] eq 'js' and
+      ($path->[1] eq 'site.js' or $path->[1] eq 'components.js')) {
+    # /js/site.js
+    # /js/components.js
+    return static $app, 'text/javascript; charset=utf-8', 'js/' . $path->[1];
+  }
+
   if (@$path == 2 and $path->[0] eq 'number') {
     if ($path->[1] eq '') {
       # /number/
@@ -221,6 +228,10 @@ sub main ($$$) {
       # /year/{year}
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_manakai_year_string ($path->[1]);
+    }
+
+    if ($path->[0] eq 'y') {
+      return static $app, 'text/html; charset=utf-8', 'html/year.html';
     }
 
     if (defined $dt and $dt->is_date_time) {
