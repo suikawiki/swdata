@@ -13,6 +13,8 @@ var defineElement = function (def) {
   }
 }; // defineElement
 
+var mod = (n, m) => ((n%m) + m) % m;
+
 defineElement ({
   name: 'section',
   is: 'sw-page-main',
@@ -101,6 +103,83 @@ defineElement ({
 }) ();
 
 defineElement ({
+  name: 'sw-data-number',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+
+      var args = {value: v};
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-number>
+
+defineElement ({
+  name: 'sw-data-kanshi',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var args = {value0: v, value1: v+1};
+      args.label = [
+        '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未',
+        '壬申', '癸酉', '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯',
+        '庚辰', '辛巳', '壬午', '癸未', '甲申', '乙酉', '丙戌', '丁亥',
+        '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳', '甲午', '乙未',
+        '丙申', '丁酉', '戊戌', '己亥', '庚子', '辛丑', '壬寅', '癸卯',
+        '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥',
+        '壬子', '癸丑', '甲寅', '乙卯', '丙辰', '丁巳', '戊午', '己未',
+        '庚申', '辛酉', '壬戌', '癸亥',
+      ][v];
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-year>
+
+defineElement ({
   name: 'sw-data-year',
   fill: 'idlattribute',
   props: {
@@ -145,15 +224,15 @@ defineElement ({
       return Promise.resolve ().then (() => {
         if (name === 'is-proleptic-julian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
-          return ['leap', 0 === (y % 4)];
+          return ['leap', 0 === mod (y, 4)];
         } else if (name === 'is-proleptic-gregorian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
-          return ['leap', 0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))];
+          return ['leap', 0 === mod (y, 4) && !(0 === mod (y, 100) && !(0 === mod (y, 400)))];
         } else if (name === 'next-proleptic-julian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           y++;
           while (true) {
-            if (0 === (y % 4)) break;
+            if (0 === mod (y, 4)) break;
             y++;
           }
           return ['year', y];
@@ -161,7 +240,7 @@ defineElement ({
           var y = parseFloat (this.getAttribute ('arg-year'));
           y--;
           while (true) {
-            if (0 === (y % 4)) break;
+            if (0 === mod (y, 4)) break;
             y--;
           }
           return ['year', y];
@@ -169,7 +248,7 @@ defineElement ({
           var y = parseFloat (this.getAttribute ('arg-year'));
           y++;
           while (true) {
-            if (0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))) break;
+            if (0 === mod (y, 4) && !(0 === mod (y, 100) && !(0 === mod (y, 400)))) break;
             y++;
           }
           return ['year', y];
@@ -177,10 +256,16 @@ defineElement ({
           var y = parseFloat (this.getAttribute ('arg-year'));
           y--;
           while (true) {
-            if (0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))) break;
+            if (0 === mod (y, 4) && !(0 === mod (y, 100) && !(0 === mod (y, 400)))) break;
             y--;
           }
           return ['year', y];
+        } else if (name === 'before-epoch-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return 1 - y;
+        } else if (name === 'kanshi-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return ['kanshi', mod (y - 4, 60)];
         } else {
           throw new TypeError ('Unknown algorithm |'+name+'|');
         }
@@ -189,20 +274,30 @@ defineElement ({
           var s = document.createElement ('sw-data-boolean');
           s.value = r;
           return s;
+        } else if (typeof r === 'number') {
+          var s = document.createElement ('sw-data-number');
+          s.value = r;
+          return s;
         } else if (Array.isArray (r) && r[0] === 'leap') {
           var s = document.createElement ('sw-data-boolean');
           s.className = r[0];
           s.value = r[1];
           return s;
-        } else if (Array.isArray (r) && r[0] === 'year') {
-          var s = document.createElement ('sw-data-year');
-          s.value = r[1];
-          return s;
-        } else {
-          var s = document.createElement ('span'); // XXX
-          s.appendChild (document.createTextNode (r));
-          return s;
+        } else if (Array.isArray (r)) {
+          if (r[0] === 'year') {
+            var s = document.createElement ('sw-data-year');
+            s.value = r[1];
+            return s;
+          } else if (r[0] === 'kanshi') {
+            var s = document.createElement ('sw-data-kanshi');
+            s.value = r[1];
+            return s;
+          }
         }
+        
+        var s = document.createElement ('span'); // XXX
+        s.appendChild (document.createTextNode (r));
+        return s;
       }, e => {
         var s = document.createElement ('span'); // XXX
         s.appendChild (document.createTextNode (e));
