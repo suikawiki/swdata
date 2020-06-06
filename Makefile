@@ -49,8 +49,17 @@ build: local/data \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
     local/data/days.json local/data/numbers-kanshi.json
+build-repo: js/components.js
 local/data:
 	mkdir -p local/data
+
+js/components.js: local/page-components.js local/time.js
+	cat local/page-components.js local/time.js > $@
+
+local/page-components.js: local/generated
+	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/src/page-components.js
+local/time.js: local/generated
+	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/timejs/master/src/time.js
 
 local/data/jp-holidays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-holidays.json
@@ -69,6 +78,9 @@ local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json
 local/data/days.json: bin/generate-days.pl local/data/days-orig.json
 	$(PERL) $< > $@
+
+local/generated:
+	touch $@
 
 ## ------ Tests ------
 
