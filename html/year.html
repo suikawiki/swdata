@@ -31,13 +31,31 @@
 
     <menu class=toc></menu>
 
-    <table class=nv>
-      <tbody>
-        <tr>
-          <th>西暦
-          <td><data data-field=year></data>
-    </table>
+    <section>
+      <h1>Year</h1>
+      
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>西暦
+            <td><data data-field=year></data>
+      </table>
+    </section>
+    
+    <section>
+      <h1>暦日</h1>
 
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>先発ユリウス閏年
+            <td><sw-algorithm name=is-proleptic-julian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+          <tr>
+            <th>先発グレゴリオ閏年
+            <td><sw-algorithm name=is-proleptic-gregorian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+      </table>
+    </section>
+    
     <section id=links>
       <h1>Links</h1>
 
@@ -81,6 +99,17 @@
     </section>
     
   </template>
+</template-set>
+
+<template-set name=sw-data-boolean templateselector=selectBooleanTemplate>
+  <template data-name=true>
+    <a href=/boolean/true>真</a>
+  </template>
+  <template data-name=false>
+    <a href=/boolean/false>偽</a>
+  </template>
+  <template data-name=leap-true><strong>閏年</strong></template>
+  <template data-name=leap-false>平年</template>
 </template-set>
 
 <template-set name=sw-data-year>

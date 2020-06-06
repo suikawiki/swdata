@@ -59,6 +59,48 @@ defineElement ({
 }) ();
 
 defineElement ({
+  name: 'sw-data-boolean',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+      var args = {name: v ? 'true' : 'false', class: this.className};
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-boolean>
+
+(() => {
+
+  var def = document.createElementNS ('data:,pc', 'templateselector');
+  def.setAttribute ('name', 'selectBooleanTemplate');
+  def.pcHandler = function (templates, obj) {
+    return templates[obj.class + '-' + obj.name] || templates[obj.name] || templates[""];
+  };
+  document.head.appendChild (def);
+  
+}) ();
+
+defineElement ({
   name: 'sw-data-year',
   fill: 'idlattribute',
   props: {
@@ -91,6 +133,51 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-year>
+
+defineElement ({
+  name: 'sw-algorithm',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var name = this.getAttribute ('name');
+      return Promise.resolve ().then (() => {
+        if (name === 'is-proleptic-julian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return ['leap', 0 === (y % 4)];
+        } else if (name === 'is-proleptic-gregorian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return ['leap', 0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))];
+        } else {
+          throw new TypeError ('Unknown algorithm |'+name+'|');
+        }
+      }).then (r => {
+        if (r === true || r === false) {
+          var s = document.createElement ('sw-data-boolean');
+          s.value = r;
+          return s;
+        } else if (Array.isArray (r) && r[0] === 'leap') {
+          var s = document.createElement ('sw-data-boolean');
+          s.className = r[0];
+          s.value = r[1];
+          return s;
+        } else {
+          var s = document.createElement ('span'); // XXX
+          s.appendChild (document.createTextNode (r));
+          return s;
+        }
+      }, e => {
+        var s = document.createElement ('span'); // XXX
+        s.appendChild (document.createTextNode (e));
+        return s;
+      }).then (s => {
+        this.textContent = '';
+        this.appendChild (s);
+      });
+    }, // swUpdate
+  },
+}); // <sw-algorithm>
 
 /*
 
