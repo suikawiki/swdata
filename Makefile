@@ -49,8 +49,7 @@ build: local/data \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
     local/data/days.json local/data/numbers-kanshi.json
-build-repo:
-    js/components.js
+build-repo: js/components.js
 local/data:
 	mkdir -p local/data
 

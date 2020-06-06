@@ -90,6 +90,14 @@
             <th>1000年
             <td><sw-data-year data-field=year delta=-1000></sw-data-year>
             <td><sw-data-year data-field=year delta=1000></sw-data-year>
+          <tr>
+            <th>先発ユリウス閏年
+            <td><sw-algorithm name=prev-proleptic-julian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+            <td><sw-algorithm name=next-proleptic-julian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+          <tr>
+            <th>先発グレゴリオ閏年
+            <td><sw-algorithm name=prev-proleptic-gregorian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+            <td><sw-algorithm name=next-proleptic-gregorian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
       </table>
 
       <ul>

@@ -149,6 +149,38 @@ defineElement ({
         } else if (name === 'is-proleptic-gregorian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           return ['leap', 0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))];
+        } else if (name === 'next-proleptic-julian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          y++;
+          while (true) {
+            if (0 === (y % 4)) break;
+            y++;
+          }
+          return ['year', y];
+        } else if (name === 'prev-proleptic-julian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          y--;
+          while (true) {
+            if (0 === (y % 4)) break;
+            y--;
+          }
+          return ['year', y];
+        } else if (name === 'next-proleptic-gregorian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          y++;
+          while (true) {
+            if (0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))) break;
+            y++;
+          }
+          return ['year', y];
+        } else if (name === 'prev-proleptic-gregorian-leap-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          y--;
+          while (true) {
+            if (0 === (y % 4) && !(0 === (y % 100) && !(0 === (y % 400)))) break;
+            y--;
+          }
+          return ['year', y];
         } else {
           throw new TypeError ('Unknown algorithm |'+name+'|');
         }
@@ -160,6 +192,10 @@ defineElement ({
         } else if (Array.isArray (r) && r[0] === 'leap') {
           var s = document.createElement ('sw-data-boolean');
           s.className = r[0];
+          s.value = r[1];
+          return s;
+        } else if (Array.isArray (r) && r[0] === 'year') {
+          var s = document.createElement ('sw-data-year');
           s.value = r[1];
           return s;
         } else {
