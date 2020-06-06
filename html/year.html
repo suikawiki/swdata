@@ -39,6 +39,15 @@
           <tr>
             <th>西暦
             <td><data data-field=year></data>
+          <tr>
+            <th>西暦紀元前
+            <td><sw-algorithm name=before-epoch-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+          <tr>
+            <th>西暦紀元前
+            <td><sw-algorithm name=kanshi-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+        <tr>
+          <th lang=ja>神武天皇即位紀元 (皇紀)
+          <td><sw-data-number data-field=year delta=660></sw-data-number>
       </table>
     </section>
     
@@ -78,6 +87,10 @@
             <th>20年
             <td><sw-data-year data-field=year delta=-20></sw-data-year>
             <td><sw-data-year data-field=year delta=20></sw-data-year>
+          <tr>
+            <th>50年
+            <td><sw-data-year data-field=year delta=-50></sw-data-year>
+            <td><sw-data-year data-field=year delta=50></sw-data-year>
           <tr>
             <th>60年
             <td><sw-data-year data-field=year delta=-60></sw-data-year>
@@ -123,6 +136,22 @@
   </template>
   <template data-name=leap-true><strong>閏年</strong></template>
   <template data-name=leap-false>平年</template>
+</template-set>
+
+<template-set name=sw-data-number>
+  <template>
+    <a data-href-template=/number/{value}><data data-field=value></data></a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-kanshi>
+  <template>
+    <a data-href-template=/kanshi/{value1}>
+      <data data-field=label></data>
+      (<data data-field=value0></data><sub>0</sub>,
+       <data data-field=value1></data><sub>1</sub>)
+    </a>
+  </template>
 </template-set>
 
 <template-set name=sw-data-year>
