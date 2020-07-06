@@ -22,7 +22,7 @@ Path::Class~0.37
 Path::Tiny~0.114
 Proc::FastSpawn~1.2
 Scalar::Util~1.55
-Socket~2.029
+Socket~2.030
 Test::Differences~0.67
 Test::More~1.302175
 Text::Diff~1.45
