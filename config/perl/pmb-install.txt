@@ -26,6 +26,6 @@ Socket~2.030
 Test::Differences~0.67
 Test::More~1.302177
 Text::Diff~1.45
-Time::HiRes~1.9760
+Time::HiRes~1.9764
 Time::Local~1.30
 common::sense~3.75
