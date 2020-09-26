@@ -2,6 +2,7 @@ Algorithm::Diff~1.1903
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.31
+AnyEvent::Socket
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -9,7 +10,7 @@ Cwd~3.75
 Data::Dumper~2.173
 Digest::SHA~6.02
 Exporter::Lite~0.08
-File::Path~2.16
+File::Path~2.17
 File::Temp~0.2309
 IO::FDPass~1.2
 IO::Handle~1.42
@@ -22,10 +23,10 @@ Path::Class~0.37
 Path::Tiny~0.114
 Proc::FastSpawn~1.2
 Scalar::Util~1.55
-Socket~2.029
+Socket~2.030
 Test::Differences~0.67
-Test::More~1.302175
+Test::More~1.302181
 Text::Diff~1.45
-Time::HiRes~1.9760
+Time::HiRes~1.9764
 Time::Local~1.30
 common::sense~3.75
