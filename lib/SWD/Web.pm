@@ -230,7 +230,9 @@ sub main ($$$) {
       $dt = $parser->parse_manakai_year_string ($path->[1]);
     }
 
-    if ($path->[0] eq 'y') {
+    if ($path->[0] eq 'y' or $path->[0] eq 'e') {
+      # /e/...
+      # /y/...
       return static $app, 'text/html; charset=utf-8', 'html/year.html';
     }
 
@@ -296,6 +298,13 @@ sub main ($$$) {
     return temma $app, ['license.html.tm'], {};
   }
 
+  if (@$path == 2 and
+      $path->[0] eq 'data' and
+      $path->[1] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {
+    # /data/{}.json
+    return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1];
+  }
+  
   if (@$path == 1 and $path->[0] eq 'robots.txt') {
     # /robots.txt
     return $app->send_plain_text ('');

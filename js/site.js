@@ -1,4 +1,24 @@
 
+var SWD = {_load: {}};
+SWD.data = function (name) {
+  if (SWD._load[name]) return SWD._load[name];
+  return SWD._load[name] = fetch ('/data/' + name).then (res => {
+    if (res.status !== 200) throw res;
+    return res.json ();
+  });
+}; // SWD.data
+
+SWD.era = async function (eraId) {
+  if (!SWD._eras) {
+    var json = await SWD.data ('calendar-era-defs.json');
+    SWD._eras = [];
+    Object.values (json.eras).forEach (_ => {
+      SWD._eras[_.id] = _;
+    });
+  }
+  return SWD._eras[eraId]; // or undefined
+}; // SWD.era
+
 var defineElement = function (def) {
   var e = document.createElementNS ('data:,pc', 'element');
   e.pcDef = def;
@@ -37,7 +57,7 @@ defineElement ({
     swUpdate: function () {
       if (!this.swTemplateSet) return;
 
-      return Promise.resolve ().then (() => {
+      return Promise.resolve ().then (async () => {
         var args = {};
         var path = location.pathname;
 
@@ -48,9 +68,18 @@ defineElement ({
           return args;
         }
 
-        if (path === '/y/') {
-          args.name = 'year-index';
+        var m = path.match (/^\/e\/([0-9]+)\/$/);
+        if (m) {
+          args.eraId = parseFloat (m[1]);
+          args.era = await SWD.era (args.eraId);
+          if (args.era) args.name = 'era-item-index';
+          return args;
         }
+
+        args.name = {
+          '/y/': 'year-index',
+          '/e/': 'era-index',
+        }[path]; // or undefined
 
         return args;
       }).then (args => {
@@ -59,6 +88,7 @@ defineElement ({
         while (e.firstChild) {
           this.appendChild (e.firstChild);
         }
+        document.title = $fill.string (e.title, args);
       });
     }, // swUpdate
   },
@@ -192,7 +222,7 @@ defineElement ({
       
     }, // swUpdate
   },
-}); // <sw-data-year>
+}); // <sw-data-kanshi>
 
 defineElement ({
   name: 'sw-data-year',
@@ -229,6 +259,36 @@ defineElement ({
 }); // <sw-data-year>
 
 defineElement ({
+  name: 'sw-data-era',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var id = this.value;
+      var args = await SWD.era (id);
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+    }, // swUpdate
+  },
+}); // <sw-data-era>
+
+defineElement ({
   name: 'sw-algorithm',
   props: {
     pcInit: function () {
@@ -246,6 +306,7 @@ defineElement ({
         } else if (name === 'next-proleptic-julian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           y++;
+          if (!Number.isFinite (y)) throw new Error ("Bad |arg-year|");
           while (true) {
             if (0 === mod (y, 4)) break;
             y++;
@@ -254,6 +315,7 @@ defineElement ({
         } else if (name === 'prev-proleptic-julian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           y--;
+          if (!Number.isFinite (y)) throw new Error ("Bad |arg-year|");
           while (true) {
             if (0 === mod (y, 4)) break;
             y--;
@@ -262,6 +324,7 @@ defineElement ({
         } else if (name === 'next-proleptic-gregorian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           y++;
+          if (!Number.isFinite (y)) throw new Error ("Bad |arg-year|");
           while (true) {
             if (0 === mod (y, 4) && !(0 === mod (y, 100) && !(0 === mod (y, 400)))) break;
             y++;
@@ -270,6 +333,7 @@ defineElement ({
         } else if (name === 'prev-proleptic-gregorian-leap-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           y--;
+          if (!Number.isFinite (y)) throw new Error ("Bad |arg-year|");
           while (true) {
             if (0 === mod (y, 4) && !(0 === mod (y, 100) && !(0 === mod (y, 400)))) break;
             y--;
@@ -346,6 +410,14 @@ defineListLoader ('swYearListLoader', (opts) => {
             prev: {ref: [ref - limit, true], has: true, limit},
             next: {ref: [ref + limit, false], has: true, limit}};
   }
+});
+
+defineListLoader ('swEraListLoader', (opts) => {
+  return SWD.data ('calendar-era-defs.json').then (json => {
+    return Object.values (json.eras).sort ((a, b) => a.id-b.id);
+  }).then (eras => {
+    return {data: eras};
+  });
 });
 
 /*
