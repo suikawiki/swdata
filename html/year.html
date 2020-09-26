@@ -29,11 +29,11 @@
     </hgroup>
 
     <menu class=toc></menu>
-
-    <list-container loader=swYearListLoader>
-      <button type=button class=list-prev>もっと前</button>
+    
+    <list-container loader=swYearListLoader class=menu-list>
+      <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
       <list-main></list-main>
-      <button type=button class=list-next>もっと後</button>
+      <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
       <template>
         <sw-data-year data-field=year></sw-data-year>
       </template>
@@ -43,7 +43,7 @@
   <template data-name=year-item-index title="{year}年">
     <hgroup>
       <h1><data data-field=year></data></h1>
-      <h2 lang=en>年</h2>
+      <h2 lang=en><a href=/y/>年</a></h2>
     </hgroup>
 
     <menu class=toc></menu>
@@ -60,7 +60,7 @@
             <th>西暦紀元前
             <td><sw-algorithm name=before-epoch-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
           <tr>
-            <th>西暦紀元前
+            <th>干支年
             <td><sw-algorithm name=kanshi-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
         <tr>
           <th lang=ja>神武天皇即位紀元 (皇紀)
@@ -142,6 +142,56 @@
     </section>
     
   </template>
+
+  <template data-name=era-index title="紀年法の一覧">
+    <hgroup>
+      <h1>紀年法の一覧</h1>
+    </hgroup>
+
+    <menu class=toc></menu>
+    
+    <list-container loader=swEraListLoader class=menu-list>
+      <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
+      <list-main></list-main>
+      <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
+      <template>
+        <sw-data-era data-field=id></sw-data-era>
+      </template>
+    </list-container>
+  </template>
+  
+  <template data-name=era-item-index title="E#{era.id} {era.name}">
+    <hgroup>
+      <h1><code>E#<span data-field=era.id></span></code> <bdi data-field=era.name></bdi></h1>
+      <h2 lang=en><a href=/e/>紀年法</a></h2>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <section>
+      <h1>識別子</h1>
+      
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>紀年法ID
+            <td><code>E#<span data-field=era.id></span></code>
+          <tr>
+            <th>紀年法キー
+            <td><code data-field=era.key></code>
+      </table>
+    </section>
+    
+    <section id=links>
+      <h1>Links</h1>
+
+      <ul>
+        <li><a data-href-template="https://en.wikipedia.org/wiki/{era.name}" lang=en><cite>Wikipedia</cite> (English)</a>
+        <li><a data-href-template="https://ja.wikipedia.org/wiki/{era.name}" lang=ja><cite>Wikipedia</cite> (日本語)</a>
+        <li><a data-href-template="https://zh.wikipedia.org/wiki/{era.name}" lang=ja><cite>Wikipedia</cite> (中文)</a>
+      </ul>
+    </section>
+  </template>
 </template-set>
 
 <template-set name=sw-data-boolean templateselector=selectBooleanTemplate>
@@ -174,6 +224,12 @@
 <template-set name=sw-data-year>
   <template>
     <a data-href-template=/y/{value}/><data data-field=value></data>年</a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-era>
+  <template>
+    <a data-href-template=/e/{id}/ data-field=name></a>
   </template>
 </template-set>
 
