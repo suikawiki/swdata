@@ -2,7 +2,7 @@
   "circleci": {
     "docker-build": "quay.io/suikawiki/swdata",
     "build": [
-      "git submodule update --init",
+      "make deps",
       "rm -fr modules/*/bin modules/*/.git modules/*/t modules/*/t_deps"
     ],
     "tests": [

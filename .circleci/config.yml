@@ -16,7 +16,7 @@
             },
             {
                "run" : {
-                  "command" : "git submodule update --init"
+                  "command" : "make deps"
                }
             },
             {
@@ -178,7 +178,7 @@
          "triggers" : [
             {
                "schedule" : {
-                  "cron" : "15 21 * * *",
+                  "cron" : "57 20 * * *",
                   "filters" : {
                      "branches" : {
                         "only" : [
