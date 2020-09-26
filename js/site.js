@@ -13,6 +13,13 @@ var defineElement = function (def) {
   }
 }; // defineElement
 
+var defineListLoader = function (name, code) {
+  var e = document.createElementNS ('data:,pc', 'loader');
+  e.setAttribute ('name', name);
+  e.pcHandler = code;
+  document.head.appendChild (e);
+}; // defineListLoader
+
 var mod = (n, m) => ((n%m) + m) % m;
 
 defineElement ({
@@ -30,21 +37,29 @@ defineElement ({
     swUpdate: function () {
       if (!this.swTemplateSet) return;
 
-      var args = {};
-      var path = location.pathname;
+      return Promise.resolve ().then (() => {
+        var args = {};
+        var path = location.pathname;
 
-      var m = path.match (/^\/y\/(-?[0-9]+)\/$/);
-      if (m) {
-        args.name = 'year-item-index';
-        args.year = parseFloat (m[1]);
-      }
-      
-      var e = this.swTemplateSet.createFromTemplate ('div', args);
-      this.textContent = '';
-      while (e.firstChild) {
-        this.appendChild (e.firstChild);
-      }
-        
+        var m = path.match (/^\/y\/(-?[0-9]+)\/$/);
+        if (m) {
+          args.name = 'year-item-index';
+          args.year = parseFloat (m[1]);
+          return args;
+        }
+
+        if (path === '/y/') {
+          args.name = 'year-index';
+        }
+
+        return args;
+      }).then (args => {
+        var e = this.swTemplateSet.createFromTemplate ('div', args);
+        this.textContent = '';
+        while (e.firstChild) {
+          this.appendChild (e.firstChild);
+        }
+      });
     }, // swUpdate
   },
 }); // <section is=sw-page-main>
@@ -309,6 +324,29 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-algorithm>
+
+defineListLoader ('swYearListLoader', (opts) => {
+  var ref = 2000;
+  var reversed = false;
+  if (Array.isArray (opts.ref)) {
+    ref = opts.ref[0];
+    reversed = opts.ref[1];
+  }
+  var limit = parseInt (opts.limit || 100);
+  var years = [];
+  for (var i = ref; i < ref + limit; i++) {
+    years.push ({year: i});
+  }
+  if (reversed) {
+    return {data: years.reverse (),
+            prev: {ref: [ref + limit, false], has: true, limit},
+            next: {ref: [ref - limit, true], has: true, limit}};
+  } else {
+    return {data: years,
+            prev: {ref: [ref - limit, true], has: true, limit},
+            next: {ref: [ref + limit, false], has: true, limit}};
+  }
+});
 
 /*
 

@@ -23,6 +23,23 @@
     <p>見つかりませんでした。 <a href=/>トップページ</a>
   </template>
 
+  <template data-name=year-index title="年の一覧">
+    <hgroup>
+      <h1>年の一覧</h1>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <list-container loader=swYearListLoader>
+      <button type=button class=list-prev>もっと前</button>
+      <list-main></list-main>
+      <button type=button class=list-next>もっと後</button>
+      <template>
+        <sw-data-year data-field=year></sw-data-year>
+      </template>
+    </list-container>
+  </template>
+  
   <template data-name=year-item-index title="{year}年">
     <hgroup>
       <h1><data data-field=year></data></h1>
