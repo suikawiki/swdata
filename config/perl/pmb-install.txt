@@ -11,6 +11,7 @@ Digest::SHA~6.02
 Exporter::Lite~0.08
 File::Path~2.18
 File::Temp~0.2311
+FindBin~1.52
 IO::FDPass~1.2
 IO::Handle~1.42
 JSON~4.02
