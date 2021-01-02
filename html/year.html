@@ -23,12 +23,17 @@
     <p>見つかりませんでした。 <a href=/>トップページ</a>
   </template>
 
-  <template data-name=year-index title="年の一覧">
+  <template data-name=page-year-index title="年の一覧">
     <hgroup>
       <h1>年の一覧</h1>
     </hgroup>
 
     <menu class=toc></menu>
+
+    <ul>
+      <li><a href=/y/determination>年の決定</a>
+      <li><a href=/e/>紀年法の一覧</a>
+    </ul>
     
     <list-container loader=swYearListLoader class=menu-list>
       <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
@@ -40,7 +45,7 @@
     </list-container>
   </template>
   
-  <template data-name=year-item-index title="{year}年">
+  <template data-name=page-year-item-index title="{year}年">
     <hgroup>
       <h1><data data-field=year></data></h1>
       <h2 lang=en><a href=/y/>年</a></h2>
@@ -141,14 +146,73 @@
       </ul>
     </section>
     
-  </template>
+  </template><!-- page-year-item-index -->
+  
+  <template data-name=page-year-determination title="年の決定">
+    <hgroup>
+      <h1>年の決定</h1>
+      <h2 lang=en><a href=/y/>年</a></h2>
+    </hgroup>
 
-  <template data-name=era-index title="紀年法の一覧">
+    <menu class=toc></menu>
+
+    <section>
+      <h1>紀年法を調べる</h1>
+
+      <form action=javascript: method=get is=sw-year-determination-form>
+        <p>
+          <label>
+            <input type=number name=input_year value=1 required>
+            (年)
+          </label>
+          が、
+          <select name=input_ref_era required>
+            <option value=ad>西暦
+          </select>
+          <label>
+            <input type=number name=input_ref_year value=1 required>
+            (年)
+          </label>
+          であるなら:
+
+        <table>
+          <thead>
+            <tr>
+              <th>当該紀年法
+              <th>西暦
+          <tbody>
+            <tr>
+              <th>0年
+              <td><output name=output_ad_year data-delta=0></output>
+            <tr>
+              <th>1年
+              <td><output name=output_ad_year data-delta=1></output>
+            <template>
+              <th><span data-field=delta></span>年
+              <td><output name=output_ad_year data-data-delta-field=delta data-filled=data-delta></output>
+            </template>
+          <tfoot>
+            <tr>
+              <td><input type=number name=output_ad_year_new_delta> (年)
+              <td><button type=button name=output_ad_year_new>追加</button>
+        </table>
+      </form>
+      
+
+    </section>
+    
+  </template><!-- page-year-determination -->
+
+  <template data-name=page-era-index title="紀年法の一覧">
     <hgroup>
       <h1>紀年法の一覧</h1>
     </hgroup>
 
     <menu class=toc></menu>
+
+    <ul>
+      <li><a href=/y/>年の一覧</a>
+    </ul>
     
     <list-container loader=swEraListLoader class=menu-list>
       <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
@@ -160,7 +224,7 @@
     </list-container>
   </template>
   
-  <template data-name=era-item-index title="E#{era.id} {era.name}">
+  <template data-name=page-era-item-index title="E#{era.id} {era.name}">
     <hgroup>
       <h1><code>E#<span data-field=era.id></span></code> <bdi data-field=era.name></bdi></h1>
       <h2 lang=en><a href=/e/>紀年法</a></h2>
@@ -300,7 +364,7 @@
 
 <!--
 
-Copyright 2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2020-2021 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

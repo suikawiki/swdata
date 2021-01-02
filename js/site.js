@@ -63,7 +63,7 @@ defineElement ({
 
         var m = path.match (/^\/y\/(-?[0-9]+)\/$/);
         if (m) {
-          args.name = 'year-item-index';
+          args.name = 'page-year-item-index';
           args.year = parseFloat (m[1]);
           return args;
         }
@@ -72,13 +72,14 @@ defineElement ({
         if (m) {
           args.eraId = parseFloat (m[1]);
           args.era = await SWD.era (args.eraId);
-          if (args.era) args.name = 'era-item-index';
+          if (args.era) args.name = 'page-era-item-index';
           return args;
         }
 
         args.name = {
-          '/y/': 'year-index',
-          '/e/': 'era-index',
+          '/y/': 'page-year-index',
+          '/y/determination': 'page-year-determination',
+          '/e/': 'page-era-index',
         }[path]; // or undefined
 
         return args;
@@ -99,7 +100,10 @@ defineElement ({
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'selectPageTemplate');
   def.pcHandler = function (templates, obj) {
-    return templates[obj.name] || templates[""];
+    if (templates[obj.name]) return templates[obj.name];
+
+    console.log ("Page template |"+obj.name+"| not found");
+    return templates[""];
   };
   document.head.appendChild (def);
   
@@ -420,9 +424,49 @@ defineListLoader ('swEraListLoader', (opts) => {
   });
 });
 
+defineElement ({
+  name: 'form',
+  is: 'sw-year-determination-form',
+  props: {
+    pcInit: function () {
+      this.oninput = () => this.swUpdate ();
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: function () {
+      clearTimeout (this._swUpdateTimer);
+      this._swUpdateTimer = setTimeout (() => this._swUpdate (), 300);
+    }, // swUpdate
+    _swUpdate: function () {
+      var form = this;
+
+      var iy = form.elements.input_year.value;
+      var ry = form.elements.input_ref_year.value;
+      var re = form.elements.input_ref_era.value;
+      var offset = ry - iy;
+
+      Array.prototype.slice.call (form.elements.output_ad_year).forEach (o => {
+        o.value = offset + parseFloat (o.getAttribute ('data-delta'));
+      });
+
+      form.elements.output_ad_year_new.onclick = () => {
+        var delta = form.elements.output_ad_year_new_delta.value;
+        if (!delta) return;
+        
+        var tbody = this.querySelector ('tbody');
+        var template = this.querySelector ('template');
+        var tr = document.createElement ('tr');
+        tr.appendChild (template.content.cloneNode (true));
+        $fill (tr, {delta});
+        tbody.appendChild (tr);
+        this.swUpdate ();
+      };
+    }, // _swUpdate
+  },
+}); // <form is=sw-year-determination-form>
+
 /*
 
-Copyright 2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2020-2021 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

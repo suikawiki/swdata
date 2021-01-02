@@ -26,7 +26,7 @@ ADD html/ /app/html/
 ADD local/data/ /app/local/data/
 
 RUN cd /app && \
-    make deps-docker PMBP_OPTIONS=--execute-system-package-installer && \
+    make deps-docker PMBP_OPTIONS="--execute-system-package-installer --dump-info-file-before-die" && \
     echo '#!/bin/bash' > /server && \
     echo 'exec /app/bin/docker-server' >> /server && \
     chmod u+x /server && \
