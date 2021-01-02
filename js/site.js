@@ -20,6 +20,39 @@ SWD.eraList = async function () {
     Object.values (json.eras).forEach (_ => {
       SWD._eras[_.id] = _;
     });
+
+    // XXX
+    var XXXlist = {
+      543 : 'BE alpha',
+      544 : 'BE beta',
+      949 : 'BE gamma',
+      566 : 'BE delta',
+      531 : 'BE epsilon',
+      1027 : 'BE zeta',
+      948 : 'BE eta',
+      565 : 'BE theta',
+      542 : 'BE iota',
+
+      1028 : 'BE zeta-1',
+      960 : 'BE gamma-11',
+      950 : 'BE gamma-1',
+      947 : 'BE gamma+2',
+      567 : 'BE delta-1',
+      532 : 'BE epsilon-1',
+      536 : 'BE epsilon-5',
+      545 : 'BE beta-1',
+      554 : 'BE theta-9',
+  
+      941 : '(BE) eta+7',
+
+        "-638" : 'Burma',
+        "-590" : 'Fasli-',
+        "-591" : 'Fasli+',
+    };
+    Object.keys (XXXlist).forEach (id => {
+      SWD._eras[20000 + parseFloat (id)] = {id: 20000 + parseFloat (id), name: XXXlist[id], offset: -parseFloat (id)};
+    });
+
   }
   return SWD._eras;
 }; // SWD.eraList
@@ -462,7 +495,7 @@ defineElement ({
       var offset = ry - iy;
 
       var tbody = this.querySelector ('tbody');
-      var template = this.querySelector ('template');
+      var template = this.querySelector ('table template');
       tbody.textContent = '';
       this.swYears.forEach (delta => {
         var tr = document.createElement ('tr');
@@ -471,11 +504,19 @@ defineElement ({
         tbody.appendChild (tr);
       });
 
-      Array.prototype.slice.call (form.elements.output_ad_year).forEach (o => {
+      form.querySelectorAll ('[data-value=year]').forEach (o => {
         o.value = offset + parseFloat (o.getAttribute ('data-delta'));
       });
       form.querySelectorAll ('[data-arg-year]').forEach (o => {
         o.setAttribute ('arg-year', offset + parseFloat (o.getAttribute ('data-delta')));
+      });
+      form.querySelectorAll ('[data-text=year]').forEach (o => {
+        var y = offset + parseFloat (o.getAttribute ('data-delta'));
+        if (o.hasAttribute ('data-text-bc')) {
+          o.textContent = 1 - y;
+        } else {
+          o.textContent = y + parseFloat (o.getAttribute ('data-text-delta'));
+        }
       });
 
       SWD.eraList ().then (eras => {

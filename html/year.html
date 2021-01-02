@@ -166,26 +166,47 @@
             (年)
           </label>
           が、
+          <label>
+            <input type=number name=input_ref_year value=2019 required>
+            (年)
+          </label>
           <select name=input_ref_era required>
             <option value=ad>西暦 (AD)
             <option value=bc>西暦紀元前 (BC)
             <option value=kouki>皇紀
           </select>
-          <label>
-            <input type=number name=input_ref_year value=2019 required>
-            (年)
-          </label>
           であるなら:
 
+        <p>
+          一致する紀年法:
+          <list-container loader=swValueListLoader data-name=output_era_list data-delta=0>
+            <list-main></list-main>
+            <template>
+              <sw-data-era data-field=id></sw-data-era>
+            </template>
+            <list-is-empty>見つかりませんでした。</list-is-empty>
+          </list-container>
+        </p>
+        
         <table>
           <thead>
             <tr>
               <th>当該紀年法
-              <th>西暦
+              <th>西暦 (AD)
+              <th>西暦紀元前 (BC)
+              <th>皇紀
+              <th>Shouou
+              <th>Bokuou
+              <th>Kyouou
               <th>干支年
             <template>
               <th><span data-field=delta></span>年
-              <td><output name=output_ad_year data-data-delta-field=delta data-filled=data-delta></output>
+              <td><sw-data-year data-value=year data-data-delta-field=delta data-filled=data-delta></sw-data-year>
+              <td><span data-text=year data-text-bc data-data-delta-field=delta data-filled=data-delta></span>
+              <td><span data-text=year data-text-delta=660 data-data-delta-field=delta data-filled=data-delta></span>
+              <td><span data-text=year data-text-delta=1052 data-data-delta-field=delta data-filled=data-delta></span>
+              <td><span data-text=year data-text-delta=1001 data-data-delta-field=delta data-filled=data-delta></span>
+              <td><span data-text=year data-text-delta=946 data-data-delta-field=delta data-filled=data-delta></span>
               <td><sw-algorithm name=kanshi-year data-arg-year data-data-delta-field=delta data-filled=data-delta></sw-algorithm>
             </template>
           <tbody>
@@ -196,17 +217,6 @@
         </table>
 
         <dl>
-          <div>
-            <dt>一致する紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=0>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
           <div>
             <dt>+1 年ずれの紀年法
             <dd>
