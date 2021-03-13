@@ -367,8 +367,9 @@
     <ul>
       <li><a href=/y/>年の一覧</a>
     </ul>
-    
+
     <list-container loader=swEraListLoader class=menu-list>
+      <action-status></action-status>
       <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
       <list-main></list-main>
       <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
@@ -386,6 +387,8 @@
 
     <menu class=toc></menu>
 
+    <sw-tags data-field=era.tag_ids></sw-tags>
+    
     <section>
       <h1>識別子</h1>
       
@@ -408,6 +411,29 @@
         <li><a data-href-template="https://ja.wikipedia.org/wiki/{era.name}" lang=ja><cite>Wikipedia</cite> (日本語)</a>
         <li><a data-href-template="https://zh.wikipedia.org/wiki/{era.name}" lang=ja><cite>Wikipedia</cite> (中文)</a>
       </ul>
+    </section>
+  </template>
+  
+  <template data-name=page-tag-item-index title="#{tag.label}">
+    <hgroup>
+      <h1>#<bdi data-field=tag.label></bdi></h1>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <section>
+      <h1>紀年法</h1>
+
+      <list-container loader=swEraListLoader class=menu-list data-loader-tagid-field=tag.id data-filled=loader-tagid>
+        <action-status></action-status>
+        <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
+        <list-main></list-main>
+        <list-is-empty>(見つかりませんでした。)</list-is-empty>
+        <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
+        <template>
+          <sw-data-era data-field=id></sw-data-era>
+        </template>
+      </list-container>
     </section>
   </template>
 </template-set>
