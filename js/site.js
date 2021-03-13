@@ -9,11 +9,11 @@ SWD.data = function (name) {
 }; // SWD.data
 
 SWD.era = async function (eraId) {
-  var list = await SWD.eraList ();
+  var list = await SWD.eraList ({});
   return list[eraId]; // or undefined
 }; // SWD.era
 
-SWD.eraList = async function () {
+SWD.eraList = async function (opts) {
   if (!SWD._eras) {
     var json = await SWD.data ('calendar-era-defs.json');
     SWD._eras = [];
@@ -66,8 +66,22 @@ SWD.eraList = async function () {
     });
 
   }
-  return SWD._eras;
+  var list = SWD._eras;
+  if (opts.tagId) {
+    list = list.filter (_ => (_.tag_ids || {})[opts.tagId]);
+  }
+  return list;
 }; // SWD.eraList
+
+SWD.tag = async function (id) {
+  var tags = await SWD.tagsByIds ([id]);
+  return tags[0]; // or undefined
+};
+
+SWD.tagsByIds = async function (ids) {
+  var tags = (await SWD.data ('tags.json')).tags;
+  return ids.map (_ => tags[_]);
+}; // SWD.tagsByIds
 
 var defineElement = function (def) {
   var e = document.createElementNS ('data:,pc', 'element');
@@ -123,6 +137,15 @@ defineElement ({
           args.eraId = parseFloat (m[1]);
           args.era = await SWD.era (args.eraId);
           if (args.era) args.name = 'page-era-item-index';
+          return args;
+        }
+
+        // /tag/{}/
+        var m = path.match (/^\/tag\/([0-9]+)\/$/);
+        if (m) {
+          args.tagId = parseFloat (m[1]);
+          args.tag = await SWD.tag (args.tagId);
+          if (args.tag) args.name = 'page-tag-item-index';
           return args;
         }
 
@@ -466,8 +489,10 @@ defineListLoader ('swYearListLoader', (opts) => {
   }
 });
 
-defineListLoader ('swEraListLoader', (opts) => {
-  return SWD.eraList ().then (eras => {
+defineListLoader ('swEraListLoader', function (opts) {
+  return SWD.eraList ({
+    tagId: this.getAttribute ('loader-tagid'),
+  }).then (eras => {
     return Object.values (eras).sort ((a, b) => a.id-b.id);
   }).then (eras => {
     return {data: eras};
@@ -531,7 +556,7 @@ defineElement ({
         }
       });
 
-      SWD.eraList ().then (eras => {
+      SWD.eraList ({}).then (eras => {
         form.querySelectorAll ('list-container[data-name=output_era_list]').forEach (l => {
           var delta = parseFloat (l.getAttribute ('data-delta'));
           l.swValue = eras.filter (_ => _.offset === offset + delta);
@@ -560,6 +585,42 @@ defineListLoader ('swValueListLoader', function (opts) {
   var data = this.swValue || [];
   return {data};
 });
+
+defineElement ({
+  name: 'sw-tags',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      setTimeout (() => this.swUpdate (), 0);
+
+      var vals = this.value || {};
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return vals;
+        },
+        set: function (newVals) {
+          vals = newVals;
+          this.swUpdate ();
+        },
+      });
+
+      // preload
+      SWD.data ('tags.json');
+    }, // pcInit
+    swUpdate: async function () {
+      var tags = await SWD.tagsByIds (Object.keys (this.value));
+
+      this.textContent = '';
+      tags.sort ((a, b) => a.label < b.label ? -1 : +1).forEach (tag => {
+        var e = document.createElement ('a');
+        e.href = '/tag/' + tag.id + '/';
+        e.textContent = tag.label;
+        this.appendChild (e);
+        this.appendChild (document.createTextNode (' '));
+      });
+    }, // swUpdate
+  },
+}); // <sw-tags>
 
 /*
 

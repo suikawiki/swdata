@@ -230,9 +230,12 @@ sub main ($$$) {
       $dt = $parser->parse_manakai_year_string ($path->[1]);
     }
 
-    if ($path->[0] eq 'y' or $path->[0] eq 'e') {
+    if ($path->[0] eq 'y' or
+        $path->[0] eq 'e' or
+        $path->[0] eq 'tag') {
       # /e/...
       # /y/...
+      # /tag/...
       return static $app, 'text/html; charset=utf-8', 'html/year.html';
     }
 
