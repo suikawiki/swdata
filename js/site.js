@@ -183,6 +183,29 @@ defineElement ({
 }) ();
 
 defineElement ({
+  name: 'sw-if-defined',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      setTimeout (() => this.swUpdate (), 0);
+    }, // pcInit
+    swUpdate: function () {
+      this.hidden = ! this.value;
+    }, // swUpdate
+  },
+}); // <sw-if-defined>
+
+defineElement ({
   name: 'sw-data-boolean',
   fill: 'idlattribute',
   props: {
@@ -278,7 +301,7 @@ defineElement ({
     swUpdate: async function () {
       var v = this.value;
 
-      var args = {value0: v, value1: v+1};
+      var args = {value0: v, value1: v+1, context: this};
       args.label = [
         '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未',
         '壬申', '癸酉', '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯',
@@ -323,7 +346,16 @@ defineElement ({
       var delta = parseFloat (this.getAttribute ('delta'));
       if (Number.isFinite (delta)) v += delta;
 
-      var args = {value: v};
+      var eraId = this.getAttribute ('eraid');
+      var era;
+      if (eraId) era = await SWD.era (eraId);
+
+      var args = {value: v, era};
+      if (era) {
+        args.era = era;
+        args.eraValue = v - era.offset;
+      }
+      
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
       this.textContent = '';
@@ -334,6 +366,28 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-year>
+
+(() => {
+
+  var def = document.createElementNS ('data:,pc', 'templateselector');
+  def.setAttribute ('name', 'swDataYearSelector');
+  def.pcHandler = function (templates, obj) {
+    return obj.era ? templates.era : templates[""];
+  };
+  document.head.appendChild (def);
+
+  var def = document.createElementNS ('data:,pc', 'templateselector');
+  def.setAttribute ('name', 'swDataValueSelector');
+  def.pcHandler = function (templates, obj) {
+    if (obj.context.hasAttribute ('text')) {
+      return templates.text;
+    } else {
+      return templates[""];
+    }
+  };
+  document.head.appendChild (def);
+  
+}) ();
 
 defineElement ({
   name: 'sw-data-era',
@@ -447,6 +501,7 @@ defineElement ({
           } else if (r[0] === 'kanshi') {
             var s = document.createElement ('sw-data-kanshi');
             s.value = r[1];
+            if (this.hasAttribute ('value-text')) s.setAttribute ('text', '');
             return s;
           }
         }
@@ -466,26 +521,49 @@ defineElement ({
   },
 }); // <sw-algorithm>
 
-defineListLoader ('swYearListLoader', (opts) => {
-  var ref = 2000;
+defineListLoader ('swYearListLoader', async function (opts) {
+  var eraId = this.getAttribute ('loader-eraid');
+  var era;
+  if (eraId) era = await SWD.era (eraId);
+
+  if (era && !Number.isFinite (era.offset)) {
+    return {data: []};
+  }
+  
+  var ref = null;
   var reversed = false;
   if (Array.isArray (opts.ref)) {
     ref = opts.ref[0];
     reversed = opts.ref[1];
   }
-  var limit = parseInt (opts.limit || 100);
+  if (!ref && era) {
+    if (Number.isFinite (era.known_oldest_year)) ref = era.known_oldest_year;
+  }
+  if (!ref) ref = 2000;
+  
+  var limit = parseInt (opts.limit);
+  var nextLimit = limit;
+  if (!Number.isFinite (limit)) {
+    if (Number.isFinite (era.known_latest_year)) {
+      limit = era.known_latest_year - ref;
+    }
+  }
+  if (!Number.isFinite (limit) || limit <= 0) limit = 100;
+  if (!Number.isFinite (nextLimit)) nextLimit = 100;
+  if (limit > 300) limit = 300;
+  
   var years = [];
   for (var i = ref; i < ref + limit; i++) {
-    years.push ({year: i});
+    years.push ({year: i, eraId});
   }
   if (reversed) {
     return {data: years.reverse (),
-            prev: {ref: [ref + limit, false], has: true, limit},
-            next: {ref: [ref - limit, true], has: true, limit}};
+            prev: {ref: [ref + limit, false], has: true, limit: nextLimit},
+            next: {ref: [ref - limit, true], has: true, limit: nextLimit}};
   } else {
     return {data: years,
-            prev: {ref: [ref - limit, true], has: true, limit},
-            next: {ref: [ref + limit, false], has: true, limit}};
+            prev: {ref: [ref - limit, true], has: true, limit: nextLimit},
+            next: {ref: [ref + limit, false], has: true, limit: nextLimit}};
   }
 });
 
