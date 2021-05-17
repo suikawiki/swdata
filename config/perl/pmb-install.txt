@@ -7,7 +7,7 @@ Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
 Cwd~3.75
-Data::Dumper~2.173
+Data::Dumper~2.180
 Digest::SHA~6.02
 Exporter::Lite~0.08
 File::Path~2.18
