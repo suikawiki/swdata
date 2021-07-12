@@ -16,7 +16,7 @@ IO::FDPass~1.3
 IO::Handle~1.45
 JSON~4.03
 MIME::Base64~3.16
-Math::BigInt~1.999822
+Math::BigInt~1.999823
 Method::WeakCallback~0.04
 Net::SSLeay~1.90
 Path::Class~0.37
