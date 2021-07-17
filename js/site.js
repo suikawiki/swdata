@@ -354,6 +354,8 @@ defineElement ({
       if (era) {
         args.era = era;
         args.eraValue = v - era.offset;
+        args.eraName = this.getAttribute ('eraname') || era.name;
+        args.format = this.getAttribute ('format');
       }
       
       var ts = await $getTemplateSet (this.localName);
@@ -372,7 +374,17 @@ defineElement ({
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataYearSelector');
   def.pcHandler = function (templates, obj) {
-    return obj.era ? templates.era : templates[""];
+    if (obj.era) {
+      if (obj.format === 'text') {
+        return templates.eraText;
+      } else if (obj.format === 'eraWithYear') {
+        return templates.eraWithYear;
+      } else {
+        return templates.era;
+      }
+    } else {
+      return templates[""];
+    }
   };
   document.head.appendChild (def);
 
@@ -537,15 +549,15 @@ defineListLoader ('swYearListLoader', async function (opts) {
     reversed = opts.ref[1];
   }
   if (!ref && era) {
-    if (Number.isFinite (era.known_oldest_year)) ref = era.known_oldest_year;
+    if (Number.isFinite (era.table_oldest_year)) ref = era.table_oldest_year;
   }
   if (!ref) ref = 2000;
   
   var limit = parseInt (opts.limit);
   var nextLimit = limit;
   if (!Number.isFinite (limit)) {
-    if (Number.isFinite (era.known_latest_year)) {
-      limit = era.known_latest_year - ref;
+    if (Number.isFinite (era.table_latest_year)) {
+      limit = era.table_latest_year - ref + 1;
     }
   }
   if (!Number.isFinite (limit) || limit <= 0) limit = 100;
@@ -558,11 +570,11 @@ defineListLoader ('swYearListLoader', async function (opts) {
   }
   if (reversed) {
     return {data: years.reverse (),
-            prev: {ref: [ref + limit, false], has: true, limit: nextLimit},
+            prev: {ref: [ref + nextLimit, false], has: true, limit: nextLimit},
             next: {ref: [ref - limit, true], has: true, limit: nextLimit}};
   } else {
     return {data: years,
-            prev: {ref: [ref - limit, true], has: true, limit: nextLimit},
+            prev: {ref: [ref - nextLimit, true], has: true, limit: nextLimit},
             next: {ref: [ref + limit, false], has: true, limit: nextLimit}};
   }
 });
@@ -576,6 +588,139 @@ defineListLoader ('swEraListLoader', function (opts) {
     return {data: eras};
   });
 });
+
+defineListLoader ('swTransitionListLoader', async function (opts) {
+  var eraId = this.getAttribute ('loader-eraid');
+  var era = await SWD.era (eraId);
+  if (!era) throw new Error ("Era not found: " + eraId);
+
+  var items = era.transitions;
+
+  var year = parseFloat (this.getAttribute ('loader-year'));
+  if (Number.isFinite (year)) {
+    // XXX primary calendar
+    items = items.filter (_ => {
+      var d = _.day || _.day_start
+      var m = (d.nongli_tiger || d.kyuureki || d.gregorian).match (/^(-?[0-9]+)/);
+      var y = parseFloat (m[1]);
+      return y === year;
+    });
+  }
+
+  items.forEach (_ => {
+    _.type2 = _.type.replace (/\//g, '-');
+    _.neighbors = {
+      year: year,
+      prev_era_ids: _.prev_era_ids,
+      next_era_ids: _.next_era_ids,
+    };
+
+    _.day_hidden = _.day ? null : '';
+    _.day_range_hidden = _.day_start ? null : '';
+  });
+
+  return {data: items};
+});
+
+defineElement ({
+  name: 'sw-transition-neighbors',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      this.textContent = '';
+
+      var v = this.value;
+      var items = [];
+      Object.keys (v.prev_era_ids || {}).forEach (_ => {
+        items.push ({year: v.year, era_id: _, direction: 'prev'});
+      });
+      Object.keys (v.next_era_ids || {}).forEach (_ => {
+        items.push ({year: v.year, era_id: _, direction: 'next'});
+      });
+      if (!items.length) return;
+      
+      var ts = await $getTemplateSet (this.localName);
+
+      items.forEach (item => {
+        var e = ts.createFromTemplate ('div', item);
+        this.appendChild (e);
+      });
+    }, // swUpdate
+  },
+}); // <sw-transition-neighbors>
+
+defineElement ({
+  name: 'sw-data-day',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+      this.hidden = !v;
+      if (!v) return;
+
+      var args = {value: v};
+      args.weekday = mod (args.value.mjd - 4, 7);
+      
+      var m = args.value.gregorian.match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
+      args.gregorian = {year: parseFloat (m[1]),
+                        month: parseFloat (m[2]),
+                        day: parseFloat (m[3])};
+      
+      var m = args.value.julian.match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
+      args.julian = {year: parseFloat (m[1]),
+                     month: parseFloat (m[2]),
+                     day: parseFloat (m[3])};
+
+      var m = (args.value.nongli_tiger || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_tiger = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_tiger_hidden = '';
+      
+      var m = (args.value.kyuureki || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.kyuureki = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.kyuureki_hidden = '';
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-day>
 
 defineElement ({
   name: 'form',

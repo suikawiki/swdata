@@ -1,5 +1,13 @@
 html {
   line-height: 1.5;
+  --list-item-1-background-color: #eee;
+  --list-item-1-color: black;
+  --list-item-2-background-color: white;
+  --list-item-2-color: black;
+  --gray-background-color: transparent;
+  --gray-color: gray;
+  --highlighted-background-color: #999;
+  --highlighted-color: white;
 }
 
 hgroup, h1, h2, h3, h4, h5, h6 {
@@ -353,7 +361,8 @@ nav.nearby ul > li > a {
   display: block;
 }
 
-.menu-list:not([hidden]) {
+.menu-list:not([hidden]),
+.era-year-list:not([hidden]) {
   display: block;
 }
 
@@ -361,17 +370,154 @@ nav.nearby ul > li > a {
   column-width: 20em;
 }
 
-.menu-list list-item:not([hidden]) {
+.menu-list list-item:not([hidden]),
+.era-year-list list-item:not([hidden]) {
   display: block;
 }
 
-.menu-list :-webkit-any(a, .list-prev, .list-next):not([hidden]) {
+.menu-list :-webkit-any(a, .list-prev, .list-next):not([hidden]),
+.era-year-list :-webkit-any(.list-prev, .list-next):not([hidden]) {
   display: block;
 }
 
-.menu-list :-webkit-any(a, .list-prev, .list-next) {
+.menu-list :-webkit-any(a, .list-prev, .list-next),
+.era-year-list :-webkit-any(.list-prev, .list-next) {
   font-size: 200%;
   padding: .3em;
+}
+
+.era-year-list list-item {
+  margin-bottom: .5em;
+}
+
+.era-year-list p {
+  margin: 0;
+}
+
+.era-year-list .main {
+  background-color: var(--list-item-1-background-color);
+  color: var(--list-item-1-color);
+  padding: .3em;
+}
+
+.era-year-list .main a:not([hidden]) {
+  display: block;
+}
+.era-year-list .main a:not(:focus):not(:active):not(:hover) {
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+}
+.era-year-list .main a {
+  font-size: 200%;
+}
+
+.era-year-list .info {
+  background-color: var(--list-item-2-background-color);
+  color: var(--list-item-2-color);
+  padding: .3em;
+}
+
+.transitions .info {
+  padding: 0;
+  font-size: 90%;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
+.transitions > tbody > tr > .type {
+  text-align: center;
+}
+
+.transitions > tbody > tr > .type enum-value {
+  white-space: pre;
+}
+
+.transitions > tbody > tr > .day {
+  line-height: 1.0;
+}
+
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden]:not([hidden]) {
+  font-size: 80%;
+}
+
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden] > *:not([hidden]) {
+  display: block;
+}
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden] > sw-data-day {
+  border: solid #eee .25em;
+  padding: .5em;
+}
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden] > sw-data-day:first-of-type {
+  border-style: solid none none solid;
+}
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden] > sw-data-day:last-of-type {
+  border-style: none solid solid none;
+}
+.transitions > tbody > tr > .day > div[data-hidden-field=day_range_hidden] > p {
+  text-align: center;
+}
+
+.transitions > tbody > tr > .day .full-date,
+.transitions > tbody > tr > .day enum-value,
+.transitions > tbody > tr > .day a {
+  white-space: nowrap;
+  text-align-last: justify;
+}
+
+.transitions > tbody > tr > .day .full-date {
+  margin-left: 1em;
+  font-size: 80%;
+}
+.transitions > tbody > tr > .day .full-date span,
+.transitions > tbody > tr > .day .full-date .leap {
+  font-size: 130%;
+  font-weight: bolder;
+}
+
+.transitions > tbody > tr > .neighbors {
+  white-space: nowrap;
+}
+
+.transitions > tbody > tr > .neighbors sw-data-year {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.transitions > tbody > tr > .neighbors a:not([hidden]) {
+  display: block;
+}
+.transitions > tbody > tr > .neighbors a {
+  white-space: nowrap;
+}
+
+.transitions > tbody > tr > .neighbors a span[data-field=eraName] {
+  font-size: 120%;
+  font-weight: bolder;
+}
+
+.transitions > tbody > tr > .tags {
+  font-size: 80%;
+  font-weight: normal;
+}
+
+.transition-type-enforced > td.type,
+.transition-type-established > td.type,
+.transition-type-canceled > td.type {
+  color: var(--highlighted-color);
+  background-color: var(--highlighted-background-color);
+}
+
+.transition-type-enforced\/incorrect,
+.transition-type-established\/incorrect {
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+  text-decoration: line-through;
+}
+
+.transition-type-triggering > td.neighbors {
+  opacity: 0.3;
 }
 
 sw-tags a {
