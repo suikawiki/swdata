@@ -8,6 +8,10 @@ html {
   --gray-color: gray;
   --highlighted-background-color: #999;
   --highlighted-color: white;
+  --weight-1-background-color: #ececec;
+  --weight-1-color: black;
+  --weight-2-background-color: #ccc;
+  --weight-2-color: black;
 }
 
 hgroup, h1, h2, h3, h4, h5, h6 {
@@ -395,9 +399,14 @@ nav.nearby ul > li > a {
 }
 
 .era-year-list .main {
-  background-color: var(--list-item-1-background-color);
-  color: var(--list-item-1-color);
+  background-color: var(--weight-1-background-color);
+  color: var(--weight-1-color);
   padding: .3em;
+}
+
+.era-year-list .known-era-year-true .main {
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
 }
 
 .era-year-list .main a:not([hidden]) {
@@ -413,8 +422,6 @@ nav.nearby ul > li > a {
 }
 
 .era-year-list .info {
-  background-color: var(--list-item-2-background-color);
-  color: var(--list-item-2-color);
   padding: .3em;
 }
 
@@ -485,16 +492,22 @@ nav.nearby ul > li > a {
   vertical-align: middle;
 }
 
-.transitions > tbody > tr > .neighbors a:not([hidden]) {
+.transitions > tbody > tr > .neighbors a:not([hidden]),
+.transitions > tbody > tr > .neighbors code:not([hidden]) {
   display: block;
 }
-.transitions > tbody > tr > .neighbors a {
+.transitions > tbody > tr > .neighbors a,
+.transitions > tbody > tr > .neighbors code {
   white-space: nowrap;
+  line-height: 1.0;
 }
 
-.transitions > tbody > tr > .neighbors a span[data-field=eraName] {
-  font-size: 120%;
+.transitions > tbody > tr > .neighbors a {
+  font-size: 130%;
   font-weight: bolder;
+}
+.transitions > tbody > tr > .neighbors a:not(:active):not(:focus):not(:hover) {
+  text-decoration: none;
 }
 
 .transitions > tbody > tr > .tags {
@@ -503,8 +516,7 @@ nav.nearby ul > li > a {
 }
 
 .transition-type-enforced > td.type,
-.transition-type-established > td.type,
-.transition-type-canceled > td.type {
+.transition-type-established > td.type {
   color: var(--highlighted-color);
   background-color: var(--highlighted-background-color);
 }
