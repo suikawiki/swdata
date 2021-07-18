@@ -388,6 +388,10 @@
     <menu class=toc></menu>
 
     <sw-tags data-field=era.tag_ids></sw-tags>
+
+    <sw-if-defined data-field=era.tag_ids.1198 hidden>
+      <p>この説は、現在では正しくないと考えられています。</p>
+    </sw-if-defined>
     
     <section>
       <h1>識別子</h1>
@@ -409,13 +413,12 @@
       <sw-if-defined data-field=era.offset>
         <p><var>西暦年</var> = <var>年</var> + <data data-field=era.offset></data></p>
         <p><var>年</var> = <var>西暦年</var> - <data data-field=era.offset></data></p>
-      </sw-if-defined>
     
       <list-container loader=swYearListLoader class=era-year-list data-loader-eraid-field=era.id data-filled=loader-eraid>
         <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
         <list-main></list-main>
         <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
-        <template>
+        <template data-class-template="known-era-year-{inKnownRange}">
           <p class=main><sw-data-year data-field=year data-eraid-field=eraId data-filled=eraid></sw-data-year>
           <p class=info>
             <sw-data-year data-field=year eraid=20 format=text></sw-data-year>
@@ -430,6 +433,11 @@
           </list-container>
         </template>
       </list-container>
+      </sw-if-defined>
+      
+      <sw-if-defined data-field=era.offset not>
+        <p>年代不詳。</p>
+      </sw-if-defined>
     </section>
     
     <section id=links>
@@ -481,6 +489,7 @@
           label-established-incorrect="実施&#xa;(旧説)"
           label-wartime=戦時異動
           label-canceled=中止
+          label-other=その他
       ></enum-value>
     <td class=neighbors>
       <sw-transition-neighbors data-field=neighbors></sw-transition-neighbors>
@@ -549,6 +558,7 @@
   </template>
   <template data-name=eraWithYear>
     <a data-href-template=/e/{era.id}/><span data-field=eraName></span></a>
+    <code>[y~<span data-field=era.id></span>]</code>
     <span data-field=eraValue></span>年
   </template>
 </template-set>

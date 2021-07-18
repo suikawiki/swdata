@@ -200,7 +200,9 @@ defineElement ({
       setTimeout (() => this.swUpdate (), 0);
     }, // pcInit
     swUpdate: function () {
-      this.hidden = ! this.value;
+      var v = !! this.value;
+      if (this.hasAttribute ('not')) v = ! v;
+      this.hidden = ! v;
     }, // swUpdate
   },
 }); // <sw-if-defined>
@@ -566,7 +568,8 @@ defineListLoader ('swYearListLoader', async function (opts) {
   
   var years = [];
   for (var i = ref; i < ref + limit; i++) {
-    years.push ({year: i, eraId});
+    years.push ({year: i, eraId,
+                 inKnownRange: era.known_oldest_year <= i && i <= era.known_latest_year});
   }
   if (reversed) {
     return {data: years.reverse (),
