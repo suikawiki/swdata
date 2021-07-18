@@ -515,7 +515,7 @@ nav.nearby ul > li > a {
   font-weight: normal;
 }
 
-.transition-type-enforced > td.type,
+.transition-type-firstday > td.type,
 .transition-type-established > td.type {
   color: var(--highlighted-color);
   background-color: var(--highlighted-background-color);
