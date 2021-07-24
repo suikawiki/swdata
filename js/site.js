@@ -423,7 +423,7 @@ defineElement ({
     swUpdate: async function () {
       var id = this.value;
       var args = await SWD.era (id);
-      var ts = await $getTemplateSet (this.localName);
+      var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
       var e = ts.createFromTemplate ('div', args);
       this.textContent = '';
       while (e.firstChild) {
@@ -553,7 +553,7 @@ defineListLoader ('swYearListLoader', async function (opts) {
   if (!ref && era) {
     if (Number.isFinite (era.table_oldest_year)) ref = era.table_oldest_year;
   }
-  if (!ref) ref = 2000;
+  if (!Number.isFinite (ref)) ref = 2000;
   
   var limit = parseInt (opts.limit);
   var nextLimit = limit;
@@ -565,10 +565,15 @@ defineListLoader ('swYearListLoader', async function (opts) {
   if (!Number.isFinite (limit) || limit <= 0) limit = 100;
   if (!Number.isFinite (nextLimit)) nextLimit = 100;
   if (limit > 300) limit = 300;
+  if (Number.isFinite (era.table_oldest_year) &&
+      era.table_oldest_year + limit < era.known_oldest_year) {
+    ref = era.known_oldest_year;
+  }
   
   var years = [];
   for (var i = ref; i < ref + limit; i++) {
     years.push ({year: i, eraId,
+                 inRange: era.start_year <= i && i <= era.end_year,
                  inKnownRange: era.known_oldest_year <= i && i <= era.known_latest_year});
   }
   if (reversed) {
@@ -586,7 +591,12 @@ defineListLoader ('swEraListLoader', function (opts) {
   return SWD.eraList ({
     tagId: this.getAttribute ('loader-tagid'),
   }).then (eras => {
-    return Object.values (eras).sort ((a, b) => a.id-b.id);
+    return Object.values (eras).sort ((a, b) => {
+      return !!b.start_day - !!a.start_day ||
+             a.start_year - b.start_year ||
+             a.end_year - b.end_year ||
+             a.id-b.id;
+    });
   }).then (eras => {
     return {data: eras};
   });
@@ -601,10 +611,16 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
 
   var year = parseFloat (this.getAttribute ('loader-year'));
   if (Number.isFinite (year)) {
-    // XXX primary calendar
     items = items.filter (_ => {
       var d = _.day || _.day_start
-      var m = (d.nongli_tiger || d.kyuureki || d.gregorian).match (/^(-?[0-9]+)/);
+      // XXX primary calendar
+      var ds;
+      if (_.tag_ids[1344]) {
+        ds = d.gregorian;
+      } else {
+        ds = d.nongli_tiger || d.kyuureki || d.gregorian;
+      }
+      var m = ds.match (/^(-?[0-9]+)/);
       var y = parseFloat (m[1]);
       return y === year;
     });

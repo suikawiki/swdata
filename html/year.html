@@ -389,6 +389,13 @@
 
     <sw-tags data-field=era.tag_ids></sw-tags>
 
+    <sw-if-defined data-field=era.start_year hidden>
+      <p><dfn><bdi data-field=era.key></bdi></dfn>
+      (<code>y~<span data-field=era.id></span></code>)
+      は、
+      <sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year>。</p>
+    </sw-if-defined>
+
     <sw-if-defined data-field=era.tag_ids.1198 hidden>
       <p>この説は、現在では正しくないと考えられています。</p>
     </sw-if-defined>
@@ -418,7 +425,7 @@
         <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
         <list-main></list-main>
         <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
-        <template data-class-template="known-era-year-{inKnownRange}">
+        <template data-class-template="era-year-{inRange} known-era-year-{inKnownRange}">
           <p class=main><sw-data-year data-field=year data-eraid-field=eraId data-filled=eraid></sw-data-year>
           <p class=info>
             <sw-data-year data-field=year eraid=20 format=text></sw-data-year>
@@ -468,7 +475,7 @@
         <list-is-empty>(見つかりませんでした。)</list-is-empty>
         <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
         <template>
-          <sw-data-era data-field=id></sw-data-era>
+          <sw-data-era data-field=id template=sw-data-era-in-menu></sw-data-era>
         </template>
       </list-container>
     </section>
@@ -480,18 +487,20 @@
     <td class=type>
       <enum-value data-field=type2
           label-triggering=変更事由
-          label-proclaimed=布告
-          label-firstday=開始
-          label-firstday-possible="開始&#xa;(異説)"
-          label-firstday-incorrect="開始&#xa;(旧説)"
-          label-prevfirstday=開始前日
-          label-prevfirstday-possible="開始前日&#xa;(異説)"
-          label-prevfirstday-incorrect="開始前日&#xa;(旧説)"
-          label-established=実施
-          label-established-possible="実施&#xa;(異説)"
-          label-established-incorrect="実施&#xa;(旧説)"
-          label-wartime=戦時異動
+          label-proclaimed=決定
           label-canceled=中止
+          label-notified=通知発出
+          label-received=通知受領
+          label-firstday=開始日
+          label-firstday-possible="開始日&#xa;(異説)"
+          label-firstday-incorrect="開始日&#xa;(旧説)"
+          label-prevfirstday=開始前日
+          label-administrative=行政異動
+          label-wartime=戦時異動
+          label-firstyearstart=初年始
+          label-prevfirstyearstart=初年前日
+          label-lastyearend=末年末
+          label-nextlastyearend=末年翌日
           label-other=その他
       ></enum-value>
     <td class=neighbors>
@@ -556,9 +565,7 @@
   <template data-name=era>
     <a data-href-template=/y/{value}/><span data-field=era.name></span><span data-field=eraValue></span>(<span data-field=value></span>)年<sw-algorithm name=kanshi-year data-arg-year-field=value value-text data-filled=arg-year></sw-algorithm></a>
   </template>
-  <template data-name=eraText>
-    <span data-field=eraName></span><span data-field=eraValue></span>年
-  </template>
+  <template data-name=eraText><span data-field=eraName></span><span data-field=eraValue></span>年</template>
   <template data-name=eraWithYear>
     <a data-href-template=/e/{era.id}/><span data-field=eraName></span></a>
     <code>[y~<span data-field=era.id></span>]</code>
@@ -569,6 +576,20 @@
 <template-set name=sw-data-era>
   <template>
     <a data-href-template=/e/{id}/ data-field=name></a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-era-in-menu>
+  <template>
+    <a data-href-template=/e/{id}/>
+      <bdi data-field=name></bdi>
+
+      <p class=year-range>
+        <span data-field=start_year data-empty=?></span>
+        -
+        <span data-field=end_year data-empty=?></span>
+      </p>
+    </a>
   </template>
 </template-set>
 
@@ -590,7 +611,7 @@
     <p class=full-date>グレゴリオ暦 <span data-field=gregorian.year></span>年<span data-field=gregorian.month></span>月<span data-field=gregorian.day></span>日
     <p class=full-date>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
     <p class=full-date data-hidden-field=nongli_tiger_hidden data-filled=hidden>農暦(寅) <span data-field=nongli_tiger.year></span>年<enum-value class=leap data-field=nongli_tiger.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_tiger.month></span>月<span data-field=nongli_tiger.day></span>日
-    <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>農暦(寅) <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
+    <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>旧暦 <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
   </template>
 </template-set>
 

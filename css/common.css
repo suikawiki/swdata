@@ -8,10 +8,14 @@ html {
   --gray-color: gray;
   --highlighted-background-color: #999;
   --highlighted-color: white;
-  --weight-1-background-color: #ececec;
+  --weight-1-background-color: #fafafa;
   --weight-1-color: black;
-  --weight-2-background-color: #ccc;
+  --weight-2-background-color: #f0f0f0;
   --weight-2-color: black;
+  --weight-3-background-color: #ccc;
+  --weight-3-color: black;
+  --weight-4-background-color: #999;
+  --weight-4-color: white;
 }
 
 hgroup, h1, h2, h3, h4, h5, h6 {
@@ -384,10 +388,30 @@ nav.nearby ul > li > a {
   display: block;
 }
 
-.menu-list :-webkit-any(a, .list-prev, .list-next),
+.menu-list :-webkit-any(.list-prev, .list-next),
 .era-year-list :-webkit-any(.list-prev, .list-next) {
   font-size: 200%;
   padding: .3em;
+}
+
+.menu-list a:not(:active):not(:hover):not(:focus) {
+  text-decoration: none;
+}
+
+.menu-list a {
+  padding: .6em;
+}
+
+.menu-list a > bdi {
+  font-size: 200%;
+}
+
+.menu-list a .year-range {
+  margin: 0;
+  text-align: right;
+  text-decoration: none;
+  font-size: 80%;
+  line-height: 1.0;
 }
 
 .era-year-list list-item {
@@ -399,14 +423,19 @@ nav.nearby ul > li > a {
 }
 
 .era-year-list .main {
-  background-color: var(--weight-1-background-color);
-  color: var(--weight-1-color);
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
   padding: .3em;
 }
 
 .era-year-list .known-era-year-true .main {
-  background-color: var(--weight-2-background-color);
-  color: var(--weight-2-color);
+  background-color: var(--weight-3-background-color);
+  color: var(--weight-3-color);
+}
+
+.era-year-list .era-year-true {
+  background-color: var(--weight-1-background-color);
+  color: var(--weight-1-color);
 }
 
 .era-year-list .main a:not([hidden]) {
@@ -521,7 +550,8 @@ nav.nearby ul > li > a {
   background-color: var(--highlighted-background-color);
 }
 
-.transition-type-enforced\/incorrect,
+.transition-type-firstday\/incorrect,
+.transition-type-prevfirstday\/incorrect,
 .transition-type-established\/incorrect {
   color: var(--gray-color);
   background-color: var(--gray-background-color);
@@ -598,6 +628,11 @@ td > .error-list > li {
   font-style: normal;
   text-transform: lowercase;
   font-variant: small-caps;
+}
+
+dfn {
+  font-weight: bolder;
+  font-style: normal;
 }
 
 /*
