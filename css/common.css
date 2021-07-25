@@ -545,14 +545,14 @@ nav.nearby ul > li > a {
 }
 
 .transition-type-firstday > td.type,
-.transition-type-established > td.type {
+.transition-type-commenced > td.type {
   color: var(--highlighted-color);
   background-color: var(--highlighted-background-color);
 }
 
 .transition-type-firstday\/incorrect,
 .transition-type-prevfirstday\/incorrect,
-.transition-type-established\/incorrect {
+.transition-type-commenced\/incorrect {
   color: var(--gray-color);
   background-color: var(--gray-background-color);
   text-decoration: line-through;
