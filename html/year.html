@@ -390,10 +390,10 @@
     <sw-tags data-field=era.tag_ids></sw-tags>
 
     <sw-if-defined data-field=era.start_year hidden>
-      <p><dfn><bdi data-field=era.key></bdi></dfn>
+      <p><dfn><bdi data-field=era.name></bdi></dfn>
       (<code>y~<span data-field=era.id></span></code>)
       は、
-      <sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year>。</p>
+      <sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-if-defined data-field=era.end_year><sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year></sw-if-defined><sw-if-defined data-field=era.end_year not>現在</sw-if-defined>の紀年法。</p>
     </sw-if-defined>
 
     <sw-if-defined data-field=era.tag_ids.1198 hidden>
@@ -488,13 +488,17 @@
       <enum-value data-field=type2
           label-triggering=変更事由
           label-proclaimed=決定
-          label-canceled=中止
+          label-canceled=中止決定
           label-notified=通知発出
           label-received=通知受領
           label-firstday=開始日
           label-firstday-possible="開始日&#xa;(異説)"
           label-firstday-incorrect="開始日&#xa;(旧説)"
+          label-firstday-canceled="開始日&#xa;(中止)"
           label-prevfirstday=開始前日
+          label-commenced=利用開始日
+          label-commenced-possible="利用開始日&#xa;(異説)"
+          label-commenced-incorrect="利用開始日&#xa;(旧説)"
           label-administrative=行政異動
           label-wartime=戦時異動
           label-firstyearstart=初年始
