@@ -552,7 +552,8 @@ nav.nearby ul > li > a {
 
 .transition-type-firstday\/incorrect,
 .transition-type-prevfirstday\/incorrect,
-.transition-type-commenced\/incorrect {
+.transition-type-commenced\/incorrect,
+.transition-type-wartime\/incorrect {
   color: var(--gray-color);
   background-color: var(--gray-background-color);
   text-decoration: line-through;
