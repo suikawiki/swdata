@@ -200,7 +200,7 @@ defineElement ({
       setTimeout (() => this.swUpdate (), 0);
     }, // pcInit
     swUpdate: function () {
-      var v = !! this.value;
+      var v = this.value != null;
       if (this.hasAttribute ('not')) v = ! v;
       this.hidden = ! v;
     }, // swUpdate

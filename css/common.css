@@ -553,13 +553,15 @@ nav.nearby ul > li > a {
 .transition-type-firstday\/incorrect,
 .transition-type-prevfirstday\/incorrect,
 .transition-type-commenced\/incorrect,
-.transition-type-wartime\/incorrect {
+.transition-type-wartime\/incorrect,
+.transition-type-triggering\/incorrect {
   color: var(--gray-color);
   background-color: var(--gray-background-color);
   text-decoration: line-through;
 }
 
-.transition-type-triggering > td.neighbors {
+.transition-type-triggering > td.neighbors,
+.transition-type-triggering\/possible > td.neighbors {
   opacity: 0.3;
 }
 
