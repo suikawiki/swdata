@@ -70,6 +70,8 @@ local/data/jp-flagdays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-flagdays.json
 local/data/calendar-era-defs.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-defs.json
+local/data/calendar-era-transitions.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-transitions.json
 local/data/calendar-era-systems.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-systems.json
 local/data/numbers-kanshi.json:

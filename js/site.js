@@ -73,6 +73,15 @@ SWD.eraList = async function (opts) {
   return list;
 }; // SWD.eraList
 
+SWD.eraTransitions = async function (eraId) {
+  if (!SWD._eraTransitions) {
+    SWD._eraTransitions = SWD.data ('calendar-era-transitions.json');
+  }
+
+  var all = await SWD._eraTransitions;
+  return all.transitions.filter (_ => _.relevant_era_ids[eraId]);
+}; // SWD.eraTransitions
+
 SWD.tag = async function (id) {
   var tags = await SWD.tagsByIds ([id]);
   return tags[0]; // or undefined
@@ -607,7 +616,7 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
   var era = await SWD.era (eraId);
   if (!era) throw new Error ("Era not found: " + eraId);
 
-  var items = era.transitions;
+  var items = await SWD.eraTransitions (eraId);
 
   var year = parseFloat (this.getAttribute ('loader-year'));
   if (Number.isFinite (year)) {
