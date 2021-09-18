@@ -636,11 +636,12 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
   }
 
   items.forEach (_ => {
+    _.self = _;
     _.type2 = _.type.replace (/\//g, '-');
     _.neighbors = {
       year: year,
-      prev_era_ids: _.prev_era_ids,
-      next_era_ids: _.next_era_ids,
+      prev_era_ids: Object.keys (_.prev_era_ids || {}).filter (_ => _ != eraId),
+      next_era_ids: Object.keys (_.next_era_ids || {}).filter (_ => _ != eraId),
     };
 
     _.day_hidden = _.day ? null : '';
@@ -672,10 +673,10 @@ defineElement ({
 
       var v = this.value;
       var items = [];
-      Object.keys (v.prev_era_ids || {}).forEach (_ => {
+      v.prev_era_ids.forEach (_ => {
         items.push ({year: v.year, era_id: _, direction: 'prev'});
       });
-      Object.keys (v.next_era_ids || {}).forEach (_ => {
+      v.next_era_ids.forEach (_ => {
         items.push ({year: v.year, era_id: _, direction: 'next'});
       });
       if (!items.length) return;
@@ -689,6 +690,44 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-transition-neighbors>
+
+defineElement ({
+  name: 'sw-transition-desc',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', this.value);
+      
+      this.textContent = '';
+      this.appendChild (e);
+    }, // swUpdate
+  },
+}); // <sw-transition-desc>
+
+(() => {
+
+  var def = document.createElementNS ('data:,pc', 'templateselector');
+  def.setAttribute ('name', 'swTransitionDescSelector');
+  def.pcHandler = function (templates, obj) {
+    return templates[obj.action_tag_id] || templates[""];
+  };
+  document.head.appendChild (def);
+  
+}) ();
 
 defineElement ({
   name: 'sw-data-day',
@@ -845,12 +884,22 @@ defineElement ({
       setTimeout (() => this.swUpdate (), 0);
 
       var vals = this.value || {};
+      if ("object" !== typeof vals) {
+        var v = {};
+        v[vals] = true;
+        vals = v;
+      }
       Object.defineProperty (this, 'value', {
         get: function () {
           return vals;
         },
         set: function (newVals) {
-          vals = newVals;
+          vals = newVals || {};
+          if ("object" !== typeof vals) {
+            var v = {};
+            v[vals] = true;
+            vals = v;
+          }
           this.swUpdate ();
         },
       });
