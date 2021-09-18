@@ -526,6 +526,7 @@
         <sw-data-day data-field=day_end></sw-data-day>
       </div>
     <td class=tags>
+      <sw-transition-desc data-field=self></sw-transition-desc>
       <sw-tags data-field=tag_ids></sw-tags>
       
   </template>
@@ -538,6 +539,26 @@
         label-next=→
     ></enum-value>
     <sw-data-year data-field=year data-eraid-field=era_id data-filled=eraid format=eraWithYear></sw-data-year>
+  </template>
+</template-set>
+
+<template-set name=sw-transition-desc templateselector=swTransitionDescSelector>
+  <template></template>
+  <template data-name=1192>
+    建元の事由:
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=position_tag_id></sw-tags>]
+    に<strong>即位</strong>
+  </template>
+  <template data-name=1197>
+    改元の事由:
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>死去</strong>
   </template>
 </template-set>
 
