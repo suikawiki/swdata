@@ -493,6 +493,7 @@
           label-proclaimed-possible="決定&#xa;(異説)"
           label-proclaimed-incorrect="決定&#xa;(旧説)"
           label-canceled=中止決定
+          label-renamed=改称決定
           label-notified=通知発出
           label-received=通知受領
           label-rejected=拒否
@@ -539,11 +540,25 @@
         label-next=→
     ></enum-value>
     <sw-data-year data-field=year data-eraid-field=era_id data-filled=eraid format=eraWithYear></sw-data-year>
+    <sw-if-defined data-field=untilFirstDay>
+      <div class=delta-first-day>開始<unit-number data-field=untilFirstDay type=count></unit-number>日前</div>
+    </sw-if-defined>
+    <sw-if-defined data-field=sinceFirstDay>
+      <div class=delta-first-day>開始<unit-number data-field=sinceFirstDay type=count></unit-number>日後</div>
+    </sw-if-defined>
   </template>
 </template-set>
 
 <template-set name=sw-transition-desc templateselector=swTransitionDescSelector>
   <template></template>
+  <template data-name=1177>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=position_tag_id></sw-tags>]
+    に<strong>即位</strong>
+  </template>
   <template data-name=1192>
     建元の事由:
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
@@ -553,12 +568,78 @@
     [<sw-tags data-field=position_tag_id></sw-tags>]
     に<strong>即位</strong>
   </template>
+  <template data-name=1196>
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>死去</strong>
+  </template>
   <template data-name=1197>
     改元の事由:
     [<sw-tags data-field=authority_tag_id></sw-tags>]
     の
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>死去</strong>
+  </template>
+  <template data-name=1399>
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=position_tag_id></sw-tags>]
+    から<strong>退位</strong>
+  </template>
+  <template data-name=1223>
+    改元の事由:
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=position_tag_id></sw-tags>]
+    から<strong>退位</strong>
+  </template>
+  <template data-name=1226>
+    敗北:
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    により<strong>陥落</strong>
+  </template>
+  <template data-name=1252>
+    敗北:
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    のため<strong>撤退</strong>
+  </template>
+  <template data-name=1397>
+    国号:
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    から
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    に<strong>改称</strong>
+  </template>
+  <template data-name=1187>
+    決定:
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>新年の改元</strong>を決定
+  </template>
+  <template data-name=1442>
+    決定:
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>元号名変更</strong>を決定
+  </template>
+  <template data-name=1188>
+    年始改元:
+    年頭に当たり
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>新元号に切り替え</strong>
   </template>
 </template-set>
 
@@ -601,7 +682,7 @@
   <template data-name=eraWithYear>
     <a data-href-template=/e/{era.id}/><span data-field=eraName></span></a>
     <code>[y~<span data-field=era.id></span>]</code>
-    <span data-field=eraValue></span>年
+    <strong data-field=eraValue></strong>年
   </template>
 </template-set>
 
