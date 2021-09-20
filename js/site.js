@@ -640,8 +640,10 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
     _.type2 = _.type.replace (/\//g, '-');
     _.neighbors = {
       year: year,
+      thisEraId: eraId,
       prev_era_ids: Object.keys (_.prev_era_ids || {}).filter (_ => _ != eraId),
       next_era_ids: Object.keys (_.next_era_ids || {}).filter (_ => _ != eraId),
+      relevant_era_ids: _.relevant_era_ids,
     };
 
     _.day_hidden = _.day ? null : '';
@@ -674,10 +676,20 @@ defineElement ({
       var v = this.value;
       var items = [];
       v.prev_era_ids.forEach (_ => {
-        items.push ({year: v.year, era_id: _, direction: 'prev'});
+        var untilFirstDay = 0+v.relevant_era_ids[v.thisEraId].until_first_day;
+        var sinceFirstDay = -untilFirstDay;
+        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
+        items.push ({year: v.year, era_id: _, direction: 'prev',
+                     untilFirstDay, sinceFirstDay});
       });
       v.next_era_ids.forEach (_ => {
-        items.push ({year: v.year, era_id: _, direction: 'next'});
+        var untilFirstDay = 0+v.relevant_era_ids[_].until_first_day;
+        var sinceFirstDay = -untilFirstDay;
+        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
+        items.push ({year: v.year, era_id: _, direction: 'next',
+                     untilFirstDay, sinceFirstDay});
       });
       if (!items.length) return;
       

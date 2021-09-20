@@ -539,6 +539,19 @@ nav.nearby ul > li > a {
   text-decoration: none;
 }
 
+.delta-first-day:not([hidden]) {
+  display: block;
+}
+.delta-first-day {
+  text-align: center;
+  font-size: 80%;
+}
+
+.delta-first-day unit-number {
+  font-weight: bold;
+  font-size: 120%;
+}
+
 .transitions > tbody > tr > .tags {
   font-size: 80%;
   font-weight: normal;
