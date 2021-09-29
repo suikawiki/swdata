@@ -2,6 +2,7 @@ Algorithm::Diff~1.201
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.31
+AnyEvent::Handle
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -16,7 +17,7 @@ IO::FDPass~1.3
 IO::Handle~1.48
 JSON~4.03
 MIME::Base64~3.16
-Math::BigInt~1.999824
+Math::BigInt~1.999825
 Method::WeakCallback~0.04
 Net::SSLeay~1.90
 Path::Class~0.37
@@ -25,7 +26,7 @@ Proc::FastSpawn~1.2
 Scalar::Util~1.59
 Socket~2.032
 Test::Differences~0.68
-Test::More~1.302187
+Test::More~1.302188
 Text::Diff~1.45
 Time::HiRes~1.9764
 Time::Local~1.30
