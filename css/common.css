@@ -573,9 +573,18 @@ nav.nearby ul > li > a {
   text-decoration: line-through;
 }
 
+.transition-type-prevfirstyearstart > td.neighbors,
+.transition-type-firstyearstart > td.neighbors,
+.transition-type-prevfirstday > td.neighbors,
+.transition-type-lastyearend > td.neighbors,
+.transition-type-nextlastyearend > td.neighbors,
 .transition-type-triggering > td.neighbors,
 .transition-type-triggering\/possible > td.neighbors {
   opacity: 0.3;
+}
+
+.incorrect-旧説 bdi[data-field=name] {
+  text-decoration: line-through !important;
 }
 
 sw-tags a {

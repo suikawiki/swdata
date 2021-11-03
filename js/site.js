@@ -601,7 +601,7 @@ defineListLoader ('swEraListLoader', function (opts) {
     tagId: this.getAttribute ('loader-tagid'),
   }).then (eras => {
     return Object.values (eras).sort ((a, b) => {
-      return !!b.start_day - !!a.start_day ||
+      return a.offset - b.offset ||
              a.start_year - b.start_year ||
              a.end_year - b.end_year ||
              a.id-b.id;
@@ -678,7 +678,7 @@ defineElement ({
       v.prev_era_ids.forEach (_ => {
         var untilFirstDay = 0+v.relevant_era_ids[v.thisEraId].until_first_day;
         var sinceFirstDay = -untilFirstDay;
-        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (untilFirstDay < 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
         if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
         items.push ({year: v.year, era_id: _, direction: 'prev',
                      untilFirstDay, sinceFirstDay});
@@ -686,7 +686,7 @@ defineElement ({
       v.next_era_ids.forEach (_ => {
         var untilFirstDay = 0+v.relevant_era_ids[_].until_first_day;
         var sinceFirstDay = -untilFirstDay;
-        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (untilFirstDay < 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
         if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
         items.push ({year: v.year, era_id: _, direction: 'next',
                      untilFirstDay, sinceFirstDay});
@@ -782,6 +782,34 @@ defineElement ({
                                   leap_month: !!m[3],
                                   day: parseFloat (m[4])};
       if (!m) args.nongli_tiger_hidden = '';
+
+      var m = (args.value.nongli_ox || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_ox = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_ox_hidden = '';
+      
+      var m = (args.value.nongli_rat || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_rat = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_rat_hidden = '';
+
+      var m = (args.value.nongli_qin || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_qin = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_qin_hidden = '';
+
+      var m = (args.value.nongli_wuzhou || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_wuzhou = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_wuzhou_hidden = '';
       
       var m = (args.value.kyuureki || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
       if (m) args.kyuureki = {year: parseFloat (m[1]),

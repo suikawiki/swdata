@@ -641,6 +641,27 @@
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>新元号に切り替え</strong>
   </template>
+  <template data-name=1189><!-- 支那改元日 -->
+    <sw-if-defined data-field=tag_ids.1359>
+      <strong>新政権</strong>樹立に当たり
+    </sw-if-defined>
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>改元</strong>
+  </template>
+  <template data-name=1235>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    と
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    の両<strong>勢力が統合</strong>
+  </template>
+  <template data-name=1586>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    の<strong>勢力を吸収</strong>
+  </template>
 </template-set>
 
 <template-set name=sw-data-boolean templateselector=selectBooleanTemplate>
@@ -694,9 +715,10 @@
 
 <template-set name=sw-data-era-in-menu>
   <template>
-    <a data-href-template=/e/{id}/>
+    <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
       <bdi data-field=name></bdi>
-
+      <code>[y~<span data-field=id></span>]</code>
+      
       <p class=year-range>
         <span data-field=start_year data-empty=?></span>
         -
@@ -724,6 +746,10 @@
     <p class=full-date>グレゴリオ暦 <span data-field=gregorian.year></span>年<span data-field=gregorian.month></span>月<span data-field=gregorian.day></span>日
     <p class=full-date>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
     <p class=full-date data-hidden-field=nongli_tiger_hidden data-filled=hidden>農暦(寅) <span data-field=nongli_tiger.year></span>年<enum-value class=leap data-field=nongli_tiger.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_tiger.month></span>月<span data-field=nongli_tiger.day></span>日
+    <p class=full-date data-hidden-field=nongli_ox_hidden data-filled=hidden>農暦(丑) <span data-field=nongli_ox.year></span>年<enum-value class=leap data-field=nongli_ox.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_ox.month></span>月<span data-field=nongli_ox.day></span>日
+    <p class=full-date data-hidden-field=nongli_rat_hidden data-filled=hidden>農暦(子) <span data-field=nongli_rat.year></span>年<enum-value class=leap data-field=nongli_rat.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_rat.month></span>月<span data-field=nongli_rat.day></span>日
+    <p class=full-date data-hidden-field=nongli_qin_hidden data-filled=hidden>農暦(秦) <span data-field=nongli_qin.year></span>年<enum-value class=leap data-field=nongli_qin.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_qin.month></span>月<span data-field=nongli_qin.day></span>日
+    <p class=full-date data-hidden-field=nongli_wuzhou_hidden data-filled=hidden>農暦(武周) <span data-field=nongli_wuzhou.year></span>年<enum-value class=leap data-field=nongli_wuzhou.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_wuzhou.month></span>月<span data-field=nongli_wuzhou.day></span>日
     <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>旧暦 <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
   </template>
 </template-set>
