@@ -465,6 +465,8 @@
 
     <menu class=toc></menu>
 
+    <p><a href=./ class=active>紀年法の一覧</a> / <a href=graph>変遷</a></p>
+
     <section>
       <h1>紀年法</h1>
 
@@ -479,6 +481,17 @@
         </template>
       </list-container>
     </section>
+  </template>
+  <template data-name=page-tag-item-graph title="#{tag.label}">
+    <hgroup>
+      <h1>#<bdi data-field=tag.label></bdi></h1>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <p><a href=./>紀年法の一覧</a> / <a href=graph class=active>変遷</a></p>
+
+    <sw-era-transition-graph data-tagid-field=tag.id data-filled=tagid></sw-era-transition-graph>
   </template>
 </template-set>
 
@@ -641,6 +654,27 @@
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>新元号に切り替え</strong>
   </template>
+  <template data-name=1189><!-- 支那改元日 -->
+    <sw-if-defined data-field=tag_ids.1359>
+      <strong>新政権</strong>樹立に当たり
+    </sw-if-defined>
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>改元</strong>
+  </template>
+  <template data-name=1235>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    と
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    の両<strong>勢力が統合</strong>
+  </template>
+  <template data-name=1586>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    の<strong>勢力を吸収</strong>
+  </template>
 </template-set>
 
 <template-set name=sw-data-boolean templateselector=selectBooleanTemplate>
@@ -684,6 +718,12 @@
     <code>[y~<span data-field=era.id></span>]</code>
     <strong data-field=eraValue></strong>年
   </template>
+  <template data-name=yearHeader>
+    <p><a data-href-template=/y/{value}/><sw-data-year data-field=value eraid=20 format=text></sw-data-year></a>
+    <p>西暦紀元前<sw-algorithm name=before-epoch-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>年
+    <p><sw-data-year data-field=value eraid=756 format=text eraname=皇紀></sw-data-year>
+    <p><sw-algorithm name=kanshi-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>
+  </template>
 </template-set>
 
 <template-set name=sw-data-era>
@@ -692,11 +732,21 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-era-in-menu>
+<template-set name=sw-data-era-item>
   <template>
     <a data-href-template=/e/{id}/>
       <bdi data-field=name></bdi>
+      <code>[y~<span data-field=id></span>]</code>
+    </a>
+  </template>
+</template-set>
 
+<template-set name=sw-data-era-in-menu>
+  <template>
+    <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
+      <bdi data-field=name></bdi>
+      <code>[y~<span data-field=id></span>]</code>
+      
       <p class=year-range>
         <span data-field=start_year data-empty=?></span>
         -
@@ -724,6 +774,10 @@
     <p class=full-date>グレゴリオ暦 <span data-field=gregorian.year></span>年<span data-field=gregorian.month></span>月<span data-field=gregorian.day></span>日
     <p class=full-date>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
     <p class=full-date data-hidden-field=nongli_tiger_hidden data-filled=hidden>農暦(寅) <span data-field=nongli_tiger.year></span>年<enum-value class=leap data-field=nongli_tiger.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_tiger.month></span>月<span data-field=nongli_tiger.day></span>日
+    <p class=full-date data-hidden-field=nongli_ox_hidden data-filled=hidden>農暦(丑) <span data-field=nongli_ox.year></span>年<enum-value class=leap data-field=nongli_ox.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_ox.month></span>月<span data-field=nongli_ox.day></span>日
+    <p class=full-date data-hidden-field=nongli_rat_hidden data-filled=hidden>農暦(子) <span data-field=nongli_rat.year></span>年<enum-value class=leap data-field=nongli_rat.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_rat.month></span>月<span data-field=nongli_rat.day></span>日
+    <p class=full-date data-hidden-field=nongli_qin_hidden data-filled=hidden>農暦(秦) <span data-field=nongli_qin.year></span>年<enum-value class=leap data-field=nongli_qin.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_qin.month></span>月<span data-field=nongli_qin.day></span>日
+    <p class=full-date data-hidden-field=nongli_wuzhou_hidden data-filled=hidden>農暦(武周) <span data-field=nongli_wuzhou.year></span>年<enum-value class=leap data-field=nongli_wuzhou.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_wuzhou.month></span>月<span data-field=nongli_wuzhou.day></span>日
     <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>旧暦 <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
   </template>
 </template-set>
@@ -767,11 +821,6 @@
     });
 </script>
 
-<footer class=site>
-  <a href=/ rel=top>Data.SuikaWiki.org</a>
-  <a href=/license rel=license>&copy;</a>
-</footer>
-
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -797,6 +846,21 @@
     <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
   </aside>
 
+<footer class=site>
+  <a href=/ rel=top>Data.SuikaWiki.org</a>
+  <a href=/license rel=license>&copy;</a>
+</footer>
+
+  <svg class=defs>
+    <defs>
+      <marker id="arrow"
+          viewBox="0 0 10 7" markerWidth="10" markerHeight="7"
+          refX="10" refY="4" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 4 L 0 7" fill="transparent" stroke="currentcolor"/>
+      </marker>
+    </defs>
+  </svg>
+  
 <!--
 
 Copyright 2020-2021 Wakaba <wakaba@suikawiki.org>.

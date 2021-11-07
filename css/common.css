@@ -5,6 +5,7 @@ html {
   --list-item-2-background-color: white;
   --list-item-2-color: black;
   --gray-background-color: transparent;
+  --gray-opaque-background-color: white;
   --gray-color: gray;
   --highlighted-background-color: #999;
   --highlighted-color: white;
@@ -16,6 +17,15 @@ html {
   --weight-3-color: black;
   --weight-4-background-color: #999;
   --weight-4-color: white;
+  --border-2-color: #f0f0f0;
+  --border-4-color: #999;
+}
+
+svg.defs {
+  position: absolute;
+  left: -100%;
+  width: 0;
+  overflow: hidden;
 }
 
 hgroup, h1, h2, h3, h4, h5, h6 {
@@ -64,12 +74,22 @@ body > section {
   min-height: 410px;
 }
 
+body.has-large > section {
+  padding-right: 1rem;
+  min-height: 0;
+}
+
 body > section > hgroup {
   margin: 0.5rem -316px 1rem -1rem;
   padding: 0.6rem 150px 0.3rem 0.3rem;
   border-bottom: 0.2rem solid;
   min-height: 65px;
   line-height: 1.0;
+}
+
+body.has-large > section > hgroup {
+  margin-right: -1rem;
+  padding-right: 0.3rem;
 }
 
 @media (max-width: 600px) {
@@ -238,6 +258,13 @@ table.years > tbody > tr > td {
   position: absolute;
   top: 100px;
   right: 1rem;
+}
+
+.has-large .ads-rectangle {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  position: static;
+  overflow: hidden;
 }
 
 @media (max-width: 600px) {
@@ -573,9 +600,18 @@ nav.nearby ul > li > a {
   text-decoration: line-through;
 }
 
+.transition-type-prevfirstyearstart > td.neighbors,
+.transition-type-firstyearstart > td.neighbors,
+.transition-type-prevfirstday > td.neighbors,
+.transition-type-lastyearend > td.neighbors,
+.transition-type-nextlastyearend > td.neighbors,
 .transition-type-triggering > td.neighbors,
 .transition-type-triggering\/possible > td.neighbors {
   opacity: 0.3;
+}
+
+.incorrect-旧説 bdi[data-field=name] {
+  text-decoration: line-through !important;
 }
 
 sw-tags a {
@@ -649,6 +685,144 @@ td > .error-list > li {
 dfn {
   font-weight: bolder;
   font-style: normal;
+}
+
+a.active {
+  font-weight: bolder;
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+}
+
+sw-era-transition-graph:not([hidden]) {
+  display: block;
+}
+sw-era-transition-graph {
+  position: relative;
+}
+
+sw-era-transition-graph a:not(:active):not(:focus):not(:hover) {
+  text-decoration: none;
+}
+
+sw-era-transition-graph foreignObject {
+  overflow: visible;
+}
+
+sw-era-transition-graph foreignObject > div {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  text-align: center;
+}
+
+sw-era-transition-graph .era-header {
+  align-items: end;
+  line-height: 1.1;
+  padding-bottom: .5em;
+}
+
+sw-era-transition-graph .era-header.selected {
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
+}
+
+sw-era-transition-graph .era-header a:not([hidden]),
+sw-era-transition-graph .era-header bdi:not([hidden]),
+sw-era-transition-graph .era-header code:not([hidden]) {
+  display: block;
+}
+
+sw-era-transition-graph .era-header bdi {
+  font-weight: bolder;
+}
+
+sw-era-transition-graph .era-header.incorrect bdi {
+      text-decoration: line-through;
+}
+
+sw-era-transition-graph .year-header {
+  justify-content: end;
+  text-align: right;
+  padding-right: 1em;
+  line-height: 1.1;
+}
+
+sw-era-transition-graph .year-header p {
+  margin: 0;
+  font-size: 80%;
+}
+
+sw-era-transition-graph .year-header span[data-field=eraValue],
+sw-era-transition-graph .year-header data[data-field=value] {
+  margin-left: .3em;
+  margin-right: .3em;
+  font-weight: bolder;
+}
+sw-era-transition-graph .year-header p:first-child span[data-field=eraValue] {
+  font-size: 130%;
+}
+
+sw-era-transition-graph line {
+  stroke: black;
+  stroke-width: 1px;
+}
+
+sw-era-transition-graph .era-line {
+  stroke: var(--border-4-color);
+  stroke-width: 5px;
+}
+
+sw-era-transition-graph .era-known-line {
+  stroke: var(--border-4-color);
+  stroke-dasharray: 8, 3;
+}
+
+sw-era-transition-graph .era-continue-line {
+  stroke: var(--border-2-color);
+  stroke-dasharray: 8, 3;
+}
+
+sw-era-transition-graph .era-transition {
+  marker-end: url(#arrow);
+}
+sw-era-transition-graph .era-transition[data-type=wartime] {
+  stroke-dasharray: 6 2;
+}
+
+sw-era-transition-graph text {
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+sw-era-transition-graph .era-year-number {
+  margin: 0 auto;
+  width: min-content;
+  min-width: 1.5em;
+  padding: 0.25em;
+  border: 1px solid currentcolor;
+  border-radius: 1em;
+  background: white;
+  color: black;
+  line-height: 1.0;
+  font-size: 90%;
+}
+
+sw-era-transition-graph .era-year-number.incorrect {
+  color: var(--gray-color);
+  background-color: var(--gray-opaque-background-color);
+}
+
+sw-era-transition-graph .year-boundary {
+  font-size: 48px;
+  white-space: pre;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  color: var(--border-2-color);
+  background: transparent;
+  user-select: none;
 }
 
 /*

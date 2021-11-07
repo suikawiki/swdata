@@ -73,14 +73,19 @@ SWD.eraList = async function (opts) {
   return list;
 }; // SWD.eraList
 
-SWD.eraTransitions = async function (eraId) {
+SWD.eraTransitions = async function () {
   if (!SWD._eraTransitions) {
     SWD._eraTransitions = SWD.data ('calendar-era-transitions.json');
   }
 
   var all = await SWD._eraTransitions;
-  return all.transitions.filter (_ => _.relevant_era_ids[eraId]);
+  return all.transitions;
 }; // SWD.eraTransitions
+
+SWD.eraTransitionsByEraId = async function (eraId) {
+  var list = await SWD.eraTransitions ();
+  return list.filter (_ => _.relevant_era_ids[eraId]);
+}; // SWD.eraTransitionsByEraId
 
 SWD.tag = async function (id) {
   var tags = await SWD.tagsByIds ([id]);
@@ -158,6 +163,18 @@ defineElement ({
           return args;
         }
 
+        // /tag/{}/graph
+        var m = path.match (/^\/tag\/([0-9]+)\/graph$/);
+        if (m) {
+          args.tagId = parseFloat (m[1]);
+          args.tag = await SWD.tag (args.tagId);
+          if (args.tag) {
+            args.name = 'page-tag-item-graph';
+            args.hasLargeContent = true;
+          }
+          return args;
+        }
+
         args.name = {
           '/y/': 'page-year-index',
           '/y/determination': 'page-year-determination',
@@ -172,6 +189,7 @@ defineElement ({
           this.appendChild (e.firstChild);
         }
         document.title = $fill.string (e.title, args);
+        document.body.classList.toggle ('has-large', !!args.hasLargeContent);
       });
     }, // swUpdate
   },
@@ -366,8 +384,8 @@ defineElement ({
         args.era = era;
         args.eraValue = v - era.offset;
         args.eraName = this.getAttribute ('eraname') || era.name;
-        args.format = this.getAttribute ('format');
       }
+      args.format = this.getAttribute ('format');
       
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
@@ -393,6 +411,8 @@ defineElement ({
       } else {
         return templates.era;
       }
+    } else if (obj.format === 'yearHeader') {
+      return templates.yearHeader;
     } else {
       return templates[""];
     }
@@ -601,7 +621,7 @@ defineListLoader ('swEraListLoader', function (opts) {
     tagId: this.getAttribute ('loader-tagid'),
   }).then (eras => {
     return Object.values (eras).sort ((a, b) => {
-      return !!b.start_day - !!a.start_day ||
+      return a.offset - b.offset ||
              a.start_year - b.start_year ||
              a.end_year - b.end_year ||
              a.id-b.id;
@@ -616,7 +636,7 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
   var era = await SWD.era (eraId);
   if (!era) throw new Error ("Era not found: " + eraId);
 
-  var items = await SWD.eraTransitions (eraId);
+  var items = await SWD.eraTransitionsByEraId (eraId);
 
   var year = parseFloat (this.getAttribute ('loader-year'));
   if (Number.isFinite (year)) {
@@ -678,7 +698,7 @@ defineElement ({
       v.prev_era_ids.forEach (_ => {
         var untilFirstDay = 0+v.relevant_era_ids[v.thisEraId].until_first_day;
         var sinceFirstDay = -untilFirstDay;
-        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (untilFirstDay < 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
         if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
         items.push ({year: v.year, era_id: _, direction: 'prev',
                      untilFirstDay, sinceFirstDay});
@@ -686,7 +706,7 @@ defineElement ({
       v.next_era_ids.forEach (_ => {
         var untilFirstDay = 0+v.relevant_era_ids[_].until_first_day;
         var sinceFirstDay = -untilFirstDay;
-        if (untilFirstDay <= 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
+        if (untilFirstDay < 0 || !Number.isFinite (untilFirstDay)) untilFirstDay = null;
         if (sinceFirstDay <= 0 || !Number.isFinite (sinceFirstDay)) sinceFirstDay = null;
         items.push ({year: v.year, era_id: _, direction: 'next',
                      untilFirstDay, sinceFirstDay});
@@ -742,6 +762,570 @@ defineElement ({
 }) ();
 
 defineElement ({
+  name: 'sw-era-transition-graph',
+  props: {
+    pcInit: async function () {
+      var tagId = this.getAttribute ('tagid');
+      var eras = await SWD.eraList ({tagId});
+      var eraIds = {};
+      var eraIdToEras = {};
+      var yearTrs = {};
+      var FUTURE = 9999; // Y10K!
+      eras.forEach (era => {
+        eraIds[era.id] = true;
+        eraIdToEras[era.id] = era;
+        yearTrs[era.known_oldest_year] = [];
+        yearTrs[era.known_latest_year] = [];
+        yearTrs[era.start_year] = [];
+        yearTrs[era.end_year] = [];
+      });
+      yearTrs[FUTURE] = [];
+      delete yearTrs.null;
+      delete yearTrs.undefined;
+      var trs = await SWD.eraTransitions ();
+      var eraStates = [];
+      for (var _ in trs) {
+        var tr = trs[_];
+        if ({
+          firstday: true,
+          administrative: true,
+          wartime: true,
+        }[tr.type]) {
+          var pushed = false;
+          for (var id in tr.relevant_era_ids) {
+            if (eraIds[id]) {
+              var year = (tr.day || tr.day_start).year;
+              yearTrs[year] = yearTrs[year] || [];
+              yearTrs[year].push (tr);
+              pushed = true;
+              break;
+            }
+          }
+          if (pushed) {
+            for (var id in tr.relevant_era_ids) {
+              var era = eraIdToEras[id];
+              if (eraStates[id]) continue;
+              var loaded = !!era;
+              if (!loaded) era = await SWD.era (id);
+              var c = eraStates[id] = {
+                era,
+                selected: loaded,
+                year: -Infinity,
+                yearNumbers: [],
+                end_year: era.end_year,
+                known_latest_year: era.known_latest_year,
+              };
+              if (c.era.start_year != null && c.end_year == null) {
+                c.end_year = FUTURE;
+                c.known_latest_year = FUTURE;
+              }
+            }
+          }
+        }
+      } // trs
+      eras.forEach (era => {
+        if (!eraStates[era.id]) {
+          var c = eraStates[era.id] = {
+            era,
+            selected: true,
+            year: -Infinity,
+            yearNumbers: [],
+            end_year: era.end_year,
+            known_latest_year: era.known_latest_year,
+          };
+          if (c.era.start_year != null && c.end_year == null) {
+            c.end_year = FUTURE;
+            c.known_latest_year = FUTURE;
+          }
+          var year = era.known_oldest_year;
+          if (year == null) year = era.start_year;
+          if (year == null) year = era.offset+1;
+          if (!Number.isFinite (year)) year = FUTURE;
+          var tr = {
+            relevant_era_ids: {},
+            prev_era_ids: {}, next_era_ids: {},
+          };
+          tr.relevant_era_ids[era.id] = true;
+          if (!yearTrs[year]) yearTrs[year] = [];
+          yearTrs[year].push (tr);
+        }
+      });
+
+      var table = document.createElement ('table');
+      var svg = document.createElementNS ('http://www.w3.org/2000/svg', 'svg');
+
+      var layers = {};
+      ['era-lines', 'year-boundaries', 'era-transitions', ''].forEach (_ => {
+        var g = document.createElementNS ('http://www.w3.org/2000/svg', 'g');
+        layers[_] = g;
+        svg.appendChild (g);
+      });
+      
+      var items = [];
+      var nextColumn = 0;
+      var columnWidth = 5*16;
+      var eraHeaderHeight = 16*3;
+      var nextRow = 0;
+      var rowHeight = 2*16;
+      var arrowHeight = 7;
+      var arrowMargin = 16*1.5;
+      var rowHeaderWidth = 16*10;
+      var rowHeaderHeight = 16*5;
+      var yearNumberWidth = 16*3;
+      var yearNumberHeight = 16*1.5;
+      var yearBoundaryMarginTop = 16;
+      var yearBoundaryMarginBottom = 16;
+
+      var insertText = args => {
+        var fo = document.createElementNS
+            ('http://www.w3.org/2000/svg', 'foreignObject');
+        if (args.left != null) {
+          fo.setAttribute ('x', args.left);
+        } else {
+          fo.setAttribute ('x', args.x - args.width/2);
+        }
+        if (args.top != null) {
+          fo.setAttribute ('y', args.top);
+        } else {
+          fo.setAttribute ('y', args.y - args.height/2);
+        }
+        fo.setAttribute ('width', args.width);
+        fo.setAttribute ('height', args.height);
+
+        var div = document.createElement ('div');
+        if (args.className) div.className = args.className;
+        (args.classList || []).forEach (_ => div.classList.toggle (_, !!_));
+        if (args.element) {
+          var e = document.createElement (args.element);
+          if (args.template) e.setAttribute ('template', args.template);
+          if (args.format) e.setAttribute ('format', args.format);
+          if (args.value != null) e.value = args.value;
+          div.appendChild (e);
+        } else {
+          div.textContent = args.text;
+        }
+
+        if (args.debug) {
+          fo.setAttribute ('data-debug', JSON.stringify (args.debug));
+        }
+
+        fo.appendChild (div);
+        layers[args.layer || ''].appendChild (fo);
+      }; // insertText
+
+      var insertLine = function (args) {
+        if (args.className === 'year-boundary') {
+          var n = Math.floor ((args.end[0] - args.start[0]) / 48);
+          var text = '';
+          for (var i = 0; i < n; i++) {
+            text += "\u2003";
+          }
+          return insertText ({
+            className: args.className,
+            text,
+            left: args.start[0],
+            y: args.start[1] - 48,
+            width: args.end[0] - args.start[0],
+            height: 48,
+            layer: args.layer,
+          });
+        }
+        var line = document.createElementNS
+            ('http://www.w3.org/2000/svg', 'line');
+        var margin = args.margin || 0;
+        if (args.start[0] < args.end[0]) {
+          line.setAttribute ('x1', args.start[0] + margin);
+          line.setAttribute ('x2', args.end[0] - margin);
+        } else {
+          line.setAttribute ('x1', args.start[0] - margin);
+          line.setAttribute ('x2', args.end[0] + margin);
+        }
+        line.setAttribute ('y1', args.start[1]);
+        line.setAttribute ('y2', args.end[1]);
+        line.setAttribute ('class', args.className);
+        if (args.lineType) line.setAttribute ('data-type', args.lineType);
+        layers[args.layer || ''].appendChild (line);
+      }; // insertLine
+
+      var activeEraStates = [];
+      var inactivatedEraStates = [];
+      var yearRows = [];
+      var insertEraHeader = (c, refYear) => {
+        var bottom = nextRow;
+        if (refYear != lastYear) bottom = yearRows[refYear].top;
+        c.column.bottom = bottom;
+        if (c.yearNumbers[refYear] && c.yearNumbers[refYear].top < bottom) {
+          bottom = c.yearNumbers[refYear].top;
+        }
+        insertText ({
+          classList: [
+            'era-header',
+            c.selected ? 'selected' : null,
+            c.era.tag_ids[1200] ? 'incorrect' : null,
+          ],
+          element: 'sw-data-era',
+          template: 'sw-data-era-item',
+          value: c.era.id,
+          left: c.column.left,
+          top: bottom - eraHeaderHeight,
+          width: columnWidth,
+          height: eraHeaderHeight,
+        });
+      }; // insertEraHeader
+
+      var insertYearLine2 = (c, close) => {
+        if (Number.isFinite (c.lineStartY)) {
+          if (c.selected) {
+            var bottom = c.bottom;
+            if (c.lineStartY < bottom) {
+              insertLine ({
+                start: [c.column.hCenter, c.lineStartY],
+                end: [c.column.hCenter, bottom],
+                className: (c.known_latest_year === c.end_year ? 'era-line era-range-line _2' : 'era-line era-known-line _2'), // _2 is for debugging
+                layer: 'era-lines',
+              });
+              if (c.column.bottom < bottom) c.column.bottom = bottom;
+            }
+          } else { // not selected
+            var bottom = c.lineEndY;
+            if (bottom < c.bottom) bottom = c.bottom;
+            if (c.lineStartY < bottom) {
+              insertLine ({
+                start: [c.column.hCenter, c.lineStartY],
+                end: [c.column.hCenter, bottom],
+                className: 'era-line era-continue-line',
+                layer: 'era-lines',
+              });
+              c.bottom = bottom;
+              if (c.column.bottom < bottom) c.column.bottom = bottom;
+            }
+            delete c.lineStartY;
+          }
+        }
+
+        if (close) {
+          var column = c.column;
+          delete column.assigned;
+          /*insertLine ({
+            start: [column.left, column.bottom],
+            end: [column.hCenter, column.bottom],
+          });*/
+        }
+      }; // insertYearLine2
+
+      var insertYearNumber = (c, year) => {
+        if (c.yearNumbers[year]) return false;
+        
+        if (c.year < year) {
+          insertYearLine2 (c, c.known_latest_year < year);
+          
+          var yr = year - c.era.offset;
+          if (c.era.offset == null || year === FUTURE) yr = "\u2003";
+          var y = nextRow;
+          if (year != lastYear) {
+            if (!yearRows[year]) return false;
+            y = yearRows[year].top;
+          }
+          if (c.column.bottom < y + yearNumberHeight) {
+            c.column.bottom = y + yearNumberHeight;
+          }
+          c.yearNumbers[year] = {top: y};
+          y += yearNumberHeight/2;
+          c.yearNumbers[year].vCenter = y;
+          insertText ({
+            text: yr,
+            x: c.column.hCenter,
+            y,
+            width: yearNumberWidth,
+            height: yearNumberHeight,
+            classList: [
+              'era-year-number',
+              c.era.tag_ids[1200] ? 'incorrect' : null,
+            ],
+          });
+          c.year = year;
+
+          if (!c.selected) {
+            var yTop = yearRows[year].top - yearBoundaryMarginBottom;
+            if (c.era.known_oldest_year < year) {
+              insertLine ({
+                start: [c.column.hCenter, yTop],
+                end: [c.column.hCenter, y],
+                className: 'era-line era-continue-line',
+                layer: 'era-lines',
+              });
+            }
+            if (year < c.known_latest_year) {
+              c.lineStartY = y;
+              c.lineEndY = y + rowHeaderHeight/2;
+            } else if (year == c.known_latest_year) {
+              c.lineStartY = y;
+              c.lineEndY = y;
+            }
+          } // !c.selected
+          
+          return true;
+        }
+        
+        return false;
+      }; // insertYearNumber
+
+      var lastYear = -Infinity;
+      var lastYearRow = -rowHeaderHeight;
+      var yearBoundaries = [];
+      var insertYearHeader = (year) => {
+        if (year <= lastYear) return;
+
+        inactivatedEraStates.forEach (c => insertYearLine2 (c, true));
+
+        var insertedYears = {};
+        insertedYears[year] = [];
+        inactivatedEraStates = [];
+        activeEraStates = activeEraStates.filter (c => {
+          var cy = c.era.known_oldest_year;
+          if (lastYear < cy && cy <= year) {
+            insertedYears[cy] = insertedYears[cy] || [];
+            insertedYears[cy].push (c);
+          }
+          var cy = c.era.start_year;
+          if (lastYear < cy && cy <= year) {
+            insertedYears[cy] = insertedYears[cy] || [];
+            insertedYears[cy].push (c);
+          }
+          var cy = c.end_year;
+          if (lastYear < cy && cy <= year) {
+            insertedYears[cy] = insertedYears[cy] || [];
+            insertedYears[cy].push (c);
+          }
+          
+          var cy = c.known_latest_year;
+          if (lastYear < cy && cy <= year) {
+            insertedYears[cy] = insertedYears[cy] || [];
+            insertedYears[cy].push (c);
+            inactivatedEraStates.push (c);
+            return false;
+          }
+          return true;
+        });
+
+        Object.keys (insertedYears).sort ((a,b) => a-b).forEach (y => {
+          y = parseInt (y);
+          if (lastYearRow + rowHeaderHeight > nextRow) {
+            nextRow = lastYearRow + rowHeaderHeight;
+          }
+          if (lastYear + 1 < y) {
+            nextRow += yearBoundaryMarginTop;
+            yearBoundaries.push (nextRow);
+            nextRow += yearBoundaryMarginBottom;
+          }
+          yearRows[y] = {
+            top: nextRow,
+          };
+          if (y !== FUTURE) insertText ({
+            className: 'year-header',
+            element: 'sw-data-year',
+            format: 'yearHeader',
+            value: y,
+            left: 0,
+            top: yearRows[y].top,
+            width: rowHeaderWidth,
+            height: rowHeaderHeight,
+          });
+          lastYear = y;
+          lastYearRow = nextRow;
+
+          insertedYears[y].forEach (c => {
+            if (c.selected) {
+              if (c.era.known_oldest_year != null) {
+                insertYearNumber (c, c.era.known_oldest_year);
+              }
+              var endYear = c.era.end_year;
+              if (c.era.start_year != null) {
+                insertYearNumber (c, c.era.start_year);
+              }
+              if (c.end_year != null) {
+                insertYearNumber (c, c.end_year);
+              }
+              if (c.known_latest_year != null) {
+                insertYearNumber (c, c.known_latest_year);
+              }
+              if (c.yearNumbers[c.era.known_oldest_year] &&
+                  c.yearNumbers[c.known_latest_year]) {
+                insertLine ({
+                  start: [c.column.hCenter,
+                          c.yearNumbers[c.era.known_oldest_year].vCenter],
+                  end: [c.column.hCenter,
+                        c.yearNumbers[c.known_latest_year].vCenter],
+                  className: 'era-line era-known-line',
+                  layer: 'era-lines',
+                });
+                if (c.known_latest_year == lastYear &&
+                    c.known_latest_year !== c.end_year) {
+                  c.lineStartY = c.yearNumbers[c.known_latest_year].vCenter;
+                }
+              }
+              if (c.yearNumbers[c.era.start_year] &&
+                  c.yearNumbers[c.end_year]) {
+                insertLine ({
+                  start: [c.column.hCenter,
+                          c.yearNumbers[c.era.start_year].vCenter],
+                  end: [c.column.hCenter, c.yearNumbers[c.end_year].vCenter],
+                  className: 'era-line era-range-line',
+                  layer: 'era-lines',
+                });
+                if (c.end_year == lastYear &&
+                    c.known_latest_year === c.end_year) {
+                  c.lineStartY = c.yearNumbers[c.end_year].vCenter;
+                }
+              }
+            } // c.selected
+          });
+        });
+      }; // insertYearHeader
+
+      nextColumn += rowHeaderWidth;
+      nextRow += eraHeaderHeight;
+
+      var Columns = [];
+      var assignColumn = (c, refCS) => {
+        if (c.column) return;
+
+        var weights = [];
+        refCS.forEach (cc => {
+          if (cc.column) {
+            weights[cc.column.index-3] = (weights[cc.column.index-3] || 0) + 1;
+            weights[cc.column.index-2] = (weights[cc.column.index-2] || 0) + 2;
+            weights[cc.column.index-1] = (weights[cc.column.index-1] || 0) + 3;
+            weights[cc.column.index+1] = (weights[cc.column.index+1] || 0) + 3;
+            weights[cc.column.index+2] = (weights[cc.column.index+2] || 0) + 2;
+            weights[cc.column.index+3] = (weights[cc.column.index+3] || 0) + 1;
+          }
+        });
+        
+        var column;
+        var cols = Columns.filter (_ => !_.assigned);
+        if (weights.length > Columns.length) cols.push ({new: true, index: Columns.length});
+        cols = cols.sort ((a,b) => (weights[b.index]||0)-(weights[a.index]||0));
+        for (var i = 0; i < cols.length; i++) {
+          var col = cols[i];
+          if (col.new) {
+            break;
+          } else if (col.bottom + yearBoundaryMarginBottom/*abused!*/ + eraHeaderHeight < nextRow) {
+            column = col;
+            break;
+          }
+        }
+        if (!column) {
+          column = {
+            left: nextColumn,
+            hCenter: nextColumn + columnWidth/2,
+            index: Columns.length,
+          };
+          Columns.push (column);
+          nextColumn += columnWidth;
+        }
+        
+        column.assigned = c;
+        c.column = column;
+      }; // assignColumn
+      
+      Object.keys (yearTrs).sort ((a,b) => a-b).forEach (year => {
+        var ehs = {};
+        yearTrs[year].forEach (tr => {
+          var cs = Object.keys (tr.prev_era_ids || {}).sort ((a,b) => a-b)
+              .concat (Object.keys (tr.relevant_era_ids).sort ((a,b) => a-b))
+              .map (id => eraStates[id]);
+          cs.forEach (c => {
+            if (c.headerAdded) return;
+
+            assignColumn (c, cs);
+            if (c.selected &&
+                c.era.known_oldest_year != null &&
+                c.era.known_oldest_year < year) {
+              insertYearNumber (c, c.era.known_oldest_year);
+              insertEraHeader (c, c.era.known_oldest_year);
+            } else {
+              ehs[c.era.id] = true;
+            }
+            activeEraStates.push (c);
+            
+            c.headerAdded = true;
+          }); // c
+        });
+        insertYearHeader (year);
+        var needYNHeight = false;
+        yearTrs[year].forEach (tr => {
+          var ynInserted = false;
+          Object.keys (tr.relevant_era_ids).forEach (id => {
+            var c = eraStates[id];
+            ynInserted = insertYearNumber (c, year) || ynInserted;
+            if (ehs[id]) insertEraHeader (c, year);
+            delete ehs[id];
+          });
+
+          var lines = [];
+          Object.keys (tr.prev_era_ids || {}).forEach (pid => {
+            var pc = eraStates[pid];
+            var x1 = pc.column.hCenter;
+            Object.keys (tr.next_era_ids || {}).forEach (nid => {
+              var nc = eraStates[nid];
+              var x2 = nc.column.hCenter;
+              lines.push ([x1, x2, pc, nc]);
+            });
+          });
+          if (ynInserted) needYNHeight = true;
+          if (!lines.length) return;
+          
+          var y = nextRow;
+          if (!ynInserted || lines.length * arrowHeight > yearNumberHeight) {
+            //
+          } else {
+            y = nextRow + (yearNumberHeight - lines.length * arrowHeight) / 2;
+          }
+          lines.forEach (_ => {
+            _[4] = y + arrowHeight/2;
+            y += arrowHeight;
+            _[2].bottom = y;
+            _[3].bottom = y;
+            insertLine ({
+              start: [_[0], _[4]],
+              end: [_[1], _[4]],
+              margin: arrowMargin,
+              className: 'era-transition',
+              lineType: tr.type,
+              layer: 'era-transitions',
+            });
+          }); // lines
+          if (ynInserted && nextRow + yearNumberHeight > y) {
+            nextRow += yearNumberHeight;
+          } else {
+            nextRow = y;
+          }
+          needYNHeight = false;
+        }); // trs
+        if (needYNHeight) nextRow += yearNumberHeight;
+      }); // year
+      insertYearHeader (FUTURE);
+      nextRow += yearNumberHeight;
+
+      nextColumn += columnWidth;
+      yearBoundaries.forEach (y => {
+        insertLine ({
+          start: [0, y],
+          end: [nextColumn, y],
+          className: 'year-boundary',
+          layer: 'year-boundaries',
+        });
+      });
+
+      svg.setAttribute ('width', nextColumn);
+      svg.setAttribute ('height', nextRow);
+      this.appendChild (svg);
+    }, // pcInit
+  },
+}); // <sw-era-transition-graph>
+
+defineElement ({
   name: 'sw-data-day',
   fill: 'idlattribute',
   props: {
@@ -782,6 +1366,34 @@ defineElement ({
                                   leap_month: !!m[3],
                                   day: parseFloat (m[4])};
       if (!m) args.nongli_tiger_hidden = '';
+
+      var m = (args.value.nongli_ox || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_ox = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_ox_hidden = '';
+      
+      var m = (args.value.nongli_rat || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_rat = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_rat_hidden = '';
+
+      var m = (args.value.nongli_qin || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_qin = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_qin_hidden = '';
+
+      var m = (args.value.nongli_wuzhou || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_wuzhou = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_wuzhou_hidden = '';
       
       var m = (args.value.kyuureki || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
       if (m) args.kyuureki = {year: parseFloat (m[1]),
