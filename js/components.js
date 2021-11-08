@@ -1,5 +1,7 @@
 (function () {
   var exportable = {$paco: {}};
+  var pcInternal = {};
+  pcInternal.$paco = exportable.$paco;
 
   var $promised = exportable.$promised = {};
 
@@ -178,6 +180,9 @@
     if (def.pcActionStatus) {
       def.props.pcActionStatus = commonMethods.pcActionStatus;
     }
+    if (def.pcInternal) {
+      def.props.pcInternal = pcInternal;
+    }
     
     upgrader[def.name] = upgrader[def.name] || {};
     var init = def.templateSet ? function () {
@@ -192,11 +197,12 @@
         return init.call (e);
       }
       return new Promise (function (ok) {
-        setInterval (function () {
+        var timer = setInterval (function () {
           if (e.nextSibling ||
               document.readyState === 'interactive' ||
               document.readyState === 'complete') {
             ok ();
+            clearInterval (timer);
           }
         }, 100);
       }).then (function () {
@@ -718,7 +724,24 @@
     },
   }); // button[is=mode-button]
 
-  function copyText (s) {
+  function parseCSSString (cssText, defaultText) {
+    var m = (cssText || 'auto').match (/^\s*"([^"\\]*)"\s*$/); // XXX escape
+    if (m) {
+      return m[1];
+    }
+
+    var m = (cssText || 'auto').match (/^\s*'([^'\\]*)'\s*$/); // XXX escape
+    if (m) {
+      return m[1];
+    }
+
+    return defaultText;
+  } // parseCSSString
+  pcInternal.parseCSSString = parseCSSString;
+  
+  var copyText = navigator.clipboard ? s => {
+    return navigator.clipboard.writeText (s);
+  } : function (s) { // for insecure context
     var e = document.createElement ('temp-text');
     e.style.whiteSpace = "pre";
     e.textContent = s;
@@ -727,16 +750,26 @@
     range.selectNode (e);
     getSelection ().empty ();
     getSelection ().addRange (range);
-    document.execCommand ('copy')
+    document.execCommand ('copy');
+    // empty string cannot be copied
     e.parentNode.removeChild (e);
-  } // copyText
+    // return undefined
+  }; // copyText
+
+  async function copyTextWithToast (e, s) {
+    await copyText (s);
+
+    // recompute!
+    var m = parseCSSString (getComputedStyle (e).getPropertyValue ('--paco-copied-message'), 'Copied!');
+    exportable.$paco.showToast ({text: m, className: 'paco-copied'});
+  } // copyTextWithToast
 
   defineElement ({
     name: 'a',
     is: 'copy-url',
     props: {
       pcInit: function () {
-        this.onclick = () => { copyText (this.href); return false };
+        this.onclick = () => { copyTextWithToast (this, this.href); return false };
       }, // pcInit
     },
   }); // <a is=copy-url>
@@ -755,11 +788,48 @@
           throw new Error ("Selector |"+selector+"| does not match any element in the document");
         }
 
-        copyText (selected.textContent);
+        copyTextWithToast (this, selected.textContent);
       }, // pcClick
     },
   }); // <button is=copy-text-content>
-  
+
+  defineElement ({
+    name: 'can-copy',
+    props: {
+      pcInit: function () {
+        // recompute!
+        var m = parseCSSString (getComputedStyle (this).getPropertyValue ('--paco-copy-button-label'), 'Copy');
+
+        var b = document.createElement ('button');
+        b.type = 'button';
+        b.textContent = m;
+        b.onclick = () => this.pcCopy ();
+        this.appendChild (b);
+      }, // pcInit
+      pcCopy: function () {
+        var e = this.querySelector ('code, data, time');
+        if (!e) throw new Error ('No copied data element');
+
+        var text;
+
+        // recompute!
+        var t = getComputedStyle (e).getPropertyValue ('--paco-copy-format') || 'auto';
+        if (/^\s*unix-tz-json\s*$/.test (t)) {
+          var d = {};
+          var dt = new Date (e.getAttribute ('datetime') || e.textContent);
+          d.unix = dt.valueOf () / 1000; // or NaN
+          var tz = parseFloat (e.getAttribute ('data-tzoffset'));
+          if (Number.isFinite (tz)) d.tzOffset = tz;
+          text = JSON.stringify (d);
+        } else {
+          text = e.textContent;
+        }
+
+        copyTextWithToast (this, text);
+      }, // pcCopy
+    }, // props
+  }); // <can-copy>
+
   defineElement ({
     name: 'popup-menu',
     props: {
@@ -880,10 +950,28 @@
     name: 'tab-set',
     props: {
       pcInit: function () {
-        new MutationObserver (() => this.tsInit ()).observe (this, {childList: true});
-        Promise.resolve ().then (() => this.tsInit ());
+        this.pcInitialURL = location.href;
+        Promise.resolve ().then (() => {
+          this.tsInit ({});
+          this.setAttribute ('ready', '');
+        });
+        new MutationObserver (() => this.tsInit ({})).observe (this, {childList: true});
+
+        if (!window.pcTSListenersInstalled) {
+          window.pcTSListenersInstalled = true;
+          window.addEventListener ('hashchange', () => {
+            document.querySelectorAll ('tab-set').forEach (e => {
+              Promise.resolve ().then (() => e.tsShowTabByURL ({initiatorType: 'url'}));
+            });
+          });
+          window.addEventListener ('pcLocationChange', (ev) => {
+            document.querySelectorAll ('tab-set').forEach (e => {
+              Promise.resolve ().then (() => e.tsShowTabByURL ({initiator: ev.pcInitiator, initiatorType: 'url'}));
+            });
+          });
+        }
       }, // pcInit
-      tsInit: function () {
+      tsInit: function (opts) {
         var tabMenu = null;
         var tabSections = [];
         Array.prototype.forEach.call (this.children, function (f) {
@@ -896,21 +984,104 @@
       
         if (!tabMenu) return;
 
-        tabMenu.textContent = '';
+        var x = null;
+        Array.prototype.slice.call (tabMenu.childNodes).forEach (e => {
+          if (e.localName === 'tab-menu-extras') {
+            x = x || e;
+          } else {
+            e.remove ();
+          }
+        });
         tabSections.forEach ((f) => {
           var header = f.querySelector ('h1');
           var a = document.createElement ('a');
+          var path = f.getAttribute ('data-pjax');
+          if (!path && f.id) {
+            path = '#' + encodeURIComponent (f.id);
+          }
           a.href = 'javascript:';
-          a.onclick = () => this.tsShowTab (a.tsSection);
+          if (path !== null) {
+            try {
+              a.href = new URL (path, this.pcInitialURL);
+            } catch (e) { } // e.g. <about:srcdoc>
+          }
+          a.onclick = () => {
+            this.tsShowTab (a.tsSection, {initiatorType: 'tab'});
+            return false;
+          };
           a.textContent = header ? header.textContent : '§';
           a.className = f.getAttribute ('data-tab-button-class') || '';
+          if (f.classList.contains ('active')) a.classList.add ('active');
           a.tsSection = f;
-          tabMenu.appendChild (a);
+          tabMenu.insertBefore (a, x);
         });
 
-        if (tabSections.length) this.tsShowTab (tabSections[0]);
+        this.tsShowTabByURL ({initiatorType: null});
       }, // tsInit
-      tsShowTab: function (f) {
+      tsShowTabByURL: function (opts) {
+        if (opts.initiator === this) return;
+        var tabSections = [];
+        Array.prototype.forEach.call (this.children, function (f) {
+          if (f.localName === 'section') {
+            tabSections.push (f);
+          }
+        });
+        var currentURL = location.href;
+        var currentPageURL = currentURL.replace (/#.+$/, '');
+        var initial = null;
+        var matchedTabSections = [];
+        tabSections.forEach (f => {
+          var path = f.getAttribute ('data-pjax');
+          if (!path && f.id) {
+            path = '#' + encodeURIComponent (f.id);
+          }
+          if (path !== null) {
+            try {
+              var url = new URL (path, this.pcInitialURL);
+              if (url.href === currentURL) {
+                initial = f;
+              } else if (url.href === currentPageURL) {
+                initial = initial || f;
+              }
+              if (this.pcLastSelectedTabURL &&
+                  this.pcLastSelectedTabURL === url.href) {
+                matchedTabSections.push (f);                
+              }
+            } catch (e) { } // e.g. <about:srcdoc>
+          }
+          var paths = (f.getAttribute ('data-pjax-selecting') || "").split (/\s+/).filter (_ => _.length);
+          paths.forEach (path => {
+            try {
+              var url = new URL (path, this.pcInitialURL);
+              if (url.href === currentURL) {
+                initial = initial || f;
+              } else if (url.href === currentPageURL) {
+                initial = initial || f;
+              } else if (/#/.test (currentURL) &&
+                         currentURL.substring (0, url.href.length) === url.href) {
+                initial = initial || f;
+              }
+            } catch (e) { } // e.g. <about:srcdoc>
+          });
+        });
+        if ((!initial || !opts.initiatorType) && matchedTabSections.length) {
+          initial = matchedTabSections[0];
+        }
+        if (!initial) {
+          var hasActive = false;
+          var nonActive = tabSections.filter (t => {
+            if (t.classList.contains ('active')) {
+              hasActive = true;
+              return false;
+            } else {
+              return true;
+            }
+          });
+          if (!hasActive) initial = nonActive[0]; // or undefined
+        }
+        if (initial) this.tsShowTab (initial, {initiatorType: opts.initiatorType});
+      }, // tsShowTabByURL
+      tsShowTab: function (f, opts) {
         var tabMenu = null;
         var tabSections = [];
         Array.prototype.forEach.call (this.children, function (f) {
@@ -927,6 +1098,27 @@
         tabSections.forEach ((g) => {
           g.classList.toggle ('active', f === g);
         });
+        var path = f.getAttribute ('data-pjax');
+        if (!path && f.id) {
+          path = '#' + encodeURIComponent (f.id);
+        }
+        if (path !== null) {
+          try {
+            var x = location;
+            var y = new URL (path, this.pcInitialURL);
+            if (x.hash && y.hash === '') y += x.hash;
+            
+            if (x.href !== y.href) {
+              history.replaceState (null, null, y);
+              var evc = new Event ('pcLocationChange', {bubbles: true});
+              evc.pcInitiator = this;
+              Promise.resolve ().then (() => window.dispatchEvent (evc));
+              if (opts.initiatorType === 'tab') {
+                this.pcLastSelectedTabURL = y.href;
+              }
+            }
+          } catch (e) { } // e.g. <about:srcdoc>
+        }
         var ev = new Event ('show', {bubbles: true});
         Promise.resolve ().then (() => f.dispatchEvent (ev));
       }, // tsShowTab
@@ -984,6 +1176,72 @@
       }, // pcSetMode
     },
   }); // <sub-window>
+
+  // <toast-group>
+  exportable.$paco.showToast = function (opts) {
+    var g = document.querySelector ('toast-group');
+    if (!g) {
+      g = document.createElement ('toast-group');
+      (document.body || document.head || document.documentElement).appendChild (g);
+    }
+
+    var b = document.createElement ('toast-box');
+    if (opts.className != null) b.className = opts.className;
+
+    g.appendChild (b);
+
+    if (opts.fragment) {
+      b.appendChild (opts.fragment);
+    } else { // no opts.fragment
+      // recompute!
+      var t = parseCSSString (getComputedStyle (b).getPropertyValue ('--paco-close-button-label'), '×');
+      
+      var h = document.createElement ('toast-box-header');
+      var button = document.createElement ('button');
+      button.type = 'button';
+      button.setAttribute ('is', 'toast-close-button');
+      button.textContent = t;
+      h.appendChild (button);
+      b.appendChild (h);
+
+      var m = document.createElement ('toast-box-main');
+      m.textContent = opts.text;
+      b.appendChild (m);
+    } // no opts.fragment
+
+    return b;
+  }; // showToast
+
+  defineElement ({
+    name: 'toast-box',
+    props: {
+      pcInit: function () {
+        this.querySelectorAll ('button[is=toast-close-button]').forEach (_ => {
+          _.onclick = () => this.pcClose ();
+        });
+
+        // recompute!
+        var v = getComputedStyle (this).getPropertyValue ('--paco-toast-autoclose') || 'auto';
+        if (/^\s*none\s*$/.test (v)) {
+          //
+        } else {
+          var s = NaN;
+          if (/^\s*[0-9.+-]+s\s*$/.test (v)) {
+            s = parseFloat (v) * 1000;
+          } else if (/^\s*[0-9.+-]+ms\s*$/.test (v)) {
+            s = parseFloat (v);
+          }
+          if (!Number.isFinite (s) || s <= 0) s = 5*1000;
+          setTimeout (() => this.pcClose (), s);
+        }
+
+        this.addEventListener ('pcDone', () => this.pcClose (), {once: true});
+      }, // pcInit
+      pcClose: function () {
+        this.remove ();
+      }, // pcClose
+    },
+  }); // <toast-box>
   
   defs.loader.src = function (opts) {
     if (!this.hasAttribute ('src')) return {};
@@ -1035,8 +1293,7 @@
           Array.prototype.forEach.call (m.addedNodes, (e) => {
             if (e.nodeType === e.ELEMENT_NODE) {
               if (e.matches (selector) || e.querySelector (selector)) {
-                var listContainer = this.lcGetListContainer ();
-                if (listContainer) listContainer.textContent = '';
+                this.pcClearListContainer ();
                 this.lcDataChanges.changed = true;
                 this.lcRequestRender ();
               }
@@ -1047,14 +1304,12 @@
 
       this.addEventListener ('pctemplatesetupdated', (ev) => {
         this.lcTemplateSet = ev.pcTemplateSet;
-
-        var listContainer = this.lcGetListContainer ();
-        if (listContainer) listContainer.textContent = '';
+        this.pcClearListContainer ();
         if (this.lcDataChanges) this.lcDataChanges.changed = true;
         this.lcRequestRender ();
       });
-      this.load ({});
-    }, // pcInit
+        this.load ({});
+      }, // pcInit
 
       lcGetNextInterval: function (currentInterval) {
         if (!currentInterval) return 10 * 1000;
@@ -1063,7 +1318,10 @@
         return interval;
       }, // lcGetNextInterval
       load: function (opts) {
-        if (!opts.page || opts.replace) this.lcClearList ();
+        if (!opts.page || opts.replace) {
+          this.lcClearList ();
+          this.pcNeedClearListContainer = true;
+        }
         return this.lcLoad (opts).then ((done) => {
           if (done) {
             this.lcDataChanges.scroll = opts.scroll;
@@ -1098,27 +1356,39 @@
         Object.keys (opts2 || {}).forEach (_ => opts[_] = opts2[_]);
         return this.load (opts);
       }, // loadNext
-    lcClearList: function () {
-      this.lcData = [];
-      this.lcDataChanges = {append: [], prepend: [], changed: false};
-      this.lcPrev = {};
-      this.lcNext = {};
+      lcClearList: function () {
+        this.lcData = [];
+        this.lcDataChanges = {append: [], prepend: [], changed: false};
+        this.lcPrev = {};
+        this.lcNext = {};
+      }, // lcClearList
+      pcClearListContainer: function () {
+        var listContainer = this.lcGetListContainer ();
+        if (!listContainer) return;
+        if (listContainer.localName === 'tab-set') {
+          Array.prototype.slice.call (listContainer.childNodes).forEach (n => {
+            if (n.localName !== 'tab-menu') n.remove ();
+          });
+        } else {
+          listContainer.textContent = '';
+        }
+      }, // pcClearListContainer
+      lcGetListContainerSelector: function () {
+        var type = this.getAttribute ('type');
+        if (type === 'table') {
+          return 'tbody';
+        } else if (type === 'tab-set') {
+          return 'tab-set';
+        } else if (type === 'ul' || type === 'ol') {
+          return type;
+        } else {
+          return 'list-main';
+        }
+      }, // lcGetListContainerSelector
+      lcGetListContainer: function () {
+        return this.querySelector (this.lcGetListContainerSelector ());
+      }, // lcGetListContainer
       
-      var listContainer = this.lcGetListContainer ();
-      if (listContainer) listContainer.textContent = '';
-    }, // lcClearList
-    lcGetListContainerSelector: function () {
-      var type = this.getAttribute ('type');
-      if (type === 'table') {
-        return 'tbody';
-      } else {
-        return 'list-main';
-      }
-    }, // lcGetListContainerSelector
-    lcGetListContainer: function () {
-      return this.querySelector (this.lcGetListContainerSelector ());
-    }, // lcGetListContainer
-    
       lcLoad: function (opts) {
         var resolve;
         var reject;
@@ -1220,6 +1490,11 @@
         var listContainer = this.lcGetListContainer ();
         if (!listContainer) return;
 
+        if (this.pcNeedClearListContainer) {
+          this.pcClearListContainer ();
+          delete this.pcNeedClearListContainer;
+        }
+
         this.querySelectorAll ('a.list-prev, button.list-prev').forEach ((e) => {
           e.hidden = ! this.lcPrev.has;
           if (e.localName === 'a') {
@@ -1229,6 +1504,9 @@
             scroll: e.getAttribute ('data-list-scroll'),
             replace: e.hasAttribute ('data-list-replace'),
           }); return false };
+        });
+        this.querySelectorAll ('button.list-reload').forEach (e => {
+          e.onclick = () => this.load ({});
         });
         this.querySelectorAll ('a.list-next, button.list-next').forEach ((e) => {
           e.hidden = ! this.lcNext.has;
@@ -1240,16 +1518,29 @@
             replace: e.hasAttribute ('data-list-replace'),
           }); return false };
         });
+        var hasListItem = this.lcData.length > 0;
         this.querySelectorAll ('list-is-empty').forEach ((e) => {
-          e.hidden = this.lcData.length > 0;
+          e.hidden = hasListItem;
         });
+        if (this.hasAttribute ('hascontainer')) {
+          var e = this.parentNode;
+          while (e && e.localName !== 'section') {
+            e = e.parentNode;
+          }
+          if (e && e.localName === 'section') {
+            e.hidden = !hasListItem;
+          }
+        }
 
       var tm = this.lcTemplateSet;
       var changes = this.lcDataChanges;
       this.lcDataChanges = {changed: false, prepend: [], append: []};
-      var itemLN = {
-        tbody: 'tr',
-      }[listContainer.localName] || 'list-item';
+        var itemLN = {
+          tbody: 'tr',
+          'tab-set': 'section',
+          ul: 'li',
+          ol: 'li',
+        }[listContainer.localName] || 'list-item';
       return Promise.resolve ().then (() => {
         if (changes.changed) {
           return $promised.forEach ((object) => {
@@ -1330,6 +1621,7 @@
             this.sdClickedButton = null;
           }
 
+          this.pc_cantSendFocus = true;
           var disabledControls = this.querySelectorAll
               ('input:enabled, select:enabled, textarea:enabled, button:enabled');
           var customControls = this.querySelectorAll ('[formcontrol]:not([disabled])');
@@ -1347,6 +1639,8 @@
               });
 
           var as = this.pcActionStatus ();
+          as.start ({stages: ['formdata', 'formvalidator', 'saver', 'formsaved']});
+          as.stageStart ('formdata');
           
           $promised.forEach ((_) => {
             if (_.pcModifyFormData) {
@@ -1356,6 +1650,7 @@
               throw "A form control is not initialized";
             }
           }, customControls).then (() => {
+            as.stageStart ('formvalidator');
             return $promised.forEach ((_) => {
               return getDef ("formvalidator", _).then ((handler) => {
                 return handler.call (this, {
@@ -1364,13 +1659,13 @@
               });
             }, validators);
           }).then (() => {
-            as.start ({stages: ['saver']});
             as.stageStart ('saver');
             return getDef ("saver", this.getAttribute ('data-saver') || 'form').then ((saver) => {
               return saver.call (this, fd);
             });
           }).then ((res) => {
             this.removeAttribute ('data-pc-modified');
+            as.stageStart ('formsaved');
             var p;
             var getJSON = function () {
               return p = p || res.json ();
@@ -1388,16 +1683,25 @@
             disabledControls.forEach ((_) => _.removeAttribute ('disabled'));
             customControls.forEach ((_) => _.removeAttribute ('disabled'));
             as.end ({ok: true});
+
+            var e = this.pc_focusToBeSent;
+            if (e) Promise.resolve ().then (() => e.focus ());
+            this.pc_cantSendFocus = false;
+            this.pc_focusToBeSent = null;
           }).catch ((e) => {
             disabledControls.forEach ((_) => _.removeAttribute ('disabled'));
             customControls.forEach ((_) => _.removeAttribute ('disabled'));
             as.end ({error: e});
+            
+            this.pc_cantSendFocus = false;
+            this.pc_focusToBeSent = null; // discard
           });
           return false;
         }; // onsubmit
       }, // sdInit
       sdCheck: function () {
-        if (!this.hasAttribute ('action')) {
+        if (!this.hasAttribute ('action') &&
+            !this.hasAttribute ('data-saver')) {
           console.log (this, 'Warning: form[is=save-data] does not have |action| attribute');
         }
         if (this.method !== 'post') {
@@ -1414,6 +1718,14 @@
           console.log (this, 'Warning: form[is=save-data] have an |onsubmit| attribute');
         }
       }, // sdCheck
+
+      pcSendFocus: function (e) {
+        if (this.pc_cantSendFocus) {
+          this.pc_focusToBeSent = e;
+        } else {
+          Promise.resolve ().then (() => e.focus ());
+        }
+      }, // pcSendFocus
     }, // props
   }); // <form is=save-data>
 
@@ -1442,6 +1754,11 @@
       return new Promise (() => {});
     });
   }; // go
+
+  defs.formsaved.focus = function (args) {
+    var e = this.querySelector (args.args[1]);
+    this.pcSendFocus (e);
+  }; // focus
 
   defineElement ({
     name: 'before-unload-check',
@@ -1565,6 +1882,7 @@
         if (!Number.isFinite (this.pcValueTZ)) {
           this.pcValueTZ = -(new Date).getTimezoneOffset () * 60;
         }
+        this.pcMinStep = 1;
         var setValue = (newValue) => {
           var d = new Date ((newValue + this.pcValueTZ) * 1000);
           this.pcValueDate = Math.floor (d.valueOf () / (24 * 60 * 60 * 1000)) * 24 * 60 * 60;
@@ -2318,91 +2636,16 @@
 
     // ieGooglePickerAPI
     ieLoadGooglePickerAPI: function () {
-      return this.ieGooglePickerAPI = this.ieGooglePickerAPI || new Promise ((ok, ng) => {
-        var name = 'pacoCB' + Math.random ().toString ().replace (/\./, '');
-        var script = document.createElement ('script');
-        script.src = 'https://apis.google.com/js/api.js?onload=' + name;
-        script.onerror = ng;
-        document.head.appendChild (script);
-        window[name] = function () {
-          delete window[name];
-          ok ();
-        };
-      }).then (() => {
-        return Promise.all ([
-          new Promise (ok => {
-            gapi.load ('auth2', ok);
-          }),
-          new Promise (ok => {
-            gapi.load ('picker', ok);
-          }),
-        ]);
-      });
+      return Promise.resolve ();
     }, // ieLoadGooglePickerAPI
     //ieGoogleOAuthToken
     iePrepareGoogleOAuth: function () {
-      if (this.ieGoogleOAuthToken) return Promise.resolve ();
-      return this.ieLoadGooglePickerAPI ().then (() => {
-        return new Promise ((ok, ng) => {
-          var scope = 'https://www.googleapis.com/auth/photos';
-          var clientId = document.documentElement.getAttribute ('data-google-picker-client-id');
-          if (!clientId) throw new DOMException ('<html data-google-picker-client-id> is not specified', 'InvalidStateError');
-          gapi.auth2.init ({client_id: clientId}).then ((ga) => {
-            ga.signIn ({scope: scope}).then ((result) => {
-              var auth = result.getAuthResponse ();
-              if (auth && !auth.error) {
-                this.ieGoogleOAuthToken = auth.access_token;
-                ok ();
-              } else {
-                ng (auth);
-              }
-            });
-          });
-        });
-      });
+      return Promise.resolve ();
     }, // iePrepareGoogleOAuth
     // XXX not tested :-<
     selectImageFromGooglePhotos: function () {
-      var key = document.documentElement.getAttribute ('data-google-picker-key');
-      var proxyTemplate = document.documentElement.getAttribute ('data-paco-image-proxy');
-      return Promise.resolve ().then (() => {
-        if (!key) throw new DOMException ('<html data-google-picker-key> is not specified', 'InvalidStateError');
-        if (!proxyTemplate) throw new DOMException ('<html data-paco-image-proxy> is not specified', 'InvalidStateError');
-        return this.ieLoadGooglePickerAPI ();
-      }).then (() => {
-        return this.iePrepareGoogleOAuth ();
-      }).then (() => {
-        return new Promise ((ok, ng) => {
-          var picker = new google.picker.PickerBuilder()
-              .addView (google.picker.ViewId.PHOTOS)
-              .addView ((new google.picker.PhotosView).setType ("camerasync"))
-              .addView (google.picker.ViewId.PHOTO_UPLOAD)
-              .setOAuthToken (this.ieGoogleOAuthToken)
-              .setDeveloperKey (key)
-              .setLocale (navigator.language)
-              .setCallback ((data) => {
-                //console.log (data);
-                if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-                  ok (data);
-                } else if (data[google.picker.Response.ACTION] == google.picker.Action.CANCEL) {
-                  ng (new DOMException ('User canceled', 'AbortError'));
-                }
-                // LOADED, ...
-              })
-              .build ();
-          picker.setVisible (true);
-        });
-      }).then (data => {
-        var doc = data[google.picker.Response.DOCUMENTS][0];
-        var url = doc[google.picker.Document.URL];
-        var imageURL = doc.thumbnails[doc.thumbnails.length-1].url;
-        if (!imageURL) throw new Error ('Google Picker API response is broken');
-        imageURL = imageURL.replace (/\/s[0-9]+[-a-z]*\/([^\/]+)$/, '/s1200/$1');
-        if (!/\/s1200\/[^\/]+$/.test (imageURL)) {
-          imageURL = imageURL.replace (/(?=[^\/]+$)/, 's1200/');
-        }
-        return this.selectImageByURL ($fill.string (proxyTemplate, {url: imageURL}));
-      });
+      if (!this.hasAttribute ('data-test')) alert ('Google no longer supports this feature.');
+      return Promise.reject (new DOMException ('Google Picker API no longer supports Google Photos.', 'AbortError'));
     }, // selectImageFromGooglePhotos
 
     ieRotateByDegree: function (degree) {
@@ -2719,7 +2962,7 @@
 
 /*
 
-Copyright 2017-2020 Wakaba <wakaba@suikawiki.org>.
+Copyright 2017-2021 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

@@ -481,6 +481,17 @@
         </template>
       </list-container>
     </section>
+
+    <section>
+      <h1>関連タグ</h1>
+
+      <list-container loader=swRelatedTagListLoader data-loader-tagid-field=tag.id type=ul data-filled=loader-tagid hascontainer>
+        <ul class=item-list></ul>
+        <template>
+          <a data-href-template=/tag/{id}/>#<bdi data-field=label></bdi></a>
+        </template>
+      </list-container>
+    </section>
   </template>
   <template data-name=page-tag-item-graph title="#{tag.label}">
     <hgroup>
@@ -491,8 +502,25 @@
 
     <p><a href=./>紀年法の一覧</a> / <a href=graph class=active>変遷</a></p>
 
-    <sw-era-transition-graph data-tagid-field=tag.id data-filled=tagid></sw-era-transition-graph>
+    <sw-era-transition-graph data-tagid-field=tag.id data-filled=tagid>
+      <action-status><progress></progress></action-status>
+    </sw-era-transition-graph>
+
+    <section>
+      <h1>関連タグ</h1>
+
+      <list-container loader=swRelatedTagListLoader data-loader-tagid-field=tag.id type=ul data-filled=loader-tagid hascontainer>
+        <ul class=item-list></ul>
+        <template>
+          <a data-href-template=/tag/{id}/graph>#<bdi data-field=label></bdi></a>
+        </template>
+      </list-container>
+    </section>
   </template>
+</template-set>
+
+<template-set name=pageSideTemplate templateselector=selectPageTemplate>
+  <template></template>
 </template-set>
 
 <template-set name=swTransitionListItem>
@@ -844,6 +872,8 @@
       (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
     <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
+
+    <div is=sw-page-side template=pageSideTemplate></div>
   </aside>
 
 <footer class=site>
