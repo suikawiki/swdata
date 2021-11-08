@@ -195,6 +195,49 @@ defineElement ({
   },
 }); // <section is=sw-page-main>
 
+defineElement ({
+  name: 'div',
+  is: 'sw-page-side',
+  templateSet: true,
+  props: {
+    pcInit: function () {
+      this.addEventListener ('pctemplatesetupdated', (ev) => {
+        this.swTemplateSet = ev.pcTemplateSet;
+        this.swUpdate ();
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: function () {
+      if (!this.swTemplateSet) return;
+
+      return Promise.resolve ().then (async () => {
+        var args = {};
+        var path = location.pathname;
+
+        /*
+        // /tag/{}/
+        var m = path.match (/^\/tag\/([0-9]+)\/(?:graph|)$/);
+        if (m) {
+          args.tagId = parseFloat (m[1]);
+          args.tag = await SWD.tag (args.tagId);
+          if (args.tag) args.name = 'page-tag-item-*';
+          return args;
+        }
+        */
+
+        args.name = '';
+        return args;
+      }).then (args => {
+        var e = this.swTemplateSet.createFromTemplate ('div', args);
+        this.textContent = '';
+        while (e.firstChild) {
+          this.appendChild (e.firstChild);
+        }
+      });
+    }, // swUpdate
+  },
+}); // <div is=sw-page-side>
+
 (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
@@ -673,6 +716,25 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
   return {data: items};
 });
 
+defineListLoader ('swRelatedTagListLoader', function (opts) {
+  var thisTagId = this.getAttribute ('loader-tagid');
+  return SWD.eraList ({
+    tagId: thisTagId,
+  }).then (eras => {
+    var tagIds = {};
+    Object.values (eras).forEach (era => {
+      Object.keys (era.tag_ids || {}).forEach (tagId => {
+        tagIds[tagId] = (tagIds[tagId] || 0) + 1;
+      });
+    });
+    delete tagIds[thisTagId];
+    var list = Object.keys (tagIds).sort ((a,b) => tagIds[b]-tagIds[a] || a-b).slice (0, 30);
+    return SWD.tagsByIds (list);
+  }).then (tags => {
+    return {data: tags};
+  });
+});
+
 defineElement ({
   name: 'sw-transition-neighbors',
   fill: 'idlattribute',
@@ -974,6 +1036,7 @@ defineElement ({
       }; // insertEraHeader
 
       var insertYearLine2 = (c, close) => {
+            console.log(c);
         if (Number.isFinite (c.lineStartY)) {
           if (c.selected) {
             var bottom = c.bottom;
@@ -1062,6 +1125,7 @@ defineElement ({
               c.lineStartY = y;
               c.lineEndY = y;
             }
+            console.log(c,c.lineStartY);
           } // !c.selected
           
           return true;
@@ -1229,7 +1293,12 @@ defineElement ({
         c.column = column;
       }; // assignColumn
       
-      Object.keys (yearTrs).sort ((a,b) => a-b).forEach (year => {
+      var years = Object.keys (yearTrs).sort ((a,b) => a-b);
+      for (var i = 0; i < years.length; i++) {
+        if ((i % 30) === 1) {
+          await new Promise (ok => setTimeout (ok, 100));
+        }
+        var year = years[i];
         var ehs = {};
         yearTrs[year].forEach (tr => {
           var cs = Object.keys (tr.prev_era_ids || {}).sort ((a,b) => a-b)
@@ -1304,9 +1373,9 @@ defineElement ({
           needYNHeight = false;
         }); // trs
         if (needYNHeight) nextRow += yearNumberHeight;
-      }); // year
+      } // year
       insertYearHeader (FUTURE);
-      nextRow += yearNumberHeight;
+      nextRow += yearNumberHeight; // sometimes more than required
 
       nextColumn += columnWidth;
       yearBoundaries.forEach (y => {
@@ -1320,6 +1389,8 @@ defineElement ({
 
       svg.setAttribute ('width', nextColumn);
       svg.setAttribute ('height', nextRow);
+
+      this.textContent = '';
       this.appendChild (svg);
     }, // pcInit
   },

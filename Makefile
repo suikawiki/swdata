@@ -15,7 +15,7 @@ updatenightly: local/bin/pmbp.pl
 ## ------ Setup ------
 
 deps: git-submodules pmbp-install build
-deps-docker: pmbp-install build
+deps-docker: pmbp-install build-local
 
 git-submodules:
 	$(GIT) submodule update --init
@@ -43,7 +43,8 @@ pmbp-install: pmbp-upgrade ./lserver
 
 ## ------ Build ------
 
-build: local/data \
+build: build-local build-repo
+build-local: local/data \
     local/data/jp-holidays.json local/data/ryukyu-holidays.json \
     local/data/jp-flagdays.json \
     local/data/calendar-era-defs.json \
