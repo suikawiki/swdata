@@ -833,6 +833,9 @@ defineElement ({
       var eraIdToEras = {};
       var yearTrs = {};
       var FUTURE = 9999; // Y10K!
+      var thisYear = (new Date).getFullYear ();
+      yearTrs[thisYear] = [];
+      yearTrs[FUTURE] = [];
       eras.forEach (era => {
         eraIds[era.id] = true;
         eraIdToEras[era.id] = era;
@@ -841,7 +844,6 @@ defineElement ({
         yearTrs[era.start_year] = [];
         yearTrs[era.end_year] = [];
       });
-      yearTrs[FUTURE] = [];
       delete yearTrs.null;
       delete yearTrs.undefined;
       var trs = await SWD.eraTransitions ();
@@ -932,7 +934,7 @@ defineElement ({
       var arrowHeight = 7;
       var arrowMargin = 16*1.5;
       var rowHeaderWidth = 16*10;
-      var rowHeaderHeight = 16*5;
+      var rowHeaderHeight = 16*6;
       var yearNumberWidth = 16*3;
       var yearNumberHeight = 16*1.5;
       var yearBoundaryMarginTop = 16;
@@ -1186,7 +1188,10 @@ defineElement ({
             top: nextRow,
           };
           if (y !== FUTURE) insertText ({
-            className: 'year-header',
+            classList: [
+              'year-header',
+              (y == thisYear ? 'this-year' : null),
+            ],
             element: 'sw-data-year',
             format: 'yearHeader',
             value: y,
@@ -1197,6 +1202,12 @@ defineElement ({
           });
           lastYear = y;
           lastYearRow = nextRow;
+
+          if (y == thisYear) {
+            activeEraStates.forEach (c => {
+              insertYearNumber (c, y);
+            });
+          }
 
           insertedYears[y].forEach (c => {
             if (c.selected) {

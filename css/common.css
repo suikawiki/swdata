@@ -750,8 +750,13 @@ sw-era-transition-graph .era-header.incorrect bdi {
 sw-era-transition-graph .year-header {
   justify-content: end;
   text-align: right;
-  padding-right: 1em;
+  padding: .5em;
   line-height: 1.1;
+}
+
+sw-era-transition-graph .year-header.this-year {
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
 }
 
 sw-era-transition-graph .year-header p {
