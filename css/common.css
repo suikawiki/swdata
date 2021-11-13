@@ -724,8 +724,12 @@ sw-era-transition-graph foreignObject > div {
 
 sw-era-transition-graph .era-header {
   align-items: end;
+  padding: .5em;
   line-height: 1.1;
-  padding-bottom: .5em;
+}
+
+sw-era-transition-graph .era-header.bottom {
+  align-items: start;
 }
 
 sw-era-transition-graph .era-header.selected {
@@ -752,6 +756,11 @@ sw-era-transition-graph .year-header {
   text-align: right;
   padding: .5em;
   line-height: 1.1;
+}
+
+sw-era-transition-graph .year-header.right {
+  justify-content: start;
+  text-align: left;
 }
 
 sw-era-transition-graph .year-header.this-year {
@@ -832,6 +841,15 @@ sw-era-transition-graph .year-boundary {
   color: var(--border-2-color);
   background: transparent;
   user-select: none;
+}
+
+.XX\58-debug {
+  color: red !important;
+  stroke: currentcolor !important;
+}
+.XX\58-debug2 {
+  color: green !important;
+  stroke: currentcolor !important;
 }
 
 /*
