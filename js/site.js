@@ -846,8 +846,14 @@ defineElement ({
         var tr = trs[_];
         if ({
           firstday: true,
+          'firstday/possible': true,
+          'firstday/possible': true,
           administrative: true,
+          'administrative/possible': true,
+          'administrative/possible': true,
           wartime: true,
+          'wartime/possible': true,
+          'wartime/incorrect': true,
         }[tr.type]) {
           var pushed = false;
           for (var id in tr.relevant_era_ids) {
@@ -979,14 +985,14 @@ defineElement ({
       }; // insertText
 
       var insertLine = function (args) {
-        if (args.className === 'year-boundary') {
+        if (args.wave) {
           var n = Math.floor ((args.end[0] - args.start[0]) / 48);
           var text = '';
           for (var i = 0; i < n; i++) {
             text += "\u2003";
           }
           return insertText ({
-            className: args.className,
+            classList: args.classList,
             text,
             left: args.start[0],
             y: args.start[1] - 36,
@@ -995,6 +1001,7 @@ defineElement ({
             layer: args.layer,
           });
         }
+        
         var line = document.createElementNS
             ('http://www.w3.org/2000/svg', 'line');
         var margin = args.margin || 0;
@@ -1007,8 +1014,7 @@ defineElement ({
         }
         line.setAttribute ('y1', args.start[1]);
         line.setAttribute ('y2', args.end[1]);
-        line.setAttribute ('class', args.className);
-        if (args.lineType) line.setAttribute ('data-type', args.lineType);
+        line.setAttribute ('class', (args.classList || []).filter (_ => _ != null).join (' '));
         layers[args.layer || ''].appendChild (line);
       }; // insertLine
 
@@ -1030,6 +1036,7 @@ defineElement ({
           }
         }
         if (opts.anBottom) {
+          if (!ya.anBottom || ya.anBottom < opts.anBottom) ya.anBottom = opts.anBottom;
           if (!yearRows[year].anBottom || yearRows[year].anBottom < opts.anBottom) yearRows[year].anBottom = opts.anBottom;
         }
         if (opts.vCenter) ya.vCenter = opts.vCenter;
@@ -1069,6 +1076,7 @@ defineElement ({
         var x = c.yearAreas[year].vCenter;
         if (opts.bottom) {
           x += yearNumberHeight/2 + eraHeaderMargin;
+          if (x < c.yearAreas[year].anBottom) x = c.yearAreas[year].anBottom;
         } else {
           x -= yearNumberHeight/2 + eraHeaderMargin;
           x -= eraHeaderHeight;
@@ -1186,6 +1194,15 @@ defineElement ({
         lastYear = year;
         lastYearRow = nextRow;
 
+        var hasTrType = [];
+        yearTrs[year].forEach (tr => {
+          Object.keys (tr.prev_era_ids || []).forEach (pid => {
+            Object.keys (tr.next_era_ids || []).forEach (nid => {
+              hasTrType[ [pid, nid, tr.type] ] = true;
+            });
+          });
+        });
+
         var aY = nextRow + yearNumberHeight/2 - arrowHeight/2;
         yearTrs[year].forEach (tr => {
           Object.keys (tr.relevant_era_ids).forEach (id => {
@@ -1193,11 +1210,13 @@ defineElement ({
             needYearNumbers.add (c);
           });
 
+          var sType = (tr.type || '').split (/\//);
           var lines = [];
           Object.keys (tr.prev_era_ids || {}).forEach (pid => {
             var pc = eraStates[pid];
             Object.keys (tr.next_era_ids || {}).forEach (nid => {
               var nc = eraStates[nid];
+              if (sType[1] && hasTrType[ [pid, nid, sType[0]] ]) return;
               lines.push ([pc, nc]);
             });
           });
@@ -1214,8 +1233,11 @@ defineElement ({
                 start: [_[0].column.hCenter, aY+arrowHeight/2],
                 end: [_[1].column.hCenter, aY+arrowHeight/2],
                 margin: arrowMargin,
-                className: 'era-transition',
-                lineType: tr.type,
+                classList: [
+                  'era-transition',
+                  tr.tag_ids[1359] ? 'tag-1359' : null, /* 起事建元 */
+                  'transition-' + tr.type,
+                ],
                 layer: 'era-transitions',
               });
               aY += arrowHeight;
@@ -1275,7 +1297,8 @@ defineElement ({
         insertLine ({
           start: [0, y],
           end: [nextColumn, y],
-          className: 'year-boundary',
+          classList: ['year-boundary'],
+          wave: true,
           layer: 'year-boundaries',
         });
       });
@@ -1288,7 +1311,10 @@ defineElement ({
                       c.yearAreas[c.era.known_oldest_year].vCenter],
               end: [c.column.hCenter,
                     c.yearAreas[c.known_latest_year].vCenter],
-              className: 'era-line era-known-line',
+              classList: [
+                'era-line', 'era-known-line',
+                c.era.tag_ids[1200] ? 'incorrect' : null,
+              ],
               layer: 'era-lines',
             });
           }
@@ -1297,7 +1323,10 @@ defineElement ({
               start: [c.column.hCenter,
                       c.yearAreas[c.era.start_year].vCenter],
               end: [c.column.hCenter, c.yearAreas[c.end_year].bottom],
-              className: 'era-line era-range-line',
+              classList: [
+                'era-line', 'era-range-line',
+                c.era.tag_ids[1200] ? 'incorrect' : null,
+              ],
               layer: 'era-lines',
             });
           }
@@ -1321,7 +1350,10 @@ defineElement ({
               insertLine ({
                 start: [c.column.hCenter, ya.vCenter],
                 end: [c.column.hCenter, yearRows[year].top - yearContinueLength],
-                className: 'era-line era-continue-line',
+                classList: [
+                  'era-line', 'era-continue-line',
+                  c.era.tag_ids[1200] ? 'incorrect' : null,
+                ],
                 layer: 'era-lines',
               });
               extendEraYearArea (c, year, {top: yearRows[year].top - yearContinueLength,
@@ -1331,7 +1363,10 @@ defineElement ({
               insertLine ({
                 start: [c.column.hCenter, ya.vCenter],
                 end: [c.column.hCenter, yearRows[year].anBottom + yearContinueLength],
-                className: 'era-line era-continue-line',
+                classList: [
+                  'era-line', 'era-continue-line',
+                  c.era.tag_ids[1200] ? 'incorrect' : null,
+                ],
                 layer: 'era-lines',
               });
               extendEraYearArea (c, year, {top: ya.vCenter,
@@ -1340,7 +1375,10 @@ defineElement ({
               insertLine ({
                 start: [c.column.hCenter, ya.vCenter],
                 end: [c.column.hCenter, ya.bottom],
-                className: 'era-line era-continue-line',
+                classList: [
+                  'era-line', 'era-continue-line',
+                  c.era.tag_ids[1200] ? 'incorrect' : null,
+                ],
                 layer: 'era-lines',
               });
             }
