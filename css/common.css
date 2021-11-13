@@ -7,6 +7,7 @@ html {
   --gray-background-color: transparent;
   --gray-opaque-background-color: white;
   --gray-color: gray;
+  --gray-border-color: #ccc;
   --highlighted-background-color: #999;
   --highlighted-color: white;
   --weight-1-background-color: #fafafa;
@@ -19,6 +20,10 @@ html {
   --weight-4-color: white;
   --border-2-color: #f0f0f0;
   --border-4-color: #999;
+  --incorrect-background-color: var(--gray-background-color);
+  --incorrect-opaque-background-color: var(--gray-opaque-background-color);
+  --incorrect-color: var(--gray-color);
+  --incorrect-border-color: var(--gray-border-color);
 }
 
 svg.defs {
@@ -599,8 +604,8 @@ nav.nearby ul > li > a {
 .transition-type-commenced\/incorrect,
 .transition-type-wartime\/incorrect,
 .transition-type-triggering\/incorrect {
-  color: var(--gray-color);
-  background-color: var(--gray-background-color);
+  color: var(--incorrect-color);
+  background-color: var(--incorrect-background-color);
   text-decoration: line-through;
 }
 
@@ -724,8 +729,12 @@ sw-era-transition-graph foreignObject > div {
 
 sw-era-transition-graph .era-header {
   align-items: end;
+  padding: .5em;
   line-height: 1.1;
-  padding-bottom: .5em;
+}
+
+sw-era-transition-graph .era-header.bottom {
+  align-items: start;
 }
 
 sw-era-transition-graph .era-header.selected {
@@ -752,6 +761,11 @@ sw-era-transition-graph .year-header {
   text-align: right;
   padding: .5em;
   line-height: 1.1;
+}
+
+sw-era-transition-graph .year-header.right {
+  justify-content: start;
+  text-align: left;
 }
 
 sw-era-transition-graph .year-header.this-year {
@@ -794,11 +808,23 @@ sw-era-transition-graph .era-continue-line {
   stroke-dasharray: 8, 3;
 }
 
+sw-era-transition-graph .era-line.incorrect {
+  stroke: var(--incorrect-border-color);
+}
+
 sw-era-transition-graph .era-transition {
   marker-end: url(#arrow);
 }
-sw-era-transition-graph .era-transition[data-type=wartime] {
+sw-era-transition-graph .era-transition.transition-wartime,
+sw-era-transition-graph .era-transition.transition-wartime\/possible,
+sw-era-transition-graph .era-transition.transition-wartime\/incorrect,
+sw-era-transition-graph .era-transition.tag-1359 /* 起事建元 */ {
   stroke-dasharray: 6 2;
+}
+
+sw-era-transition-graph .era-transition.transition-wartime\/incorrect {
+  stroke: var(--incorrect-border-color);
+  marker-end: url(#arrow-incorrect);
 }
 
 sw-era-transition-graph text {
@@ -820,8 +846,8 @@ sw-era-transition-graph .era-year-number {
 }
 
 sw-era-transition-graph .era-year-number.incorrect {
-  color: var(--gray-color);
-  background-color: var(--gray-opaque-background-color);
+  color: var(--incorrect-color);
+  background-color: var(--incorrect-opaque-background-color);
 }
 
 sw-era-transition-graph .year-boundary {
@@ -832,6 +858,15 @@ sw-era-transition-graph .year-boundary {
   color: var(--border-2-color);
   background: transparent;
   user-select: none;
+}
+
+.XX\58-debug {
+  color: red !important;
+  stroke: currentcolor !important;
+}
+.XX\58-debug2 {
+  color: green !important;
+  stroke: currentcolor !important;
 }
 
 /*
