@@ -847,10 +847,13 @@ defineElement ({
         if ({
           firstday: true,
           'firstday/possible': true,
-          'firstday/possible': true,
+          'firstday/incorrect': true,
+          commenced: true,
+          'commenced/possible': true,
+          'commenced/incorrect': true,
           administrative: true,
           'administrative/possible': true,
-          'administrative/possible': true,
+          'administrative/incorrect': true,
           wartime: true,
           'wartime/possible': true,
           'wartime/incorrect': true,
@@ -924,7 +927,9 @@ defineElement ({
       var svg = document.createElementNS ('http://www.w3.org/2000/svg', 'svg');
 
       var layers = {};
-      ['era-lines', 'year-boundaries', 'era-transitions', ''].forEach (_ => {
+      ['era-transitions',
+       'era-lines-cover', 'era-lines',
+       'year-boundaries', ''].forEach (_ => {
         var g = document.createElementNS ('http://www.w3.org/2000/svg', 'g');
         layers[_] = g;
         svg.appendChild (g);
@@ -1004,18 +1009,33 @@ defineElement ({
         
         var line = document.createElementNS
             ('http://www.w3.org/2000/svg', 'line');
-        var margin = args.margin || 0;
+        var hMargin = args.hMargin || 0;
         if (args.start[0] < args.end[0]) {
-          line.setAttribute ('x1', args.start[0] + margin);
-          line.setAttribute ('x2', args.end[0] - margin);
+          line.setAttribute ('x1', args.start[0] + hMargin);
+          line.setAttribute ('x2', args.end[0] - hMargin);
         } else {
-          line.setAttribute ('x1', args.start[0] - margin);
-          line.setAttribute ('x2', args.end[0] + margin);
+          line.setAttribute ('x1', args.start[0] - hMargin);
+          line.setAttribute ('x2', args.end[0] + hMargin);
         }
-        line.setAttribute ('y1', args.start[1]);
-        line.setAttribute ('y2', args.end[1]);
+        var vMargin = args.vMargin || 0;
+        if (args.start[1] < args.end[1]) {
+          line.setAttribute ('y1', args.start[1] + vMargin);
+          line.setAttribute ('y2', args.end[1] - vMargin);
+        } else {
+          line.setAttribute ('y1', args.start[1] - vMargin);
+          line.setAttribute ('y2', args.end[1] + vMargin);
+        }
         line.setAttribute ('class', (args.classList || []).filter (_ => _ != null).join (' '));
         layers[args.layer || ''].appendChild (line);
+
+        if (args.coverLayer) {
+          var line = document.createElementNS
+              ('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute ('x1', args.start[0]);
+          line.setAttribute ('x2', args.end[0]);
+          line.setAttribute ('class', (args.coverClassList || []).filter (_ => _ != null).join (' '));
+          layers[args.coverLayer || ''].appendChild (line);
+        }
       }; // insertLine
 
       var activeEraStates = [];
@@ -1217,6 +1237,7 @@ defineElement ({
             Object.keys (tr.next_era_ids || {}).forEach (nid => {
               var nc = eraStates[nid];
               if (sType[1] && hasTrType[ [pid, nid, sType[0]] ]) return;
+              if (sType[0] === 'commenced' && hasTrType[ [pid, nid, 'firstday'] ]) return;
               lines.push ([pc, nc]);
             });
           });
@@ -1232,11 +1253,12 @@ defineElement ({
               insertLine ({
                 start: [_[0].column.hCenter, aY+arrowHeight/2],
                 end: [_[1].column.hCenter, aY+arrowHeight/2],
-                margin: arrowMargin,
+                hMargin: arrowMargin,
                 classList: [
                   'era-transition',
-                  tr.tag_ids[1359] ? 'tag-1359' : null, /* 起事建元 */
                   'transition-' + tr.type,
+                  tr.tag_ids[1359] ? 'tag-1359' : null, /* 起事建元 */
+                  tr.tag_ids[1200] ? 'incorrect' : null,
                 ],
                 layer: 'era-transitions',
               });
@@ -1304,18 +1326,28 @@ defineElement ({
       });
 
       Object.values (eraStates).forEach (c => {
+        var years = Object.keys (c.yearAreas).map (_ => parseInt (_)).sort ((a,b) => a-b);
         if (c.selected) {
-          if (c.era.known_oldest_year != null && c.known_latest_year != null) {
+          var first = years.length ? years[0] : null;
+          if (c.era.known_oldest_year < first) first = c.era.known_oldest_year;
+          var last = years.length ? years[years.length-1] : null;
+          if (last < c.known_latest_year) last = c.known_latest_year;
+          if (first != null && last != null) {
             insertLine ({
-              start: [c.column.hCenter,
-                      c.yearAreas[c.era.known_oldest_year].vCenter],
-              end: [c.column.hCenter,
-                    c.yearAreas[c.known_latest_year].vCenter],
+              start: [c.column.hCenter, c.yearAreas[first].vCenter],
+              end: [c.column.hCenter, c.yearAreas[last].vCenter],
               classList: [
                 'era-line', 'era-known-line',
                 c.era.tag_ids[1200] ? 'incorrect' : null,
               ],
               layer: 'era-lines',
+            });
+            insertLine ({
+              start: [c.column.hCenter, c.yearAreas[first].vCenter],
+              end: [c.column.hCenter, c.yearAreas[last].vCenter],
+              classList: ['era-line-cover'],
+              layer: 'era-lines-cover',
+              vMargin: -yearNumberHeight/2,
             });
           }
           if (c.era.start_year != null && c.end_year != null) {
@@ -1336,7 +1368,6 @@ defineElement ({
             insertEraHeader (c, years[years.length-1], {bottom: true});
           }
         } else { // not c.selected
-          var years = Object.keys (c.yearAreas).map (_ => parseInt (_)).sort ((a,b) => a-b);
           var minYear = c.era.start_year;
           var maxYear = c.end_year;
           if (years[0] < minYear) minYear = years[0];

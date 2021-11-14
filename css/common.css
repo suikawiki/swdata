@@ -812,6 +812,11 @@ sw-era-transition-graph .era-line.incorrect {
   stroke: var(--incorrect-border-color);
 }
 
+sw-era-transition-graph .era-line-cover {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 20px;
+}
+
 sw-era-transition-graph .era-transition {
   marker-end: url(#arrow);
 }
@@ -822,6 +827,8 @@ sw-era-transition-graph .era-transition.tag-1359 /* 起事建元 */ {
   stroke-dasharray: 6 2;
 }
 
+sw-era-transition-graph .era-transition.transition-firstday\/incorrect,
+sw-era-transition-graph .era-transition.transition-administrative\/incorrect,
 sw-era-transition-graph .era-transition.transition-wartime\/incorrect {
   stroke: var(--incorrect-border-color);
   marker-end: url(#arrow-incorrect);
