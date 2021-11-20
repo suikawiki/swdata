@@ -1138,6 +1138,11 @@ defineElement ({
             weights[cc.column.index+1] = (weights[cc.column.index+1] || 0) + 3;
             weights[cc.column.index+2] = (weights[cc.column.index+2] || 0) + 2;
             weights[cc.column.index+3] = (weights[cc.column.index+3] || 0) + 1;
+            if (Columns.length-1 < cc.column.index+3) {
+              weights[Columns.length-1] = (weights[Columns.length-1]) + 3;
+              weights[Columns.length-2] = (weights[Columns.length-2]) + 2;
+              weights[Columns.length-3] = (weights[Columns.length-3]) + 1;
+            }
           }
         });
         
