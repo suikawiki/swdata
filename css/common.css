@@ -737,7 +737,7 @@ sw-era-transition-graph .era-header.bottom {
   align-items: start;
 }
 
-sw-era-transition-graph .era-header.selected {
+sw-era-transition-graph .era-header.selected.in-tag {
   background-color: var(--weight-2-background-color);
   color: var(--weight-2-color);
 }
@@ -837,6 +837,18 @@ sw-era-transition-graph .era-transition.transition-wartime\/incorrect {
 sw-era-transition-graph .era-transition-sequence-line {
   stroke: rgba(255, 165, 0, 0.6);
   stroke-width: 5px;
+}
+
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-1 {
+  stroke: rgba(165, 255, 0, 0.6);
+}
+
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-2 {
+  stroke: rgba(0, 165, 255, 0.6);
+}
+
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-3 {
+  stroke: rgba(0, 255, 165, 0.6);
 }
 
 sw-era-transition-graph text {
