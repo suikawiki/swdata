@@ -834,6 +834,11 @@ sw-era-transition-graph .era-transition.transition-wartime\/incorrect {
   marker-end: url(#arrow-incorrect);
 }
 
+sw-era-transition-graph .era-transition-sequence-line {
+  stroke: rgba(255, 165, 0, 0.6);
+  stroke-width: 5px;
+}
+
 sw-era-transition-graph text {
   text-anchor: middle;
   dominant-baseline: central;
