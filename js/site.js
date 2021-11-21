@@ -146,11 +146,21 @@ defineElement ({
           return args;
         }
 
+        // /e/{}/
         var m = path.match (/^\/e\/([0-9]+)\/$/);
         if (m) {
           args.eraId = parseFloat (m[1]);
           args.era = await SWD.era (args.eraId);
           if (args.era) args.name = 'page-era-item-index';
+          return args;
+        }
+
+        // /e/{}/graph
+        var m = path.match (/^\/e\/([0-9]+)\/graph$/);
+        if (m) {
+          args.eraId = parseFloat (m[1]);
+          args.era = await SWD.era (args.eraId);
+          if (args.era) args.name = 'page-era-item-graph';
           return args;
         }
 
@@ -827,8 +837,184 @@ defineElement ({
   name: 'sw-era-transition-graph',
   props: {
     pcInit: async function () {
-      var tagId = this.getAttribute ('tagid');
-      var eras = await SWD.eraList ({tagId});
+      var eraId = this.getAttribute ('eraid');
+      if (eraId !== null) {
+        var era = await SWD.era (eraId);
+        if (!era) throw new Error ('Era |'+eraId+'| not found');
+
+        var items = await this.extractTransitionSequence ({
+          startEra: era,
+        });
+        var eras = items.map (_ => _.era);
+        return this.swRender ({
+          eras,
+          sequence: items,
+        });
+      } else {
+        var tagId = this.getAttribute ('tagid');
+        var eras = await SWD.eraList ({tagId});
+        return this.swRender ({
+          eras,
+          sequence: [],
+        });
+      }
+    }, // pcInit
+
+    extractTransitionSequence: async function (opts) {
+      var tagsIncluded = (opts.includedTags || []).map (_ => _.id);
+      var tagsExcluded = (opts.excludedTags || []).map (_ => _.id);
+      var hasTag = (tr, tags) => {
+        for (var i = 0; i < tags.length; i++) {
+          if (tr.tag_ids[tags[i]]) return true;
+        }
+        return false;
+      };
+      
+      var getTransition = async (era, mjd, direction) => {
+        var fys = null;
+        var fd = null;
+        var matched1 = [];
+        var matched2 = [];
+        var matchedOthers = [];
+
+        var trs = await SWD.eraTransitionsByEraId (era.id);
+        for (var i = 0; i < trs.length; i++) {
+          var tr = trs[i];
+          if (tr.day != null) {
+            if (tr.day.mjd < mjd) continue;
+          } else if (tr.day_start != null) {
+            if (tr.day_end.mjd < mjd) continue;
+          } else {
+            console.log ("Bad transition", tr);
+            continue;
+          }
+
+          var fdMatched = false;
+          if ((direction === 'incoming' && tr.next_era_ids && tr.next_era_ids[era.id]) ||
+              (direction === 'outgoing' && tr.prev_era_ids && tr.prev_era_ids[era.id])) {
+            if ((tr.type === 'firstday' || tr.type === 'renamed') &&
+                (!(tr.tag_ids[1359] /* 起事建元 */ ||
+                   tr.tag_ids[2043] /* 起事廃元 */ ||
+                   tr.tag_ids[1420] /* 発生 */ ||
+                   (era.tag_ids[1078] /* 公年号 */ && tr.tag_ids[2045] /* マイクロネーション建元 */) ||
+                   tr.tag_ids[1492] /* 併用 */) ||
+                 direction === 'incoming')) {
+              fdMatched = true;
+              if (hasTag (tr, tagsIncluded) || !hasTag (tr, tagsExcluded)) {
+                fd = fd || tr;
+              }
+            }
+            if ((tr.type === 'commenced' &&
+                 !(tr.tag_ids[1420] /* 発生 */ ||
+                   (era.tag_ids[1078] /* 公年号 */ && tr.tag_ids[2045] /* マイクロネーション建元 */) ||
+                   tr.tag_ids[1492] /* 併用 */)) ||
+                tr.type === 'administrative') {
+              if (hasTag (tr, tagsIncluded)) {
+                matched1.push (tr);
+              } else {
+                matchedOthers.push (tr);
+              }
+            }
+            if (tr.type === 'wartime' || tr.type === 'received' ||
+                ((tr.type === 'firstday' ||
+                  tr.type === 'renamed') && !fdMatched)) {
+              if (hasTag (tr, tagsIncluded)) {
+                matched2.push (tr);
+              } else {
+                matchedOthers.push (tr);
+              }
+            }
+            if (tr.type === 'firstyearstart') {
+              if (hasTag (tr, tagsIncluded)) {
+                fys = fys || tr;
+              }
+            }
+          } // tr
+        } // prev or next
+        
+        if (matched1.length) return matched1[0];
+        if (matched2.length) return matched2[0];
+        if (fd !== null) return fd;
+        if (fys !== null) return fys;
+        if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
+        return null;
+      }; // getTransition
+
+      var items = [];
+      var lastItem;
+      var tr = await getTransition (opts.startEra, -Infinity, 'incoming');
+      if (tr !== null) {
+        lastItem = {
+          prevEra: null,
+          era: opts.startEra,
+          transition: tr,
+          day: tr.day || tr.day_end,
+          delta: 0,
+        };
+        items.push (lastItem);
+      } else {
+        console.log ('No incoming transition', opts.startEra);
+        lastItem = {
+          prevEra: null,
+          era: opts.startEra,
+          transition: null,
+          day: null,
+          delta: null,
+        };
+        items.push (lastItem);
+      } // tr
+
+      var seen = new Set;
+      while (true) {
+        var tr = await getTransition (lastItem.era, (lastItem.day ? lastItem.day.mjd : -Infinity), 'outgoing');
+          if (tr === null) break;
+          if (seen.has (tr)) {
+            console.log ("Transition loop", tr);
+            break;
+          }
+          seen.add (tr);
+          
+          var nextEraIds = Object.keys (tr.next_era_ids);
+          var nextEraId = null;
+          if (nextEraIds.length === 1) {
+            nextEraId = nextEraIds[0];
+          } else {
+            var nextEras = [];
+            for (var i = 0; i < nextEraIds.length; i++) {
+              var era = await SWD.era (nextEraIds[i]);
+              nextEras[nextEraIds[i]] = era;
+            }
+            nextEraIds = nextEraIds.filter (_ => !nextEras[_].tag_ids[1200] /* 旧説 */);
+            if (nextEraIds.length === 1) {
+              nextEraId = nextEraIds[0];
+            } else {
+              if (nextEraIds.length === 0) {
+                console.log ('No next era', tr);
+              } else {
+                console.log ('Multiple next eras', tr);
+              }
+              break;
+            }
+          }
+          var delta = 0;
+          if (tr.type === 'wartime' && tr.tag_ids[1226] /* 陥落 */) {
+            delta = 1;
+          }
+          lastItem = {
+            prevEra: lastItem.era,
+            //era
+            transition: tr,
+            day: tr.day || tr.day_end,
+            delta,
+          };
+          lastItem.era = await SWD.era (nextEraId);
+          items.push (lastItem);
+        } // while
+
+      return items;
+    }, // extractTransitionSequence
+    
+    swRender: async function ({eras, sequence}) {
       var eraIds = {};
       var eraIdToEras = {};
       var yearTrs = {};
@@ -841,23 +1027,29 @@ defineElement ({
         eraIdToEras[era.id] = era;
       });
       var trs = await SWD.eraTransitions ();
+      var trArrows = new Map;
+      sequence.forEach (item => {
+        if (item.transition) trArrows.set (item.transition, []);
+      });
+      var arrowVisibleTransitionTypes = {
+        firstday: true,
+        'firstday/possible': true,
+        'firstday/incorrect': true,
+        commenced: true,
+        'commenced/possible': true,
+        'commenced/incorrect': true,
+        renamed: true,
+        administrative: true,
+        'administrative/possible': true,
+        'administrative/incorrect': true,
+        wartime: true,
+        'wartime/possible': true,
+        'wartime/incorrect': true,
+      };
       var eraStates = [];
       for (var _ in trs) {
         var tr = trs[_];
-        if ({
-          firstday: true,
-          'firstday/possible': true,
-          'firstday/incorrect': true,
-          commenced: true,
-          'commenced/possible': true,
-          'commenced/incorrect': true,
-          administrative: true,
-          'administrative/possible': true,
-          'administrative/incorrect': true,
-          wartime: true,
-          'wartime/possible': true,
-          'wartime/incorrect': true,
-        }[tr.type]) {
+        if (arrowVisibleTransitionTypes[tr.type] || trArrows.get (tr)) {
           var pushed = false;
           for (var id in tr.relevant_era_ids) {
             if (eraIds[id]) {
@@ -929,6 +1121,7 @@ defineElement ({
       var layers = {};
       ['era-transitions',
        'era-lines-cover', 'era-lines',
+       'era-transition-sequence',
        'year-boundaries', ''].forEach (_ => {
         var g = document.createElementNS ('http://www.w3.org/2000/svg', 'g');
         layers[_] = g;
@@ -1138,6 +1331,11 @@ defineElement ({
             weights[cc.column.index+1] = (weights[cc.column.index+1] || 0) + 3;
             weights[cc.column.index+2] = (weights[cc.column.index+2] || 0) + 2;
             weights[cc.column.index+3] = (weights[cc.column.index+3] || 0) + 1;
+            if (Columns.length-1 < cc.column.index+3) {
+              weights[Columns.length-1] = (weights[Columns.length-1]) + 3;
+              weights[Columns.length-2] = (weights[Columns.length-2]) + 2;
+              weights[Columns.length-3] = (weights[Columns.length-3]) + 1;
+            }
           }
         });
         
@@ -1243,6 +1441,8 @@ defineElement ({
           });
 
           if (lines.length) {
+            var trArrowList = trArrows.get (tr) || [];
+            trArrows.set (tr, trArrowList);
             lines.forEach (_ => {
               extendEraYearArea (_[0], year, {top: aY,
                                               anBottom: aY+arrowHeight-1,
@@ -1250,9 +1450,11 @@ defineElement ({
               extendEraYearArea (_[1], year, {top: aY,
                                               anBottom: aY+arrowHeight-1,
                                               bottom: aY+arrowHeight-1});
-              insertLine ({
-                start: [_[0].column.hCenter, aY+arrowHeight/2],
-                end: [_[1].column.hCenter, aY+arrowHeight/2],
+              var start = [_[0].column.hCenter, aY+arrowHeight/2];
+              var end = [_[1].column.hCenter, aY+arrowHeight/2];
+              if (arrowVisibleTransitionTypes[tr.type]) insertLine ({
+                start,
+                end,
                 hMargin: arrowMargin,
                 classList: [
                   'era-transition',
@@ -1262,6 +1464,7 @@ defineElement ({
                 ],
                 layer: 'era-transitions',
               });
+              trArrowList[ [_[0].era.id, _[1].era.id] ] = [start, end];
               aY += arrowHeight;
             }); // lines
           } // lines
@@ -1442,12 +1645,78 @@ defineElement ({
         } // !c.selected?
       }); // era
 
+      var lastPoint = null;
+      sequence.forEach (item => {
+        var trArrowList = trArrows.get (item.transition);
+        if (trArrowList) {
+          var prevEraId = item.prevEra ? item.prevEra.id : Object.keys (item.transition.prev_era_ids || {})[0];
+          var ap = trArrowList[ [prevEraId, item.era.id] ];
+          if (ap) { 
+            if (lastPoint) insertLine ({
+                start: lastPoint,
+                end: ap[0],
+                classList: [
+                  'era-line', 'era-transition-sequence-line',
+                ],
+                layer: 'era-transition-sequence',
+              });
+              insertLine ({
+                start: ap[0],
+                end: ap[1],
+                classList: [
+                  'era-line', 'era-transition-sequence-line',
+                ],
+                layer: 'era-transition-sequence',
+              });
+              lastPoint = ap[1];
+          } else { // !ap
+            console.log ("Arrow not found", item, trArrowList);
+          }
+        } else { // !trArrowList
+          if (item.transition) {
+            console.log ("Transition not found", item, trArrows);
+          } else {
+            var c = eraStates[item.era.id];
+            //var ya = c.yearAreas[c.era.start_year] || c.yearAreas[c.era.known_oldest_year] || c.yearAreas[c.era.offset+1];
+            //if (ya) lastPoint = [c.column.hCenter, ya.vCenter];
+            lastPoint = [c.column.hCenter, 0];
+          }
+        }
+      }); // item
+      if (lastPoint) {
+        var era = sequence[sequence.length-1].era;
+        var c = eraStates[era.id];
+        /*
+        var ya = c && c.yearAreas[c.end_year];
+        if (!(ya && lastPoint[1] < ya.vCenter)) {
+          ya = c && c.yearAreas[FUTURE];
+        }
+        */
+        var bottom;
+        /*
+        if (ya && lastPoint[1] < ya.vCenter) {
+          bottom = ya.vCenter;
+        } else {
+        */
+          bottom = yearRows[FUTURE].bottom;
+        //}
+        insertLine ({
+          start: lastPoint,
+          end: [c.column.hCenter, bottom],
+          classList: [
+            'era-line', 'era-transition-sequence-line',
+          ],
+          layer: 'era-transition-sequence',
+        });
+      }
+      console.log (sequence);
+
       svg.setAttribute ('width', nextColumn);
       svg.setAttribute ('height', nextRow);
 
       this.textContent = '';
       this.appendChild (svg);
-    }, // pcInit
+    }, // swRender
   },
 }); // <sw-era-transition-graph>
 

@@ -388,6 +388,8 @@
     <menu class=toc></menu>
 
     <sw-tags data-field=era.tag_ids></sw-tags>
+    
+    <p><a href=./ class=active>紀年法の情報</a> / <a href=graph>その後の変遷</a></p>
 
     <sw-if-defined data-field=era.start_year hidden>
       <p><dfn><bdi data-field=era.name></bdi></dfn>
@@ -456,6 +458,21 @@
         <li><a data-href-template="https://zh.wikipedia.org/wiki/{era.name}" lang=ja><cite>Wikipedia</cite> (中文)</a>
       </ul>
     </section>
+  </template>
+  <template data-name=page-era-item-graph title="y~{era.id} {era.name} からの変遷">
+    <hgroup>
+      <h1><code>y~<span data-field=era.id></span></code> <bdi data-field=era.name></bdi></h1>
+      <h2 lang=en><a href=/e/>紀年法</a></h2>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <p><a href=./>紀年法の情報</a> / <a href=graph class=active>その後の変遷</a></p>
+
+    <sw-era-transition-graph data-eraid-field=era.id data-filled=eraid>
+      <action-status><progress></progress></action-status>
+    </sw-era-transition-graph>
+    
   </template>
   
   <template data-name=page-tag-item-index title="#{tag.label}">
@@ -690,6 +707,15 @@
     の
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>改元</strong>
+  </template>
+  <template data-name=1728><!-- 支那改元詔 -->
+    <sw-if-defined data-field=tag_ids.1359>
+      <strong>新政権</strong>樹立に当たり
+    </sw-if-defined>
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>改元</strong>を制定施行
   </template>
   <template data-name=1235>
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
