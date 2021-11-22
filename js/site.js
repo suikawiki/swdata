@@ -843,6 +843,11 @@ defineElement ({
   props: {
     // </tag/1756/graph?sequence=651&sequence=651%2B1801&sequence=651%2B1171>:
     // 三国時代
+    //
+    // </tag/1933/graph?sequence=1366&sequence=1366%2B1957&sequence=1366%2B1957%2B1524>:
+    // 五代
+    //
+    // </tag/1003/graph?sequence=756%2B1065&sequence=756>: 日本南北朝時代
     pcInit: async function () {
       var eras = [];
       var eraClassLists = [];
@@ -923,8 +928,7 @@ defineElement ({
       var getTransition = async (era, mjd, direction) => {
         var fys = null;
         var fd = null;
-        var matched1 = [];
-        var matched2 = [];
+        var matched = [];
         var matchedOthers = [];
 
         var trs = await SWD.eraTransitionsByEraId (era.id);
@@ -950,7 +954,10 @@ defineElement ({
                    tr.tag_ids[1492] /* 併用 */) ||
                  direction === 'incoming')) {
               fdMatched = true;
-              if (hasTag (tr, tagsIncluded) || !hasTag (tr, tagsExcluded)) {
+              if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
+                matched.push (tr);
+              }
+              if (!hasTag (tr, tagsExcluded)) {
                 fd = fd || tr;
               }
             }
@@ -959,8 +966,8 @@ defineElement ({
                    (era.tag_ids[1078] /* 公年号 */ && tr.tag_ids[2045] /* マイクロネーション建元 */) ||
                    tr.tag_ids[1492] /* 併用 */)) ||
                 tr.type === 'administrative') {
-              if (hasTag (tr, tagsIncluded)) {
-                matched1.push (tr);
+              if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
+                matched.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
@@ -968,8 +975,8 @@ defineElement ({
             if (tr.type === 'wartime' || tr.type === 'received' ||
                 ((tr.type === 'firstday' ||
                   tr.type === 'renamed') && !fdMatched)) {
-              if (hasTag (tr, tagsIncluded)) {
-                matched2.push (tr);
+              if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
+                matched.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
@@ -981,9 +988,8 @@ defineElement ({
             }
           } // tr
         } // prev or next
-        
-        if (matched1.length) return matched1[0];
-        if (matched2.length) return matched2[0];
+
+        if (matched.length) return matched[0];
         if (fd !== null) return fd;
         if (fys !== null) return fys;
         if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
@@ -1203,6 +1209,7 @@ defineElement ({
       var yearBoundaryMarginTop = 16;
       var yearBoundaryMarginBottom = 16;
       var yearContinueLength = 16*2;
+      var seqLineShift = 5;
 
       var insertText = args => {
         var fo = document.createElementNS
@@ -1495,9 +1502,13 @@ defineElement ({
             var pc = eraStates[pid];
             Object.keys (tr.next_era_ids || {}).forEach (nid => {
               var nc = eraStates[nid];
-              if (sType[1] && hasTrType[ [pid, nid, sType[0]] ]) return;
+              if (sType[1] &&
+                  hasTrType[ [pid, nid, sType[0]] ] &&
+                  !trArrows.get (tr)) return;
               if ((sType[0] === 'commenced' ||
-                   sType[0] === 'firstyearstart') && hasTrType[ [pid, nid, 'firstday'] ]) return;
+                   sType[0] === 'firstyearstart') &&
+                  hasTrType[ [pid, nid, 'firstday'] ] &&
+                  !trArrows.get (tr)) return;
               lines.push ([pc, nc]);
             });
           });
@@ -1708,18 +1719,22 @@ defineElement ({
         } // !c.selected?
       }); // era
 
+      var seqLined = {};
       for (var i = 0; i < sequences.length; i++) {
         var seq = sequences[i];
         var lastPoint = null;
+        var seqLineS = {};
         seq.forEach (item => {
           var trArrowList = trArrows.get (item.transition);
           if (trArrowList) {
             var prevEraId = item.prevEra ? item.prevEra.id : Object.keys (item.transition.prev_era_ids || {})[0];
             var ap = trArrowList[ [prevEraId, item.era.id] ];
-            if (ap) { 
+            if (ap) {
+              seqLineS[prevEraId] = seqLineS[prevEraId] || (seqLined[prevEraId] = (seqLined[prevEraId] || 0) + 1);
               if (lastPoint) insertLine ({
-                start: lastPoint,
-                end: ap[0],
+                start: [lastPoint[0]+seqLineS[prevEraId]*seqLineShift, lastPoint[1]],
+                end: [ap[0][0]+seqLineS[prevEraId]*seqLineShift, ap[0][1]],
+                vMargin: -seqLineShift/2,
                 classList: [
                   'era-line', 'era-transition-sequence-line',
                   'in-sequence-' + i,
@@ -1727,7 +1742,7 @@ defineElement ({
                 layer: 'era-transition-sequence',
               });
               insertLine ({
-                start: ap[0],
+                start: [ap[0][0]+seqLineS[prevEraId]*seqLineShift, ap[0][1]],
                 end: ap[1],
                 classList: [
                   'era-line', 'era-transition-sequence-line',
@@ -1753,9 +1768,11 @@ defineElement ({
           var era = seq[seq.length-1].era;
           var c = eraStates[era.id];
           var bottom = yearRows[FUTURE].bottom;
+          seqLineS[era.id] = seqLineS[era.id] || (seqLined[era.id] = (seqLined[era.id] || 0) + 1);
           insertLine ({
-            start: lastPoint,
-            end: [c.column.hCenter, bottom],
+            start: [lastPoint[0]+seqLineS[era.id]*seqLineShift, lastPoint[1]],
+            end: [c.column.hCenter+seqLineS[era.id]*seqLineShift, bottom],
+            vMargin: -seqLineShift/2,
             classList: [
               'era-line', 'era-transition-sequence-line',
               'in-sequence-' + i,

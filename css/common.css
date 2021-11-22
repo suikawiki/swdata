@@ -851,6 +851,14 @@ sw-era-transition-graph .era-transition-sequence-line.in-sequence-3 {
   stroke: rgba(0, 255, 165, 0.6);
 }
 
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-4 {
+  stroke: rgba(255, 0, 165, 0.6);
+}
+
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-5 {
+  stroke: rgba(165, 0, 255, 0.6);
+}
+
 sw-era-transition-graph text {
   text-anchor: middle;
   dominant-baseline: central;
