@@ -1731,6 +1731,7 @@ defineElement ({
             var ap = trArrowList[ [prevEraId, item.era.id] ];
             if (ap) {
               seqLineS[prevEraId] = seqLineS[prevEraId] || (seqLined[prevEraId] = (seqLined[prevEraId] || 0) + 1);
+              seqLineS[item.era.id] = seqLineS[item.era.id] || (seqLined[item.era.id] = (seqLined[item.era.id] || 0) + 1);
               if (lastPoint) insertLine ({
                 start: [lastPoint[0]+seqLineS[prevEraId]*seqLineShift, lastPoint[1]],
                 end: [ap[0][0]+seqLineS[prevEraId]*seqLineShift, ap[0][1]],
@@ -1743,7 +1744,7 @@ defineElement ({
               });
               insertLine ({
                 start: [ap[0][0]+seqLineS[prevEraId]*seqLineShift, ap[0][1]],
-                end: ap[1],
+                end: [ap[1][0]+seqLineS[item.era.id]*seqLineShift, ap[1][1]],
                 classList: [
                   'era-line', 'era-transition-sequence-line',
                   'in-sequence-' + i,

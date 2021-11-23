@@ -829,6 +829,7 @@ sw-era-transition-graph .era-transition.tag-1359 /* 起事建元 */ {
 
 sw-era-transition-graph .era-transition.transition-firstday\/incorrect,
 sw-era-transition-graph .era-transition.transition-administrative\/incorrect,
+sw-era-transition-graph .era-transition.transition-commenced\/incorrect,
 sw-era-transition-graph .era-transition.transition-wartime\/incorrect {
   stroke: var(--incorrect-border-color);
   marker-end: url(#arrow-incorrect);
@@ -838,25 +839,29 @@ sw-era-transition-graph .era-transition-sequence-line {
   stroke: rgba(255, 165, 0, 0.6);
   stroke-width: 5px;
 }
-
 sw-era-transition-graph .era-transition-sequence-line.in-sequence-1 {
   stroke: rgba(165, 255, 0, 0.6);
 }
-
 sw-era-transition-graph .era-transition-sequence-line.in-sequence-2 {
   stroke: rgba(0, 165, 255, 0.6);
 }
-
 sw-era-transition-graph .era-transition-sequence-line.in-sequence-3 {
   stroke: rgba(0, 255, 165, 0.6);
 }
-
 sw-era-transition-graph .era-transition-sequence-line.in-sequence-4 {
   stroke: rgba(255, 0, 165, 0.6);
 }
-
 sw-era-transition-graph .era-transition-sequence-line.in-sequence-5 {
   stroke: rgba(165, 0, 255, 0.6);
+}
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-6 {
+  stroke: rgba(255, 165, 165, 0.6);
+}
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-7 {
+  stroke: rgba(165, 255, 165, 0.6);
+}
+sw-era-transition-graph .era-transition-sequence-line.in-sequence-8 {
+  stroke: rgba(165, 165, 255, 0.6);
 }
 
 sw-era-transition-graph text {
