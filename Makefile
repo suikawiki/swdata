@@ -49,6 +49,7 @@ build-local: local/data \
     local/data/jp-flagdays.json \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
+    local/data/calendar-era-transitions.json \
     local/data/days.json local/data/numbers-kanshi.json \
     local/data/tags.json
 build-repo: js/components.js
