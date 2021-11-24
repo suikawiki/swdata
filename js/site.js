@@ -841,13 +841,18 @@ defineElement ({
 defineElement ({
   name: 'sw-era-transition-graph',
   props: {
-    // </tag/1756/graph?sequence=651&sequence=651%2B1801&sequence=651%2B1171>:
-    // 三国時代
-    //
-    // </tag/1933/graph?sequence=1366&sequence=1366%2B1957&sequence=1366%2B1957%2B1524>:
-    // 五代
-    //
-    // </tag/1003/graph?sequence=756%2B1065&sequence=756>: 日本南北朝時代
+    /*
+      <https://data.suikawiki.org/tag/1756/graph?sequence=651&sequence=651%2B1801&sequence=651%2B1171>:
+      三国時代
+    
+      <https://data.suikawiki.org/tag/1933/graph?sequence=1366&sequence=1366%2B1957&sequence=1366%2B1957%2B1524>:
+      五代
+      <https://data.suikawiki.org/tag/1933/graph?sequence=1366%2B1936-2053&sequence=1366%2B1952-1955&sequence=1366%2B1952%2B1955-1969&sequence=1366%2B1952%2B1955-1969%2B1957-1973&sequence=1366%2B1952%2B1955-1969%2B1957-1973%2B1524&sequence=1366%2B2054&sequence=1366%2B1945&sequence=1366%2B1936%2B2046&sequence=1366%2B1942&sequence=1366%2B2081&sequence=1366%2B1154&sequence=1366%2B2053>:
+      五代十国
+      
+      <https://data.suikawiki.org/tag/1003/graph?sequence=756%2B1065&sequence=756>:
+      日本南北朝時代
+    */
     pcInit: async function () {
       var eras = [];
       var eraClassLists = [];
