@@ -952,12 +952,7 @@ defineElement ({
           if ((direction === 'incoming' && tr.next_era_ids && tr.next_era_ids[era.id]) ||
               (direction === 'outgoing' && tr.prev_era_ids && tr.prev_era_ids[era.id])) {
             if ((tr.type === 'firstday' || tr.type === 'renamed') &&
-                (!(tr.tag_ids[1359] /* 起事建元 */ ||
-                   tr.tag_ids[2043] /* 起事廃元 */ ||
-                   tr.tag_ids[1420] /* 発生 */ ||
-                   (era.tag_ids[1078] /* 公年号 */ && tr.tag_ids[2045] /* マイクロネーション建元 */) ||
-                   tr.tag_ids[1492] /* 併用 */) ||
-                 direction === 'incoming')) {
+                (!tr.tag_ids[2107] /* 分離 */ || direction === 'incoming')) {
               fdMatched = true;
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                 matched.push (tr);
@@ -966,30 +961,27 @@ defineElement ({
                 fd = fd || tr;
               }
             }
-            if ((tr.type === 'commenced' &&
-                 !(tr.tag_ids[1420] /* 発生 */ ||
-                   (era.tag_ids[1078] /* 公年号 */ && tr.tag_ids[2045] /* マイクロネーション建元 */) ||
-                   tr.tag_ids[1492] /* 併用 */)) ||
-                tr.type === 'administrative') {
+            if ((tr.type === 'commenced' || tr.type === 'administrative') &&
+                !tr.tag_ids[2107] /* 分離 */) {
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                 matched.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
             }
-            if (tr.type === 'wartime' || tr.type === 'received' ||
-                ((tr.type === 'firstday' ||
-                  tr.type === 'renamed') && !fdMatched)) {
+            if ((tr.type === 'wartime' ||
+                 tr.type === 'received' ||
+                 tr.type === 'firstday' ||
+                 tr.type === 'renamed') && !fdMatched) {
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                 matched.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
             }
-            if (tr.type === 'firstyearstart') {
-              if (tr.tag_ids[1342] /* 天皇即位元年年始 */) {
-                fys = fys || tr;
-              }
+            if (tr.type === 'firstyearstart' &&
+                tr.tag_ids[2108] /* 即位元年年始 */) {
+              fys = fys || tr;              
             }
           } // tr
         } // prev or next
