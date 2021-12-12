@@ -835,7 +835,7 @@ defineElement ({
     return templates[obj.action_tag_id] || templates[""];
   };
   document.head.appendChild (def);
-  
+
 }) ();
 
 defineElement ({
@@ -933,7 +933,8 @@ defineElement ({
       var getTransition = async (era, mjd, direction) => {
         var fys = null;
         var fd = null;
-        var matched = [];
+        var matched1 = [];
+        var matched2 = [];
         var matchedOthers = [];
 
         var trs = await SWD.eraTransitionsByEraId (era.id);
@@ -955,7 +956,7 @@ defineElement ({
                 (!tr.tag_ids[2107] /* 分離 */ || direction === 'incoming')) {
               fdMatched = true;
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
-                matched.push (tr);
+                matched2.push (tr);
               }
               if (!hasTag (tr, tagsExcluded)) {
                 fd = fd || tr;
@@ -964,7 +965,7 @@ defineElement ({
             if ((tr.type === 'commenced' || tr.type === 'administrative') &&
                 !tr.tag_ids[2107] /* 分離 */) {
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
-                matched.push (tr);
+                matched1.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
@@ -974,7 +975,7 @@ defineElement ({
                  tr.type === 'firstday' ||
                  tr.type === 'renamed') && !fdMatched) {
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
-                matched.push (tr);
+                matched2.push (tr);
               } else {
                 matchedOthers.push (tr);
               }
@@ -983,10 +984,19 @@ defineElement ({
                 tr.tag_ids[2108] /* 即位元年年始 */) {
               fys = fys || tr;              
             }
-          } // tr
-        } // prev or next
+          } // prev or next
 
-        if (matched.length) return matched[0];
+          if (matched1.length || matched2.length) {
+            if ((direction === 'outgoing' && tr.next_era_ids[era.id]) ||
+                (direction === 'incoming' && tr.prev_era_ids[era.id])) {
+              break;
+            }
+          }
+        } // tr
+        
+        //if (era.id == 852) console.log (matched1, matched2, fd, fys, matchedOthers);
+        if (matched1.length) return matched1[0];
+        if (matched2.length) return matched2[0];
         if (fd !== null) return fd;
         if (fys !== null) return fys;
         if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
@@ -1105,7 +1115,7 @@ defineElement ({
       for (var _ in trs) {
         var tr = trs[_];
         if (arrowVisibleTransitionTypes[tr.type] ||
-            (tr.type === 'firstyearstart' && tr.tag_ids[1342] /* 天皇即位元年年始 */) ||
+            (tr.type === 'firstyearstart' && tr.tag_ids[2108] /* 即位元年年始 */) ||
             trArrows.get (tr)) {
           var pushed = false;
           for (var id in tr.relevant_era_ids) {
