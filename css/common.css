@@ -731,6 +731,8 @@ sw-era-transition-graph .era-header {
   align-items: end;
   padding: .5em;
   line-height: 1.1;
+  background: rgba(255, 255, 255, 0.7);
+  color: black;
 }
 
 sw-era-transition-graph .era-header.bottom {
@@ -812,11 +814,6 @@ sw-era-transition-graph .era-line.incorrect {
   stroke: var(--incorrect-border-color);
 }
 
-sw-era-transition-graph .era-line-cover {
-  stroke: rgba(255, 255, 255, 0.7);
-  stroke-width: 20px;
-}
-
 sw-era-transition-graph .era-transition {
   marker-end: url(#arrow);
 }
@@ -894,6 +891,15 @@ sw-era-transition-graph .era-year-number {
 sw-era-transition-graph .era-year-number.incorrect {
   color: var(--incorrect-color);
   background-color: var(--incorrect-opaque-background-color);
+}
+
+sw-era-transition-graph .era-line-cover {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 20px;
+}
+
+sw-era-transition-graph .year-number-cover {
+  fill: rgba(255, 255, 255, 0.7);
 }
 
 sw-era-transition-graph .year-boundary {

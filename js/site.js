@@ -962,12 +962,17 @@ defineElement ({
                 fd = fd || tr;
               }
             }
-            if ((tr.type === 'commenced' || tr.type === 'administrative') &&
-                !tr.tag_ids[2107] /* 分離 */) {
-              if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
-                matched1.push (tr);
+            if (tr.type === 'commenced' || tr.type === 'administrative') {
+              if (tr.tag_ids[2107] /* 分離 */) {
+                if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
+                  matched1.push (tr);
+                }
               } else {
-                matchedOthers.push (tr);
+                if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
+                  matched1.push (tr);
+                } else {
+                  matchedOthers.push (tr);
+                }
               }
             }
             if ((tr.type === 'wartime' ||
@@ -994,12 +999,12 @@ defineElement ({
           }
         } // tr
         
-        //if (era.id == 852) console.log (matched1, matched2, fd, fys, matchedOthers);
+        if (era.id == 1112) console.log (matched1, matched2, fd, fys, matchedOthers);
         if (matched1.length) return matched1[0];
         if (matched2.length) return matched2[0];
         if (fd !== null) return fd;
-        if (fys !== null) return fys;
         if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
+        if (fys !== null) return fys;
         return null;
       }; // getTransition
 
@@ -1053,10 +1058,12 @@ defineElement ({
             } else {
               if (nextEraIds.length === 0) {
                 console.log ('No next era', tr);
+                break;
               } else {
                 console.log ('Multiple next eras', tr);
+                nextEraIds = nextEraIds.sort ((a, b) => a - b);
+                nextEraId = nextEraIds[0];
               }
-              break;
             }
           }
           var delta = 0;
@@ -1158,10 +1165,12 @@ defineElement ({
         };
         var c = eraStates[era.id];
 
-        if (c.era.start_year != null && c.end_year == null) {
+        if (c.era.tag_ids[2301] /* 継続中 */) {
+        //c.era.start_year != null && c.end_year == null
           c.end_year = FUTURE;
           c.known_latest_year = FUTURE;
         }
+        var future_year = c.era.tag_ids[2300] /* 利用中 */ ? FUTURE : year;
 
         if (c.selected) {
           var year = era.known_oldest_year;
@@ -1172,7 +1181,7 @@ defineElement ({
           [era.known_oldest_year, c.known_latest_year,
            era.start_year, c.end_year,
            (c.known_latest_year >= thisYear ? thisYear : year),
-           year].forEach (yy => {
+           year, future_year].forEach (yy => {
              if (!yearTrs[yy]) yearTrs[yy] = [];
         
              var tr = {relevant_era_ids: {}, prev_era_ids: {}, next_era_ids: {}};
@@ -1253,6 +1262,17 @@ defineElement ({
 
         fo.appendChild (div);
         layers[args.layer || ''].appendChild (fo);
+
+        if (args.backgroundCircle) {
+          var c = document.createElementNS
+              ('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute ('cx', args.x);
+          c.setAttribute ('cy', args.y);
+          var r = args.width > args.height ? args.width : args.height;
+          c.setAttribute ('r', r/2);
+          c.setAttribute ('class', 'year-number-cover');
+          layers['era-lines-cover'].appendChild (c);
+        }
       }; // insertText
 
       var insertLine = function (args) {
@@ -1351,6 +1371,7 @@ defineElement ({
             'era-year-number',
             c.era.tag_ids[1200] ? 'incorrect' : null,
           ],
+          backgroundCircle: true,
         });
 
         extendEraYearArea (c, year, {top: y-yearNumberHeight/2,
