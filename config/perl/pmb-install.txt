@@ -1,8 +1,8 @@
 Algorithm::Diff~1.201
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
-AnyEvent::Fork~1.31
-AnyEvent::Socket
+AnyEvent::Fork~1.32
+AnyEvent::Handle
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
