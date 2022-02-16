@@ -22,7 +22,7 @@ Net::SSLeay~1.92
 Path::Class~0.37
 Path::Tiny~0.122
 Proc::FastSpawn~1.2
-Scalar::Util~1.60
+Scalar::Util~1.61
 Socket~2.032
 Test::Differences~0.69
 Test::More~1.302188
