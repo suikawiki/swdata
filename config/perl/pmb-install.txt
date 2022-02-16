@@ -2,6 +2,7 @@ Algorithm::Diff~1.201
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
+AnyEvent::IO
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -22,7 +23,7 @@ Net::SSLeay~1.92
 Path::Class~0.37
 Path::Tiny~0.122
 Proc::FastSpawn~1.2
-Scalar::Util~1.60
+Scalar::Util~1.61
 Socket~2.032
 Test::Differences~0.69
 Test::More~1.302188
