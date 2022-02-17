@@ -368,6 +368,8 @@
       <li><a href=/y/>年の一覧</a>
     </ul>
 
+    <p><a href=/e/ class=active>紀年法の一覧</a> / <a href=/e/first>元年別</a>
+
     <list-container loader=swEraListLoader class=menu-list>
       <action-status></action-status>
       <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
@@ -377,6 +379,25 @@
         <sw-data-era data-field=id template=sw-data-era-in-menu></sw-data-era>
       </template>
     </list-container>
+  </template>
+
+  <template data-name=page-era-first title="紀年法の一覧 (元年別)">
+    <hgroup>
+      <h1>紀年法の一覧 (元年別)</h1>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <p><a href=/e/>紀年法の一覧</a> / <a href=/e/first class=active>元年別</a>
+    </p>
+
+    <table is=sw-era-list-by-first-year>
+      <thead>
+        <tr>
+          <th><a href=/y/>年</a>
+          <th>紀年法
+      <tbody>
+    </table>
   </template>
   
   <template data-name=page-era-item-index title="y~{era.id} {era.name}">
@@ -924,7 +945,7 @@
   
 <!--
 
-Copyright 2020-2021 Wakaba <wakaba@suikawiki.org>.
+Copyright 2020-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

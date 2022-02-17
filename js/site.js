@@ -194,6 +194,7 @@ defineElement ({
           '/y/': 'page-year-index',
           '/y/determination': 'page-year-determination',
           '/e/': 'page-era-index',
+          '/e/first': 'page-era-first',
         }[path]; // or undefined
 
         return args;
@@ -678,11 +679,16 @@ defineListLoader ('swEraListLoader', function (opts) {
   return SWD.eraList ({
     tagId: this.getAttribute ('loader-tagid'),
   }).then (eras => {
+    var FUTURE = 9999; // Y10K!
     return Object.values (eras).sort ((a, b) => {
-      return a.offset - b.offset ||
+      var A = a.offset || a.start_year || a.end_year || FUTURE;
+      if (a.offset === 0) A = 0;
+      var B = b.offset || b.start_year || b.end_year || FUTURE;
+      if (b.offset === 0) B = 0;
+      return A - B ||
              a.start_year - b.start_year ||
              a.end_year - b.end_year ||
-             a.id-b.id;
+             a.id - b.id;
     });
   }).then (eras => {
     return {data: eras};
@@ -883,25 +889,28 @@ defineElement ({
         var seqs = (this.getAttribute ('sequences') || '').split (/\s+/).filter (_ => _.length);
         for (var i = 0; i < seqs.length; i++) {
           var seq = seqs[i];
-          var v = seq.split (/(?=[+-])/);
+          var v = seq.split (/(?<!\+)(?=[+-][+]?)/);
           var startEraId = v.shift ();
           var startEra = await SWD.era (startEraId);
           if (!startEra) throw new Error ('Era |'+startEraId+'| not found');
 
           var includedTags = [];
+          var included2Tags = [];
           var excludedTags = [];
           for (var j = 0; j < v.length; j++) {
-            var m = v[j].match (/^([+-])([0-9]+)$/);
+            var m = v[j].match (/^([+-][+]?)([0-9]+)$/);
             if (!m) throw new Error ('Bad sequence specification |'+seq+'|');
             var tag = await SWD.tag (m[2]);
             if (!tag) throw new Error ('Tag |'+m[2]+'| not found');
             if (m[1] === '+') includedTags.push (tag);
+            if (m[1] === '++') included2Tags.push (tag);
             if (m[1] === '-') excludedTags.push (tag);
           }
 
           var items = await this.extractTransitionSequence ({
             startEra,
             includedTags,
+            included2Tags,
             excludedTags,
           });
           eras = eras.concat (items.map (_ => {
@@ -922,6 +931,7 @@ defineElement ({
 
     extractTransitionSequence: async function (opts) {
       var tagsIncluded = (opts.includedTags || []).map (_ => _.id);
+      var tagsIncluded2 = (opts.included2Tags || []).map (_ => _.id);
       var tagsExcluded = (opts.excludedTags || []).map (_ => _.id);
       var hasTag = (tr, tags) => {
         for (var i = 0; i < tags.length; i++) {
@@ -936,6 +946,8 @@ defineElement ({
         var matched1 = [];
         var matched2 = [];
         var matchedOthers = [];
+        var matchedOthers2 = [];
+        var matchedOthers3 = [];
 
         var trs = await SWD.eraTransitionsByEraId (era.id);
         for (var i = 0; i < trs.length; i++) {
@@ -985,6 +997,22 @@ defineElement ({
                 matchedOthers.push (tr);
               }
             }
+            if (tr.type === 'wartime/possible' ||
+                tr.type === 'received/possible' ||
+                tr.type === 'firstday/possible' ||
+                tr.type === 'renamed/possible') {
+              matchedOthers2.push (tr);
+            }
+            if (tr.type === 'wartime/incorrect' ||
+                tr.type === 'received/incorrect' ||
+                tr.type === 'firstday/incorrect' ||
+                tr.type === 'renamed/incorrect') {
+              if (hasTag (tr, tagsIncluded2) && !hasTag (tr, tagsExcluded)) {
+                matched2.push (tr);
+              } else {
+                matchedOthers3.push (tr);
+              }
+            }
             if (tr.type === 'firstyearstart' &&
                 tr.tag_ids[2108] /* 即位元年年始 */) {
               fys = fys || tr;              
@@ -998,12 +1026,14 @@ defineElement ({
             }
           }
         } // tr
-        
-        if (era.id == 1112) console.log (matched1, matched2, fd, fys, matchedOthers);
+
+        //if (era.id == 2022) console.log (matched1, matched2, fd, fys, matchedOthers);
         if (matched1.length) return matched1[0];
         if (matched2.length) return matched2[0];
         if (fd !== null) return fd;
         if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
+        if (matchedOthers2.length) return matchedOthers2[matchedOthers2.length-1];
+        if (matchedOthers3.length) return matchedOthers3[matchedOthers3.length-1];
         if (fys !== null) return fys;
         return null;
       }; // getTransition
@@ -1105,6 +1135,7 @@ defineElement ({
       });
       var arrowVisibleTransitionTypes = {
         firstday: true,
+        'firstday/canceled': true,
         'firstday/possible': true,
         'firstday/incorrect': true,
         commenced: true,
@@ -1200,7 +1231,8 @@ defineElement ({
       var svg = document.createElementNS ('http://www.w3.org/2000/svg', 'svg');
 
       var layers = {};
-      ['era-transitions',
+      ['year-background',
+       'era-transitions',
        'era-lines-cover', 'era-lines',
        'era-transition-sequence',
        'year-boundaries', ''].forEach (_ => {
@@ -1410,6 +1442,7 @@ defineElement ({
       var lastYear = -Infinity;
       var lastYearRow = -rowHeaderHeight;
       var yearBoundaries = [];
+      var yearBorders = [];
 
       nextColumn += rowHeaderWidth;
       nextRow += eraHeaderHeight;
@@ -1581,6 +1614,8 @@ defineElement ({
         if (yearRows[year].top === yearRows[year].bottom) continue;
         if (yearRows[year].yearBoundary) {
           yearBoundaries.push (yearRows[year].yearBoundary);
+        } else {
+          yearBorders.push (yearRows[year].top);
         }
         shownYears.push (year);
         if (yearRows[year].bottom < yearRows[year].top + rowHeaderHeight) {
@@ -1618,8 +1653,9 @@ defineElement ({
           width: rowHeaderWidth,
           height: rowHeaderHeight,
         });
-      });
+      }); // shownYears
       nextColumn += rowHeaderWidth;
+      
       yearBoundaries.forEach (y => {
         insertLine ({
           start: [0, y],
@@ -1627,6 +1663,14 @@ defineElement ({
           classList: ['year-boundary'],
           wave: true,
           layer: 'year-boundaries',
+        });
+      });
+      yearBorders.forEach (y => {
+        insertLine ({
+          start: [0, y],
+          end: [nextColumn, y],
+          classList: ['year-border'],
+          layer: 'year-background',
         });
       });
 
@@ -1820,6 +1864,70 @@ defineElement ({
     }, // swRender
   },
 }); // <sw-era-transition-graph>
+
+defineElement ({
+  name: 'table',
+  is: 'sw-era-list-by-first-year',
+  props: {
+    pcInit: function () {
+      return this.swRender ();
+    }, // pcInit
+    swRender: async function () {
+      var FUTURE = 9999; // Y10K!
+      var eras = await SWD.eraList ({});
+      var years = new Set;
+      var yearEras = [];
+      eras.forEach (era => {
+        var y = era.offset + 1;
+        if (era.offset == null) {
+          y = era.start_year || era.end_year || FUTURE;
+          y += 0.5;
+        }
+        years.add (y);
+        yearEras[y] = yearEras[y] || [];
+        yearEras[y].push (era);
+      });
+
+      var tbody = this.tBodies[0];
+      var prev = NaN;
+      Array.from (years).sort ((a, b) => a-b).forEach (y => {
+        var unknownYear = Math.floor (y) !== y;
+        if (prev + 1 < y || unknownYear || Math.floor (prev) !== prev) {
+          tbody = document.createElement ('tbody');
+          this.appendChild (tbody);
+        }
+        prev = y;
+        var tr = document.createElement ('tr');
+        
+        var th = document.createElement ('th');
+        th.setAttribute ('class', 'year-header');
+        if (!unknownYear && y !== FUTURE) {
+          var year = document.createElement ('sw-data-year');
+          year.value = y;
+          year.setAttribute ('format', 'yearHeader');
+          th.appendChild (year);
+        }
+        tr.appendChild (th);
+
+        var td = document.createElement ('td');
+        yearEras[y].sort ((a, b) => {
+          return a.start_year - b.start_year ||
+                 a.end_year - b.end_year ||
+                 a.id - b.id;
+        }).forEach (era => {
+          var e = document.createElement ('sw-data-era');
+          e.setAttribute ('class', 'era-list-item');
+          e.value = era.id;
+          e.setAttribute ('template', 'sw-data-era-in-menu');
+          td.appendChild (e);
+        });
+        tr.appendChild (td);
+        
+        tbody.appendChild (tr);
+      });
+    }, // swRender
+  }, 
+}); // <table is=sw-era-list-by-first-year>
 
 defineElement ({
   name: 'sw-data-day',
@@ -2044,7 +2152,7 @@ defineElement ({
 
 /*
 
-Copyright 2020-2021 Wakaba <wakaba@suikawiki.org>.
+Copyright 2020-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
