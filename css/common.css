@@ -710,7 +710,9 @@ sw-era-transition-graph {
   position: relative;
 }
 
-sw-era-transition-graph a:not(:active):not(:focus):not(:hover) {
+sw-era-transition-graph a:not(:active):not(:focus):not(:hover),
+th.year-header a:not(:active):not(:focus):not(:hover),
+.era-list-item a:not(:active):not(:focus):not(:hover) {
   text-decoration: none;
 }
 
@@ -765,6 +767,14 @@ sw-era-transition-graph .year-header {
   line-height: 1.1;
 }
 
+th.year-header {
+  font-weight: normal;
+}
+
+th.year-header:last-of-type::after {
+  content: none;
+}
+
 sw-era-transition-graph .year-header.right {
   justify-content: start;
   text-align: left;
@@ -775,17 +785,21 @@ sw-era-transition-graph .year-header.this-year {
   color: var(--weight-2-color);
 }
 
+th.year-header p,
 sw-era-transition-graph .year-header p {
   margin: 0;
   font-size: 80%;
 }
 
+th.year-header span[data-field=eraValue],
+th.year-header data[data-field=value],
 sw-era-transition-graph .year-header span[data-field=eraValue],
 sw-era-transition-graph .year-header data[data-field=value] {
   margin-left: .3em;
   margin-right: .3em;
   font-weight: bolder;
 }
+th.year-header p:first-child span[data-field=eraValue],
 sw-era-transition-graph .year-header p:first-child span[data-field=eraValue] {
   font-size: 130%;
 }
@@ -822,6 +836,11 @@ sw-era-transition-graph .era-transition.transition-wartime\/possible,
 sw-era-transition-graph .era-transition.transition-wartime\/incorrect,
 sw-era-transition-graph .era-transition.tag-1359 /* 起事建元 */ {
   stroke-dasharray: 6 2;
+}
+
+sw-era-transition-graph .era-transition.transition-firstday\/canceled {
+  stroke: var(--incorrect-border-color);
+  marker-end: url(#arrow-incorrect);
 }
 
 sw-era-transition-graph .era-transition.transition-firstday\/incorrect,
@@ -902,6 +921,11 @@ sw-era-transition-graph .year-number-cover {
   fill: rgba(255, 255, 255, 0.7);
 }
 
+sw-era-transition-graph .year-border {
+  stroke: var(--border-2-color);
+  stroke-dasharray: 6 2;
+}
+
 sw-era-transition-graph .year-boundary {
   font-size: 48px;
   white-space: pre;
@@ -910,6 +934,29 @@ sw-era-transition-graph .year-boundary {
   color: var(--border-2-color);
   background: transparent;
   user-select: none;
+}
+
+table[is=sw-era-list-by-first-year] tbody > tr:first-child {
+  border-top: var(--border-2-color) solid 6px;
+}
+
+.era-list-item:not([hidden]) {
+  display: inline-block;
+}
+.era-list-item {
+  margin: .5em;
+  min-width: 10em;
+}
+
+.era-list-item bdi {
+  font-size: 120%;
+  font-weight: bolder;
+}
+
+.era-list-item .year-range {
+  margin: 0;
+  font-size: 90%;
+  text-align: right;
 }
 
 .XX\58-debug {
@@ -923,7 +970,7 @@ sw-era-transition-graph .year-boundary {
 
 /*
 
-Copyright 2015-2021 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
