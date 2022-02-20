@@ -419,8 +419,22 @@
       <sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-if-defined data-field=era.end_year><sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year></sw-if-defined><sw-if-defined data-field=era.end_year not>現在</sw-if-defined>の紀年法。</p>
     </sw-if-defined>
 
-    <sw-if-defined data-field=era.tag_ids.1200 hidden>
-      <p>この説は、現在では正しくないと考えられています。</p>
+    <sw-if-defined data-field=era.tag_ids.2887 hidden>
+      <p>
+        <sw-data-era data-field=canonEra.id template=sw-data-era-item></sw-data-era>
+        から<strong>避諱</strong>により派生しました。</p>
+    </sw-if-defined>
+
+    <sw-if-defined data-field=era.tag_ids.1198 hidden>
+      <p>
+        この紀年法は、
+        <sw-if-defined data-field=canonEra hidden>
+          <sw-data-era data-field=canonEra.id template=sw-data-era-item></sw-data-era>
+          
+        の</sw-if-defined>異説です。
+        <sw-if-defined data-field=era.tag_ids.1200 hidden>
+          現在では<strong>正しくない</strong>と考えられています。</p>
+      </sw-if-defined>
     </sw-if-defined>
     
     <section>
@@ -468,6 +482,38 @@
       <sw-if-defined data-field=era.offset not>
         <p>年代不詳。</p>
       </sw-if-defined>
+    </section>
+
+    <section id=relateds>
+      <h1>関連する紀年法</h1>
+
+      <list-container loader=swRelatedEraListLoader class=era-related-list data-loader-eraid-field=era.id data-filled=loader-eraid hascontainer>
+        <list-main></list-main>
+        <action-status></action-status>
+        <template data-class-template="era-related-type-{type}">
+          <sw-data-era data-field=eraId template=sw-data-era-in-menu></sw-data-era>
+          <p class=info><enum-value data-field=type
+              label-cognate_canon=原型
+              label-cognate_deviates=異説
+              label-cognate_deviated=本説
+              label-name_reuses=襲名元
+              label-name_reused=襲名先
+              label-name_equal=同名
+              label-name_rev_equal=逆転名
+              label-abbr_equal=同じ略称
+              label-yomi_equal=同音
+              label-name_similar=似た名前
+              label-transition_prev=前
+              label-transition_prevnext=前後
+              label-transition_next=後
+              label-year_equal
+              label-year_range_overlap
+              label-other
+          ></enum-value>
+          <sw-if-defined data-field=types.year_equal>同年</sw-if-defined>
+          <sw-if-defined data-field=types.year_range_overlap>同時期</sw-if-defined>
+        </template>
+      </list-container>
     </section>
     
     <section id=links>
@@ -592,6 +638,9 @@
           label-prevfirstyearstart=初年前日
           label-lastyearend=末年末
           label-nextlastyearend=末年翌日
+          label-deviated=異説発生
+          label-namesucceeded=襲名
+          label-taboorenamed=避諱
           label-other=その他
       ></enum-value>
     <td class=neighbors>
@@ -749,6 +798,12 @@
     が
     [<sw-tags data-field=object_tag_ids></sw-tags>]
     の<strong>勢力を吸収</strong>
+  </template>
+  <template data-name=2879>
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    を<strong>避諱</strong>して採用
   </template>
 </template-set>
 

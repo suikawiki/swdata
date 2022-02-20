@@ -490,6 +490,44 @@ nav.nearby ul > li > a {
   padding: .3em;
 }
 
+.era-related-list list-item:not([hidden]) {
+  display: inline-block;
+}
+.era-related-list list-item {
+  min-width: 10em;
+  vertical-align: top;
+}
+
+.era-related-list a:not([hidden]) {
+  display: block;
+}
+.era-related-list a {
+  padding: .25em;
+}
+
+.era-related-list bdi {
+  font-size: 120%;
+  font-weight: bolder;
+}
+
+.era-related-list .year-range {
+  margin: 0;
+  text-align: end;
+  font-size: 90%;
+}
+
+.era-related-list .info {
+  margin: 0 0.25em 0.25em 0.25em;
+  background-color: var(--gray-background-color)
+  color: var(--gray-color);
+  font-size: 90%;
+}
+
+.era-related-list a:not(:active):not(:focus):not(:hover),
+p sw-data-era a:not(:active):not(:focus):not(:hover) {
+  text-decoration: none;
+}
+
 .transitions .info {
   padding: 0;
   font-size: 90%;
@@ -615,7 +653,8 @@ nav.nearby ul > li > a {
 .transition-type-lastyearend > td.neighbors,
 .transition-type-nextlastyearend > td.neighbors,
 .transition-type-triggering > td.neighbors,
-.transition-type-triggering\/possible > td.neighbors {
+.transition-type-triggering\/possible > td.neighbors,
+.transition-type-deviated > td.neighbors {
   opacity: 0.3;
 }
 
