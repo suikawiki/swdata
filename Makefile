@@ -50,6 +50,7 @@ build-local: local/data \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
     local/data/calendar-era-transitions.json \
+    local/data/calendar-era-relations.json \
     local/data/days.json local/data/numbers-kanshi.json \
     local/data/tags.json
 build-repo: js/components.js
@@ -74,6 +75,8 @@ local/data/calendar-era-defs.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-defs.json
 local/data/calendar-era-transitions.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-transitions.json
+local/data/calendar-era-relations.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-relations.json
 local/data/calendar-era-systems.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-systems.json
 local/data/numbers-kanshi.json:

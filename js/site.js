@@ -87,6 +87,27 @@ SWD.eraTransitionsByEraId = async function (eraId) {
   return list.filter (_ => _.relevant_era_ids[eraId]);
 }; // SWD.eraTransitionsByEraId
 
+SWD.relatedEras = async function (id) {
+  if (!SWD._eraRelations) {
+    SWD._eraRelations = SWD.data ('calendar-era-relations.json');
+  }
+
+  var all = await SWD._eraRelations;
+  var era = all.eras[id] || {};
+  return era.relateds || {};
+}; // SWD.relatedEras
+
+SWD.canonEra = async function (id) {
+  var relateds = await SWD.relatedEras (id);
+  var rids = Object.keys (relateds);
+  for (var i = 0; i < rids.length; i++) {
+    if (relateds[rids[i]].cognate_canon) {
+      return await SWD.era (rids[i]);
+    }
+  }
+  return null;
+}; // SWD.canonEra
+
 SWD.tag = async function (id) {
   var tags = await SWD.tagsByIds ([id]);
   return tags[0]; // or undefined
@@ -151,7 +172,10 @@ defineElement ({
         if (m) {
           args.eraId = parseFloat (m[1]);
           args.era = await SWD.era (args.eraId);
-          if (args.era) args.name = 'page-era-item-index';
+          if (args.era) {
+            args.name = 'page-era-item-index';
+            args.canonEra = await SWD.canonEra (args.era.id);
+          }
           return args;
         }
 
@@ -695,6 +719,78 @@ defineListLoader ('swEraListLoader', function (opts) {
   });
 });
 
+var RelatedEraTypeIndex = {
+  cognate_canon:       10,
+  cognate_deviates:    11,
+  cognate_deviated:    12,
+  name_reuses:         20,
+  name_reused:         21,
+  name_equal:          22,
+  abbr_equal:          23,
+  name_rev_equal:      24,
+  yomi_equal:          25,
+  year_equal:          55,
+  transition_prevnext: 60,
+  transition_prev:     61,
+  transition_next:     62,
+  year_range_overlap:  67,
+  name_similar:        80,
+  other:               99,
+};
+defineListLoader ('swRelatedEraListLoader', function (opts) {
+  var thisEraId = this.getAttribute ('loader-eraid');
+  return SWD.relatedEras (thisEraId).then (async _ => {
+    var eraIds = Object.keys (_);
+    var data = eraIds.map (eraId => {
+      var types = _[eraId];
+      var type = 'other';
+      if (types.cognate_canon) {
+        type = 'cognate_canon';
+      } else if (types.cognate_deviated) {
+        type = 'cognate_deviated';
+      } else if (types.cognate_deviates) {
+        type = 'cognate_deviates';
+      } else if (types.name_reuses) {
+        type = 'name_reuses';
+      } else if (types.name_reused) {
+        type = 'name_reused';
+      } else if (types.transition_prev && types.transition_next) {
+        type = 'transition_prevnext';
+      } else if (types.transition_prev) {
+        type = 'transition_prev';
+      } else if (types.transition_next) {
+        type = 'transition_next';
+      } else if (types.name_equal) {
+        type = 'name_equal';
+      } else if (types.abbr_equal) {
+        type = 'abbr_equal';
+      } else if (types.year_equal) {
+        type = 'year_equal';
+      } else if (types.name_rev_equal) {
+        type = 'name_rev_equal';
+      } else if (types.yomi_equal ||
+                 types.korean_equal ||
+                 types.alphabetical_equal) {
+        type = 'yomi_equal';
+      } else if (types.year_range_overlap) {
+        type = 'year_range_overlap';
+      } else if (types.name_similar ||
+                 types.yomi_contains || types.yomi_contained ||
+                 types.korean_contains || types.korean_contained ||
+                 types.alphabetical_contains || types.alphabetical_contained) {
+        type = 'name_similar';
+      }
+      return {eraId, type, types, _ti: RelatedEraTypeIndex[type]};
+    });
+    for (var i = 0; i < data.length; i++) {
+      var era = await SWD.era (data[i].eraId);
+      data[i]._eraOffset = era.offset != null ? era.offset : +Infinity;
+    }
+    data = data.sort ((a, b) => a._ti - b._ti || a._eraOffset - b._eraOffset);
+    return {data};
+  });
+}); // swRelatedEraListLoader
+
 defineListLoader ('swTransitionListLoader', async function (opts) {
   var eraId = this.getAttribute ('loader-eraid');
   var era = await SWD.era (eraId);
@@ -978,6 +1074,8 @@ defineElement ({
               if (tr.tag_ids[2107] /* 分離 */) {
                 if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                   matched1.push (tr);
+                } else {
+                  matchedOthers.push (tr);
                 }
               } else {
                 if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
@@ -1154,6 +1252,8 @@ defineElement ({
         var tr = trs[_];
         if (arrowVisibleTransitionTypes[tr.type] ||
             (tr.type === 'firstyearstart' && tr.tag_ids[2108] /* 即位元年年始 */) ||
+            tr.type === 'deviated' ||
+            tr.type === 'taboorenamed' ||
             trArrows.get (tr)) {
           var pushed = false;
           for (var id in tr.relevant_era_ids) {
