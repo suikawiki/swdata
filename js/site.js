@@ -180,12 +180,13 @@ defineElement ({
         }
 
         // /e/{}/graph
-        var m = path.match (/^\/e\/([0-9]+)\/graph$/);
+        // /e/{}/kanshi
+        var m = path.match (/^\/e\/([0-9]+)\/(graph|kanshi)$/);
         if (m) {
           args.eraId = parseFloat (m[1]);
           args.era = await SWD.era (args.eraId);
           if (args.era) {
-            args.name = 'page-era-item-graph';
+            args.name = 'page-era-item-' + m[2];
             args.hasLargeContent = true;
           }
           return args;
@@ -491,6 +492,8 @@ defineElement ({
         return templates.eraText;
       } else if (obj.format === 'eraWithYear') {
         return templates.eraWithYear;
+      } else if (obj.format === 'eraADYear') {
+        return templates.eraADYear;
       } else {
         return templates.era;
       }
@@ -2028,6 +2031,116 @@ defineElement ({
     }, // swRender
   }, 
 }); // <table is=sw-era-list-by-first-year>
+
+defineElement ({
+  name: 'table',
+  is: 'sw-era-kanshi-years',
+  props: {
+    pcInit: function () {
+      return this.swRender ();
+    }, // pcInit
+    swRender: async function () {
+      var thisYear = (new Date).getFullYear ();
+
+      var eraId = this.getAttribute ('eraid');
+      var relateds = await SWD.relatedEras (eraId);
+      var eraIds = Object.keys (relateds).filter (_ => relateds[_].name_equal || relateds[_].abbr_equal || relateds[_].yomi_equal || relateds[_].alphabetical_equal || relateds[_].korean_equal);
+      eraIds.unshift (eraId);
+
+      var eees = [];
+      for (var i = 0; i < eraIds.length; i++) {
+        var era = await SWD.era (eraIds[i]);
+
+        var core_start = era.start_year;
+        if (core_start == null) core_start = era.offset;
+        if (core_start == null) core_start = thisYear - 60;
+        var start = era.known_oldest_year;
+        if (start == null) start = core_start;
+        var core_end = era.end_year;
+        if (era.start_year != null && era.end_year == null) core_end = thisYear;
+        if (core_end == null) core_end = thisYear;
+        var end = era.known_latest_year;
+        if (era.start_year != null && era.end_year == null) end = thisYear;
+        if (end == null) end = thisYear;
+        var kStart = mod (start - 4, 60);
+        var first = start - kStart;
+        var cols = 1;
+        while (first + cols * 60 < end) {
+          cols++;
+        }
+        var eee = {first, cols, start, end, core_start, core_end, era,
+                   kStart};
+        if (eraId == era.id) {
+          eee.active = true;
+          eee._ne = true;
+        } else {
+          eee.active = false;
+          eee._ne = relateds[era.id].name_equal || 0;
+        }
+        eees.push (eee);
+      } // era
+
+      eees = eees.sort ((a, b) => {
+        return b._ne - a._ne ||
+               a.kStart - b.kStart ||
+               a.start - b.start ||
+               a.end - b.end ||
+               a.era.id - b.era.id;
+      });
+      
+      var thead = this.tHead;
+      var headers = thead.rows[0];
+      eees.forEach (eee => {
+        var cg = document.createElement ('colgroup');
+        cg.span = eee.cols;
+        this.insertBefore (cg, thead);
+        
+        var th = document.createElement ('th');
+        th.setAttribute ('colspan', eee.cols);
+        th.classList.toggle ('active', eee.active);
+        var e = document.createElement ('sw-data-era');
+        e.value = eee.era.id;
+        e.setAttribute ('template', 'sw-data-era-item');
+        th.appendChild (e);
+        headers.appendChild (th);
+      }); // eee
+
+      var tbody = this.tBodies[0];
+      for (var i = 0; i < 60; i++) {
+        var tr = document.createElement ('tr');
+
+        var th = document.createElement ('th');
+        var e = document.createElement ('sw-data-kanshi');
+        e.value = i;
+        th.appendChild (e);
+        tr.appendChild (th);
+
+        eees.forEach (eee => {
+          for (var j = 0; j < eee.cols; j++) {
+            var y = eee.first + j * 60 + i;
+            var td = document.createElement ('td');
+            td.classList.toggle ('active', eee.active);
+            td.classList.toggle ('year-numbers', true);
+            if (eee.start <= y && y <= eee.end) {
+              td.classList.toggle ('in-era-known-year', true);
+              if (eee.core_start <= y && y <= eee.core_end) {
+                td.classList.toggle ('in-era-year', true);
+              }
+            }
+            var e = document.createElement ('sw-data-year');
+            e.value = y;
+            e.setAttribute ('eraid', eee.era.id);
+            e.setAttribute ('format', 'eraADYear');
+            td.appendChild (e);
+            tr.appendChild (td);
+          }
+        }); // eee
+
+        tbody.appendChild (tr);
+      }
+    }, // swRender
+  }, 
+}); // <table is=sw-era-kanshi-years>
 
 defineElement ({
   name: 'sw-data-day',

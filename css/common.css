@@ -24,6 +24,7 @@ html {
   --incorrect-opaque-background-color: var(--gray-opaque-background-color);
   --incorrect-color: var(--gray-color);
   --incorrect-border-color: var(--gray-border-color);
+  --header-z-index: 1000;
 }
 
 svg.defs {
@@ -151,6 +152,10 @@ table + table {
   margin-top: 1em;
 }
 
+colgroup + colgroup {
+  border-left: 1px #eee solid;
+}
+
 tr {
   border-top: 1px #eee solid;
   border-bottom: 1px #eee solid;
@@ -162,6 +167,14 @@ th, td {
 
 td.long {
   vertical-align: top;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
+  z-index: var(--header-z-index);
 }
 
 tbody th {
@@ -524,6 +537,7 @@ nav.nearby ul > li > a {
 }
 
 .era-related-list a:not(:active):not(:focus):not(:hover),
+.era-kanshi-table a:not(:active):not(:focus):not(:hover),
 p sw-data-era a:not(:active):not(:focus):not(:hover) {
   text-decoration: none;
 }
@@ -996,6 +1010,91 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
   margin: 0;
   font-size: 90%;
   text-align: right;
+}
+
+.era-kanshi-table thead th a:not([hidden]) {
+  display: block;
+}
+
+.era-kanshi-table thead th sw-data-era {
+  font-weight: normal;
+}
+
+.era-kanshi-table thead th sw-data-era bdi {
+  font-weight: bolder;
+}
+
+.era-kanshi-table thead th code:not([hidden]) {
+  display: block;
+}
+
+.era-kanshi-table tbody th {
+  width: 8em;
+  text-align: center;
+  font-weight: normal;
+}
+
+.era-kanshi-table tbody th::after {
+  content: none;
+}
+
+.era-kanshi-table tbody th a:not([hidden]) {
+  display: block;
+}
+
+.era-kanshi-table tbody th data[data-field=label]:not([hidden]) {
+  display: block;
+}
+
+.era-kanshi-table tbody th data[data-field=label] {
+  font-weight: bolder;
+}
+
+.era-kanshi-table th.active {
+  background-color: var(--weight-3-background-color);
+  color: var(--weight-3-color);
+}
+
+.era-kanshi-table td.active {
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
+}
+
+.year-numbers {
+  text-align: center;
+  line-height: 1.0;
+}
+
+.year-numbers.in-era-known-year {
+}
+
+.year-numbers.in-era-year {
+  font-weight: bolder;
+}
+
+.year-numbers a:not([hidden]) {
+  display: block;
+}
+
+.year-numbers a {
+  min-width: 4em;
+  opacity: 0.3;
+}
+
+.year-numbers.in-era-known-year a {
+  opacity: 1;
+}
+
+.year-numbers .era-year:not([hidden]),
+.year-numbers .ad-year:not([hidden]) {
+  display: block;
+}
+
+.year-numbers .era-year {
+  font-size: 200%;
+}
+
+.year-numbers .ad-year {
 }
 
 .XX\58-debug {
