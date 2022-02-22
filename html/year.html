@@ -400,9 +400,10 @@
     </table>
   </template>
   
-  <template data-name=page-era-item-index title="y~{era.id} {era.name}">
+  <template data-name=page-era-item-index title="{era.name} [y~{era.id}]">
     <hgroup>
-      <h1><code>y~<span data-field=era.id></span></code> <bdi data-field=era.name></bdi></h1>
+      <h1><bdi data-field=era.name></bdi>
+      [<code>y~<span data-field=era.id></span></code>]</h1>
       <h2 lang=en><a href=/e/>紀年法</a></h2>
     </hgroup>
 
@@ -410,7 +411,9 @@
 
     <sw-tags data-field=era.tag_ids></sw-tags>
     
-    <p><a href=./ class=active>紀年法の情報</a> / <a href=graph>その後の変遷</a></p>
+    <p><a href=./ class=active>紀年法の情報</a> /
+    <a href=graph>その後の変遷</a> /
+    <a href=kanshi>干支年</a></p>
 
     <sw-if-defined data-field=era.start_year hidden>
       <p><dfn><bdi data-field=era.name></bdi></dfn>
@@ -526,20 +529,57 @@
       </ul>
     </section>
   </template>
-  <template data-name=page-era-item-graph title="y~{era.id} {era.name} からの変遷">
+  <template data-name=page-era-item-graph title="{era.name} [y~{era.id}] からの変遷">
     <hgroup>
-      <h1><code>y~<span data-field=era.id></span></code> <bdi data-field=era.name></bdi></h1>
+      <h1><bdi data-field=era.name></bdi>
+      [<code>y~<span data-field=era.id></span></code>]</h1>
       <h2 lang=en><a href=/e/>紀年法</a></h2>
     </hgroup>
 
     <menu class=toc></menu>
 
-    <p><a href=./>紀年法の情報</a> / <a href=graph class=active>その後の変遷</a></p>
+    <p><a href=./>紀年法の情報</a> /
+    <a href=graph class=active>その後の変遷</a> /
+    <a href=kanshi>干支年</a></p>
 
     <sw-era-transition-graph data-eraid-field=era.id data-filled=eraid>
       <action-status><progress></progress></action-status>
     </sw-era-transition-graph>
     
+  </template>
+  <template data-name=page-era-item-kanshi title="{era.name} [y~{era.id}] の干支年">
+    <hgroup>
+      <h1><bdi data-field=era.name></bdi>
+      [<code>y~<span data-field=era.id></span></code>]</h1>
+      <h2 lang=en><a href=/e/>紀年法</a></h2>
+    </hgroup>
+
+    <menu class=toc></menu>
+
+    <p><a href=./>紀年法の情報</a> /
+    <a href=graph>その後の変遷</a> /
+    <a href=kanshi class=active>干支年</a></p>
+
+    <table is=sw-era-kanshi-years data-eraid-field=era.id data-filled=eraid class=era-kanshi-table>
+      <colgroup>
+      <thead>
+        <tr>
+          <th><a href=/kanshi>干支</a>
+      <tbody>
+    </table>
+
+    <section id=relateds>
+      <h1>関連紀年法</h1>
+
+      <list-container loader=swRelatedEraListLoader data-loader-eraid-field=era.id data-filled=loader-eraid hascontainer type=ul>
+        <ul class=item-list></ul>
+        <action-status></action-status>
+        <template data-class-template="era-related-type-{type}">
+          <sw-data-era data-field=eraId template=sw-data-era-kanshi></sw-data-era>
+        </template>
+      </list-container>
+    </section>
+
   </template>
   
   <template data-name=page-tag-item-index title="#{tag.label}">
@@ -848,6 +888,12 @@
     <code>[y~<span data-field=era.id></span>]</code>
     <strong data-field=eraValue></strong>年
   </template>
+  <template data-name=eraADYear>
+    <a data-href-template=/y/{value}/>
+      <span data-field=eraValue class=era-year></span>
+      <span data-field=value class=ad-year></span>
+    </a>
+  </template>
   <template data-name=yearHeader>
     <p><a data-href-template=/y/{value}/><sw-data-year data-field=value eraid=20 format=text></sw-data-year></a>
     <p>西暦紀元前<sw-algorithm name=before-epoch-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>年
@@ -858,13 +904,22 @@
 
 <template-set name=sw-data-era>
   <template>
-    <a data-href-template=/e/{id}/ data-field=name></a>
+    <a data-href-template=/e/{id}/ data-field=name data-class-template=incorrect-{tag_ids.1200}></a>
   </template>
 </template-set>
 
 <template-set name=sw-data-era-item>
   <template>
-    <a data-href-template=/e/{id}/>
+    <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
+      <bdi data-field=name></bdi>
+      <code>[y~<span data-field=id></span>]</code>
+    </a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-era-kanshi>
+  <template>
+    <a data-href-template=/e/{id}/kanshi data-class-template=incorrect-{tag_ids.1200}>
       <bdi data-field=name></bdi>
       <code>[y~<span data-field=id></span>]</code>
     </a>
