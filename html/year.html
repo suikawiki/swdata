@@ -11,7 +11,12 @@
   <h1 itemprop=name><a href=/ rel=top itemprop=url>Data.</a><a href=https://suikawiki.org><img src=https://wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
 </header>
 
-<section is=sw-page-main template=pageMainTemplate></section>
+<section is=sw-page-main template=pageMainTemplate>
+  <action-status>
+    <action-status-message>読込中...</action-status-message>
+    <progress></progress>
+  </action-status>
+</section>
 
 <template-set name=pageMainTemplate templateselector=selectPageTemplate>
   <template title="404 Not Found">
@@ -159,15 +164,15 @@
     <section>
       <h1>紀年法を調べる</h1>
 
-      <form action=javascript: method=get is=sw-year-determination-form>
+      <form is=sw-year-determination-form>
         <p>
           <label>
-            <input type=number name=input_year value=1 required>
+            <input type=number name=input_year value=1 step=1 required>
             (年)
           </label>
           が、
           <label>
-            <input type=number name=input_ref_year value=2019 required>
+            <input type=number name=input_ref_year value=2019 step=1 required>
             (年)
           </label>
           <select name=input_ref_era required>
@@ -177,179 +182,141 @@
           </select>
           であるなら:
 
-        <p>
-          一致する紀年法:
-          <list-container loader=swValueListLoader data-name=output_era_list data-delta=0>
-            <list-main></list-main>
+        <dl class=matched-era-list>
+          <template-set name=matchedEraListItem>
             <template>
-              <sw-data-era data-field=id></sw-data-era>
+              <sw-data-era data-field=id template=sw-data-era-in-menu class=era-list-item></sw-data-era>
             </template>
-            <list-is-empty>見つかりませんでした。</list-is-empty>
-          </list-container>
-        </p>
+          </template-set>
+          <div>
+            <dt>&minus;120
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-120 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>&minus;60
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-60 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>&minus;12
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-12 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>&minus;10
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-10 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>&minus;2
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-2 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>&minus;1
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-1 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div class=active>
+            <dt>一致
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=0 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+1
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=1 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+2
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=2 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+10
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=10 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+12
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=12 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+60
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=60 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+          <div>
+            <dt>+120
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=120 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+        </dl>
         
         <table>
           <thead>
             <tr>
               <th>当該紀年法
-              <th>西暦 (AD)
-              <th>西暦紀元前 (BC)
-              <th>皇紀
+              <th><a href=/y/>年</a>
               <th>Shouou
               <th>Bokuou
               <th>Kyouou
-              <th>干支年
             <template>
-              <th><span data-field=delta></span>年
-              <td><sw-data-year data-value=year data-data-delta-field=delta data-filled=data-delta></sw-data-year>
-              <td><span data-text=year data-text-bc data-data-delta-field=delta data-filled=data-delta></span>
-              <td><span data-text=year data-text-delta=660 data-data-delta-field=delta data-filled=data-delta></span>
+              <td class=year-numbers>
+                <span data-field=delta class=era-year></span>年
+              <td class=year-header><sw-data-year format=yearHeader data-value=year data-data-delta-field=delta data-filled=data-delta></sw-data-year>
               <td><span data-text=year data-text-delta=1052 data-data-delta-field=delta data-filled=data-delta></span>
               <td><span data-text=year data-text-delta=1001 data-data-delta-field=delta data-filled=data-delta></span>
               <td><span data-text=year data-text-delta=946 data-data-delta-field=delta data-filled=data-delta></span>
-              <td><sw-algorithm name=kanshi-year data-arg-year data-data-delta-field=delta data-filled=data-delta></sw-algorithm>
             </template>
           <tbody>
           <tfoot>
             <tr>
-              <td><input type=number name=output_ad_year_new_delta> (年)
+              <td class=year-numbers>
+                <input type=number name=output_ad_year_new_delta step=1 class=era-year>年
               <td><button type=button name=output_ad_year_new>追加</button>
         </table>
-
-        <dl>
-          <div>
-            <dt>+1 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=1>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;1 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-1>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>+2 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=2>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;2 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-2>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>+10 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=10>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;10 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-10>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>+12 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=12>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;12 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-12>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>+60 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=60>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;60 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-60>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>+120 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=120>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-          <div>
-            <dt>&minus;120 年ずれの紀年法
-            <dd>
-              <list-container loader=swValueListLoader data-name=output_era_list data-delta=-120>
-                <list-main></list-main>
-                <template>
-                  <sw-data-era data-field=id></sw-data-era>
-                </template>
-                <list-is-empty>見つかりませんでした。</list-is-empty>
-              </list-container>
-          </div>
-        </dl>
       </form>
       
 
@@ -397,6 +364,12 @@
           <th><a href=/y/>年</a>
           <th>紀年法
       <tbody>
+        <tr>
+          <td colspan=2>
+            <action-status>
+              <action-status-message>読込中...</action-status-message>
+              <progress></progress>
+            </action-status>
     </table>
   </template>
   
@@ -462,7 +435,7 @@
           <p><sw-mi>西暦<can-copy><output data-data-add-field=era.offset data-filled=data-add></output></can-copy>年</sw-mi> <sw-mo>=</sw-mo> <sw-mi><bdi data-field=era.name></bdi><input type=number step=1>年</sw-mi> <sw-mo>+</sw-mo> <sw-mn><can-copy><data data-field=era.offset></data></can-copy></sw-mn></p>
         </form>
         <form is=sw-calc-form>
-          <p><sw-mi><bdi data-field=era.name></bdi><can-copy><output data-data-subtract-field=era.offset data-filled=data-subtract></output></can-copy>年</sw-mi> <sw-mo>=</sw-mo> <sw-mi>西暦<input type=number step=1>年</sw-mi> <sw-mo>-</sw-mo> <sw-mn><can-copy><data data-field=era.offset></data></can-copy></sw-mn></p>
+          <p><sw-mi><bdi data-field=era.name></bdi><can-copy><output data-data-subtract-field=era.offset data-filled=data-subtract></output></can-copy>年</sw-mi> <sw-mo>=</sw-mo> <sw-mi>西暦<input type=number step=1>年</sw-mi> <sw-mo>&minus;</sw-mo> <sw-mn><can-copy><data data-field=era.offset></data></can-copy></sw-mn></p>
         </form>
       </sw-if-defined>
       
@@ -544,7 +517,10 @@
     <a href=kanshi>干支年</a></p>
 
     <sw-era-transition-graph data-eraid-field=era.id data-filled=eraid>
-      <action-status><progress></progress></action-status>
+      <action-status>
+        <action-status-message>読込中...</action-status-message>
+        <progress></progress>
+      </action-status>
     </sw-era-transition-graph>
     
   </template>
@@ -628,7 +604,10 @@
     <p><a href=./>紀年法の一覧</a> / <a href=graph class=active>変遷</a></p>
 
     <sw-era-transition-graph data-tagid-field=tag.id data-sequences-field=eraSequenceSpecifications data-filled="tagid sequences">
-      <action-status><progress></progress></action-status>
+      <action-status>
+        <action-status-message>読込中...</action-status-message>
+        <progress></progress>
+      </action-status>
     </sw-era-transition-graph>
 
     <section>

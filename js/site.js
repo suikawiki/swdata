@@ -1997,6 +1997,7 @@ defineElement ({
       });
 
       var tbody = this.tBodies[0];
+      tbody.innerHTML = '';
       var prev = NaN;
       Array.from (years).sort ((a, b) => a-b).forEach (y => {
         var unknownYear = Math.floor (y) !== y;
@@ -2273,6 +2274,9 @@ defineElement ({
   is: 'sw-year-determination-form',
   props: {
     pcInit: function () {
+      var thisYear = (new Date).getFullYear ();
+      
+      this.action = 'javascript:';
       this.oninput = () => this.swUpdate ();
       this.onchange = () => {
         var iy = parseFloat (this.elements.input_year.value);
@@ -2281,6 +2285,12 @@ defineElement ({
         }
       };
       this.swYears = [0, 1];
+
+      var s = new window.URL (location.href).searchParams;
+      this.elements.input_year.value = s.get ('input_year') || 1;
+      this.elements.input_ref_year.value = s.get ('input_ref_year') || thisYear;
+      this.elements.input_ref_era.value = s.get ('input_ref_era') || 'ad';
+      
       this.swUpdate ();
     }, // pcInit
     swUpdate: function () {
@@ -2338,6 +2348,15 @@ defineElement ({
         if (!Number.isFinite (delta)) return;
         this.swAddYear (delta);
       };
+
+      var u = location.pathname + '?input_year=' + iy + '&input_ref_year=' + ry + '&input_ref_era=' + re;
+      history.replaceState (null, null, u);
+
+      setTimeout (() => {
+        form.querySelectorAll ('.active').forEach (_ => {
+          _.parentNode.scrollLeft = _.offsetLeft + _.offsetWidth/2 - _.parentNode.offsetWidth/2;
+        });
+      }, 100);
     }, // _swUpdate
     swAddYear: function (delta) {
       var found = [];
