@@ -470,6 +470,8 @@ defineElement ({
         args.eraName = this.getAttribute ('eraname') || era.name;
       }
       args.format = this.getAttribute ('format');
+      args.canCopy = this.hasAttribute ('can-copy');
+      args.link =  this.hasAttribute ('link');
       
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
@@ -489,7 +491,13 @@ defineElement ({
   def.pcHandler = function (templates, obj) {
     if (obj.era) {
       if (obj.format === 'text') {
-        return templates.eraText;
+        if (obj.canCopy && obj.link) {
+          return templates.eraTextCanCopyLink;
+        } else if (obj.canCopy) {
+          return templates.eraTextCanCopy;
+        } else {
+          return templates.eraText;
+        }
       } else if (obj.format === 'eraWithYear') {
         return templates.eraWithYear;
       } else if (obj.format === 'eraADYear') {
@@ -537,6 +545,12 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var id = this.value;
+      if (id == null) {
+        this.hidden = true;
+        return;
+      }
+      this.hidden = false;
+      
       var args = await SWD.era (id);
       var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
       var e = ts.createFromTemplate ('div', args);
@@ -655,10 +669,6 @@ defineListLoader ('swYearListLoader', async function (opts) {
   var era;
   if (eraId) era = await SWD.era (eraId);
 
-  if (era && !Number.isFinite (era.offset)) {
-    return {data: []};
-  }
-  
   var ref = null;
   var reversed = false;
   if (Array.isArray (opts.ref)) {
@@ -771,16 +781,11 @@ defineListLoader ('swRelatedEraListLoader', function (opts) {
         type = 'year_equal';
       } else if (types.name_rev_equal) {
         type = 'name_rev_equal';
-      } else if (types.yomi_equal ||
-                 types.korean_equal ||
-                 types.alphabetical_equal) {
+      } else if (types.label_equal) {
         type = 'yomi_equal';
       } else if (types.year_range_overlap) {
         type = 'year_range_overlap';
-      } else if (types.name_similar ||
-                 types.yomi_contains || types.yomi_contained ||
-                 types.korean_contains || types.korean_contained ||
-                 types.alphabetical_contains || types.alphabetical_contained) {
+      } else if (types.label_similar) {
         type = 'name_similar';
       }
       return {eraId, type, types, _ti: RelatedEraTypeIndex[type]};
@@ -2044,7 +2049,7 @@ defineElement ({
 
       var eraId = this.getAttribute ('eraid');
       var relateds = await SWD.relatedEras (eraId);
-      var eraIds = Object.keys (relateds).filter (_ => relateds[_].name_equal || relateds[_].abbr_equal || relateds[_].yomi_equal || relateds[_].alphabetical_equal || relateds[_].korean_equal);
+      var eraIds = Object.keys (relateds).filter (_ => relateds[_].label_equal);
       eraIds.unshift (eraId);
 
       var eees = [];
@@ -2229,6 +2234,39 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-day>
+
+defineElement ({
+  name: 'form',
+  is: 'sw-calc-form',
+  props: {
+    pcInit: function () {
+      this.oninput = () => this.swUpdate ();
+      this.action = 'javascript:';
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: function () {
+      var nn = this.querySelector ('input[type=number]');
+      if (!nn) return;
+
+      if (nn.value) {
+        var n = nn.valueAsNumber;
+        this.querySelectorAll ('output').forEach (_ => {
+          var m = n;
+          
+          var a = _.getAttribute ('data-add');
+          if (a) m += parseFloat (a);
+
+          var s = _.getAttribute ('data-subtract');
+          if (s) m -= parseFloat (s);
+
+          _.textContent = m;
+        });
+      } else {
+        this.querySelectorAll ('output').forEach (_ => _.textContent = '');
+      }
+    }, // swUpdate
+  },
+}); // <form is=sw-calc-form>
 
 defineElement ({
   name: 'form',

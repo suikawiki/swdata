@@ -53,7 +53,7 @@ build-local: local/data \
     local/data/calendar-era-relations.json \
     local/data/days.json local/data/numbers-kanshi.json \
     local/data/tags.json
-build-repo: js/components.js
+build-repo: js/components.js css/default.css
 local/data:
 	mkdir -p local/data
 
@@ -62,6 +62,8 @@ js/components.js: local/page-components.js local/time.js
 
 local/page-components.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/src/page-components.js
+css/default.css: local/generated
+	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/css/default.css
 local/time.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/timejs/master/src/time.js
 

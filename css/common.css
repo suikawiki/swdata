@@ -1,3 +1,5 @@
+@import 'default.css';
+
 html {
   line-height: 1.5;
   --list-item-1-background-color: #eee;
@@ -24,6 +26,10 @@ html {
   --incorrect-opaque-background-color: var(--gray-opaque-background-color);
   --incorrect-color: var(--gray-color);
   --incorrect-border-color: var(--gray-border-color);
+  --dialog-background-color: white;
+  --dialog-color: black;
+  --dialog-border-color: gray;
+  --dialog-shadow-color: #eee;
   --header-z-index: 1000;
 }
 
@@ -195,6 +201,24 @@ td > a:only-child:not(.inline) {
   display: block;
 }
 
+toast-box {
+  margin: 1em;
+  border: 1px solid var(--dialog-border-color);
+  padding: .5em;
+  background-color: var(--dialog-background-color);
+  color: var(--dialog-color);
+  box-shadow: 3px 3px var(--dialog-shadow-color);
+  font-size: 90%;
+}
+
+toast-box-main {
+  padding-right: .5em;
+}
+
+button {
+  cursor: pointer;
+}
+
 output:lang(ar) {
   direction: rtl;
 }
@@ -204,18 +228,28 @@ td.copy {
   text-align: right;
 }
 
-td.copy button {
+td.copy button,
+can-copy button {
   font-size: 80%;
   cursor: pointer;
   border-style: none;
-  -moz-appearance: none;
   -webkit-appearance: none;
   line-height: 1.4;
+  background: var(--gray-background-color);
+  color: var(--gray-color);
 }
 
 td.copy button:not(:hover) {
   background: transparent;
   color: gray;
+}
+
+sw-era-transition-graph .year-header can-copy button,
+th.year-header can-copy button,
+.transitions > tbody > tr > .day .info can-copy button {
+  zoom: 0.6;
+  line-height: 2.8;
+  vertical-align: middle;
 }
 
 #yearless-date ul {
@@ -490,7 +524,8 @@ nav.nearby ul > li > a {
 .era-year-list .main a:not([hidden]) {
   display: block;
 }
-.era-year-list .main a:not(:focus):not(:active):not(:hover) {
+.era-year-list .main a:not(:focus):not(:active):not(:hover),
+.era-year-list .day a:not(:focus):not(:active):not(:hover) {
   text-decoration: none;
   color: inherit;
   background-color: transparent;
@@ -597,6 +632,13 @@ p sw-data-era a:not(:active):not(:focus):not(:hover) {
 .transitions > tbody > tr > .day .full-date .leap {
   font-size: 130%;
   font-weight: bolder;
+}
+
+.transitions > tbody > tr > .day .info {
+  margin: 0;
+  color: inherit;
+  background-color: transparent;
+  line-height: 1.3;
 }
 
 .transitions > tbody > tr > .neighbors {
@@ -765,6 +807,7 @@ sw-era-transition-graph {
 
 sw-era-transition-graph a:not(:active):not(:focus):not(:hover),
 th.year-header a:not(:active):not(:focus):not(:hover),
+.era-year-list .year-header a:not(:active):not(:focus):not(:hover),
 .era-list-item a:not(:active):not(:focus):not(:hover) {
   text-decoration: none;
 }
@@ -844,16 +887,29 @@ sw-era-transition-graph .year-header p {
   font-size: 80%;
 }
 
-th.year-header span[data-field=eraValue],
+.era-year-list .year-header p:not([hidden]) {
+  display: inline-block;
+}
+.era-year-list .year-header p {
+  padding: .3em;
+  font-size: 110%;
+}
+
+.era-year-list .year-header data[data-field=eraValue],
+.era-year-list .year-header data[data-field=value],
+th.year-header data[data-field=eraValue],
 th.year-header data[data-field=value],
-sw-era-transition-graph .year-header span[data-field=eraValue],
+sw-era-transition-graph .year-header data[data-field=eraValue],
 sw-era-transition-graph .year-header data[data-field=value] {
   margin-left: .3em;
   margin-right: .3em;
   font-weight: bolder;
 }
-th.year-header p:first-child span[data-field=eraValue],
-sw-era-transition-graph .year-header p:first-child span[data-field=eraValue] {
+.era-year-list .year-header p data[data-field=value],
+.era-year-list .year-header p data[data-field=eraValue],
+.era-year-list .year-header p sw-data-kanshi data,
+th.year-header p:first-child data[data-field=eraValue],
+sw-era-transition-graph .year-header p:first-child data[data-field=eraValue] {
   font-size: 130%;
 }
 
@@ -1095,6 +1151,60 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
 }
 
 .year-numbers .ad-year {
+}
+
+form[is=sw-calc-form] p {
+  text-align: center;
+  font-size: 120%;
+}
+
+sw-mi input[type=number] {
+  width: 5em;
+  margin: 0 .5em;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 140%;
+  font-weight: bolder;
+  font-family: sans-serif;
+}
+
+sw-mi output:not(:empty) {
+  margin: 0 .5em;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 140%;
+  font-weight: bolder;
+  font-family: sans-serif;
+}
+
+sw-mi output:empty ~ button {
+  display: none;
+}
+
+sw-mo {
+  font-family: serif;
+  font-size: 130%;
+}
+
+sw-mn {
+  font-size: 130%;
+  font-weight: bolder;
+  font-family: sans-serif;
+}
+
+sw-mi can-copy:not([hidden]),
+sw-mn can-copy:not([hidden]) {
+  display: inline-flex;
+}
+sw-mi can-copy,
+sw-mn can-copy {
+  flex-direction: column;
+  align-items: center;
+}
+
+sw-mi can-copy button,
+sw-mn can-copy button {
+  font-size: .8rem;
 }
 
 .XX\58-debug {
