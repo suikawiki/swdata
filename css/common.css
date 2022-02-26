@@ -201,6 +201,27 @@ td > a:only-child:not(.inline) {
   display: block;
 }
 
+action-status:not([hidden]) {
+  display: block;
+}
+action-status {
+  padding: 1em;
+  background-color: var(--gray-background-color);
+  color: var(--gray-color);
+  text-align: center;
+  font-size: 200%;
+}
+
+action-status-message {
+  font-size: 200%;
+}
+
+action-status progress:not([hidden]) {
+  display: block;
+  width: 100%;
+  font-size: 200%;
+}
+
 toast-box {
   margin: 1em;
   border: 1px solid var(--dialog-border-color);
@@ -246,6 +267,7 @@ td.copy button:not(:hover) {
 
 sw-era-transition-graph .year-header can-copy button,
 th.year-header can-copy button,
+td.year-header can-copy button,
 .transitions > tbody > tr > .day .info can-copy button {
   zoom: 0.6;
   line-height: 2.8;
@@ -807,6 +829,7 @@ sw-era-transition-graph {
 
 sw-era-transition-graph a:not(:active):not(:focus):not(:hover),
 th.year-header a:not(:active):not(:focus):not(:hover),
+td.year-header a:not(:active):not(:focus):not(:hover),
 .era-year-list .year-header a:not(:active):not(:focus):not(:hover),
 .era-list-item a:not(:active):not(:focus):not(:hover) {
   text-decoration: none;
@@ -882,6 +905,7 @@ sw-era-transition-graph .year-header.this-year {
 }
 
 th.year-header p,
+td.year-header p,
 sw-era-transition-graph .year-header p {
   margin: 0;
   font-size: 80%;
@@ -899,6 +923,8 @@ sw-era-transition-graph .year-header p {
 .era-year-list .year-header data[data-field=value],
 th.year-header data[data-field=eraValue],
 th.year-header data[data-field=value],
+td.year-header data[data-field=eraValue],
+td.year-header data[data-field=value],
 sw-era-transition-graph .year-header data[data-field=eraValue],
 sw-era-transition-graph .year-header data[data-field=value] {
   margin-left: .3em;
@@ -909,6 +935,7 @@ sw-era-transition-graph .year-header data[data-field=value] {
 .era-year-list .year-header p data[data-field=eraValue],
 .era-year-list .year-header p sw-data-kanshi data,
 th.year-header p:first-child data[data-field=eraValue],
+td.year-header p:first-child data[data-field=eraValue],
 sw-era-transition-graph .year-header p:first-child data[data-field=eraValue] {
   font-size: 130%;
 }
@@ -1054,7 +1081,11 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
 }
 .era-list-item {
   margin: .5em;
-  min-width: 10em;
+  min-inline-size: 10em;
+}
+
+.era-list-item a:not([hidden]) {
+  display: block;
 }
 
 .era-list-item bdi {
@@ -1116,6 +1147,58 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
   color: var(--weight-2-color);
 }
 
+.matched-era-list:not([hidden]) {
+}
+.matched-era-list {
+  writing-mode: vertical-rl;
+  max-width: 100%;
+  min-height: 15em;
+  max-height: calc(90vh - 15em);
+  overflow: auto;
+  margin: 1em auto;
+  padding: 0;
+}
+
+.matched-era-list > div:not([hidden]) {
+  display: table-row;
+}
+
+.matched-era-list > div > dt:not([hidden]) {
+  display: table-cell;
+}
+.matched-era-list > div > dt {
+  writing-mode: horizontal-tb;
+  min-width: 3em;
+  padding: 0.25em 0.5em;
+  background-color: var(--weight-2-background-color);
+  color: var(--weight-2-color);
+  font-weight: bolder;
+  text-align: center;
+}
+
+.matched-era-list > div > dd:not([hidden]) {
+  display: table-cell;
+}
+.matched-era-list > div > dd {
+  vertical-align: middle;
+  border-right: 1px solid #eee;
+}
+.matched-era-list > div > dd:last-child {
+  border-left: 1px solid #eee;
+}
+
+.matched-era-list > div.active > dd {
+  background-color: var(--weight-1-background-color);
+  color: var(--weight-1-color);
+}
+
+.matched-era-list list-is-empty {
+  margin: .5em;
+  font-size: 90%;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
 .year-numbers {
   text-align: center;
   line-height: 1.0;
@@ -1151,6 +1234,12 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
 }
 
 .year-numbers .ad-year {
+}
+
+.year-numbers input.era-year {
+  margin: .3em auto;
+  width: 5em;
+  text-align: center;
 }
 
 form[is=sw-calc-form] p {
