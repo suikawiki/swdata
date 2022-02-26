@@ -80,6 +80,9 @@ sub main ($$$) {
   if (@$path == 2 and $path->[0] eq 'css' and $path->[1] eq 'common.css') {
     # /css/common.css
     return static $app, 'text/css; charset=utf-8', 'css/common.css';
+  } elsif (@$path == 2 and $path->[0] eq 'css' and $path->[1] eq 'default.css') {
+    # /css/default.css
+    return static $app, 'text/css; charset=utf-8', 'css/default.css';
   }
 
   if (@$path == 2 and $path->[0] eq 'js' and

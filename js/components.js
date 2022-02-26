@@ -226,7 +226,7 @@
 
   var filledAttributes = ['href', 'src', 'id', 'title', 'value', 'action',
                           'class'];
-  var $fill = exportable.$fill = function (root, object) {
+  var $fill = exportable.$fill = pcInternal.$fill = function (root, object) {
     root.querySelectorAll ('[data-field]').forEach ((f) => {
       var name = f.getAttribute ('data-field').split (/\./);
       var value = object;
@@ -725,12 +725,18 @@
   }); // button[is=mode-button]
 
   function parseCSSString (cssText, defaultText) {
-    var m = (cssText || 'auto').match (/^\s*"([^"\\]*)"\s*$/); // XXX escape
+    var t = (cssText || 'auto');
+
+    // XXX
+    t = t.replace (/\\(00[89A-Fa-f][0-9A-Fa-f]|[1-9A-Fa-f][0-9A-Fa-f]{3}|[1-9A-Fa-f][0-9A-Fa-f]{4})/g,
+                   (__, _) => String.fromCodePoint (parseInt (_, 16)));
+    
+    var m = t.match (/^\s*"([^"\\]*)"\s*$/); // XXX escape
     if (m) {
       return m[1];
     }
 
-    var m = (cssText || 'auto').match (/^\s*'([^'\\]*)'\s*$/); // XXX escape
+    var m = t.match (/^\s*'([^'\\]*)'\s*$/); // XXX escape
     if (m) {
       return m[1];
     }
@@ -844,6 +850,21 @@
             this.pmToggle (true);
           }
         }, 100);
+
+        // recompute!
+        var s = getComputedStyle (this);
+        var ha = s.getPropertyValue ('--paco-hover-action') || '';
+        if (/^\s*open\s*$/.test (ha)) {
+          this.addEventListener ('mouseover', function () {
+            if (!this.hasAttribute ('open')) {
+              this.setAttribute ('open', '');
+              this.pcSetOpenByHover = true;
+              var ev = new Event ('click');
+              ev.pmEventHandledBy = this;
+              window.dispatchEvent (ev);
+            }
+          });
+        }
       }, // pcInit
       pmClick: function (ev) {
         var current = ev.target;
@@ -855,6 +876,9 @@
           } else if (current.localName === 'button') {
             if (current.parentNode === this) {
               targetType = 'button';
+              break;
+            } else if (current.parentNode.localName === 'popup-menu') {
+              targetType = 'submenu';
               break;
             } else {
               targetType = 'command';
@@ -872,10 +896,15 @@
         } // current
 
         if (targetType === 'button') {
-          this.toggle ();
-        } else if (targetType === 'menu') {
-          //
+          if (this.pcOpenByHover && this.hasAttribute ('open')) {
+            delete this.pcOpenByHover;
+          } else {
+            this.toggle ();
+          }
+        } else if (targetType === 'menu' || targetType === 'submenu') {
+          ev.stopPropagation ();
         } else {
+          ev.stopPropagation ();
           this.toggle (false);
         }
         ev.pmEventHandledBy = this;
@@ -895,7 +924,11 @@
         if (show) {
           if (!this.pmGlobalClickHandler) {
             this.pmGlobalClickHandler = (ev) => {
-              if (ev.pmEventHandledBy === this) return;
+              var p = ev.pmEventHandledBy;
+              while (p) {
+                if (p === this) return;
+                p = p.parentNode;
+              }
               this.toggle (false);
             };
             window.addEventListener ('click', this.pmGlobalClickHandler);
@@ -909,6 +942,11 @@
             var ev = new Event ('toggle', {bubbles: true});
             this.dispatchEvent (ev);
           }
+        }
+        delete this.pcOpenByHover;
+        if (this.pcSetOpenByHover) {
+          this.pcOpenByHover = true;
+          delete this.pcSetOpenByHover;
         }
       }, // pmToggle
 
@@ -1194,7 +1232,7 @@
       b.appendChild (opts.fragment);
     } else { // no opts.fragment
       // recompute!
-      var t = parseCSSString (getComputedStyle (b).getPropertyValue ('--paco-close-button-label'), '×');
+      var t = parseCSSString (getComputedStyle (b).getPropertyValue ('--paco-close-button-label'), '\u00D7');
       
       var h = document.createElement ('toast-box-header');
       var button = document.createElement ('button');

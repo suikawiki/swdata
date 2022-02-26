@@ -3,7 +3,7 @@
 <link rel=stylesheet href=/css/common.css>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel=license href=/license>
-<script src=/js/components.js async data-export="$fill $getTemplateSet"></script>
+<script src=/js/components.js async data-export="$fill $getTemplateSet $paco"></script>
 <script src=/js/site.js async></script>
 <title>SuikaWiki</title>
 
@@ -458,8 +458,17 @@
       <h1>年</h1>
 
       <sw-if-defined data-field=era.offset>
-        <p><var>西暦年</var> = <var>年</var> + <data data-field=era.offset></data></p>
-        <p><var>年</var> = <var>西暦年</var> - <data data-field=era.offset></data></p>
+        <form is=sw-calc-form>
+          <p><sw-mi>西暦<can-copy><output data-data-add-field=era.offset data-filled=data-add></output></can-copy>年</sw-mi> <sw-mo>=</sw-mo> <sw-mi><bdi data-field=era.name></bdi><input type=number step=1>年</sw-mi> <sw-mo>+</sw-mo> <sw-mn><can-copy><data data-field=era.offset></data></can-copy></sw-mn></p>
+        </form>
+        <form is=sw-calc-form>
+          <p><sw-mi><bdi data-field=era.name></bdi><can-copy><output data-data-subtract-field=era.offset data-filled=data-subtract></output></can-copy>年</sw-mi> <sw-mo>=</sw-mo> <sw-mi>西暦<input type=number step=1>年</sw-mi> <sw-mo>-</sw-mo> <sw-mn><can-copy><data data-field=era.offset></data></can-copy></sw-mn></p>
+        </form>
+      </sw-if-defined>
+      
+      <sw-if-defined data-field=era.offset not>
+        <p>年代不詳。</p>
+      </sw-if-defined>
     
       <list-container loader=swYearListLoader class=era-year-list data-loader-eraid-field=era.id data-filled=loader-eraid>
         <button type=button class=list-prev data-list-scroll=preserve>もっと前</button>
@@ -467,12 +476,8 @@
         <button type=button class=list-next data-list-scroll=preserve>もっと後</button>
         <template data-class-template="era-year-{inRange} known-era-year-{inKnownRange}">
           <p class=main><sw-data-year data-field=year data-eraid-field=eraId data-filled=eraid></sw-data-year>
-          <p class=info>
-            <sw-data-year data-field=year eraid=20 format=text></sw-data-year>
-            西暦紀元前<sw-algorithm name=before-epoch-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>年
-            <sw-data-year data-field=year eraid=756 format=text eraname=皇紀></sw-data-year>
-            <sw-algorithm name=kanshi-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
           </p>
+          <sw-data-year data-field=year format=yearHeader class=year-header></sw-data-year>
           <list-container loader=swTransitionListLoader data-loader-eraid-field=eraId data-loader-year-field=year data-filled="loader-eraid loader-year" template=swTransitionListItem type=table>
             <table class=transitions>
               <tbody>
@@ -480,11 +485,6 @@
           </list-container>
         </template>
       </list-container>
-      </sw-if-defined>
-      
-      <sw-if-defined data-field=era.offset not>
-        <p>年代不詳。</p>
-      </sw-if-defined>
     </section>
 
     <section id=relateds>
@@ -514,6 +514,7 @@
               label-other
           ></enum-value>
           <sw-if-defined data-field=types.year_equal>同年</sw-if-defined>
+          <sw-if-defined data-field=types.label_kanshi_equal>同干支年</sw-if-defined>
           <sw-if-defined data-field=types.year_range_overlap>同時期</sw-if-defined>
         </template>
       </list-container>
@@ -882,9 +883,11 @@
   <template data-name=era>
     <a data-href-template=/y/{value}/><span data-field=era.name></span><span data-field=eraValue></span>(<span data-field=value></span>)年<sw-algorithm name=kanshi-year data-arg-year-field=value value-text data-filled=arg-year></sw-algorithm></a>
   </template>
-  <template data-name=eraText><span data-field=eraName></span><span data-field=eraValue></span>年</template>
+  <template data-name=eraText><span data-field=eraName data-empty=?></span><span data-field=eraValue></span>年</template>
+  <template data-name=eraTextCanCopyLink><can-copy><a data-href-template="/y/{value}/"><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</a></can-copy></template>
+  <template data-name=eraTextCanCopy><can-copy><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</can-copy></template>
   <template data-name=eraWithYear>
-    <a data-href-template=/e/{era.id}/><span data-field=eraName></span></a>
+    <a data-href-template=/e/{era.id}/><span data-field=eraName data-empty=?></span></a>
     <code>[y~<span data-field=era.id></span>]</code>
     <strong data-field=eraValue></strong>年
   </template>
@@ -895,23 +898,23 @@
     </a>
   </template>
   <template data-name=yearHeader>
-    <p><a data-href-template=/y/{value}/><sw-data-year data-field=value eraid=20 format=text></sw-data-year></a>
-    <p>西暦紀元前<sw-algorithm name=before-epoch-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>年
-    <p><sw-data-year data-field=value eraid=756 format=text eraname=皇紀></sw-data-year>
-    <p><sw-algorithm name=kanshi-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>
+    <p><sw-data-year data-field=value eraid=20 format=text link can-copy></sw-data-year>
+    <p><can-copy>BC<sw-algorithm name=before-epoch-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>年</can-copy>
+    <p><sw-data-year data-field=value eraid=756 format=text can-copy eraname=皇紀></sw-data-year>
+    <p><can-copy><sw-algorithm name=kanshi-year data-arg-year-field=value data-filled=arg-year></sw-algorithm></can-copy>
   </template>
 </template-set>
 
 <template-set name=sw-data-era>
   <template>
-    <a data-href-template=/e/{id}/ data-field=name data-class-template=incorrect-{tag_ids.1200}></a>
+    <a data-href-template=/e/{id}/ data-field=name data-empty=? data-class-template=incorrect-{tag_ids.1200}></a>
   </template>
 </template-set>
 
 <template-set name=sw-data-era-item>
   <template>
     <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
-      <bdi data-field=name></bdi>
+      <bdi data-field=name data-empty=?></bdi>
       <code>[y~<span data-field=id></span>]</code>
     </a>
   </template>
@@ -920,7 +923,7 @@
 <template-set name=sw-data-era-kanshi>
   <template>
     <a data-href-template=/e/{id}/kanshi data-class-template=incorrect-{tag_ids.1200}>
-      <bdi data-field=name></bdi>
+      <bdi data-field=name data-empty=?></bdi>
       <code>[y~<span data-field=id></span>]</code>
     </a>
   </template>
@@ -929,7 +932,7 @@
 <template-set name=sw-data-era-in-menu>
   <template>
     <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
-      <bdi data-field=name></bdi>
+      <bdi data-field=name data-empty=?></bdi>
       <code>[y~<span data-field=id></span>]</code>
       
       <p class=year-range>
@@ -944,10 +947,10 @@
 <template-set name=sw-data-day>
   <template>
     <p class=info>
-      <a data-href-template=/datetime/jd:{value.jd}>JD:<data data-field=value.jd></data></a>
-      <a data-href-template=/datetime/mjd:{value.mjd}>MJD:<data data-field=value.mjd></data></a>
-      <sw-data-kanshi data-field=value.kanshi0></sw-data-kanshi>
-      <enum-value data-field=weekday
+      <can-copy><a data-href-template=/datetime/jd:{value.jd}>JD:<data data-field=value.jd></data></a></can-copy>
+      <can-copy><a data-href-template=/datetime/mjd:{value.mjd}>MJD:<data data-field=value.mjd></data></a></can-copy>
+      <can-copy><sw-data-kanshi data-field=value.kanshi0></sw-data-kanshi></can-copy>
+      <can-copy><data><enum-value data-field=weekday
           label-0=日曜日
           label-1=月曜日
           label-2=火曜日
@@ -955,7 +958,7 @@
           label-4=木曜日
           label-5=金曜日
           label-6=土曜日
-      ></enum-value>
+      ></enum-value></data></can-copy>
     <p class=full-date>グレゴリオ暦 <span data-field=gregorian.year></span>年<span data-field=gregorian.month></span>月<span data-field=gregorian.day></span>日
     <p class=full-date>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
     <p class=full-date data-hidden-field=nongli_tiger_hidden data-filled=hidden>農暦(寅) <span data-field=nongli_tiger.year></span>年<enum-value class=leap data-field=nongli_tiger.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_tiger.month></span>月<span data-field=nongli_tiger.day></span>日
