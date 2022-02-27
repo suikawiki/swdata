@@ -8,6 +8,24 @@ SWD.data = function (name) {
   });
 }; // SWD.data
 
+SWD.charName = async function (charCode) {
+  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
+
+  var c = SWD._charNames.code_to_name[charCode.toString (16).toUpperCase () /* XXX %04X */];
+  if (!c) return undefined;
+
+  return c.name; // or undefined
+}; // SWD.charName
+
+SWD.charJaName = async function (unicode) {
+  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
+
+  var c = SWD._charNames.code_to_name[unicode.toString (16).toUpperCase () /* XXX %04X */];
+  if (!c) return undefined;
+
+  return c.ja_name; // or undefined
+}; // SWD.charJaName
+
 SWD.era = async function (eraId) {
   var list = await SWD.eraList ({});
   return list[eraId]; // or undefined
@@ -395,6 +413,90 @@ defineElement ({
 }); // <sw-data-number>
 
 defineElement ({
+  name: 'sw-data-charcode',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var args = {};
+      var type = this.getAttribute ('type');
+      var template = this.localName;
+      if (type === 'mkt') {
+        var w = v.split (/-/);
+        args.men = parseFloat (w[0]);
+        args.ku = parseFloat (w[1]);
+        args.ten = parseFloat (w[2]);
+        args.gl = args.ku * 0x100 + args.ten + 0x2121;
+        args.gr = args.gl + 0x8080;
+        template += '-mkt';
+      } else {
+        args.code = v;
+        args.hex = args.code.toString (16).toUpperCase ();
+      }
+      
+      var ts = await $getTemplateSet (this.getAttribute ('template') || template);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-charcode>
+
+defineElement ({
+  name: 'sw-data-char',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var args = {string: v};
+      args.code = v.charCodeAt (0);
+      args.hex = args.code.toString (16).toUpperCase ();
+      args.name = await SWD.charName (args.code);
+      args.ja_name = await SWD.charJaName (args.code);
+      
+      var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-char>
+
+defineElement ({
   name: 'sw-data-kanshi',
   fill: 'idlattribute',
   props: {
@@ -683,24 +785,29 @@ defineListLoader ('swYearListLoader', async function (opts) {
   var limit = parseInt (opts.limit);
   var nextLimit = limit;
   if (!Number.isFinite (limit)) {
-    if (Number.isFinite (era.table_latest_year)) {
+    if (era && Number.isFinite (era.table_latest_year)) {
       limit = era.table_latest_year - ref + 1;
     }
   }
   if (!Number.isFinite (limit) || limit <= 0) limit = 100;
   if (!Number.isFinite (nextLimit)) nextLimit = 100;
   if (limit > 300) limit = 300;
-  if (Number.isFinite (era.table_oldest_year) &&
+  if (era &&
+      Number.isFinite (era.table_oldest_year) &&
       era.table_oldest_year + limit < era.known_oldest_year) {
     ref = era.known_oldest_year;
   }
   
   var years = [];
   for (var i = ref; i < ref + limit; i++) {
-    years.push ({year: i, eraId,
-                 inRange: era.start_year <= i && i <= era.end_year,
-                 inKnownRange: era.known_oldest_year <= i && i <= era.known_latest_year});
+    var y = {year: i, eraId};
+    if (era) {
+      y.inRange = era.start_year <= i && i <= era.end_year;
+      y.inKnownRange = era.known_oldest_year <= i && i <= era.known_latest_year;
+    }
+    years.push (y);
   }
+  
   if (reversed) {
     return {data: years.reverse (),
             prev: {ref: [ref + nextLimit, false], has: true, limit: nextLimit},
@@ -859,6 +966,34 @@ defineListLoader ('swRelatedTagListLoader', function (opts) {
     return {data: tags};
   });
 });
+
+defineElement ({
+  name: 'dl',
+  is: 'sw-era-code-list',
+  props: {
+    pcInit: function () {
+      var missings = [];
+      this.querySelectorAll ('div').forEach (_ => {
+        var code = _.querySelector ('[data-field]');
+        if (code) {
+          if (code.textContent === '' && code.value == null) {
+            _.hidden = true;
+            _.querySelectorAll ('a').forEach (_ => missings.push (_));
+          }
+        } else if (_.classList.contains ('missing')) {
+          if (missings.length) {
+            var dd = _.querySelector ('dd');
+            missings.forEach (_ => {
+              dd.appendChild (_);
+            });
+          } else {
+            _.hidden = true;
+          }
+        }
+      });
+    }, // pcInit
+  }, 
+}); // <dl is=sw-era-code-list>
 
 defineElement ({
   name: 'sw-transition-neighbors',
