@@ -22,6 +22,10 @@ html {
   --weight-4-color: white;
   --border-2-color: #f0f0f0;
   --border-4-color: #999;
+  --header-background-color: var(--weight-2-background-color);
+  --header-color: var(--header-color);
+  --header-cell-padding: .25em;
+  --data-cell-padding: .25em;
   --incorrect-background-color: var(--gray-background-color);
   --incorrect-opaque-background-color: var(--gray-opaque-background-color);
   --incorrect-color: var(--gray-color);
@@ -30,7 +34,9 @@ html {
   --dialog-color: black;
   --dialog-border-color: gray;
   --dialog-shadow-color: #eee;
+  --paragraph-margin-block: 1em;
   --header-z-index: 1000;
+  --floating-z-index: 100000;
 }
 
 svg.defs {
@@ -127,6 +133,7 @@ body > section > hgroup > h2 {
 
 section > section {
   padding-left: 1em;
+  overflow: auto;
 }
 
 section > section > h1 {
@@ -178,8 +185,8 @@ td.long {
 thead th {
   position: sticky;
   top: 0;
-  background-color: var(--weight-2-background-color);
-  color: var(--weight-2-color);
+  background-color: var(--header-background-color);
+  color: var(--header-color);
   z-index: var(--header-z-index);
 }
 
@@ -244,6 +251,23 @@ output:lang(ar) {
   direction: rtl;
 }
 
+code {
+  color: #800000;
+  background: transparent;
+  font-family: "Courier New", monospace;
+}
+
+.char-sample:not([hidden]) {
+  display: inline-block;
+}
+.char-sample {
+  min-width: 1em;
+  min-height: 1em;
+  border: 1px solid var(--gray-border-color);
+  line-height: 1;
+  vertical-align: middle;
+}
+
 td.copy {
   width: 2em;
   text-align: right;
@@ -268,10 +292,20 @@ td.copy button:not(:hover) {
 sw-era-transition-graph .year-header can-copy button,
 th.year-header can-copy button,
 td.year-header can-copy button,
-.transitions > tbody > tr > .day .info can-copy button {
+.transitions > tbody > tr > .day .info can-copy button,
+.era-code-list can-copy button {
   zoom: 0.6;
   line-height: 2.8;
   vertical-align: middle;
+}
+
+.era-code-list sw-data-char can-copy:not([hidden]),
+.era-code-list .cid-list can-copy:not([hidden]) {
+  display: block;
+}
+
+.era-code-list sw-data-char can-copy .charname:not([hidden]) {
+  display: block;
 }
 
 #yearless-date ul {
@@ -1147,6 +1181,115 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
   color: var(--weight-2-color);
 }
 
+.era-code-list:not([hidden]) {
+  display: table;
+}
+.era-code-list {
+  writing-mode: vertical-lr;
+  border-collapse: collapse;
+  margin: var(--paragraph-margin-block) 0;
+}
+
+.era-code-list > div:not([hidden]) {
+  display: table-row;
+}
+
+.era-code-list > div > dt,
+.era-code-list > div > dd {
+  writing-mode: horizontal-tb;
+  margin: 0;
+  padding: 0.25em;
+  text-align: center;
+}
+
+.era-code-list > div > dt:not([hidden]) {
+  display: table-cell;
+}
+.era-code-list > div > dt {
+  background-color: var(--header-background-color);
+  color: var(--header-color);
+  padding: var(--header-cell-padding);
+  font-weight: bolder;
+  min-width: 3em;
+  width: min-content;
+  line-height: 1.0;
+  vertical-align: middle;
+}
+
+.era-code-list > div > dd:not([hidden]) {
+  display: table-cell;
+}
+.era-code-list > div > dd {
+  padding: var(--data-cell-padding);
+}
+
+.era-code-list .source-name:not([hidden]) {
+  display: block;
+}
+.era-code-list .source-name {
+  margin-top: .25em;
+  font-size: 75%;
+  font-weight: normal;
+  line-height: 1.0;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
+.era-code-list .cid-list code:not([hidden]) {
+  display: block;
+}
+
+.era-code-list .charcode-iso2022:not([hidden]) {
+  display: block;
+}
+.era-code-list .charcode-iso2022 {
+  font-size: 80%;
+}
+
+.era-code-list unit-number {
+}
+
+.era-code-list number-value {
+  padding-left: .25em;
+  padding-right: .25em;
+  font-size: 120%;
+  font-weight: bolder;
+}
+
+.era-code-list number-unit {
+  font-size: 90%;
+}
+
+.era-code-list .info {
+  font-size: 75%;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
+.era-code-list .missing dd {
+  font-size: 80%;
+  width: min-content;
+  vertical-align: middle;
+}
+
+.era-code-list .missing a + a {
+  margin-left: .5em;
+}
+
+.era-code-list code {
+  font-size: 120%;
+  font-weight: bolder;
+}
+
+.era-code-list .charname,
+.era-code-list .char-ja-name {
+  font-size: 80%;
+}
+
+.era-code-list .char-sample {
+  font-size: 250%;
+}
+
 .matched-era-list:not([hidden]) {
 }
 .matched-era-list {
@@ -1169,9 +1312,9 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
 .matched-era-list > div > dt {
   writing-mode: horizontal-tb;
   min-width: 3em;
-  padding: 0.25em 0.5em;
-  background-color: var(--weight-2-background-color);
-  color: var(--weight-2-color);
+  padding: var(--header-cell-padding) calc(var(--header-cell-padding) + 0.25em);
+  background-color: var(--header-background-color);
+  color: var(--header-color);
   font-weight: bolder;
   text-align: center;
 }
@@ -1282,18 +1425,50 @@ sw-mn {
 }
 
 sw-mi can-copy:not([hidden]),
-sw-mn can-copy:not([hidden]) {
+sw-mn can-copy:not([hidden]),
+.era-code-list can-copy:not([hidden]) {
   display: inline-flex;
 }
 sw-mi can-copy,
-sw-mn can-copy {
+sw-mn can-copy,
+.era-code-list can-copy {
   flex-direction: column;
   align-items: center;
 }
 
 sw-mi can-copy button,
-sw-mn can-copy button {
+sw-mn can-copy button,
+.era-code-list can-copy button {
   font-size: .8rem;
+}
+
+nav.toplink {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  border: 1px solid var(--gray-border-color);
+  border-radius: 1em;
+  font-size: 150%;
+  z-index: var(--floating-z-index);
+}
+
+nav.toplink a {
+  min-width: 1em;
+  min-height: 1em;
+  border-radius: 1em;
+  padding: 0.2em;
+  background-color: var(--dialog-background-color);
+  color: var(--dialog-color);
+  opacity: 0.4;
+  line-height: 1.0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+nav.toplink a:hover,
+nav.toplink a:focus,
+nav.toplink a:active {
+  opacity: 1;
 }
 
 .XX\58-debug {

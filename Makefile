@@ -52,7 +52,8 @@ build-local: local/data \
     local/data/calendar-era-transitions.json \
     local/data/calendar-era-relations.json \
     local/data/days.json local/data/numbers-kanshi.json \
-    local/data/tags.json
+    local/data/tags.json \
+    local/data/char-names.json
 build-repo: js/components.js css/default.css
 local/data:
 	mkdir -p local/data
@@ -90,6 +91,10 @@ local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json
 local/data/days.json: bin/generate-days.pl local/data/days-orig.json
 	$(PERL) $< > $@
+
+local/data/char-names.json:
+	mkdir -p local
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-chars/master/data/names.json
 
 local/generated:
 	touch $@

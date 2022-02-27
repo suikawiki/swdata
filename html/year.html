@@ -18,6 +18,8 @@
   </action-status>
 </section>
 
+<nav class="toplink"><a href="#top" title="このページの先頭に戻る">▲</a></nav>
+
 <template-set name=pageMainTemplate templateselector=selectPageTemplate>
   <template title="404 Not Found">
     <hgroup>
@@ -412,21 +414,145 @@
           現在では<strong>正しくない</strong>と考えられています。</p>
       </sw-if-defined>
     </sw-if-defined>
-    
-    <section>
-      <h1>識別子</h1>
-      
-      <table class=nv>
-        <tbody>
-          <tr>
-            <th>紀年法ID
-            <td><code>y~<span data-field=era.id></span></code>
-          <tr>
-            <th>紀年法キー
-            <td><code data-field=era.key></code>
-      </table>
-    </section>
 
+    <section id=names>
+      <h1>紀年法の名前</h1>
+      
+      <section>
+        <h1>識別子</h1>
+
+        <dl is=sw-era-code-list class=era-code-list>
+          <div>
+            <dt>紀年法ID
+            <dd><can-copy><code>y~<span data-field=era.id></span></code></can-copy>
+          </div>
+        <div>
+          <dt>紀年法<nobr>キー</nobr>
+          <dd><can-copy><code data-field=era.key></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8007>#7</a>
+          <dd><can-copy><code data-field=era.code7></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8002>#2</a>
+          <dd><can-copy><code data-field=era.code2></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8001>#1</a>
+          <dd><can-copy><code data-field=era.code1></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8017>#17</a>
+          <dd><can-copy><code data-field=era.code17></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8016>#16</a>
+          <dd><can-copy><code data-field=era.code16></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8004>#4</a>
+          <dd><can-copy><code data-field=era.code4></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8005>#5</a>
+          <dd><can-copy><code data-field=era.code5></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8020>#20</a>
+          <dd><can-copy><code data-field=era.code20></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8006>#6</a>
+          <dd><can-copy><code data-field=era.code6></code></can-copy>
+        </div>
+        <div>
+          <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8009>#9</a>
+          <dd><can-copy><code data-field=era.code9></code></can-copy>
+        </div>
+        <div>
+          <dt>
+            <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8015>#15</a>
+            <span class=source-name>日本<nobr>年号大観</nobr></span>
+          <dd><can-copy><code data-field=era.code15></code></can-copy>
+        </div>
+        <div>
+          <dt>
+            <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8014>#14</a>
+            <span class=source-name>日本<nobr>年号史</nobr><nobr>大事典</nobr></span>
+          <dd><can-copy><code data-field=era.code14></code></can-copy>
+        </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8010>#10</a>
+              <span class=source-name>CLDR</span>
+            <dd><can-copy><code data-field=era.code10></code></can-copy>
+          </div>
+          <div>
+            <dt><a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8024>#24</a>
+            <dd><can-copy><code data-field=era.code24></code></can-copy>
+          </div>
+          <div class=missing>
+            <dt>表現<nobr>不可</nobr>
+            <dd>
+          </div>
+        </dl>
+      </section>
+      
+      <section>
+        <h1>元号合字</h1>
+
+        <dl is=sw-era-code-list class=era-code-list>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8003>#3</a>
+              <span class=source-name>Unicode</span>
+            <dd>
+              <sw-data-char data-field=era.unicode></sw-data-char>
+          </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8011>#11</a>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8012>#12</a>
+              <span class=source-name>Adobe-Japan1</span>
+            <dd class=cid-list>
+              <can-copy><code>CID+<span data-field=era.code11></span></code> <span class=info>(横書き)</span></can-copy>
+              <can-copy><code>CID+<span data-field=era.code12></span></code> <span class=info>(縦書き)</span></can-copy>
+          </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8013>#13</a>
+              <span class=source-name>シフトJIS</span>
+            <dd><can-copy><sw-data-charcode data-field=era.code13></sw-data-charcode></can-copy>
+          </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8021>#21</a>
+              <span class=source-name>シフトJIS (Mac)</span>
+            <dd><can-copy><sw-data-charcode data-field=era.code21></sw-data-charcode></can-copy>
+          </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8022>#22</a>
+              <span class=source-name>JIS X 0213</span>
+            <dd>
+              <sw-data-charcode type=mkt data-field=era.code22></sw-data-charcode>
+              <sw-data-char data-field=era.unicode template=sw-data-jis-char></sw-data-char>
+          </div>
+          <div>
+            <dt>
+              <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8023>#23</a>
+              <span class=source-name>EBCDIC</span>
+            <dd><can-copy><sw-data-charcode data-field=era.code23></sw-data-charcode></can-copy>
+          </div>
+          <div class=missing>
+            <dt>表現<nobr>不可</nobr>
+            <dd>
+          </div>
+        </dl>
+      </section>
+    </section>
+    
     <section id=years>
       <h1>年</h1>
 
@@ -881,6 +1007,38 @@
     <p><can-copy>BC<sw-algorithm name=before-epoch-year data-arg-year-field=value data-filled=arg-year></sw-algorithm>年</can-copy>
     <p><sw-data-year data-field=value eraid=756 format=text can-copy eraname=皇紀></sw-data-year>
     <p><can-copy><sw-algorithm name=kanshi-year data-arg-year-field=value data-filled=arg-year></sw-algorithm></can-copy>
+  </template>
+</template-set>
+
+<template-set name=sw-data-charcode>
+  <template>
+    <code>0x<span data-field=hex></span></code>
+  </template>
+</template-set>
+
+<template-set name=sw-data-charcode-mkt>
+  <template>
+    <can-copy><data><unit-number><number-value data-field=men></number-value><number-unit>面</number-unit><number-value data-field=ku></number-value><number-unit>区</number-unit><number-value data-field=ten></number-value><number-unit>点</number-unit></can-copy>
+    <can-copy class=charcode-iso2022>GL <sw-data-charcode data-field=gl></sw-data-charcode></can-copy>
+    <can-copy class=charcode-iso2022>GR <sw-data-charcode data-field=gr></sw-data-charcode></can-copy>
+  </template>
+</template-set>
+
+<template-set name=sw-data-char>
+  <template>
+    <can-copy><a data-href-template=https://chars.suikawiki.org/char/{hex}><code>U+<span data-field=hex></span></code></a></can-copy>
+    
+    <can-copy><code class=charname data-field=name></code></can-copy>
+    
+    <can-copy><data class=char-sample data-field=string></data></can-copy>
+  </template>
+</template-set>
+
+<template-set name=sw-data-jis-char>
+  <template>
+    <can-copy><code class=charname data-field=name></code></can-copy>
+    
+    <can-copy><data class=char-ja-name data-field=ja_name></data></can-copy>
   </template>
 </template-set>
 
