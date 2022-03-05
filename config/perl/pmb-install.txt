@@ -2,7 +2,7 @@ Algorithm::Diff~1.201
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
-AnyEvent::Socket
+AnyEvent::Handle
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -26,7 +26,7 @@ Proc::FastSpawn~1.2
 Scalar::Util~1.61
 Socket~2.032
 Test::Differences~0.69
-Test::More~1.302189
+Test::More~1.302190
 Text::Diff~1.45
 Time::HiRes~1.9764
 Time::Local~1.30
