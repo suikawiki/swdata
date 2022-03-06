@@ -813,7 +813,7 @@
         this.appendChild (b);
       }, // pcInit
       pcCopy: function () {
-        var e = this.querySelector ('code, data, time');
+        var e = this.querySelector ('code, data, time, output');
         if (!e) throw new Error ('No copied data element');
 
         var text;
@@ -855,7 +855,19 @@
         var s = getComputedStyle (this);
         var ha = s.getPropertyValue ('--paco-hover-action') || '';
         if (/^\s*open\s*$/.test (ha)) {
-          this.addEventListener ('mouseover', function () {
+          var isLegacyTouchDevice = false;
+          if (navigator.vendor === "Apple Computer, Inc.") { // WebKit
+            var me = new MouseEvent ("mouseover");
+            if (me.sourceCapabilities === undefined) { // not implemented yet
+              isLegacyTouchDevice = true;
+              /* Set true even for Desktop Safari, for "desktop browser 
+                 mode" of Mobile Safari. */
+            }
+          }
+          if (!isLegacyTouchDevice)
+          this.addEventListener ('mouseover', function (event) {
+            if (event.sourceCapabilities &&
+                event.sourceCapabilities.firesTouchEvents) return;
             if (!this.hasAttribute ('open')) {
               this.setAttribute ('open', '');
               this.pcSetOpenByHover = true;

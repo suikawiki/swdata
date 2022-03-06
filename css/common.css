@@ -145,14 +145,16 @@ section > section > h1 {
   font-size: 150%;
 }
 
-section > section > section > h1 {
+section > section > section > h1,
+.label-set-list h1 {
   font-size: 120%;
   margin-bottom: .5rem;
   border-bottom: none;
   padding-bottom: 0;
 }
 
-section > section > section > h1::after {
+section > section > section > h1::after,
+.label-set-list h1::after {
   content: ":";
 }
 
@@ -293,7 +295,8 @@ sw-era-transition-graph .year-header can-copy button,
 th.year-header can-copy button,
 td.year-header can-copy button,
 .transitions > tbody > tr > .day .info can-copy button,
-.era-code-list can-copy button {
+.era-code-list can-copy button,
+sw-label-set can-copy button {
   zoom: 0.6;
   line-height: 2.8;
   vertical-align: middle;
@@ -1290,6 +1293,163 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
   font-size: 250%;
 }
 
+.label-set-list section {
+  padding-left: 1em;
+}
+
+.label-set-list h1 {
+  margin-left: -1rem;
+}
+
+sw-label-set > ul:not([hidden]) {
+  display: block;
+}
+sw-label-set > ul {
+  margin: 0;
+  padding: 0;
+}
+
+sw-label-set > ul > li:not([hidden]) {
+  display: block;
+}
+sw-label-set > ul > li {
+  margin: 0;
+  border: 1px none var(--gray-border-color);
+  padding: var(--data-cell-padding);
+}
+sw-label-set > ul > li:not(:first-child) {
+  border-style: solid none none none;
+}
+
+sw-label-set dl:not([hidden]) {
+  display: inline-block;
+}
+sw-label-set dl {
+  margin: 0;
+  vertical-align: top;
+}
+
+sw-label-set dl > div:not([hidden]) {
+  display: inline-block;
+}
+sw-label-set dl > div {
+  vertical-align: top;
+}
+
+sw-label-set dt,
+sw-label-set dd {
+  margin: 0;
+  padding: var(--header-cell-padding);
+  min-width: 10em;
+  text-align: center;
+}
+
+sw-label-set dt {
+  background-color: var(--header-background-color);
+  color: var(--header-color);
+  font-weight: bolder;
+  line-height: 1.0;
+  vertical-align: middle;
+}
+
+sw-label-set dd {
+}
+
+sw-label-set div.expanded {
+  writing-mode: vertical-lr;
+}
+
+sw-label-set div.expanded > dt:not([hidden]) {
+}
+sw-label-set div.expanded > dt {
+  min-width: 0;
+}
+
+sw-label-set div.expanded > dd {
+  writing-mode: horizontal-tb;
+  min-width: 0;
+}
+
+sw-label-set dd ul:not([hidden]) {
+  display: inline-block;
+}
+sw-label-set dd ul {
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+  min-width: 5em;
+}
+
+sw-label-set dd ul + ul {
+  margin-inline-start: .5em;
+}
+
+sw-label-set dd li:not([hidden]) {
+  display: block;
+}
+sw-label-set dd li {
+  margin: 0;
+  padding: 0;
+}
+
+sw-label-set .label-info-caption:not([hidden]) {
+  display: inline-block;
+}
+sw-label-set .label-info-caption {
+  padding: var(--header-cell-padding);
+  vertical-align: middle;
+}
+
+sw-label-set div.expanded > dt,
+sw-label-set > ul > li > .label-info-caption {
+  writing-mode: vertical-rl;
+  background-color: var(--header-background-color);
+  color: var(--header-color);
+  line-height: 1.0;
+  font-weight: bolder;
+  min-height: 5em;
+  text-align: start;
+}
+
+sw-label-set dd .label-info-caption {
+  min-width: 5em;
+  font-size: 70%;
+  text-align: end;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
+sw-label-set bdi.primary {
+  font-size: 150%;
+  font-weight: bolder;
+}
+
+sw-label-set ul:not(:first-child) bdi.primary {
+  font-size: 100%;
+  line-height: 2;
+}
+
+sw-label-set .label-on-type:not([hidden]) {
+  display: inline-block;
+}
+sw-label-set .label-on-type {
+  margin: 2px;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 60%;
+  line-height: 1.0;
+  vertical-align: middle;
+  writing-mode: vertical-rl;
+  min-height: 24px;
+}
+
+sw-label-set .label-on-type span {
+  writing-mode: horizontal-tb;
+  font-size: 120%;
+  min-width: 24px;
+}
+
 .matched-era-list:not([hidden]) {
 }
 .matched-era-list {
@@ -1469,6 +1629,11 @@ nav.toplink a:hover,
 nav.toplink a:focus,
 nav.toplink a:active {
   opacity: 1;
+}
+
+.charref {
+  color: red;
+  background: transparent;
 }
 
 .XX\58-debug {
