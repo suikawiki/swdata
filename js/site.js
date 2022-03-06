@@ -105,6 +105,16 @@ SWD.eraTransitionsByEraId = async function (eraId) {
   return list.filter (_ => _.relevant_era_ids[eraId]);
 }; // SWD.eraTransitionsByEraId
 
+SWD.eraLabelSets = async function (id) {
+  if (!SWD._eraLabels) {
+    SWD._eraLabels = SWD.data ('calendar-era-labels.json');
+  }
+
+  var all = await SWD._eraLabels;
+  var era = all.eras[id] || {};
+  return era.label_sets || {};
+}; // SWD.eraLabelSets
+
 SWD.relatedEras = async function (id) {
   if (!SWD._eraRelations) {
     SWD._eraRelations = SWD.data ('calendar-era-relations.json');
@@ -971,8 +981,8 @@ defineListLoader ('swRelatedTagListLoader', function (opts) {
 
 defineListLoader ('swLabelSetListLoader', async function (opts) {
   var eraId = this.getAttribute ('loader-eraid');
-  var era = await SWD.era (eraId);
-  return {data: era.label_sets.map (_ => {return {item:_}})};
+  var lss = await SWD.eraLabelSets (eraId);
+  return {data: lss.map (_ => {return {item:_}})};
 }); // swLabelSetListLoader
 
 defineElement ({
