@@ -1039,12 +1039,14 @@ defineElement ({
       var readFGs = (fgs, opts) => {
         var out = {
           cn: [], tw: [], ja: [], ja_kana: [], ja_latin: [],
-          kr: [], kr_hangul: [], en: [], la: [], others: [],
+          kr: [], kr_hangul: [],
+          en: [], la: [], vi: [], vi_latin: [], others: [],
           expandeds: [],
         };
         fgs.forEach (fg => {
           if (fg.form_group_type === 'han' ||
               fg.form_group_type === 'ja' ||
+              fg.form_group_type === 'vi' ||
               fg.form_group_type === 'kana') {
             fg.form_sets.forEach (fs => {
               if (fs.form_set_type === 'hanzi') {
@@ -1056,7 +1058,7 @@ defineElement ({
                 if (fs.jp_h22) out.ja.push (['ja', fs.jp_h22, 'jp_h22']);
                 if (fs.jp_new) out.ja.push (['ja', fs.jp_new, 'jp_new']);
                 if (fs.jp_old) out.ja.push (['ja', fs.jp_old, 'jp_old']);
-                if (fs.kr) out.kr.push (['ko-KR', fs.kr, 'kr', opts.captioned ? 'kr' : null]);
+                if (fs.kr) out.kr.push (['ko-KR', fs.kr, 'kr_hanzi']);
                 (fs.others || []).forEach (_ => others.push (['und', _]));
               } else if (fs.form_set_type === 'yomi' ||
                          fs.form_set_type === 'kana') {
@@ -1064,13 +1066,37 @@ defineElement ({
                 if (fs.hiragana_modern) out.ja_kana.push (['ja', fs.hiragana_modern, opts.captioned ? 'jp' : null]);
                 if (fs.hiragana_classic) out.ja_kana.push (['ja', fs.hiragana_classic, 'ja_hiragana_classic']);
                 (fs.hiragana_others || []).forEach (_ => out.ja_kana.push (['ja', _, 'ja_hiragana_other']));
-                if (fs.latin) out.ja_latin.push (['ja-Latn', fs.latin, opts.captioned ? 'jp' : null]);
-                if (fs.latin_normal) out.ja_latin.push (['ja-Latn', fs.latin_normal, 'ja_latin_normal']);
-                if (fs.latin_macron) out.ja_latin.push (['ja-Latn', fs.latin_macron, 'ja_latin_macron']);
-                (fs.latin_others || []).forEach (_ => out.ja_latin.push (['ja-Latn', _, 'ja_latin_other']));
+                (fs.hiragana_wrongs || []).forEach (_ => out.ja_kana.push (['ja', _, 'ja_hiragana_wrong']));
+                if (fs.ja_latin) out.ja_latin.push (['ja-Latn', fs.ja_latin, opts.captioned ? 'jp' : null]);
+                if (fs.ja_latin_normal) out.ja_latin.push (['ja-Latn', fs.ja_latin_normal, 'ja_latin_normal']);
+                if (fs.ja_latin_macron) out.ja_latin.push (['ja-Latn', fs.ja_latin_macron, 'ja_latin_macron']);
+                (fs.ja_latin_others || []).forEach (_ => out.ja_latin.push (['ja-Latn', _, 'ja_latin_other']));
                 if (fs.on_types) out.ja_kana.push (['on_types', fs.on_types]);
               } else if (fs.form_set_type === 'korean') {
-                if (fs.kr) out.kr_hangul.push (['ko-KR', fs.kr, opts.captioned ? 'kr' : null]);
+                if (fs.origin_lang === 'vi') {
+                  if (fs.kr) out.kr_hangul.push (['ko-KR', fs.kr, opts.captioned ? 'kr_vi' : null]);
+                  if (fs.kr_fukui) out.kr_hangul.push (['ko-Latn-KR', fs.kr_fukui, 'kr_vi_fukui']);
+                } else {
+                  if (fs.kr) out.kr_hangul.push (['ko-KR', fs.kr, opts.captioned ? 'kr' : null]);
+                  if (fs.kr_fukui) out.kr_hangul.push (['ko-Latn-KR', fs.kr_fukui, 'kr_fukui']);
+                }
+                if (fs.kp) out.kr_hangul.push (['ko-KP', fs.kp, 'kp']);
+                if (fs.kp_fukui) out.kr_hangul.push (['ko-Latn-KP', fs.kp_fukui, 'kp_fukui']);
+                if (fs.ko) out.kr_hangul.push (['ko', fs.ko, 'ko']);
+                if (fs.ko_fukui) out.kr_hangul.push (['ko-Latn', fs.ko_fukui, 'ko_fukui']);
+              } else if (fs.form_set_type === 'vietnamese') {
+                if (fs.vi) out.vi_latin.push (['vi', fs.vi, opts.captioned ? 'vi' : null]);
+              } else if (fs.form_set_type === 'alphabetical') {
+                if (fs.en) out.en.push (['en', fs.en, opts.captioned ? 'en' : null]);
+                if (fs.en_la) out.en.push (['en', fs.en_la, 'en_la']);
+                if (fs.la) out.la.push (['la', fs.la, opts.captioned ? 'la' : null]);
+                if (fs.ja_latin) out.ja.push (['ja-Latn', fs.ja_latin, opts.captioned ? 'jp' : null]);
+                if (fs.ja_latin_old) out.ja.push (['ja-Latn', fs.ja_latin_old, 'ja_latin_old']);
+                (fs.ja_latin_old_wrongs || []).forEach (_ => out.ja_latin.push (['ja-Latn', _, 'ja_latin_old_wrong']));
+                if (fs.fr) out.others.push (['fr', fs.fr, 'fr']);
+                if (fs.it) out.others.push (['it', fs.it, 'it']);
+                if (fs.po) out.others.push (['po', fs.po, 'po']);
+                (fs.others || []).forEach (_ => out.others.push (['und', _, 'other']));
               }
             });
           } else if (fg.form_group_type === 'alphabetical') {
@@ -1085,7 +1111,6 @@ defineElement ({
                 if (fs.fr) out.others.push (['fr', fs.fr, 'fr']);
                 if (fs.it) out.others.push (['it', fs.it, 'it']);
                 if (fs.po) out.others.push (['po', fs.po, 'po']);
-                if (fs.vi) out.others.push (['vi', fs.vi, 'vi']);
                 (fs.others || []).forEach (_ => out.others.push (['und', _, 'other']));
               }
             });
@@ -1169,12 +1194,14 @@ defineElement ({
                   .concat (xout.cn)
                   .concat (xout.tw)
                   .concat (xout.kr)
+                  .concat (xout.vi)
                   .concat (xout.others);
             });
           }
         }); // fg
 
         out.kr = out.kr_hangul.concat (out.kr);
+        out.vi = out.vi_latin.concat (out.vi);
         
         return out;
       }; // readFGs
@@ -1196,7 +1223,8 @@ defineElement ({
           [[out.ja, out.ja_kana, out.ja_latin], '日本語'],
           [[out.cn], '中文'],
           [[out.tw], '中華民國國語'],
-          [[out.kr], '朝鮮語'],
+          [[out.kr], '조선어'],
+          [[out.vi], 'Tiếng Việt'],
           [[out.en], 'English'],
           [[out.la], 'ラテン語'],
           [[out.others], 'その他'],
@@ -1218,7 +1246,7 @@ defineElement ({
               if (lang === 'on_types') {
                 st.forEach (_ => {
                   var s = document.createElement ('span');
-                  s.className = 'label-on-type';
+                  s.className = 'label-on-type label-on-type-' + _;
                   s.innerHTML = {
                     K: '<span>漢音</span>',
                     G: '<span>呉音</span>',
@@ -1248,22 +1276,32 @@ defineElement ({
                   jp_h22: '平成22年',
                   ja_hiragana_classic: '歴史的仮名遣',
                   ja_hiragana_other: '旧表記',
+                  ja_hiragana_wrong: '誤表記',
                   ja_latin: '日本語ローマ字',
                   ja_latin_normal: '翻字',
                   ja_latin_macron: 'マクロン表記',
                   ja_latin_other: '異表記',
                   ja_latin_old: '旧表記',
                   ja_latin_old_wrong: '誤表記',
-                  kr: '韓國漢字',
+                  kr_hanzi: '韓國漢字',
+                  kr: '韓國',
+                  kr_vi: '越南語系韓國',
+                  kp: '北朝鮮',
+                  ko: '朝鮮',
+                  kr_fukui: '韓國福井式',
+                  kr_vi_fukui: '越南語系韓國福井式',
+                  kp_fukui: '北朝鮮福井式',
+                  ko_fukui: '朝鮮福井式',
                   en: '英語',
                   en_la: 'ラテン語系英語',
                   fr: 'フランス語',
                   la: 'ラテン語',
                   it: 'イタリア語',
                   po: 'ポルトガル語',
-                  vi: 'ベトナム語',
+                  vi: 'Tiếng Việt',
                   other: '',
                 }[variant];
+                data.classList.toggle ('label-form-variant-' + variant);
                 li1.appendChild (s);
               }
               var cc = document.createElement ('can-copy');

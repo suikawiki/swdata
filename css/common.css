@@ -1407,7 +1407,7 @@ sw-label-set > ul > li > .label-info-caption {
   color: var(--header-color);
   line-height: 1.0;
   font-weight: bolder;
-  min-height: 5em;
+  height: 5em;
   text-align: start;
 }
 
@@ -1429,6 +1429,13 @@ sw-label-set ul:not(:first-child) bdi.primary {
   line-height: 2;
 }
 
+.label-form-variant-ja_hiragana_wrong,
+.label-form-variant-ja_latin_old_wrong {
+  color: var(--incorrect-color);
+  background-color: var(--incorrect-background-color);
+  text-decoration: line-through;
+}
+
 sw-label-set .label-on-type:not([hidden]) {
   display: inline-block;
 }
@@ -1443,6 +1450,10 @@ sw-label-set .label-on-type {
   writing-mode: vertical-rl;
   min-height: 24px;
 }
+
+.label-on-type-KG { background: yellowgreen; color: black }
+.label-on-type-K { background: yellow; color: black }
+.label-on-type-G { background: green; color: white }
 
 sw-label-set .label-on-type span {
   writing-mode: horizontal-tb;
