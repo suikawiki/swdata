@@ -270,6 +270,10 @@ code {
   vertical-align: middle;
 }
 
+.char-sample.vertical {
+  writing-mode: vertical-rl;
+}
+
 td.copy {
   width: 2em;
   text-align: right;
@@ -1242,10 +1246,10 @@ table[is=sw-era-list-by-first-year] tbody > tr:first-child {
   display: block;
 }
 
-.era-code-list .charcode-iso2022:not([hidden]) {
+.era-code-list .charcode-hex:not([hidden]) {
   display: block;
 }
-.era-code-list .charcode-iso2022 {
+.era-code-list .charcode-hex {
   font-size: 80%;
 }
 

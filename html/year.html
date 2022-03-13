@@ -548,6 +548,7 @@
               <span class=source-name>JIS X 0213</span>
             <dd>
               <sw-data-charcode type=mkt data-field=era.code22></sw-data-charcode>
+              <can-copy class=charcode-hex>SJIS <sw-data-charcode data-field=era.code13></sw-data-charcode></can-copy>
               <sw-data-char data-field=era.unicode template=sw-data-jis-char></sw-data-char>
           </div>
           <div>
@@ -1030,8 +1031,8 @@
 <template-set name=sw-data-charcode-mkt>
   <template>
     <can-copy><data><unit-number><number-value data-field=men></number-value><number-unit>面</number-unit><number-value data-field=ku></number-value><number-unit>区</number-unit><number-value data-field=ten></number-value><number-unit>点</number-unit></can-copy>
-    <can-copy class=charcode-iso2022>GL <sw-data-charcode data-field=gl></sw-data-charcode></can-copy>
-    <can-copy class=charcode-iso2022>GR <sw-data-charcode data-field=gr></sw-data-charcode></can-copy>
+    <can-copy class=charcode-hex>GL <sw-data-charcode data-field=gl></sw-data-charcode></can-copy>
+    <can-copy class=charcode-hex>GR <sw-data-charcode data-field=gr></sw-data-charcode></can-copy>
   </template>
 </template-set>
 
@@ -1039,9 +1040,16 @@
   <template>
     <can-copy><a data-href-template=https://chars.suikawiki.org/char/{hex}><code>U+<span data-field=hex></span></code></a></can-copy>
     
-    <can-copy><code class=charname data-field=name></code></can-copy>
+    <can-copy><code class=charname data-field=name lang=en></code></can-copy>
+
+    <sw-if-defined data-field=fr_name>
+      <can-copy><code class=charname data-field=fr_name lang=fr></code></can-copy>
+    </sw-if-defined>
     
-    <can-copy><data class=char-sample data-field=string></data></can-copy>
+    <can-copy><data class="char-sample horizontal" data-field=string></data>
+      <span class=info>(横書き)</span></can-copy>
+    <can-copy><data class="char-sample vertical" data-field=string></data>
+      <span class=info>(縦書き)</span></can-copy>
   </template>
 </template-set>
 
@@ -1049,7 +1057,8 @@
   <template>
     <can-copy><code class=charname data-field=name></code></can-copy>
     
-    <can-copy><data class=char-ja-name data-field=ja_name></data></can-copy>
+    <can-copy><data class=char-ja-name data-field=ja_name></data>
+      <span class=info>(日本語通用名称)</span></can-copy>
   </template>
 </template-set>
 
