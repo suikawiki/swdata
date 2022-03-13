@@ -1086,6 +1086,10 @@ defineElement ({
                 if (fs.ko_fukui) out.kr_hangul.push (['ko-Latn', fs.ko_fukui, 'ko_fukui']);
               } else if (fs.form_set_type === 'vietnamese') {
                 if (fs.vi) out.vi_latin.push (['vi', fs.vi, opts.captioned ? 'vi' : null]);
+              } else if (fs.form_set_type === 'chinese') {
+                if (fs.bopomofo) out.tw.push (['zh-Bopo', fs.bopomofo, 'bopomofo']);
+                if (fs.pinyin) out.cn.push (['zh-Latn', fs.pinyin, 'pinyin']);
+                if (fs.nan_poj) out.cn.push (['nan-Latn', fs.nan_poj, 'nan_poj']);
               } else if (fs.form_set_type === 'alphabetical') {
                 if (fs.en) out.en.push (['en', fs.en, opts.captioned ? 'en' : null]);
                 if (fs.en_la) out.en.push (['en', fs.en_la, 'en_la']);
@@ -1270,6 +1274,9 @@ defineElement ({
                   cn_complex: '繁體字',
                   hk: '香港漢字',
                   tw: '中華民國國語',
+                  pinyin: '汉语拼音',
+                  bopomofo: '注音符號',
+                  nan_poj: '閩南語白話字',
                   jp: '日本語',
                   jp_old: '日本旧字体',
                   jp_new: '日本新字体',
