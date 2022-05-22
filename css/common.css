@@ -759,7 +759,9 @@ p sw-data-era a:not(:active):not(:focus):not(:hover) {
 .transition-type-firstday\/incorrect,
 .transition-type-prevfirstday\/incorrect,
 .transition-type-commenced\/incorrect,
+.transition-type-proclaimed\/incorrect,
 .transition-type-wartime\/incorrect,
+.transition-type-administrative\/incorrect,
 .transition-type-triggering\/incorrect {
   color: var(--incorrect-color);
   background-color: var(--incorrect-background-color);
@@ -918,6 +920,10 @@ sw-era-transition-graph .era-header bdi {
 
 sw-era-transition-graph .era-header.incorrect bdi {
   text-decoration: line-through;
+}
+
+sw-era-transition-graph .era-header code {
+  line-height: 1.0;
 }
 
 sw-era-transition-graph .year-header {
