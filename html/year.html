@@ -789,6 +789,8 @@
           label-commenced-possible="利用開始日&#xa;(異説)"
           label-commenced-incorrect="利用開始日&#xa;(旧説)"
           label-administrative=行政異動
+          label-administrative-possible="行政異動&#xa;(異説)"
+          label-administrative-incorrect="行政異動&#xa;(旧説)"
           label-wartime=戦時異動
           label-wartime-possible="戦時異動&#xa;(異説)"
           label-wartime-incorrect="戦時異動&#xa;(旧説)"
@@ -911,6 +913,13 @@
     の
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>新年の改元</strong>を決定
+  </template>
+  <template data-name=1220>
+    決定:
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>月始の改元</strong>を決定
   </template>
   <template data-name=1442>
     決定:
@@ -1044,6 +1053,10 @@
 
     <sw-if-defined data-field=fr_name>
       <can-copy><code class=charname data-field=fr_name lang=fr></code></can-copy>
+    </sw-if-defined>
+
+    <sw-if-defined data-field=tw_name>
+      <can-copy><code class=charname data-field=tw_name lang=zh-TW></code></can-copy>
     </sw-if-defined>
     
     <can-copy><data class="char-sample horizontal" data-field=string></data>

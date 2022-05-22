@@ -1092,11 +1092,14 @@ defineElement ({
                 if (fs.ko_fukui) out.kr_hangul.push (['ko-Latn', fs.ko_fukui, 'ko_fukui']);
               } else if (fs.form_set_type === 'vietnamese') {
                 if (fs.vi) out.vi_latin.push (['vi', fs.vi, opts.captioned ? 'vi' : null]);
+                if (fs.vi_katakana) out.vi_latin.push (['vi-Kana', fs.vi_katakana, 'vi_katakana']);
               } else if (fs.form_set_type === 'chinese') {
                 if (fs.bopomofo) out.tw.push (['zh-Bopo', fs.bopomofo, 'bopomofo']);
+                if (fs.nan_bopomofo) out.tw.push (['nan-Bopo', fs.nan_bopomofo, 'nan_bopomofo']);
                 if (fs.pinyin) out.cn.push (['zh-Latn', fs.pinyin, 'pinyin']);
                 if (fs.zh_alalc) out.cn.push (['zh-Latn', fs.zh_alalc, 'zh_alalc']);
                 if (fs.nan_poj) out.cn.push (['nan-Latn', fs.nan_poj, 'nan_poj']);
+                if (fs.nan_tl) out.tw.push (['nan-Latn', fs.nan_tl, 'nan_tl']);
               } else if (fs.form_set_type === 'alphabetical') {
                 if (fs.en) {
                   if (fs.origin_lang === 'zh_pinyin') {
@@ -1305,6 +1308,8 @@ defineElement ({
                   zh_alalc: 'ALA-LC',
                   bopomofo: '注音符號',
                   nan_poj: '閩南語白話字',
+                  nan_tl: '閩南語臺羅',
+                  nan_bopomofo: '方音符號系統',
                   jp: '日本語',
                   jp_old: '日本旧字体',
                   jp_new: '日本新字体',
@@ -1340,6 +1345,7 @@ defineElement ({
                   it: 'イタリア語',
                   po: 'ポルトガル語',
                   vi: 'Tiếng Việt',
+                  vi_katakana: '越南語カタカナ',
                   other: '',
                 }[variant];
                 data.classList.toggle ('label-form-variant-' + variant);
@@ -1586,6 +1592,8 @@ defineElement ({
         var fd = null;
         var matched1 = [];
         var matched2 = [];
+        var matched3 = [];
+        var matched4 = [];
         var matchedOthers = [];
         var matchedOthers2 = [];
         var matchedOthers3 = [];
@@ -1620,7 +1628,9 @@ defineElement ({
                 if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                   matched1.push (tr);
                 } else {
-                  matchedOthers.push (tr);
+                  if (direction === 'incoming' || era.end_year != null) {
+                    matchedOthers.push (tr);
+                  }
                 }
               } else {
                 if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
@@ -1637,32 +1647,50 @@ defineElement ({
               if (hasTag (tr, tagsIncluded) && !hasTag (tr, tagsExcluded)) {
                 matched2.push (tr);
               } else {
-                matchedOthers.push (tr);
+                if (!tr.tag_ids[2107] /* 分離 */ ||
+                    direction === 'incoming' ||
+                    era.end_year != null) {
+                  matchedOthers.push (tr);
+                }
               }
             }
             if (tr.type === 'wartime/possible' ||
                 tr.type === 'received/possible' ||
                 tr.type === 'firstday/possible' ||
                 tr.type === 'renamed/possible') {
-              matchedOthers2.push (tr);
+              if (hasTag (tr, tagsIncluded2) && !hasTag (tr, tagsExcluded)) {
+                matched3.push (tr);
+              } else {
+                if (!tr.tag_ids[2107] /* 分離 */ ||
+                    direction === 'incoming' ||
+                    era.end_year != null) {
+                  matchedOthers2.push (tr);
+                }
+              }
             }
             if (tr.type === 'wartime/incorrect' ||
+                tr.type === 'administrative/incorrect' ||
                 tr.type === 'received/incorrect' ||
                 tr.type === 'firstday/incorrect' ||
                 tr.type === 'renamed/incorrect') {
               if (hasTag (tr, tagsIncluded2) && !hasTag (tr, tagsExcluded)) {
-                matched2.push (tr);
+                matched4.push (tr);
               } else {
-                matchedOthers3.push (tr);
+                if (!tr.tag_ids[2107] /* 分離 */ ||
+                    direction === 'incoming' ||
+                    era.end_year != null) {
+                  matchedOthers3.push (tr);
+                }
               }
             }
             if (tr.type === 'firstyearstart' &&
                 tr.tag_ids[2108] /* 即位元年年始 */) {
-              fys = fys || tr;              
+              fys = fys || tr;
             }
           } // prev or next
 
-          if (matched1.length || matched2.length) {
+          if (matched1.length || matched2.length || matched3.length ||
+              matched4.length) {
             if ((direction === 'outgoing' && tr.next_era_ids[era.id]) ||
                 (direction === 'incoming' && tr.prev_era_ids[era.id])) {
               break;
@@ -1670,9 +1698,11 @@ defineElement ({
           }
         } // tr
 
-        //if (era.id == 2022) console.log (matched1, matched2, fd, fys, matchedOthers);
+        //if (era.id == 60) console.log (matched1, matched2, matched3, matched4, fd, fys, matchedOthers, matchedOthers2, matchedOthers3);
         if (matched1.length) return matched1[0];
         if (matched2.length) return matched2[0];
+        if (matched3.length) return matched3[0];
+        if (matched4.length) return matched4[0];
         if (fd !== null) return fd;
         if (matchedOthers.length) return matchedOthers[matchedOthers.length-1];
         if (matchedOthers2.length) return matchedOthers2[matchedOthers2.length-1];
