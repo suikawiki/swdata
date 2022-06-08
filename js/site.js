@@ -1040,7 +1040,7 @@ defineElement ({
         var out = {
           cn: [], tw: [], ja: [], ja_kana: [], ja_latin: [],
           kr: [], kr_hangul: [],
-          en: [], la: [], vi: [], vi_latin: [], others: [],
+          en: [], vi: [], vi_latin: [], others: [],
           expandeds: [],
         };
         fgs.forEach (fg => {
@@ -1092,6 +1092,7 @@ defineElement ({
                 if (fs.ko_fukui) out.kr_hangul.push (['ko-Latn', fs.ko_fukui, 'ko_fukui']);
               } else if (fs.form_set_type === 'vietnamese') {
                 if (fs.vi) out.vi_latin.push (['vi', fs.vi, opts.captioned ? 'vi' : null]);
+                if (fs.vi_old) out.vi_latin.push (['vi', fs.vi_old, 'vi_old']);
                 if (fs.vi_katakana) out.vi_latin.push (['vi-Kana', fs.vi_katakana, 'vi_katakana']);
               } else if (fs.form_set_type === 'chinese') {
                 if (fs.bopomofo) out.tw.push (['zh-Bopo', fs.bopomofo, 'bopomofo']);
@@ -1100,6 +1101,8 @@ defineElement ({
                 if (fs.zh_alalc) out.cn.push (['zh-Latn', fs.zh_alalc, 'zh_alalc']);
                 if (fs.nan_poj) out.cn.push (['nan-Latn', fs.nan_poj, 'nan_poj']);
                 if (fs.nan_tl) out.tw.push (['nan-Latn', fs.nan_tl, 'nan_tl']);
+              } else if (fs.form_set_type === 'sinkan') {
+                if (fs.sinkan && fs.origin_lang === 'zh') out.tw.push (['fos', fs.sinkan, 'sinkan_zh']);
               } else if (fs.form_set_type === 'alphabetical') {
                 if (fs.en) {
                   if (fs.origin_lang === 'zh_pinyin') {
@@ -1109,7 +1112,10 @@ defineElement ({
                   }
                 }
                 if (fs.en_la) out.en.push (['en', fs.en_la, 'en_la']);
-                if (fs.la) out.la.push (['la', fs.la, opts.captioned ? 'la' : null]);
+                if (fs.en_old) out.en.push (['en', fs.en_old, 'en_old']);
+                if (fs.es) out.others.push (['es', fs.es, 'es']);
+                if (fs.es_old) out.others.push (['es', fs.es_old, 'es_old']);
+                if (fs.la) out.others.push (['la', fs.la, opts.captioned ? 'la' : null]);
                 if (fs.ja_latin) out.ja_latin.push (['ja-Latn', fs.ja_latin, opts.captioned ? 'jp' : null]);
                 if (fs.ja_latin_old) out.ja_latin.push (['ja-Latn', fs.ja_latin_old, 'ja_latin_old']);
                 (fs.ja_latin_old_wrongs || []).forEach (_ => out.ja_latin.push (['ja-Latn', _, 'ja_latin_old_wrong']));
@@ -1120,6 +1126,7 @@ defineElement ({
                     out.others.push (['fr', fs.fr, 'fr']);
                   }
                 }
+                if (fs.fr_old) out.others.push (['fr', fs.fr_old, 'fr_old']);
                 if (fs.it) out.others.push (['it', fs.it, 'it']);
                 if (fs.po) out.others.push (['po', fs.po, 'po']);
                 (fs.others || []).forEach (_ => out.others.push (['und', _, 'other']));
@@ -1138,11 +1145,15 @@ defineElement ({
                   }
                 }
                 if (fs.en_la) out.en.push (['en', fs.en_la, 'en_la']);
-                if (fs.la) out.la.push (['la', fs.la, opts.captioned ? 'la' : null]);
+                if (fs.en_old) out.en.push (['en', fs.en_old, 'en_old']);
+                if (fs.es) out.others.push (['es', fs.es, 'es']);
+                if (fs.es_old) out.others.push (['es', fs.es_old, 'es_old']);
+                if (fs.la) out.others.push (['la', fs.la, opts.captioned ? 'la' : null]);
                 if (fs.ja_latin) out.ja_latin.push (['ja-Latn', fs.ja_latin, opts.captioned ? 'jp' : null]);
                 if (fs.ja_latin_old) out.ja_latin.push (['ja-Latn', fs.ja_latin_old, 'ja_latin_old']);
                 (fs.ja_latin_old_wrongs || []).forEach (_ => out.ja_latin.push (['ja-Latn', _, 'ja_latin_old_wrong']));
                 if (fs.fr) out.others.push (['fr', fs.fr, 'fr']);
+                if (fs.fr_old) out.others.push (['fr', fs.fr_old, 'fr_old']);
                 if (fs.it) out.others.push (['it', fs.it, 'it']);
                 if (fs.po) out.others.push (['po', fs.po, 'po']);
                 (fs.others || []).forEach (_ => out.others.push (['und', _, 'other']));
@@ -1222,7 +1233,6 @@ defineElement ({
             fg.expandeds.forEach (xlabel => {
               var xout = readFGs (xlabel.form_groups, {captioned: true});
               out.expandeds = out.expandeds
-                  .concat (xout.la)
                   .concat (xout.en)
                   .concat (xout.ja)
                   .concat (xout.cn)
@@ -1260,7 +1270,6 @@ defineElement ({
           [[out.kr], '조선어'],
           [[out.vi], 'Tiếng Việt'],
           [[out.en], 'English'],
-          [[out.la], 'ラテン語'],
           [[out.others], 'その他'],
           [[out.expandeds], '展開形', 'expanded'],
         ].forEach (([lists, header, cls]) => {
@@ -1335,16 +1344,22 @@ defineElement ({
                   kr_ja_fukui: '日本語系韓國福井式',
                   kp_fukui: '北朝鮮福井式',
                   ko_fukui: '朝鮮福井式',
-                  en: '英語',
-                  en_zh_pinyin: '汉语拼音系英語',
-                  en_kr: '韓國語系英語',
-                  en_la: 'ラテン語系英語',
+                  sinkan_zh: '中文系新港語',
+                  en: 'English',
+                  en_zh_pinyin: '汉语拼音系English',
+                  en_kr: '韓國語系English',
+                  en_la: 'ラテン語系English',
+                  en_old: 'English (旧)',
+                  es: '西語',
+                  es_old: '西語 (旧)',
                   fr: '仏語',
                   fr_ja: '日本語系仏語',
+                  fr_old: '仏語 (旧)',
                   la: 'ラテン語',
                   it: 'イタリア語',
                   po: 'ポルトガル語',
                   vi: 'Tiếng Việt',
+                  vi_old: 'Chữ Quốc Ngữ (旧)',
                   vi_katakana: '越南語カタカナ',
                   other: '',
                 }[variant];
