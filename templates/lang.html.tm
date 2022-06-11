@@ -10,18 +10,21 @@
   <t:include path=_site_header.html.tm />
   <t:my as=$is_valid x=0>
 
-<section>
+  <header class=page>
   <hgroup>
     <h1><code><t:text value="$tag"></></h1>
     <h2>Language tag</h2>
   </>
+  </header>
+
+  <menu class=toc />
+
+  <page-main>
 
   <form method=get action=/lang class=input>
     <input name=tag pl:value=$tag>
     <button type=submit>Go</button>
   </form>
-
-  <menu class=toc />
 
   <t:my as=$versions x="[
     {name => 'rfc5646', label => 'RFC 5646', parsible => 1, validity => 1},
@@ -225,16 +228,19 @@
           </t:for>
   </section>
 
-</section>
+  </page-main>
+
 
   <t:if x=$is_valid>
-    <m:ads />
+    <page-side>
+      <m:ads />
+    </page-side>
   </>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

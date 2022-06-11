@@ -9,16 +9,21 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
-  <t:my as=$is_integer x="$value == int $value">
+  <header class=page>
   <hgroup>
     <h1><data><t:text value=$value></></h1>
     <h2>Number</h2>
   </>
+  </header>
 
-  <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value">Notes</a></menu>
-
+  <nav class=content-links>
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $value">Notes</a></menu>
+  </nav>
+  
   <menu class=toc />
+
+  <page-main>
+  <t:my as=$is_integer x="$value == int $value">
 
   <section id=serializations>
     <h1>Serializations</h1>
@@ -171,14 +176,16 @@
     </table>
   </section>
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

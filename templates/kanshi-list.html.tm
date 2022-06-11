@@ -8,13 +8,16 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1>Stems and branches</h1>
   </>
+  </header>
 
   <menu class=toc />
 
+  <page-main>
+    
   <section id=stems>
     <h1>Heavenly stems (十干, celestial stems)</h1>
 
@@ -50,14 +53,16 @@
   JSON data file</a>
   (<a href=https://github.com/manakai/data-locale/blob/master/doc/numbers-kanshi.txt>documentation</a>).
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

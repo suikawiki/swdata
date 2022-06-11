@@ -8,34 +8,72 @@
 <title>SuikaWiki</title>
 
 <header class=site itemscope itemtype=http://schema.org/WebSite>
-  <h1 itemprop=name><a href=/ rel=top itemprop=url>Data.</a><a href=https://suikawiki.org><img src=https://wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
+  <h1 itemprop=name><a href=/ rel=top itemprop=url data-field=siteShortLabel>Data.</a><a href=https://suikawiki.org><img src=https://wiki.suikawiki.org/images/sw.png alt=SuikaWiki.org title=SuikaWiki.org></a></h1>
 </header>
 
-<section is=sw-page-main template=pageMainTemplate>
-  <action-status>
-    <action-status-message>読込中...</action-status-message>
-    <progress></progress>
-  </action-status>
-</section>
+<article>
+  <header class=page>
+    <page-area template=pageHeaderTemplate></page-area>
+  </header>
+
+  <nav is=sw-page-breadcrumbs>
+  </nav>
+
+  <nav class=content-links hidden>
+    <span class=lsf-icon data-icon=memo><a data-href-field=swHref>ノート</a></span>
+  </nav>
+  
+  <page-main>
+
+    <menu class=toc></menu>
+
+    <page-area template=pageMainTemplate>
+      <action-status>
+        <action-status-message>読込中...</action-status-message>
+        <progress></progress>
+      </action-status>
+    </page-area>
+  </page-main>
+
+  <page-side>
+    <aside class="ads-rectangle">
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6943204637055835" crossorigin="anonymous"></script>
+    <!-- side 2 -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-6943204637055835"
+           data-ad-slot="3970136925"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+      <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
+    </aside>
+
+    <page-area template=pageSideTemplate></page-area>
+  </page-side>
+</article>
+
+<footer class=site>
+  <a href=/ rel=top data-field=siteLabel>Data.SuikaWiki.org</a>
+  <a href=/about>このウィキについて</a>
+  <a href=/license rel=license>&copy;</a>
+</footer>
 
 <nav class="toplink"><a href="#top" title="このページの先頭に戻る">▲</a></nav>
+<page-ready></page-ready>
 
 <template-set name=pageMainTemplate templateselector=selectPageTemplate>
-  <template title="404 Not Found">
-    <hgroup>
-      <h1>404</h1>
-      <h2 lang=en>Page not found</h2>
-    </hgroup>
+  <template>
+    <t-title>404 Page not found</t-title>
 
     <p>見つかりませんでした。 <a href=/>トップページ</a>
   </template>
 
-  <template data-name=page-year-index title="年の一覧">
-    <hgroup>
-      <h1>年の一覧</h1>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-year-index>
+    <t-title>年の一覧</t-title>
+    <t-category>日時</t-category>
 
     <ul>
       <li><a href=/y/determination>年の決定</a>
@@ -52,13 +90,9 @@
     </list-container>
   </template>
   
-  <template data-name=page-year-item-index title="{year}年">
-    <hgroup>
-      <h1><data data-field=year></data></h1>
-      <h2 lang=en><a href=/y/>年</a></h2>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-year-item-index>
+    <t-title>西暦<data data-field=year></data>年</t-title>
+    <t-category><a href=/y/>年</a></t-category>
 
     <section>
       <h1>Year</h1>
@@ -155,13 +189,9 @@
     
   </template><!-- page-year-item-index -->
   
-  <template data-name=page-year-determination title="年の決定">
-    <hgroup>
-      <h1>年の決定</h1>
-      <h2 lang=en><a href=/y/>年</a></h2>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-year-determination>
+    <t-title>年の決定</t-title>
+    <t-category><a href=/y/>年</a></t-category>
 
     <section>
       <h1>紀年法を調べる</h1>
@@ -326,12 +356,9 @@
     
   </template><!-- page-year-determination -->
 
-  <template data-name=page-era-index title="紀年法の一覧">
-    <hgroup>
-      <h1>紀年法の一覧</h1>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-era-index>
+    <t-title>紀年法の一覧</t-title>
+    <t-category>日時</t-category>
 
     <ul>
       <li><a href=/y/>年の一覧</a>
@@ -350,12 +377,9 @@
     </list-container>
   </template>
 
-  <template data-name=page-era-first title="紀年法の一覧 (元年別)">
-    <hgroup>
-      <h1>紀年法の一覧 (元年別)</h1>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-era-first>
+    <t-title>紀年法の一覧 (元年別)</t-title>
+    <t-category>日時</t-category>
 
     <p><a href=/e/>紀年法の一覧</a> / <a href=/e/first class=active>元年別</a>
     </p>
@@ -375,14 +399,9 @@
     </table>
   </template>
   
-  <template data-name=page-era-item-index title="{era.name} [y~{era.id}]">
-    <hgroup>
-      <h1><bdi data-field=era.name></bdi>
-      [<code>y~<span data-field=era.id></span></code>]</h1>
-      <h2 lang=en><a href=/e/>紀年法</a></h2>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-era-item-index>
+    <t-title><bdi data-field=era.name></bdi> [<code>y~<span data-field=era.id></span></code>]</t-title>
+    <t-category><a href=/e/>紀年法</a></t-category>
 
     <sw-tags data-field=era.tag_ids></sw-tags>
     
@@ -641,14 +660,10 @@
       </ul>
     </section>
   </template>
-  <template data-name=page-era-item-graph title="{era.name} [y~{era.id}] からの変遷">
-    <hgroup>
-      <h1><bdi data-field=era.name></bdi>
-      [<code>y~<span data-field=era.id></span></code>]</h1>
-      <h2 lang=en><a href=/e/>紀年法</a></h2>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-era-item-graph>
+    <t-title><bdi data-field=era.name></bdi>
+    [<code>y~<span data-field=era.id></span></code>] からの変遷</t-title>
+    <t-category><a href=/e/>紀年法</a></t-category>
 
     <p><a href=./>紀年法の情報</a> /
     <a href=graph class=active>その後の変遷</a> /
@@ -662,14 +677,10 @@
     </sw-era-transition-graph>
     
   </template>
-  <template data-name=page-era-item-kanshi title="{era.name} [y~{era.id}] の干支年">
-    <hgroup>
-      <h1><bdi data-field=era.name></bdi>
-      [<code>y~<span data-field=era.id></span></code>]</h1>
-      <h2 lang=en><a href=/e/>紀年法</a></h2>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-era-item-kanshi>
+    <t-title><bdi data-field=era.name></bdi>
+    [<code>y~<span data-field=era.id></span></code>] の干支年</t-title>
+    <t-category><a href=/e/>紀年法</a></t-category>
 
     <p><a href=./>紀年法の情報</a> /
     <a href=graph>その後の変遷</a> /
@@ -697,12 +708,8 @@
 
   </template>
   
-  <template data-name=page-tag-item-index title="#{tag.label}">
-    <hgroup>
-      <h1>#<bdi data-field=tag.label></bdi></h1>
-    </hgroup>
-
-    <menu class=toc></menu>
+  <template data-name=page-tag-item-index>
+    <t-title>#<bdi data-field=tag.label></bdi></t-title>
 
     <p><a href=./ class=active>紀年法の一覧</a> / <a href=graph>変遷</a></p>
 
@@ -732,13 +739,10 @@
       </list-container>
     </section>
   </template>
-  <template data-name=page-tag-item-graph title="#{tag.label}">
-    <hgroup>
-      <h1>#<bdi data-field=tag.label></bdi></h1>
-    </hgroup>
-
-    <menu class=toc></menu>
-
+  <template data-name=page-tag-item-graph>
+    <t-title>#<bdi data-field=tag.label></bdi> の紀年法の変遷</t-title>
+    <t-category><a href=/e/>紀年法</a></t-category>
+    
     <p><a href=./>紀年法の一覧</a> / <a href=graph class=active>変遷</a></p>
 
     <sw-era-transition-graph data-tagid-field=tag.id data-sequences-field=eraSequenceSpecifications data-filled="tagid sequences">
@@ -759,10 +763,376 @@
       </list-container>
     </section>
   </template>
+
+  <template data-name=page-geoobject-item-item>
+    <t-title><span data-field=geoObject.name></span> - <span data-field=geoObject.goDef.name></span></t-title>
+    <t-sw data-field=geoObject.swURL></t-sw>
+    
+    <!-- XXX -->
+    <section class="summary wp-abstract" hidden>
+      <blockquote>
+        <p>{abstract}
+      </blockquote>
+      <cite><a href=https://ja.wikipedia.org/wiki/>フリー百科事典 ウィキペディア日本語版</a></cite>
+    </section>
+
+        <section class=go-data
+          data-data-spot-lat-field=geoObject.lat
+          data-data-spot-lon-field=geoObject.lon
+          data-data-spot-name-field=geoObject.name
+          data-filled="data-spot-lat data-spot-lon data-spot-name"
+        >
+          <list-container loader=swGOPropListLoader loader-props=mainProps type=table>
+            <table class=props>
+              <tbody></tbody>
+              <template>
+                <th data-field=name>
+                <td><can-copy><code data-field=value></code></can-copy>
+              </template>
+            </table>
+          </list-container>
+
+          <list-container loader=swGOPropListLoader loader-props=locationProps type=table>
+            <table class=props>
+              <tbody></tbody>
+              <template>
+                <th data-field=name>
+                <td data-field=value.address
+                    data-data-spot-lat-field=value.position.0
+                    data-data-spot-lon-field=value.position.1
+                    data-data-spot-name-field=label
+                    data-filled="data-spot-lat data-spot-lon data-spot-name"
+                >
+              </template>
+            </table>
+          </list-container>
+          
+          <list-container loader=swGOPropListLoader loader-props=symbolProps type=table>
+            <table class=props>
+              <tbody></tbody>
+              <template>
+                <th data-field=name>
+                <td>
+                  <sw-if-defined data-field=value>
+                    <span data-field=value></span>
+                  </sw-if-defined>
+                  <sw-if-defined data-field=dateValue>
+                    <time data-datetime-field=dateValue data-filled=datetime><span data-field=dateLabel></span></time>
+                  </sw-if-defined>
+              </template>
+            </table>
+          </list-container>
+   
+          <list-container loader=swGOPropListLoader loader-props=linkProps type=ul>
+            <ul class=links>
+              <template>
+                <a data-href-field=url data-field=label></a>
+              </template>
+            </ul>
+          </list-container>
+          <ul class=links>
+            <li class=source><a data-href-template="/about#{geoObject.goDef.id">データ出典</a>
+          </ul>
+        </section>
+
+        <div class=child-spots>
+          <section>
+            <h1>地域</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=subregions loader-gotype=macroregions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>国</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=countries loader-gotype=countries
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>都道府県</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-gotype=jp-prefs
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>市</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=descendant_city_ids loader-gotype=jp-regions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>郡</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=descendant_district_ids loader-gotype=jp-regions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>区</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=descendant_ward_ids loader-gotype=jp-regions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>町</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=descendant_town_ids loader-gotype=jp-regions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <section>
+            <h1>村</h1>
+            <list-container loader=swGOPropListLoader loader-props=children
+                loader-key=descendant_village_ids loader-gotype=jp-regions
+            type=ul template=swChildGeoObjectLink hascontainer>
+              <ul></ul>
+            </list-container>
+          </section>
+          <template-set name=swChildGeoObjectLink>
+            <template>
+              <a data-href-template="/spots/{goDef.id}/{goId}" data-field=name
+                  data-data-spot-lat-field=lat
+                  data-data-spot-lon-field=lon
+              data-filled="data-spot-lat data-spot-lon"></a>
+            </template>
+          </template-set>
+        </div>
+  </template>
+  <template data-name=page-geoobject-item>
+    <t-title><span data-field=geoObjectList.0.goDef.name></span>の一覧</t-title>
+    <t-category><a href=/world>世界</a></t-category>
+
+    <list-container loader=swGOListLoader type=ul>
+      <ul class=menu-list></ul>
+      <template>
+        <a data-href-template="/spots/{goDef.id}/{goId}" data-field=name data-empty=■></a>
+      </template>
+    </list-container>
+  </template>
+  
+  <template data-name=page-index>
+    <t-title>データ型</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <ul lang=en>
+      <li><a href=/boolean/true>Booleans</a>
+      <li><a href=/number/>Numbers</a>
+        <form action=javascript: onsubmit="
+          location.href = '/number/' + elements.number.value;
+          return false;
+        " class=input>
+          <input type=number name=number step=any value=0 required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/lat/0>Latitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/lat/' + elements.number.value;
+          return false;
+        " class=input>
+          <input type=number name=number step=any value=0 min=-90 max=90 required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/lon/0>Longitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/lon/' + elements.number.value;
+          return false;
+        " class=input>
+          <input type=number name=number step=any value=0 min=-180 max=180 required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/latlon/0,0>Latitudes and longitudes</a>
+        <form action=javascript: onsubmit="
+          location.href = '/latlon/' + elements.lat.value + ',' + elements.lon.value;
+          return false;
+        " class=input>
+          <input type=number name=lat step=any value=0 min=-90 max=90 required title=Latitude>
+          <input type=number name=lon step=any value=0 min=-180 max=180 required title=Longitude>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/tzoffset>Time zone offsets</a>
+      <li><a href=/datetime/now>Dates and times</a>
+        <form action=javascript: onsubmit="
+          location.href = '/datetime/' + elements.number.value;
+          return false;
+        " class=input>
+          <input type=date name=number step=any required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/datetime/--mm-dd>Yearless dates</a>
+      <li><a href=/y/>年</a>
+      <li><a href=/year>Years</a>
+        <form action=javascript: onsubmit="
+          location.href = '/year/' + elements.number.value;
+          return false;
+        " class=input>
+          <input type=number name=number step=any value=2000 required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/era>Eras</a>
+      <li><a href=/e/>紀年法</a>
+      <li><a href=/era/system>Era systems</a>
+      <li><a href=https://chars.suikawiki.org>Characters</a>
+        <form action=https://chars.suikawiki.org/string class=input>
+          <input name=s required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=/kanshi>Stems and branches</a>
+      <li><a href=/lang>Language tags</a>
+        <form action=/lang class=input>
+          <input name=tag required>
+          <button type=submit>Go</button>
+        </form>
+      <li><a href=https://world.suikawiki.org/spots/macroregions>マクロ地域</a>
+      <li><a href=https://world.suikawiki.org/spots/countries>国</a>
+      <li><a href=https://world.suikawiki.org/spots/jp-regions>日本の地域</a>
+    </ul>
+
+  </template>
+  <template data-name=page-world>
+    <t-title>世界</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <ul class=menu-list>
+      <li><a href=/spots/macroregions>マクロ地域</a>
+      <li><a href=/spots/countries>国</a>
+      <li><a href=/spots/jp-regions>日本の地域</a>
+      <li><a href=https://data.suikawiki.org/lang>言語タグ</a>
+    </ul>
+  </template>
+  <template data-name=page-about>
+    <t-title>このウィキについて</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <page-intro>
+      <p>このサイトはウィキサイト
+      <a href=https://suikawiki.org><cite>SuikaWiki</cite></a>
+      の一部です。
+
+      <p>くわしくは<a href=https://wiki.suikawiki.org/n/SuikaWiki>SuikaWikiのご案内</a>をご参照ください。
+
+      <p>記事のご利用については <a href=/license>License</a> ページを、
+      お問い合わせは
+      <a href=https://wiki.suikawiki.org/n/ContactPage>ContactPage</a>
+      をご参照ください。
+    </page-intro>
+  </template>
+  <template data-name=page-license>
+    <t-title lang=en>License</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+    
+    <section id=site lang=en>
+      <h1>The site</h1>
+
+      <p>Copyright 2015-2022 Wakaba &lt;wakaba@suikawiki.org>.
+
+      <p><a href=https://github.com/suikawiki/swdata>This program</a> is
+      free software: you can redistribute it and/or modify it under the
+      terms of the <cite>GNU Affero General Public License</cite> as
+      published by the Free Software Foundation, either version 3 of the
+      License, or (at your option) any later version.
+
+      <p>This program is distributed in the hope that it will be useful,
+      but <strong>WITHOUT ANY WARRANTY</strong>; without even the
+      implied warranty of <strong>MERCHANTABILITY</strong>
+      or <strong>FITNESS FOR A PARTICULAR PURPOSE</strong>.  See
+      the <cite>GNU Affero General Public License</cite> for more
+      details.
+
+      <p>You does not have received a copy of the <cite>GNU Affero
+      General Public License</cite> along with this program, see
+      &lt;<a href=https://www.gnu.org/licenses/>https://www.gnu.org/licenses/</a>>.
+    </section>
+
+    <section id=data lang=en>
+      <h1>Data on this site</h1>
+
+      <p>See the license documentations for the relevant data files:
+
+      <ul>
+        <li><a href=https://github.com/manakai/data-locale/#:~:text=License><code>manakai/data-locale</code></a>
+        <li><a href=https://github.com/manakai/data-chars/#:~:text=License><code>manakai/data-chars</code></a>
+        <li><a href=https://github.com/manakai/data-web-defs/#:~:text=License><code>manakai/data-web-defs</code></a>
+        <li><a href=https://github.com/geocol/data-countries/#:~:text=License><code>geocol/data-countries</code></a>
+        <li><a href=https://github.com/geocol/data-jp-areas/#:~:text=License><code>geocol/data-jp-areas</code></a>
+        <li><a href=https://github.com/geocol/data-days/#:~:text=License><code>geocol/data-days</code></a>
+      </ul>
+    </section>
+    
+    <section lang=en>
+      <h1>Resources</h1>
+
+      <p>See the license documentation<!--s--> for the relevant resource files:
+
+      <ul>
+        <li><a href=https://github.com/suikawiki/swdata/blob/master/fonts/LICENSE><code>fonts/LICENSE</code></a>
+      </ul>
+      
+    </section>
+  </template>
+</template-set>
+
+<template-set name=pageHeaderTemplate templateselector=selectPageTemplate>
+  <template>
+    <hgroup>
+      <h1 data-html=t-title></h1>
+      <h2 data-html=t-category></h2>
+    </hgroup>
+  </template>
+  <template data-name=page-geoobject-item-item>
+    <hgroup>
+      <h1><ruby><bdi data-field=geoObject.name></bdi><rt data-field=geoObject.kanaName><rt data-field=geoObject.enName></ruby></h1>
+      <h2 lang=en><a data-href-template="/spots/{geoObject.goType}" data-field=geoObject.goDef.name></a></h2>
+    </hgroup>
+  </template>
 </template-set>
 
 <template-set name=pageSideTemplate templateselector=selectPageTemplate>
   <template></template>
+
+  <template data-name=page-geoobject-item>
+    <list-container loader=swGOPropListLoader loader-props=names type=ul>
+      <ul class=additional-names>
+        <template>
+          <ruby>
+            <bdi data-field=name></bdi>
+            <rt data-field=kanaName>
+            <rt data-field=enName>
+          </ruby>
+        </template>
+      </ul>
+    </list-container>
+    
+    <list-container loader=swGOPropListLoader loader-props=images>
+      <list-main></list-main>
+      <template>
+        <figure data-class-field=class data-title-field=title>
+          <a data-href-field=wrefLinkURL><img data-src-field=wrefImageURL onerror="
+            if (/\/commons\//.test (this.src)) {
+              this.src = this.src.replace (/\/commons\//, '/ja/');
+            }
+          "></a>
+          <figcaption data-field=caption></figcaption>
+        </figure>
+      </template>
+    </list-container>
+    
+    <div id=map class=map data-data-map-zoom-field="geoObject.goDef.map_zoom" data-filled=data-map-zoom></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmPxsvoS9L-Ixcwex0XjMReZCg&#x37;dE4kv4&sensor=false&libraries=places" onload="
+      createMapFromSpotList ('map', '[data-spot-lat][data-spot-lon]');
+    "></script>
+  </template>
 </template-set>
 
 <template-set name=swTransitionListItem>
@@ -1140,6 +1510,8 @@
   </template>
 </template-set>
 
+
+
 <script>
   Array.prototype.forEach.call (document.querySelectorAll ('table.nv, table.nnv'), function (table) {
     Array.prototype.forEach.call (table.querySelectorAll ('tbody tr'), function (tr) {
@@ -1189,28 +1561,6 @@
   ga('send', 'pageview');
 </script>
 
-  <aside class="ads-rectangle">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6943204637055835" crossorigin="anonymous"></script>
-    <!-- side 2 -->
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-6943204637055835"
-         data-ad-slot="3970136925"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-    <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
-
-    <div is=sw-page-side template=pageSideTemplate></div>
-  </aside>
-
-<footer class=site>
-  <a href=/ rel=top>Data.SuikaWiki.org</a>
-  <a href=/license rel=license>&copy;</a>
-</footer>
-
   <svg class=defs>
     <defs>
       <marker id="arrow"
@@ -1228,7 +1578,7 @@
   
 <!--
 
-Copyright 2020-2022 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

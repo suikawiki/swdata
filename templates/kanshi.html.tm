@@ -12,18 +12,21 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
-  <hgroup>
+  <header class=page>
+    <hgroup>
     <h1><t:text value="$def->{name}"></h1>
     <h2><t:text value="{
       earthly_branch => 'Earthly branch',
       heavenly_stem => 'Heavenly stem',
       kanshi => 'Stem and branch',
     }->{$def->{type}}"></h2>
-  </>
+    </>
+  </header>
 
   <menu class=toc />
 
+  <page-main>
+    
   <section id=names>
     <h1>Name</h1>
 
@@ -148,14 +151,16 @@
     </table>
   </section>
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

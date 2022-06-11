@@ -72,11 +72,6 @@ sub main ($$$) {
   my ($class, $app) = @_;
   my $path = $app->path_segments;
 
-  if (@$path == 1 and $path->[0] eq '') {
-    # /
-    return temma $app, ['index.html.tm'], {};
-  }
-
   if (@$path == 2 and $path->[0] eq 'css' and $path->[1] eq 'common.css') {
     # /css/common.css
     return static $app, 'text/css; charset=utf-8', 'css/common.css';
@@ -235,10 +230,19 @@ sub main ($$$) {
 
     if ($path->[0] eq 'y' or
         $path->[0] eq 'e' or
-        $path->[0] eq 'tag') {
+        $path->[0] eq 'tag' or
+        $path->[0] eq 'spots' or
+        $path->[0] eq 'world' or
+        $path->[0] eq '' or
+        $path->[0] eq 'about' or
+        $path->[0] eq 'license') {
       # /e/...
       # /y/...
       # /tag/...
+      # /spots/...
+      # /world
+      # /about
+      # /license
       return static $app, 'text/html; charset=utf-8', 'html/year.html';
     }
 
@@ -299,16 +303,18 @@ sub main ($$$) {
     return temma $app, ['lang.html.tm'], {tag => $tag};
   }
 
-  if (@$path == 1 and $path->[0] eq 'license') {
-    # /license
-    return temma $app, ['license.html.tm'], {};
-  }
-
   if (@$path == 2 and
       $path->[0] eq 'data' and
       $path->[1] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {
     # /data/{}.json
     return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1];
+  }
+
+  if (@$path == 2 and
+      $path->[0] eq 'fonts' and
+      $path->[1] =~ m{\A[0-9A-Za-z_-]+\.ttf\z}) {
+    # /fonts/{}.ttf
+    return static $app, 'font/ttf', 'fonts/'.$path->[1];
   }
   
   if (@$path == 1 and $path->[0] eq 'robots.txt') {

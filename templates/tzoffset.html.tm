@@ -10,16 +10,20 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1><data><t:text value=$serialized></></h1>
     <h2><a href=/tzoffset rel=up>Time zone offset</a></h2>
   </>
+  </header>
 
+  <nav class=content-links>
   <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c $serialized">Notes</a></menu>
-
+  </nav>
+  
   <menu class=toc />
 
+  <page-main>
   <section id=serializations>
     <h1>Serializations</h1>
 
@@ -196,15 +200,17 @@
           <td><m:number m:value="$tzvalue->seconds"/>
     </table>
   </section>
+  </page-main>
 
-</section>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

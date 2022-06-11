@@ -8,10 +8,13 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1>Numbers</h1>
   </hgroup>
+  </header>
+
+  <page-main>
   
   <form action=javascript: onsubmit="
     location.href = '/number/' + elements.number.value;
@@ -45,9 +48,10 @@
     <button type=submit>CJK number</button>
   </form>
 
-</section>
-
-  <m:ads />
+  </page-main>
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--

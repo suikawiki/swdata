@@ -8,14 +8,19 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
-  <hgroup>
-    <h1>Time zone offsets</>
-  </>
+  <header class=page>
+    <hgroup>
+      <h1>Time zone offsets</>
+    </>
+  </header>
 
+  <nav class=content-links>
   <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/time%20zone%20offsets'">Notes</a></menu>
+  </nav>
+  
+  <menu class=toc />
 
-  <!--<menu class=toc />-->
+  <page-main>
 
   <section>
     <h1>Standard time</h1>
@@ -48,14 +53,16 @@
 
   </section>
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-20122 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

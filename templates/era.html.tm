@@ -8,11 +8,20 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1><t:text value="$era->{name}"></h1>
     <h2>Era</h2>
   </>
+  </header>
+
+  <nav class=content-links>
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c ($era->{suikawiki} // $era->{name})">Notes</a></menu>
+  </nav>
+  
+  <menu class=toc />
+
+  <page-main>
 
   <t:my as=$nearby_keys x="SWD::Eras::get_nearby_era_keys ($era)">
   <t:if x="@$nearby_keys">
@@ -25,10 +34,6 @@
       </ul>
     </nav>
   </t:if>
-
-    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c ($era->{suikawiki} // $era->{name})">Notes</a></menu>
-
-  <menu class=toc />
 
   <section id=ids>
     <h1>Identifiers</h1>
@@ -185,14 +190,15 @@
     </table>
   </section>
 
-</section>
-
-  <m:ads />
+  </page-main>
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
