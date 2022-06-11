@@ -251,7 +251,7 @@ SWD.geoObject = async function (type, id) {
 
 SWD.geoObjectList = async function (type) {
   var def = SWD._geoObjectDefs[type];
-  if (!def) return [];
+  if (!def) return null;
 
   var json = await SWD.data (def.fileName);
   return def.getIds (json).map (id => {
@@ -425,15 +425,24 @@ SWD.openPage = function (url) {
       args.site = 'world';
     }
 
-        // /spots/{type}/{id}
-        var m = path.match (/^\/spots\/([a-z0-9-]+)\/([1-9][0-9]*)$/);
-        if (m) {
-          args.geoObject = await SWD.geoObject (m[1], m[2]);
-          if (args.geoObject) {
-            args.name = 'page-geoobject-item';
-            return args;
-          }
-        }
+    // /spots/{type}/{id}
+    var m = path.match (/^\/spots\/([a-z0-9-]+)\/([1-9][0-9]*)$/);
+    if (m) {
+      args.geoObject = await SWD.geoObject (m[1], m[2]);
+      if (args.geoObject) {
+        args.name = 'page-geoobject-item-item';
+        return args;
+      }
+    }
+    // /spots/{type}
+    var m = path.match (/^\/spots\/([a-z0-9-]+)$/);
+    if (m) {
+      args.geoObjectList = await SWD.geoObjectList (m[1]);
+      if (args.geoObjectList) {
+        args.name = 'page-geoobject-item';
+        return args;
+      }
+    }
 
     args.name = {
       '/': 'page-index',
@@ -538,6 +547,7 @@ defineElement ({
       }
 
       this.querySelectorAll ('list-container[loader=swGOPropListLoader]').forEach (_ => _.swGeoObject = this.swArgs.geoObject);
+      this.querySelectorAll ('list-container[loader=swGOListLoader]').forEach (_ => _.swGeoObjectList = this.swArgs.geoObjectList);
 
       return e;
     }, // swUpdate
@@ -1335,6 +1345,11 @@ defineListLoader ('swGOPropListLoader', async function (opts) {
   } else {
     throw new Error ("Unknown |data-props| value: |"+ps+"|");
   }
+  return {data: list};
+});
+
+defineListLoader ('swGOListLoader', function (opts) {
+  var list = this.swGeoObjectList;
   return {data: list};
 });
 

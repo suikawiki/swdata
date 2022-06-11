@@ -764,7 +764,7 @@
     </section>
   </template>
 
-  <template data-name=page-geoobject-item>
+  <template data-name=page-geoobject-item-item>
     <t-title><span data-field=geoObject.name></span> - <span data-field=geoObject.goDef.name></span></t-title>
     <t-sw data-field=geoObject.swURL></t-sw>
     
@@ -910,7 +910,18 @@
           </template-set>
         </div>
   </template>
+  <template data-name=page-geoobject-item>
+    <t-title><span data-field=geoObjectList.0.goDef.name></span>の一覧</t-title>
+    <t-category><a href=/world>世界</a></t-category>
 
+    <list-container loader=swGOListLoader type=ul>
+      <ul class=menu-list></ul>
+      <template>
+        <a data-href-template="/spots/{goDef.id}/{goId}" data-field=name data-empty=■></a>
+      </template>
+    </list-container>
+  </template>
+  
   <template data-name=page-index>
     <t-title>データ型</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
@@ -1079,7 +1090,7 @@
       <h2 data-html=t-category></h2>
     </hgroup>
   </template>
-  <template data-name=page-geoobject-item>
+  <template data-name=page-geoobject-item-item>
     <hgroup>
       <h1><ruby><bdi data-field=geoObject.name></bdi><rt data-field=geoObject.kanaName><rt data-field=geoObject.enName></ruby></h1>
       <h2 lang=en><a data-href-template="/spots/{geoObject.goType}" data-field=geoObject.goDef.name></a></h2>
