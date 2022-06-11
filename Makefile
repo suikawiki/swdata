@@ -54,13 +54,17 @@ build-local: local/data \
     local/data/calendar-era-labels.json \
     local/data/days.json local/data/numbers-kanshi.json \
     local/data/tags.json \
-    local/data/char-names.json
+    local/data/char-names.json \
+    local/data/countries.json \
+    local/data/macroregions.json \
+    local/data/jp-regions-full-flatten.json
+
 build-repo: js/components.js css/default.css
 local/data:
 	mkdir -p local/data
 
-js/components.js: local/page-components.js local/time.js
-	cat local/page-components.js local/time.js > $@
+js/components.js: local/page-components.js local/time.js intermediate/md5.js
+	cat local/page-components.js local/time.js intermediate/md5.js > $@
 
 local/page-components.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/src/page-components.js
@@ -68,6 +72,9 @@ css/default.css: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/css/default.css
 local/time.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/timejs/master/src/time.js
+
+intermediate/md5.js:
+	$(WGET) -O $@ https://raw.githubusercontent.com/blueimp/JavaScript-MD5/master/js/md5.js
 
 local/data/jp-holidays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-holidays.json
@@ -94,6 +101,13 @@ local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json
 local/data/days.json: bin/generate-days.pl local/data/days-orig.json
 	$(PERL) $< > $@
+
+local/data/countries.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-countries/master/data/countries.json
+local/data/macroregions.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-countries/master/data/macroregions.json
+local/data/jp-regions-full-flatten.json:
+	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-jp-areas/master/data/jp-regions-full-flatten.json
 
 local/data/char-names.json:
 	mkdir -p local
