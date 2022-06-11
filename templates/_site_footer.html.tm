@@ -39,6 +39,7 @@
 
 <footer class=site>
   <a href=/ rel=top>Data.SuikaWiki.org</a>
+  <a href=/about>このウィキについて</a>
   <a href=/license rel=license>&copy;</a>
 </footer>
 

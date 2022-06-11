@@ -9,13 +9,16 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1><data><t:text value="$value->to_global_date_and_time_string"></></h1>
     <h2>Date and time</h2>
   </>
+  </header>
 
   <menu class=toc />
+
+  <page-main>
 
   <section id=components>
     <h1>Components</>
@@ -471,14 +474,15 @@
     </table>
   </section>
 
-</section>
-
-  <m:ads />
+  </page-main>
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

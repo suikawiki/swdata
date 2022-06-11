@@ -8,15 +8,19 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1>Years</>
   </>
+  </header>
 
-  <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/year'">Notes</a></menu>
-
+  <nav class=content-links>
+    <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/year'">Notes</a></menu>
+  </nav>
+  
   <menu class=toc />
 
+  <page-main>
   <t:for as=$m x="[-2 .. 2]">
     <section pl:id="'years-' . $m">
       <h1>Years <t:text value="$m * 1000"> - <t:text value="$m * 1000 + 999"></h1>
@@ -28,15 +32,16 @@
       </ul>
     </section>
   </t:for>
+  </page-main>
 
-</section>
-
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

@@ -10,14 +10,16 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1><data><t:text value="$value->to_manakai_year_string"></></h1>
     <h2><a href=/year rel=up>Year</a></h2>
   </>
+  </header>
 
   <menu class=toc />
 
+  <page-main>
   <section id=year>
     <t:my as=$year x="$value->year">
     <h1>Year (<t:text value="$value->to_manakai_year_string">)</h1>
@@ -173,14 +175,16 @@
     </ul>
   </section>
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2015-2019 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

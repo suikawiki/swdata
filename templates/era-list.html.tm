@@ -8,15 +8,20 @@
 <body>
   <t:include path=_site_header.html.tm />
 
-<section>
+  <header class=page>
   <hgroup>
     <h1>Eras</h1>
   </>
+  </header>
 
-  <menu class=nearby><a href="https://wiki.suikawiki.org/n/紀年法">Notes</a></menu>
+  <nav class=content-links>
+    <menu class=nearby><a href="https://wiki.suikawiki.org/n/紀年法">Notes</a></menu>
+  </nav>
 
   <menu class=toc />
 
+  <page-main>
+  
   <section id=list>
     <h1>List of eras</h1>
 
@@ -40,14 +45,16 @@
   JSON data file</a>
   (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-defs.txt>documentation</a>).
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
 
-Copyright 2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2016-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

@@ -136,6 +136,199 @@ SWD.canonEra = async function (id) {
   return null;
 }; // SWD.canonEra
 
+SWD._geoObjectDefs = {
+  macroregions: {
+    id: 'macroregions', fileName: 'macroregions.json',
+    name: '地域',
+    keys: {name: ['ja_name', 'en_name']},
+    getIds: x => Object.keys (x.areas),
+    getGetGoById: (x, y) => x.areas[y],
+    mapZoom: 1,
+    mainProps: [
+      {
+        key: 'code',
+        name: 'UN M.49 符号',
+      },
+    ],
+  },
+  countries: {
+    id: 'countries', fileName: 'countries.json',
+    name: '国',
+    keys: {
+      name: ['ja_name', 'en_name'],
+      short_name: ['ja_short_name', 'en_short_name'],
+    },
+    getIds: x => Object.keys (x.areas),
+    getGetGoById: (x, y) => x.areas[y],
+    mainProps: [
+      {
+        key: 'code',
+        name: 'ISO 3166-1 2文字国符号',
+      },
+      {
+        key: 'code3',
+        name: 'ISO 3166-1 3文字国符号',
+      },
+      {
+        key: 'iso3166_numeric',
+        name: 'ISO 3166-1 3桁国符号',
+      },
+      {
+        key: 'stanag',
+        name: 'GEC 国符号',
+      },
+      {
+        key: 'stanag',
+        name: 'STANAG 国符号',
+      },
+    ],
+    link_props: [
+      {
+        key: 'wref_ja',
+        name: 'Wikipedia (日)',
+        wikipedia: 'ja',
+      },
+      {
+        key: 'wref_en',
+        name: 'Wikipedia (英)',
+        wikipedia: 'en',
+      },
+      {
+        key: 'mofa_area_url',
+        name: '外務省各国・地域情勢',
+      },
+      {
+        key: 'mofa_anzen_url',
+        name: '外務省海外安全情報',
+      },
+      {
+        key: 'world_factbook_url',
+        name: 'The World Factbook',
+      },
+    ],
+  },
+  'jp-regions': {
+    id: 'jp-regions', fileName: 'jp-regions-full-flatten.json',
+    name: '日本の地方自治体',
+    keys: {
+      name: ['name'],
+      kanaName: ['kana'],
+      enName: ['latin'],
+      position: ['position', 'office'],
+    },
+    getIds: x => Object.keys (x.regions),
+    getGetGoById: (x, y) => x.regions[y],
+    mainProps: [
+      {
+        key: 'code',
+        name: '全国地方公共団体コード',
+      },
+    ],
+    linkProps: [
+      {
+        key: 'wref',
+        name: 'Wikipedia',
+        wikipedia: 'ja',
+      },
+      {
+        key: 'url',
+        name: 'Web サイト',
+      },
+    ],
+  },
+}; // SWD._geoObjectDefs
+
+SWD.geoObject = async function (type, id) {
+  var def = SWD._geoObjectDefs[type];
+  if (!def) return null;
+
+  var json = await SWD.data (def.fileName);
+  var data = def.getGetGoById (json, id);
+  if (!data) return null;
+
+  return new SWDGeoObject (def, type, id, data);
+}; // SWD.geoObject
+
+SWD.geoObjectList = async function (type) {
+  var def = SWD._geoObjectDefs[type];
+  if (!def) return [];
+
+  var json = await SWD.data (def.fileName);
+  return def.getIds (json).map (id => {
+    var data = def.getGetGoById (json, id);
+    return new SWDGeoObject (def, type, id, data);
+  });
+}; // SWD.geoObjectList
+
+function SWDGeoObject (def, type, id, data) {
+  this.goDef = def;
+  this.goType = type;
+  this.goId = id;
+  this._data = data;
+}
+
+SWDGeoObject.prototype.getPropValue = function (propName) {
+  var names = this.goDef.keys[propName] || [propName];
+  for (var i = 0; i < names.length; i++) {
+    if (this._data[names[i]] != null) {
+      return this._data[names[i]];
+    }
+  }
+  return null;
+}; // getPropValue
+
+Object.defineProperty (SWDGeoObject.prototype, 'name', {
+  get: function () {
+    if (this._name !== undefined) return this._name;
+    return this._name = this.getPropValue ('name');
+  },
+});
+Object.defineProperty (SWDGeoObject.prototype, 'kanaName', {
+  get: function () {
+    return this.getPropValue ('kanaName');
+  },
+});
+Object.defineProperty (SWDGeoObject.prototype, 'enName', {
+  get: function () {
+    return this.getPropValue ('enName');
+  },
+});
+
+SWDGeoObject.prototype._latlon = function () {
+  if (this._ll !== undefined) return this._ll;
+
+  var latlon = this.getPropValue ('position');
+  if (latlon == null) {
+    return this._ll = null;
+  } else if (typeof latlon === 'object') {
+    return this._ll = latlon.position || null;
+  } else {
+    return this._ll = latlon;
+  }
+}; // _latlon
+
+Object.defineProperty (SWDGeoObject.prototype, 'lat', {
+  get: function () {
+    var ll = this._latlon ();
+    if (ll) return ll[0];
+    return null;
+  },
+});
+Object.defineProperty (SWDGeoObject.prototype, 'lon', {
+  get: function () {
+    var ll = this._latlon ();
+    if (ll) return ll[1];
+    return null;
+  },
+});
+
+Object.defineProperty (SWDGeoObject.prototype, 'swURL', {
+  get: function () {
+    return 'https://wiki.suikawiki.org/n/' + encodeURIComponent (this.getPropValue ('name'));
+  },
+});
+
+
 SWD.tag = async function (id) {
   var tags = await SWD.tagsByIds ([id]);
   return tags[0]; // or undefined
@@ -169,24 +362,10 @@ var defineListLoader = function (name, code) {
 
 var mod = (n, m) => ((n%m) + m) % m;
 
-defineElement ({
-  name: 'section',
-  is: 'sw-page-main',
-  templateSet: true,
-  props: {
-    pcInit: function () {
-      this.addEventListener ('pctemplatesetupdated', (ev) => {
-        this.swTemplateSet = ev.pcTemplateSet;
-        this.swUpdate ();
-      });
-      this.swUpdate ();
-    }, // pcInit
-    swUpdate: function () {
-      if (!this.swTemplateSet) return;
-
-      return Promise.resolve ().then (async () => {
-        var args = {};
-        var path = location.pathname;
+SWD.openPage = function (url) {
+  return Promise.resolve ().then (async () => {
+    var args = {};
+    var path = url.pathname;
 
         var m = path.match (/^\/y\/(-?[0-9]+)\/$/);
         if (m) {
@@ -237,75 +416,143 @@ defineElement ({
           if (args.tag) {
             args.name = 'page-tag-item-graph';
             args.hasLargeContent = true;
-            var qp = (new window.URL (location.href)).searchParams;
-            args.eraSequenceSpecifications = Array.prototype.slice.call (qp.getAll ('sequence')).join (' ');
+            args.eraSequenceSpecifications = Array.prototype.slice.call (url.searchParams.getAll ('sequence')).join (' ');
           }
           return args;
         }
 
-        args.name = {
-          '/y/': 'page-year-index',
-          '/y/determination': 'page-year-determination',
-          '/e/': 'page-era-index',
-          '/e/first': 'page-era-first',
-        }[path]; // or undefined
+    if (/^\/spots\//.test (path)) {
+      args.site = 'world';
+    }
 
-        return args;
-      }).then (args => {
-        var e = this.swTemplateSet.createFromTemplate ('div', args);
-        this.textContent = '';
-        while (e.firstChild) {
-          this.appendChild (e.firstChild);
+        // /spots/{type}/{id}
+        var m = path.match (/^\/spots\/([a-z0-9-]+)\/([1-9][0-9]*)$/);
+        if (m) {
+          args.geoObject = await SWD.geoObject (m[1], m[2]);
+          if (args.geoObject) {
+            args.name = 'page-geoobject-item';
+            return args;
+          }
         }
-        document.title = $fill.string (e.title, args);
-        document.body.classList.toggle ('has-large', !!args.hasLargeContent);
-      });
-    }, // swUpdate
-  },
-}); // <section is=sw-page-main>
+
+    args.name = {
+      '/': 'page-index',
+      '/world': 'page-world',
+      '/y/': 'page-year-index',
+      '/y/determination': 'page-year-determination',
+      '/e/': 'page-era-index',
+      '/e/first': 'page-era-first',
+      '/about': 'page-about',
+      '/license': 'page-license',
+    }[path]; // or undefined
+
+    if (args.name === 'page-world') {
+      args.site = 'world';
+    }
+
+    return args;
+  }).then (async args => {
+    var ma = document.querySelector ('page-area[template=pageMainTemplate]');
+    await ma.ready;
+    ma.swArgs = args;
+    var mx = args.mx = ma.swUpdate ();
+    document.title = [
+      (mx['t-title'] || {textContent: ''}).textContent,
+      (mx['t-category'] || {textContent: ''}).textContent,
+      'SuikaWiki',
+    ].filter (_ => _.length).join (' - ');
+    document.querySelectorAll ('page-area').forEach (_ => {
+      var t = _.getAttribute ('template');
+      if (t === 'pageMainTemplate') {
+        //
+      } else if (t === 'pageHeaderTemplate') {
+        _.swArgs = args;
+        _.swUpdate ();
+        _.querySelectorAll ('[data-html]').forEach (_ => {
+          var k = _.getAttribute ('data-html');
+          if (mx[k]) {
+            while (mx[k].firstChild) {
+              _.appendChild (mx[k].firstChild);
+            }
+          }
+        });
+      } else {
+        _.swArgs = args;
+        _.swUpdate ();
+      }
+    });
+    document.body.classList.toggle ('has-large', !!args.hasLargeContent);
+
+    var obj = {};
+    var x = mx['t-sw'] ? mx['t-sw'].textContent : '';
+    if (x) obj.swHref = x;
+    document.querySelectorAll ('.content-links').forEach (_ => {
+      _.hidden = ! obj.swHref;
+      $fill (_, obj);
+    });
+    document.querySelectorAll ('nav[is=sw-page-breadcrumbs]').forEach (_ => {
+      _.value = args.geoObject;
+    });
+
+    var obj = {};
+    obj.siteShortLabel = {
+      'world': 'World.',
+      'antenna': 'Antenna.',
+      'chars': 'Chars.',
+    }[args.site];
+    if (!obj.siteShortLabel) obj.siteShortLabel = 'Data.';
+    obj.siteLabel = obj.siteShortLabel + 'SuikaWiki.org';
+    document.querySelectorAll ('header.site, footer.site').forEach (_ => {
+      $fill (_, obj);
+    });
+  });
+}; // SWD.openPage
 
 defineElement ({
-  name: 'div',
-  is: 'sw-page-side',
+  name: 'page-area',
   templateSet: true,
   props: {
     pcInit: function () {
+      var ok;
+      this.ready = new Promise ((x, y) => ok = x);
       this.addEventListener ('pctemplatesetupdated', (ev) => {
         this.swTemplateSet = ev.pcTemplateSet;
         this.swUpdate ();
+        ok ();
       });
       this.swUpdate ();
     }, // pcInit
     swUpdate: function () {
       if (!this.swTemplateSet) return;
+      if (!this.swArgs) return;
 
-      return Promise.resolve ().then (async () => {
-        var args = {};
-        var path = location.pathname;
-
-        /*
-        // /tag/{}/
-        var m = path.match (/^\/tag\/([0-9]+)\/(?:graph|)$/);
-        if (m) {
-          args.tagId = parseFloat (m[1]);
-          args.tag = await SWD.tag (args.tagId);
-          if (args.tag) args.name = 'page-tag-item-*';
-          return args;
-        }
-        */
-
-        args.name = '';
-        return args;
-      }).then (args => {
-        var e = this.swTemplateSet.createFromTemplate ('div', args);
-        this.textContent = '';
-        while (e.firstChild) {
+      var e = this.swTemplateSet.createFromTemplate ('div', this.swArgs);
+      this.textContent = '';
+      while (e.firstChild) {
+        if (/^t-/.test (e.firstChild.localName)) {
+          e[e.firstChild.localName] = e.firstChild;
+          e.firstChild.remove ();
+        } else {
           this.appendChild (e.firstChild);
         }
-      });
+      }
+
+      this.querySelectorAll ('list-container[loader=swGOPropListLoader]').forEach (_ => _.swGeoObject = this.swArgs.geoObject);
+
+      return e;
     }, // swUpdate
   },
-}); // <div is=sw-page-side>
+}); // <page-area>
+
+defineElement ({
+  name: 'page-ready',
+  props: {
+    pcInit: function () {
+      var url = new window.URL (location.href);
+      return SWD.openPage (url);
+    },
+  },
+});
 
 (() => {
 
@@ -313,13 +560,83 @@ defineElement ({
   def.setAttribute ('name', 'selectPageTemplate');
   def.pcHandler = function (templates, obj) {
     if (templates[obj.name]) return templates[obj.name];
-
-    console.log ("Page template |"+obj.name+"| not found");
     return templates[""];
   };
   document.head.appendChild (def);
   
 }) ();
+
+defineElement ({
+  name: 'nav',
+  is: 'sw-page-breadcrumbs',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: () => v,
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      setTimeout (() => this.swUpdate (), 0);
+    }, // pcInit
+    swUpdate: async function () {
+      var go = this.value;
+      this.hidden = ! go;
+      if (!go) return;
+      
+      var goDef = go.goDef;
+      var items = [];
+      if (goDef.id === 'countries' || goDef.id === 'macroregions') {
+        var region = await (goDef.id === 'countries' ? SWD.geoObject ('macroregions', go.getPropValue ('submacroregion') || 1) : go);
+
+        var sups = region.getPropValue ('superregions') || {};
+        var superRegionPs = Object.keys (sups).sort ((a, b) => sups[b] - sups[a]).map (_ => SWD.geoObject ('macroregions', _));
+        for (var i = 0; i < superRegionPs.length; i++) {
+          var superRegion = await superRegionPs[i];
+          items.push (['/spots/macroregions/' + superRegion.goId,
+                       superRegion.name]);
+        }
+        if (goDef.id === 'countries') {
+          items.push (['/spots/'+region.goType+'/' + region.goId,
+                       region.name]);
+        }
+      } else if (goDef.id === 'jp-regions') {
+        items.push (['/spots/macroregions/1', '世界']);
+        items.push (['/spots/countries/57', '日本国']);
+        var keys = ['pref_id', 'city_id', 'district_id'];
+        for (var i = 0; i < keys.length; i++) {
+          var id = go.getPropValue (keys[i]);
+          if (!id) continue;
+          var aGo = await SWD.geoObject ('jp-regions', id);
+          if (!aGo) continue;
+          items.push (['/spots/jp-regions/' + aGo.goId, aGo.name]);
+        }
+      }
+      items.push (['', go.name]);
+      
+      this.textContent = '';
+      var p = document.createElement ('p');
+      var last = items.pop ();
+      items.forEach (item => {
+        var a = document.createElement ('a');
+        a.href = item[0];
+        a.textContent = item[1];
+        p.appendChild (a);
+        p.appendChild (document.createTextNode (' > '));
+      });
+      {
+        var a = document.createElement ('a');
+        a.href = last[0];
+        a.textContent = last[1];
+        p.appendChild (a);
+      }
+      this.appendChild (p);
+    }, // swUpdate
+  },
+}); // <nav is=sw-page-breadcrumbs>
 
 defineElement ({
   name: 'sw-if-defined',
@@ -849,6 +1166,176 @@ defineListLoader ('swEraListLoader', function (opts) {
   }).then (eras => {
     return {data: eras};
   });
+});
+
+SWD.wrefToImageURL = function (wref) {
+  var fileName = wref.replace (/^[^:]+:/, '').replace (/ /g, '_');
+  var hash = md5 (fileName);
+  return 'https://upload.wikimedia.org/wikipedia/commons/'
+      + hash.substring (0, 1)
+      + '/'
+      + hash.substring (0, 2)
+      + '/'
+      + encodeURIComponent (fileName);
+}; // SWD.wrefToImageURL
+
+defineListLoader ('swGOPropListLoader', async function (opts) {
+  var go = this.swGeoObject;
+  var ps = this.getAttribute ('loader-props');
+  var list = [];
+  if (ps === 'mainProps') {
+    list = go.goDef.mainProps.map (_ => {
+      return {
+        name: _.name,
+        value: go.getPropValue (_.key),
+      };
+    });
+  } else if (ps === 'locationProps') {
+    if (go.goDef.id === 'jp-regions') {
+      var office = go.getPropValue ('office');
+      if (office) {
+        var nameSuffix = go.name.substring (go.name.length - 1);
+        var label = {
+          city: '市役所',
+          ward: '区役所',
+          town: '町役場',
+          village: '村役場',
+        }[go.getPropValue ('type')] || nameSuffix + '庁';
+        list.push ({
+          name: label + '所在地',
+          label,
+          value: office,
+        });
+      }
+    }
+  } else if (ps === 'symbolProps') {
+    var symbols = go.getPropValue ('area_symbols') || {};
+    Object.keys (symbols).forEach (st => {
+      var items = symbols[st];
+      items.forEach (symbol => {
+        if (st === 'flag' || st === 'mark') {
+          //
+        } else {
+          var nameSuffix = go.name.substring (go.name.length - 1);
+          var name = {
+            tree: nameSuffix + '木',
+            flower: nameSuffix + '花',
+            bird: nameSuffix + '鳥',
+            fish: nameSuffix + '魚',
+            song: nameSuffix + '歌',
+            day: nameSuffix + 'の日',
+            misc: 'その他',
+          }[st] || st;
+          var url = symbol.wref ? SWD.wrefToImageURL (symbol.wref) : null;
+          var dateValue;
+          var dateLabel;
+          if (symbol.date_value) {
+            var m = symbol.date_value.match (/^([0-9]+)-([0-9]+)$/);
+            dateValue = '--' + symbol.date_value;
+            dateLabel = parseInt (m[1]) + '月' + parseInt (m[2]) + '日';
+          }
+          list.push ({
+            name,
+            value: symbol.name,
+            dateValue,
+            dateLabel,
+            wref: symbol.wref,
+            wrefLinkURL: url,
+            wrefImageURL: url,
+          });
+        }
+      });
+    });
+  } else if (ps === 'linkProps') {
+    var props = go.goDef.linkProps || [];
+    props.forEach (prop => {
+      var value = go.getPropValue (prop.key);
+      if (value == null) return;
+      if (prop.wikipedia) {
+        value = 'https://' + prop.wikipedia + '.wikipedia.org/wiki/' + encodeURIComponent (value);
+      }
+      list.push ({label: prop.name, url: value});
+    });
+  } else if (ps === 'children') {
+    var ct = this.getAttribute ('loader-gotype');
+    if (go.goType === 'countries' && go.goId == 57) {
+      if (ct === 'jp-prefs') {
+        var x = await SWD.geoObjectList ('jp-regions');
+        x = x.filter (_ => _.getPropValue ('type') === 'pref');
+        console.log(x);
+        x = x.sort ((a, b) => a.getPropValue ('code') - b.getPropValue ('code'));
+        list = list.concat (x);
+      }
+    } else {
+      var items = go.getPropValue (this.getAttribute ('loader-key')) || {};
+      var keys = Object.keys (items);
+      for (var i = 0; i < keys.length; i++) {
+        var cGO = await SWD.geoObject (ct, keys[i]);
+        list.push (cGO);
+      }
+    }
+  } else if (ps === 'names') {
+    list.push ({
+      name: go.name,
+      kanaName: go.kanaName,
+      enName: go.enName,
+    });
+    var sn = go.getPropValue ('short_name');
+    if (sn != null) {
+      list.push ({
+        name: sn,
+        kanaName: go.getPropValue ('kana_short_name'),
+        enName: go.getPropValue ('en_short_name'),
+      });
+    }
+  } else if (ps === 'images') {
+    var ff = go.getPropValue ('wikipedia_flag_file_name');
+    if (ff) {
+      var url = SWD.wrefToImageURL (ff);
+      list.push ({
+        wrefLinkURL: url,
+        wrefImageURL: url,
+        class: 'flag',
+        title: '旗',
+      });
+    } else {
+      var symbols = go.getPropValue ('area_symbols') || [];
+      var flags = symbols.flag || [];
+      flags.forEach (symbol => {
+        var url = SWD.wrefToImageURL (symbol.wref);
+        list.push ({
+          wrefLinkURL: url,
+          wrefImageURL: url,
+          class: 'flag',
+          title: '旗',
+        });
+      });
+    }
+
+    var wi = go.getPropValue ('wikipedia_image');
+    if (wi && wi.wref) {
+      var url = SWD.wrefToImageURL (wi.wref);
+      list.push ({
+        wrefLinkURL: url,
+        wrefImageURL: url,
+        caption: wi.desc,
+      });
+    }
+
+    /*
+    wi = go.getPropValue ('wikipedia_location_image_wref');
+    if (wi) {
+      var url = SWD.wrefToImageURL (wi);
+      list.push ({
+        wrefLinkURL: url,
+        wrefImageURL: url,
+      });
+    }
+    */
+  } else {
+    throw new Error ("Unknown |data-props| value: |"+ps+"|");
+  }
+  return {data: list};
 });
 
 var RelatedEraTypeIndex = {
@@ -2956,6 +3443,47 @@ defineListLoader ('swValueListLoader', function (opts) {
   return {data};
 });
 
+
+function createMapFromSpotList (mapId, selectors, onselect) {
+  var spots = document.querySelectorAll (selectors);
+  if (spots.length) {
+    var pos = new google.maps.LatLng
+        (spots[0].getAttribute ('data-spot-lat'),
+         spots[0].getAttribute ('data-spot-lon'));
+    var mapEl = mapId.nodeType ? mapId : document.getElementById (mapId);
+    var map = new google.maps.Map
+        (mapEl, {
+           center: pos,
+           zoom: parseInt (mapEl.getAttribute ('data-map-zoom')) || 6,
+           mapTypeId: google.maps.MapTypeId.HYBRID
+         });
+    for (var i = 0; i < spots.length; i++) (function (el) {
+      var pos = new google.maps.LatLng
+          (el.getAttribute ('data-spot-lat'),
+           el.getAttribute ('data-spot-lon'));
+      var marker = new google.maps.Marker ({
+        position: pos,
+        map: map,
+        title: el.getAttribute ('data-spot-name') || el.textContent
+      });
+      google.maps.event.addListener (marker, 'click', function () {
+        if (onselect) {
+          onselect (el);
+        } else {
+          for (var j = 0; j < spots.length; j++) {
+            if (spots[j] === el) {
+              spots[j].className += ' selected';
+            } else {
+              spots[j].className = spots[j].className.replace (/\bselected\b/g, '');
+            }
+          }
+        }
+      });
+    }) (spots[i]);
+  }
+} // createMapFromSpotList
+
+
 defineElement ({
   name: 'sw-tags',
   fill: 'idlattribute',
@@ -3002,9 +3530,10 @@ defineElement ({
   },
 }); // <sw-tags>
 
+
 /*
 
-Copyright 2020-2022 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2022 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

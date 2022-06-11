@@ -7,16 +7,21 @@
   </t:include>
 <body>
   <t:include path=_site_header.html.tm />
-
-<section>
+  
+  <header class=page>
   <hgroup>
     <h1><data><t:text value="$value ? 'true' : 'false'"></></h1>
     <h2>Boolean</h2>
   </>
+  </header>
 
+  <nav class=content-links>
   <menu class=nearby><a pl:href="'https://wiki.suikawiki.org/n/'.Wanage::URL::percent_encode_c ($value ? 'true' : 'false')">Notes</a></menu>
+  </nav>
 
   <menu class=toc />
+
+  <page-main>
 
   <section id=serializations>
     <h1>Serializations</h1>
@@ -40,9 +45,11 @@
     </table>
   </section>
 
-</section>
+  </page-main>
 
-  <m:ads />
+  <page-side>
+    <m:ads />
+  </page-side>
   <t:include path=_site_footer.html.tm />
 
 <!--
