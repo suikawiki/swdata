@@ -57,7 +57,8 @@ build-local: local/data \
     local/data/char-names.json \
     local/data/countries.json \
     local/data/macroregions.json \
-    local/data/jp-regions-full-flatten.json
+    local/data/jp-regions-full-flatten.json \
+    local/data/sww-pages.json
 
 build-repo: js/components.js css/default.css
 local/data:
@@ -110,8 +111,14 @@ local/data/jp-regions-full-flatten.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-jp-areas/master/data/jp-regions-full-flatten.json
 
 local/data/char-names.json:
-	mkdir -p local
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-chars/master/data/names.json
+
+local/sww-pages-1.jsonl:
+	$(WGET) -O $@ https://gist.githubusercontent.com/wakaba/d708f869625459c1c80068513ba0d083/raw/pages-1.jsonl
+local/sww-pages-2.jsonl:
+	$(WGET) -O $@ https://gist.githubusercontent.com/wakaba/d708f869625459c1c80068513ba0d083/raw/pages-2.jsonl
+local/data/sww-pages.json: local/sww-pages-1.jsonl local/sww-pages-2.jsonl
+	$(PERL) -MJSON::PS -MWeb::URL::Encoding -e 'while(<>){$$v=json_bytes2perl$$_;$$d->{$$v->[1]}=(percent_encode_c$$v->[3]->[0]).q{$$}.$$v->[2]};print perl2json_bytes$$d' local/sww-pages-1.jsonl local/sww-pages-2.jsonl > $@
 
 local/generated:
 	touch $@

@@ -11,6 +11,7 @@ use Web::DateTime::TimeZone;
 use Web::DateTime::Parser;
 use Kyuureki qw(kyuureki_to_gregorian);
 use Number::CJK::Parser;
+use JSON::PS;
 use Wanage::HTTP;
 use Warabe::App;
 use Temma;
@@ -67,6 +68,8 @@ sub static ($$$) {
     $app->http->close_response_body;
   });
 } # static
+
+my $SWWPages = json_bytes2perl $RootPath->child ('local/data/sww-pages.json')->slurp;
 
 sub main ($$$) {
   my ($class, $app) = @_;
@@ -226,6 +229,13 @@ sub main ($$$) {
       # /year/{year}
       my $parser = Web::DateTime::Parser->new;
       $dt = $parser->parse_manakai_year_string ($path->[1]);
+    }
+
+    if (@$path == 2 and $path->[0] eq 'spots') {
+      my $mapped = $SWWPages->{$path->[1]};
+      if (defined $mapped) {
+        return $app->throw_redirect ('https://wiki.suikawiki.org/n/' . $mapped);
+      }
     }
 
     if ($path->[0] eq 'y' or
