@@ -52,6 +52,11 @@
     </aside>
 
     <page-area template=pageSideTemplate></page-area>
+
+    <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
+      <input type=search name=q required placeholder="SuikaWiki 等の記事から検索" data-field=searchText>
+      <button type="submit" data-icon="search" class="lsf-icon">検索</button>
+    </form>
   </page-side>
 </article>
 
@@ -1010,6 +1015,29 @@
       <li><a href=/spots/jp-regions>日本の地域</a>
       <li><a href=https://data.suikawiki.org/lang>言語タグ</a>
     </ul>
+
+    <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
+      <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
+      <button type="submit" data-icon="search" class="lsf-icon">検索</button>
+    </form>
+  </template>
+  <template data-name=page-chars>
+    <t-title>文字</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
+      <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
+      <button type="submit" data-icon="search" class="lsf-icon">検索</button>
+    </form>
+  </template>
+  <template data-name=page-antenna>
+    <t-title>アンテナ</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
+      <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
+      <button type="submit" data-icon="search" class="lsf-icon">検索</button>
+    </form>
   </template>
   <template data-name=page-about>
     <t-title>このウィキについて</t-title>

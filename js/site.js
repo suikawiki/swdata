@@ -447,6 +447,8 @@ SWD.openPage = function (url) {
     args.name = {
       '/': 'page-index',
       '/world': 'page-world',
+      '/chars': 'page-chars',
+      '/antenna': 'page-antenna',
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
       '/e/': 'page-era-index',
@@ -455,8 +457,26 @@ SWD.openPage = function (url) {
       '/license': 'page-license',
     }[path]; // or undefined
 
+    if (args.name === '/') {
+      if (location.hostname === 'world.suikawiki.org') {
+        args.name = 'page-world';
+      } else if (location.hostname === 'chars.suikawiki.org') {
+        args.name = 'page-chars';
+      } else if (location.hostname === 'ja.chars.suikawiki.org') {
+        args.name = 'page-chars';
+      } else if (location.hostname === 'en.chars.suikawiki.org') {
+        args.name = 'page-chars';
+      } else if (location.hostname === 'antenna.suikawiki.org') {
+        args.name = 'page-antenna';
+      }
+    }
+
     if (args.name === 'page-world') {
       args.site = 'world';
+    } else if (args.name === 'page-antenna') {
+      args.site = 'antenna';
+    } else if (args.name === 'page-chars') {
+      args.site = 'chars';
     }
 
     return args;
@@ -465,8 +485,9 @@ SWD.openPage = function (url) {
     await ma.ready;
     ma.swArgs = args;
     var mx = args.mx = ma.swUpdate ();
+    var title = (mx['t-title'] || {textContent: ''}).textContent;
     document.title = [
-      (mx['t-title'] || {textContent: ''}).textContent,
+      title,
       (mx['t-category'] || {textContent: ''}).textContent,
       'SuikaWiki',
     ].filter (_ => _.length).join (' - ');
@@ -501,6 +522,9 @@ SWD.openPage = function (url) {
     });
     document.querySelectorAll ('nav[is=sw-page-breadcrumbs]').forEach (_ => {
       _.value = args.geoObject;
+    });
+    document.querySelectorAll ('.search-form input[data-field=searchText]').forEach (_ => {
+      _.value = title;
     });
 
     var obj = {};
