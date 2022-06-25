@@ -609,6 +609,23 @@ form.input > button {
   padding: .2rem;
 }
 
+.search-form:not([hidden]) {
+  display: flex;
+}
+.search-form {
+  flex-wrap: wrap;
+}
+
+.search-form input {
+  flex: 2;
+  font-size: 120%;
+}
+
+.search-form button {
+  min-width: 5em;
+  font-size: 120%;
+}
+
 .nearby {
   margin: 0;
   text-align: right;

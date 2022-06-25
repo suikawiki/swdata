@@ -9,6 +9,7 @@ use Promised::File;
 use Web::DateTime;
 use Web::DateTime::TimeZone;
 use Web::DateTime::Parser;
+use Web::URL::Encoding;
 use Kyuureki qw(kyuureki_to_gregorian);
 use Number::CJK::Parser;
 use JSON::PS;
@@ -232,9 +233,15 @@ sub main ($$$) {
     }
 
     if (@$path == 2 and $path->[0] eq 'spots') {
+      # //WORLD/spots/{spot_id}
       my $mapped = $SWWPages->{$path->[1]};
       if (defined $mapped) {
         return $app->throw_redirect ('https://wiki.suikawiki.org/n/' . $mapped);
+      }
+
+      if ($path->[1] eq 'search') {
+        # //WORLD/spots/search?q={text}
+        return $app->throw_redirect ('https://wiki.suikawiki.org/n/Wiki%2F%2FSearch?q=' . percent_encode_c ($app->text_param ('q') // ''));
       }
     }
 
@@ -243,6 +250,8 @@ sub main ($$$) {
         $path->[0] eq 'tag' or
         $path->[0] eq 'spots' or
         $path->[0] eq 'world' or
+        $path->[0] eq 'antenna' or
+        $path->[0] eq 'chars' or
         $path->[0] eq '' or
         $path->[0] eq 'about' or
         $path->[0] eq 'license') {
@@ -251,6 +260,8 @@ sub main ($$$) {
       # /tag/...
       # /spots/...
       # /world
+      # /chars
+      # /antenna
       # /about
       # /license
       return static $app, 'text/html; charset=utf-8', 'html/year.html';

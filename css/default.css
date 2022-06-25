@@ -907,6 +907,7 @@ map-area {
   --paco-legend-show-text: "Show legend";
   --paco-legend-hide-text: "Hide legend";
   --paco-map-legend-initial: shown;
+  --paco-map-zoom-animation: auto;
 }
 map-area:lang(en) {
   --paco--gsi-lang: gsi-english-standard;
