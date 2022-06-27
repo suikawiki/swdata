@@ -3741,6 +3741,25 @@ SWD.antennaCategory = async function (t) {
   return SWD._antennaCategories[t]; // or undefined
 }; // SWD.antennaCategory
 
+defineListLoader ('swAntennaDayListLoader', async function (opts) {
+  var cat = this.getAttribute ('loader-category');
+  var day = new Date (this.getAttribute ('loader-day') * 1000);
+  var ymd = day.toISOString ().replace (/T.*$/, '');
+  var ym = ymd.replace (/-[0-9]+$/, '');
+  return fetch ('/data/antenna/' + cat + '/' + ym + '.json').then (res => {
+    if (res.status === 404) return {items: []};
+    if (res.status !== 200) throw res;
+    return res.json ();
+  }).then (json => {
+    var start = new Date (ymd + 'T00:00:00Z') . valueOf () / 1000;
+    var end = new Date (ymd + 'T24:00:00Z') . valueOf () / 1000;
+    var list = json.items.filter (_ => {
+      return start <= _.timestamp && _.timestamp < end;
+    });
+    return {data: list};
+  });
+});
+
 
 defineListLoader ('swRecentListLoader', async function (opts) {
   var key = this.getAttribute ('loader-key');

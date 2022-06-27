@@ -2049,6 +2049,80 @@ sw-antenna-recent-list ol li:first-child {
   font-weight: bolder;
 }
 
+.antenna-day-list list-item:not([hidden]) {
+  display: block;
+}
+.antenna-day-list list-item {
+  margin: .5em;
+  color: black;
+  background: rgb(245, 245, 230);
+}
+.antenna-day-list list-item:nth-child(2n) {
+  color: black;
+  background: rgb(255, 245, 230);
+}
+
+.antenna-day-list list-item a:not([hidden]) {
+  display: block;
+}
+.antenna-day-list list-item a {
+  padding: .5em;
+}
+.antenna-day-list list-item a:not(:focus):not(:active):not(:hover) {
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+}
+
+.antenna-day-list .blog-title {
+  font-weight: bolder;
+  font-style: italic;
+}
+
+.antenna-day-list h1 {
+  margin: 0;
+  margin-bottom: .5em;
+  font-size: 120%;
+  line-height: 1.1;
+}
+.antenna-day-list a:link:not(:focus):not(:active):not(:hover) h1 {
+  color: blue;
+  background: transparent;
+}
+.antenna-day-list a:visited:not(:focus):not(:active):not(:hover) h1 {
+  color: purple;
+  background: transparent;
+}
+
+.antenna-day-list p {
+  margin: 0;
+}
+
+.antenna-day-list h1:empty,
+.antenna-day-list cite:empty,
+.antenna-day-list p:empty {
+  display: none;
+}
+
+.antenna-day-list .author {
+  font-size: 90%;
+  text-align: end;
+}
+
+.antenna-day-list .summary {
+  font-size: 80%;
+  color: var(--gray-color);
+  line-height: 1.1;
+  background-color: var(--gray-background-color);
+}
+
+.antenna-day-list .timestamp {
+  font-size: 90%;
+  text-align: end;
+  color: var(--gray-color);
+  background-color: var(--gray-background-color);
+}
+
 page-main {
   grid-area: main;
   padding: 0.3rem;

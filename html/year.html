@@ -71,7 +71,8 @@
 
 <footer class=site>
   <a href=/ rel=top data-field=siteLabel>Data.SuikaWiki.org</a>
-  <a href=/about>このウィキについて</a>
+  <a href=/about>About</a>
+  <a href=https://wiki.suikawiki.org/n/ContactPage>Contact</a>
   <a href=/license rel=license>&copy;</a>
 </footer>
 
@@ -1085,6 +1086,11 @@
     <t-category><a href=./><bdi data-field=antennaCategory.name></bdi>の新着</a></t-category>
     <t-keyword>アンテナ</t-keyword>
 
+    <list-container loader=swAntennaDayListLoader data-loader-category-field=antennaCategory.type data-loader-day-field=antennaDay class=antenna-day-list template=swAntennaDayListItem data-filled="loader-category loader-day">
+      <list-main></list-main>
+      <list-is-empty>この日の新着はありませんでした。</list-is-empty>
+      <action-status></action-status>
+    </list-container>
   </template>
   <template data-name=page-antenna-program-item>
     <t-title><span data-field=radioProgram.name></span></t-title>
@@ -1607,6 +1613,22 @@
 <template-set name=sw-antenna-recent-list>
   <template>
     <a data-href-template="{urlPrefix}{dayYMD}"><time data-field=day data-format=date></time></a>
+  </template>
+</template-set>
+
+<template-set name=swAntennaDayListItem>
+  <template>
+    <article>
+      <a data-href-field=url>
+        <header>
+          <cite class=blog-title data-field=blog_title></cite>
+          <h1 data-field=title></h1>
+          <p class=author data-field=author></p>
+        </header>
+        <p class=summary data-field=body></p>
+        <p class=timestamp><time data-field=timestamp></time></p>
+      </a>
+    </article>
   </template>
 </template-set>
 
