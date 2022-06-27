@@ -3,7 +3,7 @@
 <link rel=stylesheet href=/css/common.css>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel=license href=/license>
-<script src=/js/components.js async data-export="$fill $getTemplateSet $paco"></script>
+<script src=/js/components.js async data-export="$fill $getTemplateSet $paco" data-time-selector=time></script>
 <script src=/js/site.js async></script>
 <title>SuikaWiki</title>
 
@@ -16,11 +16,15 @@
     <page-area template=pageHeaderTemplate></page-area>
   </header>
 
-  <nav is=sw-page-breadcrumbs>
-  </nav>
+  <nav is=sw-page-breadcrumbs hidden></nav>
 
   <nav class=content-links hidden>
     <span class=lsf-icon data-icon=memo><a data-href-field=swHref>ノート</a></span>
+  </nav>
+
+  <nav is=sw-page-pager hidden>
+    <a data-href-field=prevURL rel=prev>前の日</a>
+    <a data-href-field=nextURL rel=next>次の日</a>
   </nav>
   
   <page-main>
@@ -34,6 +38,11 @@
       </action-status>
     </page-area>
   </page-main>
+    
+  <nav is=sw-page-pager hidden>
+    <a data-href-field=prevURL rel=prev>前の日</a>
+    <a data-href-field=nextURL rel=next>次の日</a>
+  </nav>
 
   <page-side>
     <aside class="ads-rectangle">
@@ -1004,6 +1013,14 @@
       <li><a href=https://world.suikawiki.org/spots/jp-regions>日本の地域</a>
     </ul>
 
+    <list-container loader=swRecentListLoader loader-key=data type=ul template=swRecentListItem>
+      <ul class=menu-list></ul>
+    </list-container>
+    
+    <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
+      <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
+      <button type="submit" data-icon="search" class="lsf-icon">検索</button>
+    </form>
   </template>
   <template data-name=page-world>
     <t-title>世界</t-title>
@@ -1016,29 +1033,65 @@
       <li><a href=https://data.suikawiki.org/lang>言語タグ</a>
     </ul>
 
+    <list-container loader=swRecentListLoader loader-key=world type=ul template=swRecentListItem>
+      <ul class=menu-list></ul>
+    </list-container>
+    
     <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
       <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
       <button type="submit" data-icon="search" class="lsf-icon">検索</button>
     </form>
   </template>
+  
   <template data-name=page-chars>
     <t-title>文字</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
 
+    <list-container loader=swRecentListLoader loader-key=chars type=ul template=swRecentListItem>
+      <ul class=menu-list></ul>
+    </list-container>
+    
     <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
       <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
       <button type="submit" data-icon="search" class="lsf-icon">検索</button>
     </form>
   </template>
+  
   <template data-name=page-antenna>
     <t-title>アンテナ</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
 
+    <list-container loader=swAntennaCategoryListLoader type=ul>
+      <ul class=menu-list></ul>
+      <template>
+        <a data-href-field=urlPrefix data-field=name></a>
+        <sw-antenna-recent-list data-href-field=urlPrefix>
+          <ol></ol>
+        </sw-antenna-recent-list>
+      </template>
+    </list-container>
+
+    <list-container loader=swRecentListLoader loader-key=antenna type=ul template=swRecentListItem>
+      <ul class=menu-list></ul>
+    </list-container>
+    
     <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
       <input type=search name=q required autofocus placeholder="SuikaWiki 等の記事から検索">
       <button type="submit" data-icon="search" class="lsf-icon">検索</button>
     </form>
   </template>
+  <template data-name=page-antenna-item-day>
+    <t-title><time data-format=date data-field=antennaDay></time></t-title>
+    <t-category><a href=./><bdi data-field=antennaCategory.name></bdi>の新着</a></t-category>
+    <t-keyword>アンテナ</t-keyword>
+
+  </template>
+  <template data-name=page-antenna-program-item>
+    <t-title><span data-field=radioProgram.name></span></t-title>
+    <t-category><bdi data-field=antennaCategory.name></bdi></a></t-category>
+
+  </template>
+  
   <template data-name=page-about>
     <t-title>このウィキについて</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
@@ -1160,6 +1213,13 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmPxsvoS9L-Ixcwex0XjMReZCg&#x37;dE4kv4&sensor=false&libraries=places" onload="
       createMapFromSpotList ('map', '[data-spot-lat][data-spot-lon]');
     "></script>
+  </template>
+
+  <template data-name=page-antenna-item-day>
+    <sw-month-calendar data-field=antennaDay></sw-month-calendar>
+    <ul>
+      <li><a data-href-template="/{antennaCategory.type}/">今日</a>
+    </ul>
   </template>
 </template-set>
 
@@ -1538,6 +1598,17 @@
   </template>
 </template-set>
 
+<template-set name=swRecentListItem>
+  <template>
+    <a data-href-field=url data-field=label data-empty=■></a>
+  </template>
+</template-set>
+
+<template-set name=sw-antenna-recent-list>
+  <template>
+    <a data-href-template="{urlPrefix}{dayYMD}"><time data-field=day data-format=date></time></a>
+  </template>
+</template-set>
 
 
 <script>

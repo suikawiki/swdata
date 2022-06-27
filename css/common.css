@@ -22,6 +22,8 @@ html {
   --weight-4-color: white;
   --border-2-color: #f0f0f0;
   --border-4-color: #999;
+  --heading-background-color: transparent;
+  --heading-color: #004000;
   --header-background-color: var(--weight-2-background-color);
   --header-color: var(--header-color);
   --header-cell-padding: .25em;
@@ -34,12 +36,26 @@ html {
   --dialog-color: black;
   --dialog-border-color: gray;
   --dialog-shadow-color: #eee;
+  --flavor-background-color: transparent;
+  --flavor-background-foreground-color: black;
+  --flavor-border-color: #004000;
   --paragraph-margin-block: 1em;
   --site-header-z-index: 1000;
   --data-header-z-index: 1001;
   --floating-z-index: 100000;
   --page-side-width: 300px;
   --site-logo-width: 107px;
+  --timejs-serialization: dtsjp1;
+}
+
+html[data-site=world] {
+  --flavor-border-color: #CCECCC;
+}
+
+html[data-site=antenna] {
+  --flavor-background-color: rgb(255, 215, 215);
+  --flavor-background-foreground-color: black;
+  --flavor-border-color: rgb(255, 215, 215);
 }
 
 svg.defs {
@@ -50,8 +66,8 @@ svg.defs {
 }
 
 hgroup, h1, h2, h3, h4, h5, h6 {
-  background: transparent;
-  color: #004000;
+  color: var(--heading-color);
+  background: var(--heading-background-color);
   font-size: 100%;
 }
 
@@ -89,6 +105,11 @@ table {
 
 table + table {
   margin-top: 1em;
+}
+
+caption {
+  background: var(--heading-background-color);
+  color: var(--heading-color);
 }
 
 colgroup + colgroup {
@@ -430,7 +451,7 @@ section.ksj-data footer {
 .child-spots section h1 {
   display: block;
   margin: 0 0 1em 0;
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--flavor-border-color);
   padding-bottom: 0.1em;
   font-size: 110%;
 }
@@ -593,6 +614,11 @@ a[rel~=bookmark] {
   text-decoration: none;
 }
 
+
+input, textarea, select {
+  border: 1px solid var(--flavor-border-color);
+  padding: .2em;
+}
 
 form.input {
   padding: .2rem;
@@ -1738,6 +1764,64 @@ form[is=sw-calc-form] p {
 }
 
 
+
+sw-month-calendar table {
+  margin: 1em auto;
+  border-collapse: collapse;
+  width: auto;
+}
+
+sw-month-calendar table caption time {
+  font-weight: bolder;
+  padding: .2em;
+}
+
+sw-month-calendar table caption a {
+  padding: .2em;
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
+  min-width: 2em;
+}
+
+sw-month-calendar table caption a:first-child {
+  float: left;
+}
+sw-month-calendar table caption a:last-child {
+  float: right;
+}
+
+sw-month-calendar table tr {
+  border: none;
+}
+
+sw-month-calendar table td {
+  border: none;
+  padding: 0;
+  text-align: center;
+}
+
+sw-month-calendar table td a {
+  display: block;
+  padding: .2em;
+  color: black;
+  text-decoration: none;
+  min-width: 2em;
+}
+
+sw-month-calendar table td:nth-child(1) a:not(:focus):not(:active):not(:hover) {
+  color: red;
+}
+sw-month-calendar table td:nth-child(7) a:not(:focus):not(:active):not(:hover) {
+  color: blue;
+}
+
+sw-month-calendar table tbody .prev-month:not(:focus):not(:active):not(:hover),
+sw-month-calendar table tbody .next-month:not(:focus):not(:active):not(:hover) {
+  opacity: 0.3;
+}
+
+
 .map {
   width: 20em;
   height: 20em;
@@ -1807,9 +1891,11 @@ body {
   grid-template:
       "page-header page-header page-header site-header" 
       "breadcrumbs clinks      side        side"        
+      "pager1      pager1      side        side"        
       "main        main        side        side"        1fr
+      "pager2      pager2      side        side"        
       "footer      footer      footer      footer"      
-    /  1fr 1fr calc(var(--page-side-width) - var(--site-logo-width))
+    /  2fr 1fr calc(var(--page-side-width) - var(--site-logo-width))
                                            var(--site-logo-width);
   --page-header-margin-right: var(--site-logo-width);
 }
@@ -1825,16 +1911,19 @@ header.site {
   grid-area: site-header;
   line-height: 1.0;
   z-index: var(--site-header-z-index);
+  align-self: end;
 }
 
 header.site h1 {
   margin: 0;
+  text-align: end;
 }
 
 header.site h1 a {
   display: block;
   color: inherit;
   text-decoration: none;
+  text-align: start;
 }
 
 body > article:not([hidden]) {
@@ -1849,9 +1938,26 @@ header.page hgroup {
   margin: 0.3rem 0 0 0;
   margin-right: calc(-1 * var(--page-header-margin-right));
   padding: 0.3rem;
+  padding-right: calc(0.3rem + var(--page-header-margin-right));
   border-bottom: 0.2rem solid;
   min-height: 65px;
   line-height: 1.0;
+}
+
+html[data-site=antenna] header.page hgroup {
+  border-bottom: none;
+  padding: 0.5rem;
+  background: var(--flavor-background-color);
+  color: var(--flavor-background-foreground-color);
+}
+
+html[data-site=world] header.page hgroup {
+  border-bottom: #CCECCC solid 0.2em;
+  padding: 0.5rem;
+  background: #8C8;
+  background: -webkit-gradient(linear, left top, right top, from(#8c8), to(#fef));
+  color: #004000;
+  text-shadow: 0.1em 0.1em #C0E0C0;
 }
 
 header.page hgroup h1 {
@@ -1893,6 +1999,54 @@ nav[is=sw-page-breadcrumbs] {
   margin: 0;
   padding: 0.3rem;
   font-size: 80%;
+}
+
+nav[is=sw-page-pager]:not([hidden]) {
+  display: flex;
+}
+nav[is=sw-page-pager] {
+  grid-area: pager1;
+}
+page-main + nav[is=sw-page-pager] {
+  grid-area: pager2;
+}
+
+nav[is=sw-page-pager] > a {
+  flex: 1;
+  padding: .3em;
+  font-size: 150%;
+}
+
+nav[is=sw-page-pager] > a:not(:focus):not(:active):not(:hover) {
+  text-decoration: none;
+}
+
+nav[is=sw-page-pager] a:first-child {
+  text-align: start;
+}
+nav[is=sw-page-pager] a:last-child {
+  text-align: end;
+}
+
+nav[is=sw-page-pager] a:first-child::before {
+  content: "<< ";
+}
+nav[is=sw-page-pager] a:last-child::after {
+  content: " >>";
+}
+
+sw-antenna-recent-list ol {
+  padding: 0;
+}
+
+sw-antenna-recent-list ol li:not([hidden]) {
+  display: inline-block;
+}
+sw-antenna-recent-list ol li {
+  font-size: 90%;
+}
+sw-antenna-recent-list ol li:first-child {
+  font-weight: bolder;
 }
 
 page-main {
