@@ -64,6 +64,8 @@ sub static ($$$) {
   return $file->stat->then (sub {
     $app->http->set_response_last_modified ($_[0]->mtime);
     return $file->read_byte_string;
+  }, sub {
+    return $app->throw_error (404);
   })->then (sub {
     $app->http->send_response_body_as_ref (\($_[0]));
     $app->http->close_response_body;
@@ -204,7 +206,7 @@ sub main ($$$) {
         $dt = $parser->parse_date_string
             (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
                 if defined $d->[0];
-      } elsif ($path->[1] eq 'now') {
+      } elsif ($path->[1] eq 'now' or $path->[1] eq '') {
         $dt = Web::DateTime->new_from_unix_time (time);
       } elsif ($path->[1] =~ /\Ayear:([+-]?[0-9]+)\z/) {
         my $parser = Web::DateTime::Parser->new;
@@ -253,6 +255,9 @@ sub main ($$$) {
         $path->[0] eq 'antenna' or
         $path->[0] eq 'chars' or
         $path->[0] eq '' or
+        $path->[0] eq 'web' or
+        $path->[0] eq 'radio' or
+        $path->[0] eq 'houses' or
         $path->[0] eq 'about' or
         $path->[0] eq 'license') {
       # /e/...
@@ -262,6 +267,9 @@ sub main ($$$) {
       # /world
       # /chars
       # /antenna
+      # /radio
+      # /web
+      # /houses
       # /about
       # /license
       return static $app, 'text/html; charset=utf-8', 'html/year.html';
@@ -329,6 +337,15 @@ sub main ($$$) {
       $path->[1] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {
     # /data/{}.json
     return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1];
+  }
+  
+  if (@$path == 4 and
+      $path->[0] eq 'data' and
+      $path->[1] eq 'antenna' and
+      $path->[2] =~ m{\A[0-9A-Za-z_-]+\z} and
+      $path->[3] =~ m{\A[0-9]{4}-[0-9]{2}\.json\z}) {
+    # /data/antenna/{}/{}.json
+    return static $app, 'application/json; charset=utf-8', 'local/aggregated/'.$path->[2] . '/' . $path->[3];
   }
 
   if (@$path == 2 and

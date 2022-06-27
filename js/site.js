@@ -329,6 +329,7 @@ Object.defineProperty (SWDGeoObject.prototype, 'swURL', {
 });
 
 
+
 SWD.tag = async function (id) {
   var tags = await SWD.tagsByIds ([id]);
   return tags[0]; // or undefined
@@ -444,15 +445,62 @@ SWD.openPage = function (url) {
       }
     }
 
+    // //ANTENNA/{}/{}
+    var m = path.match (/^\/(web|radio|houses)\/([0-9]+)-([0-9]+)-([0-9]+)$/);
+    if (m) {
+      args.name = 'page-antenna-item-day';
+      args.antennaCategory = await SWD.antennaCategory (m[1]);
+      args.antennaDay = Date.UTC (m[2], m[3] - 1, m[4], 0, 0, 0) / 1000;
+      args.site = 'antenna';
+      return args;
+    }
+    // //ANTENNA/{}/
+    var m = path.match (/^\/(web|radio|houses)\/$/);
+    if (m) {
+      args.name = 'page-antenna-item-day';
+      args.antennaCategory = await SWD.antennaCategory (m[1]);
+      var d = new Date;
+      args.antennaDay = Date.UTC (d.getFullYear (), d.getMonth (), d.getDate (), 0, 0, 0) / 1000;
+      args.site = 'antenna';
+      return args;
+    }
+
+    var m = path.match (/^\/radio\/p\/([A-Za-z0-9_-]+)$/);
+    if (m) {
+      args.radioProgram = await SWD.radioProgram (m[1]);
+      if (args.radioProgram) {
+        args.name = 'page-antenna-radio-program-item';
+        args.site = 'antenna';
+        return args;
+      }
+    }
+
     args.name = {
-      '/': 'page-index',
-      '/world': 'page-world',
-      '/chars': 'page-chars',
-      '/antenna': 'page-antenna',
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
       '/e/': 'page-era-index',
       '/e/first': 'page-era-first',
+    }[path]; // or undefined
+    if (args.name) return args;
+    
+    if (path === '/world') {
+      args.name = 'page-world';
+      args.site = 'world';
+      return args;
+    }
+    if (path === '/chars') {
+      args.name = 'page-chars';
+      args.site = 'chars';
+      return args;
+    }
+    if (path === '/antenna') {
+      args.name = 'page-antenna';
+      args.site = 'antenna';
+      return args;
+    }
+
+    args.name = {
+      '/': 'page-index',
       '/about': 'page-about',
       '/license': 'page-license',
     }[path]; // or undefined
@@ -479,6 +527,16 @@ SWD.openPage = function (url) {
       args.site = 'chars';
     }
 
+    if (!args.site) {
+      args.site = {
+        'antenna.suikawiki.org': 'antenna',
+        'chars.suikawiki.org': 'chars',
+        'en.chars.suikawiki.org': 'chars',
+        'ja.chars.suikawiki.org': 'chars',
+        'world.suikawiki.org': 'world',
+      }[location.hostname];
+    }
+
     return args;
   }).then (async args => {
     var ma = document.querySelector ('page-area[template=pageMainTemplate]');
@@ -497,18 +555,22 @@ SWD.openPage = function (url) {
         //
       } else if (t === 'pageHeaderTemplate') {
         _.swArgs = args;
-        _.swUpdate ();
-        _.querySelectorAll ('[data-html]').forEach (_ => {
-          var k = _.getAttribute ('data-html');
-          if (mx[k]) {
-            while (mx[k].firstChild) {
-              _.appendChild (mx[k].firstChild);
+        _.ready.then (() => {
+          _.swUpdate ();
+          _.querySelectorAll ('[data-html]').forEach (_ => {
+            var k = _.getAttribute ('data-html');
+            if (mx[k]) {
+              while (mx[k].firstChild) {
+                _.appendChild (mx[k].firstChild);
+              }
             }
-          }
+          });
         });
       } else {
-        _.swArgs = args;
-        _.swUpdate ();
+        _.ready.then (() => {
+          _.swArgs = args;
+          _.swUpdate ();
+        });
       }
     });
     document.body.classList.toggle ('has-large', !!args.hasLargeContent);
@@ -523,8 +585,11 @@ SWD.openPage = function (url) {
     document.querySelectorAll ('nav[is=sw-page-breadcrumbs]').forEach (_ => {
       _.value = args.geoObject;
     });
+    document.querySelectorAll ('nav[is=sw-page-pager]').forEach (_ => {
+      _.value = args;
+    });
     document.querySelectorAll ('.search-form input[data-field=searchText]').forEach (_ => {
-      _.value = title;
+      _.value = (mx['t-keyword'] || {textContent: title}).textContent;
     });
 
     var obj = {};
@@ -538,6 +603,7 @@ SWD.openPage = function (url) {
     document.querySelectorAll ('header.site, footer.site').forEach (_ => {
       $fill (_, obj);
     });
+    document.documentElement.setAttribute ('data-site', args.site || 'data');
   });
 }; // SWD.openPage
 
@@ -671,6 +737,40 @@ defineElement ({
     }, // swUpdate
   },
 }); // <nav is=sw-page-breadcrumbs>
+
+defineElement ({
+  name: 'nav',
+  is: 'sw-page-pager',
+  //fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: () => v,
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      setTimeout (() => this.swUpdate (), 0);
+    }, // pcInit
+    swUpdate: async function () {
+      var args = this.value || {};
+      var day = args.antennaDay;
+      this.hidden = ! day;
+      if (!day) return;
+
+      var prev = new Date (day*1000 - 24*60*60*1000);
+      var next = new Date (day*1000 + 24*60*60*1000);
+
+      var prevURL = prev.toISOString ().replace (/T.*$/, '');
+      var nextURL = next.toISOString ().replace (/T.*$/, '');
+
+      $fill (this, {prevURL, nextURL});
+    }, // swUpdate
+  },
+}); // <nav is=sw-page-pager>
+      
 
 defineElement ({
   name: 'sw-if-defined',
@@ -1028,6 +1128,75 @@ defineElement ({
 }); // <sw-data-era>
 
 defineElement ({
+  name: 'sw-month-calendar',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: () => v,
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: function () {
+      var v = this.value;
+      if (v == null) return;
+
+      var thisDay = new Date (v * 1000);
+      var wday = (thisDay.getUTCDay () - thisDay.getUTCDate () + 1 + 7*5) % 7;
+      var last = new Date (Date.UTC (thisDay.getUTCFullYear (), thisDay.getUTCMonth () + 1, 0, 0, 0, 0)).getUTCDate ();
+      var month = [[]];
+      for (var i = 0; i < wday; i++) {
+        month[0][i] = ['prev-month', i - wday + 1];
+      }
+      for (var i = 1; i <= last; i++) {
+        if (month[0].length === 7) month.unshift ([]);
+        month[0].push (['', i]);
+      }
+      for (var i = month[0].length; i < 7; i++) {
+        month[0].push (['next-month', month[0][0][1] + i]);
+      }
+
+      var link = (d, label, c) => {
+        var day = new Date (Date.UTC (thisDay.getUTCFullYear (), thisDay.getUTCMonth (), d, 0, 0, 0));
+        var a = document.createElement ('a');
+        if (c) a.className = c;
+        a.href = day.toISOString ().replace (/T.*$/, '');
+        a.textContent = label || day.getUTCDate ();
+        return a;
+      };
+
+      this.textContent = '';
+      var table = document.createElement ('table');
+      var cap = document.createElement ('caption');
+      cap.appendChild (link (0, '<', 'prev-month'));
+      var time = document.createElement ('time');
+      time.textContent = thisDay.toISOString ().replace (/-[0-9]+T.*$/, '')
+      cap.appendChild (time);
+      cap.appendChild (link (last+1, '>', 'next-month'));
+      table.appendChild (cap);
+      var tbody = document.createElement ('tbody');
+      month.reverse ().forEach (w => {
+        var tr = document.createElement ('tr');
+        w.forEach (_ => {
+          var td = document.createElement ('td');
+          td.appendChild (link (_[1], null, _[0]));
+          tr.appendChild (td);
+        });
+        tbody.appendChild (tr);
+      });
+      table.appendChild (tbody);
+      this.appendChild (table);
+      
+    }, // swUpdate
+  },
+}); // <sw-month-calendar>
+
+defineElement ({
   name: 'sw-algorithm',
   props: {
     pcInit: function () {
@@ -1296,7 +1465,6 @@ defineListLoader ('swGOPropListLoader', async function (opts) {
       if (ct === 'jp-prefs') {
         var x = await SWD.geoObjectList ('jp-regions');
         x = x.filter (_ => _.getPropValue ('type') === 'pref');
-        console.log(x);
         x = x.sort ((a, b) => a.getPropValue ('code') - b.getPropValue ('code'));
         list = list.concat (x);
       }
@@ -3069,7 +3237,6 @@ defineElement ({
             layer: 'era-transition-sequence',
           });
         }
-        console.log (seq);
       } // sequences
 
       svg.setAttribute ('width', nextColumn);
@@ -3521,6 +3688,99 @@ function createMapFromSpotList (mapId, selectors, onselect) {
     }) (spots[i]);
   }
 } // createMapFromSpotList
+
+
+
+SWD._antennaCategories = {};
+[
+  {type: 'web', name: 'Web', urlPrefix: '/web/'},
+  {type: 'houses', name: '住居', urlPrefix: '/houses/'},
+  {type: 'radio', name: 'アニメ関連番組', urlPrefix: '/radio/'},
+  {type: 'date', name: '日', urlPrefix: 'https://data.suikawiki.org/datetime/'},
+].map (_ => SWD._antennaCategories[_.type] = _);
+
+SWD.antennaCategoryList = async function () {
+  return SWD._antennaCategories;
+}; // SWD.antennaCategoryList
+
+defineListLoader ('swAntennaCategoryListLoader', async function (opts) {
+  var list = await SWD.antennaCategoryList ();
+  return {data: list};
+});
+
+defineElement ({
+  name: 'sw-antenna-recent-list',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var ts = await $getTemplateSet (this.localName);
+      var list = this.querySelector ('ol');
+      list.textContent = '';
+      
+      var urlPrefix = this.getAttribute ('href');
+      var d = new Date () . valueOf ();
+      for (var i = 0; i < 10; i++) {
+        var item = {
+          urlPrefix,
+          dayYMD: new Date (d) . toISOString () . replace (/T.*/, ''),
+        };
+        item.day = new Date (item.dayYMD + 'T00:00:00Z').valueOf () / 1000;
+
+        var e = ts.createFromTemplate ('li', item);
+        list.appendChild (e);
+
+        d -= 24*60*60*1000;
+      }
+    }, // swUpdate
+  },
+}); // <sw-antenna-recent-list>
+
+SWD.antennaCategory = async function (t) {
+  return SWD._antennaCategories[t]; // or undefined
+}; // SWD.antennaCategory
+
+defineListLoader ('swAntennaDayListLoader', async function (opts) {
+  var cat = this.getAttribute ('loader-category');
+  var day = new Date (this.getAttribute ('loader-day') * 1000);
+  var ymd = day.toISOString ().replace (/T.*$/, '');
+  var ym = ymd.replace (/-[0-9]+$/, '');
+  return fetch ('/data/antenna/' + cat + '/' + ym + '.json').then (res => {
+    if (res.status === 404) return {items: []};
+    if (res.status !== 200) throw res;
+    return res.json ();
+  }).then (json => {
+    var start = new Date (ymd + 'T00:00:00Z') . valueOf () / 1000;
+    var end = new Date (ymd + 'T24:00:00Z') . valueOf () / 1000;
+    var list = json.items.filter (_ => {
+      return start <= _.timestamp && _.timestamp < end;
+    });
+    return {data: list};
+  });
+});
+
+
+defineListLoader ('swRecentListLoader', async function (opts) {
+  var key = this.getAttribute ('loader-key');
+  return fetch ('https://suikawiki.org/feed' + (key ? '/' + key : ''), {
+    mode: 'cors',
+  }).then (res => {
+    if (res.status !== 200) throw res;
+    return res.text ();
+  }).then (text => {
+    var div = document.createElement ('div');
+    div.innerHTML = text;
+
+    var list = Array.prototype.slice.call (div.querySelectorAll ('entry'), 0, 20).map (e => {
+      var url = e.querySelector ('link[href]:not([rel])').getAttribute ('href');
+      var label = e.querySelector ('title').textContent;
+      return {url, label};
+    });
+    
+    return {data: list};
+  });
+});
 
 
 defineElement ({
