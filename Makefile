@@ -64,8 +64,11 @@ build-repo: js/components.js css/default.css
 local/data:
 	mkdir -p local/data
 
-js/components.js: local/page-components.js local/time.js intermediate/md5.js
-	cat local/page-components.js local/time.js intermediate/md5.js > $@
+js/components.js: local/page-components.js local/time.js intermediate/md5.js \
+    local/unit-number.js
+	cat local/page-components.js local/time.js > $@
+	cat local/unit-number.js >> $@
+	cat intermediate/md5.js >> $@
 
 local/page-components.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/src/page-components.js
@@ -73,6 +76,8 @@ css/default.css: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/css/default.css
 local/time.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/timejs/master/src/time.js
+local/unit-number.js: local/generated
+	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-unit-number/master/src/unit-number.js
 
 intermediate/md5.js:
 	$(WGET) -O $@ https://raw.githubusercontent.com/blueimp/JavaScript-MD5/master/js/md5.js

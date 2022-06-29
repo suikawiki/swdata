@@ -322,9 +322,9 @@ Object.defineProperty (SWDGeoObject.prototype, 'lon', {
   },
 });
 
-Object.defineProperty (SWDGeoObject.prototype, 'swURL', {
+Object.defineProperty (SWDGeoObject.prototype, 'swName', {
   get: function () {
-    return 'https://wiki.suikawiki.org/n/' + encodeURIComponent (this.getPropValue ('name'));
+    return this.getPropValue ('name');
   },
 });
 
@@ -460,7 +460,7 @@ SWD.openPage = function (url) {
       args.name = 'page-antenna-item-day';
       args.antennaCategory = await SWD.antennaCategory (m[1]);
       var d = new Date;
-      args.antennaDay = Date.UTC (d.getFullYear (), d.getMonth (), d.getDate (), 0, 0, 0) / 1000;
+      args.antennaDay = Date.UTC (d.getFullYear (), d.getMonth (), d.getDate () - 1, 0, 0, 0) / 1000;
       args.site = 'antenna';
       return args;
     }
@@ -468,6 +468,7 @@ SWD.openPage = function (url) {
     var m = path.match (/^\/radio\/p\/([A-Za-z0-9_-]+)$/);
     if (m) {
       args.radioProgram = await SWD.radioProgram (m[1]);
+      args.antennaCategory = await SWD.antennaCategory ('radio');
       if (args.radioProgram) {
         args.name = 'page-antenna-radio-program-item';
         args.site = 'antenna';
@@ -576,7 +577,7 @@ SWD.openPage = function (url) {
     document.body.classList.toggle ('has-large', !!args.hasLargeContent);
 
     var obj = {};
-    var x = mx['t-sw'] ? mx['t-sw'].textContent : '';
+    var x = mx['t-sw'] ? 'https://wiki.suikawiki.org/n/' + encodeURIComponent (mx['t-sw'].textContent) : '';
     if (x) obj.swHref = x;
     document.querySelectorAll ('.content-links').forEach (_ => {
       _.hidden = ! obj.swHref;
@@ -3694,7 +3695,7 @@ function createMapFromSpotList (mapId, selectors, onselect) {
 SWD._antennaCategories = {};
 [
   {type: 'web', name: 'Web', urlPrefix: '/web/'},
-  {type: 'houses', name: '住居', urlPrefix: '/houses/'},
+  {type: 'houses', name: '住居', urlPrefix: '/houses/', noOld: true},
   {type: 'radio', name: 'アニメ関連番組', urlPrefix: '/radio/'},
   {type: 'date', name: '日', urlPrefix: 'https://data.suikawiki.org/datetime/'},
 ].map (_ => SWD._antennaCategories[_.type] = _);
@@ -3743,7 +3744,12 @@ SWD.antennaCategory = async function (t) {
 
 defineListLoader ('swAntennaDayListLoader', async function (opts) {
   var cat = this.getAttribute ('loader-category');
-  var day = new Date (this.getAttribute ('loader-day') * 1000);
+  var dv = this.getAttribute ('loader-day') * 1000;
+  var day = new Date (dv);
+  var c = await SWD.antennaCategory (cat);
+  if (c.noOld && (new Date).valueOf () - dv > 100*24*60*60*1000) {
+    return {data: []};
+  }
   var ymd = day.toISOString ().replace (/T.*$/, '');
   var ym = ymd.replace (/-[0-9]+$/, '');
   return fetch ('/data/antenna/' + cat + '/' + ym + '.json').then (res => {
@@ -3756,9 +3762,60 @@ defineListLoader ('swAntennaDayListLoader', async function (opts) {
     var list = json.items.filter (_ => {
       return start <= _.timestamp && _.timestamp < end;
     });
+    list.forEach (_ => {
+      if (!_.blog_title) delete _.blog_title;
+      if (!_.title && _.body) {
+        _.title = _.body.substring (0, 60);
+      }
+      if (!_.title) _.title = _.blog_title;
+      _.authors = [_.author].concat (_.casts || []).filter (_ => _ && _.length);
+      _.blogLinkURL = _.program_key ? '/radio/p/' + _.program_key : _.url;
+    });
     return {data: list};
   });
 });
+
+defineElement ({
+  name: 'sw-keyword-list',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: function () {
+      (this.value || []).forEach (_ => {
+        this.appendChild (document.createTextNode (' '));
+        var a = this.appendChild (document.createElement ('a'));
+        a.textContent = _;
+        a.href = 'https://wiki.suikawiki.org/n/' + encodeURIComponent (_);
+      });
+    }, // swUpdate
+  },
+}); // <sw-keyword-list>
+
+defineElement ({
+  name: 'sw-hashtag-list',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: function () {
+      (this.value || []).forEach (_ => {
+        this.appendChild (document.createTextNode (' '));
+        var a = this.appendChild (document.createElement ('a'));
+        a.textContent = '#' + _;
+        a.href = 'https://twitter.com/hashtag/' + encodeURIComponent (_);
+      });
+    }, // swUpdate
+  },
+}); // <sw-hashtag-list>
+
+SWD.radioProgram = async function (key) {
+  var programs = await SWD.data ('antenna/radio/programs.json');
+  return programs[key]; // or undefined
+}; // SWD.radioProgram
+
 
 
 defineListLoader ('swRecentListLoader', async function (opts) {
