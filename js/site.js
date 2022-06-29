@@ -506,7 +506,7 @@ SWD.openPage = function (url) {
       '/license': 'page-license',
     }[path]; // or undefined
 
-    if (args.name === '/') {
+    if (path === '/') {
       if (location.hostname === 'world.suikawiki.org') {
         args.name = 'page-world';
       } else if (location.hostname === 'chars.suikawiki.org') {
@@ -518,14 +518,6 @@ SWD.openPage = function (url) {
       } else if (location.hostname === 'antenna.suikawiki.org') {
         args.name = 'page-antenna';
       }
-    }
-
-    if (args.name === 'page-world') {
-      args.site = 'world';
-    } else if (args.name === 'page-antenna') {
-      args.site = 'antenna';
-    } else if (args.name === 'page-chars') {
-      args.site = 'chars';
     }
 
     if (!args.site) {
