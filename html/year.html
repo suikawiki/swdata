@@ -781,7 +781,7 @@
 
   <template data-name=page-geoobject-item-item>
     <t-title><span data-field=geoObject.name></span> - <span data-field=geoObject.goDef.name></span></t-title>
-    <t-sw data-field=geoObject.swURL></t-sw>
+    <t-sw data-field=geoObject.swName></t-sw>
     
     <!-- XXX -->
     <section class="summary wp-abstract" hidden>
@@ -1092,10 +1092,134 @@
       <action-status></action-status>
     </list-container>
   </template>
-  <template data-name=page-antenna-program-item>
-    <t-title><span data-field=radioProgram.name></span></t-title>
+  <template data-name=page-antenna-radio-program-item>
+    <t-title><span data-field=radioProgram.title></span></t-title>
     <t-category><bdi data-field=antennaCategory.name></bdi></a></t-category>
+    <t-sw data-field=radioProgram.title></t-sw>
+    <t-keyword data-field=radioProgram.title></t-keyword>
+    
+    <sw-keyword-list class=tags data-field=radioProgram.keywords></sw-keyword-list>
 
+    <sw-if-defined data-field=radioProgram.desc>
+      <section class=summary>
+        <h1>番組概要</h1>
+        
+        <blockquote>
+          <p data-field=radioProgram.desc>
+        </blockquote>
+      </section>
+    </sw-if-defined>
+
+    <table class=program-data>
+      <tbody>
+        <tr>
+          <th>Web サイト
+          <td>
+            <sw-if-defined data-field=radioProgram.url>
+              <a data-href-field=radioProgram.url>公式サイト</a>
+            </sw-if-defined>
+            <sw-if-defined data-field=radioProgram.nicoch_url>
+              <a data-href-field=radioProgram.nicoch_url>ニコニコチャンネル</a>
+            </sw-if-defined>
+            <sw-if-defined data-field=radioProgram.twitter_screen_name>
+              <a data-href-template="https://twitter.com/{radioProgram.twitter_screen_name}">Twitter</a>
+            </sw-if-defined>
+        <tr>
+          <th>出演者・スタッフ
+          <td>
+            <sw-if-defined data-field=radioProgram.casts>
+              出演者:
+              <sw-keyword-list data-field=radioProgram.casts></sw-keyword-list>
+            </sw-if-defined>
+            <sw-if-defined data-field=radioProgram.former_casts>
+              旧出演者:
+              <sw-keyword-list data-field=radioProgram.former_casts></sw-keyword-list>
+            </sw-if-defined>
+            <sw-if-defined data-field=radioProgram.writers>
+              作家:
+              <sw-keyword-list data-field=radioProgram.writers></sw-keyword-list>
+            </sw-if-defined>
+            <sw-if-defined data-field=radioProgram.makers>
+              制作:
+              <sw-keyword-list data-field=radioProgram.makers></sw-keyword-list>
+            </sw-if-defined>
+        <tr>
+          <th>関連作品
+          <td>
+            <sw-keyword-list data-field=radioProgram.animes></sw-keyword-list>
+            <sw-keyword-list data-field=radioProgram.games></sw-keyword-list>
+        <tr>
+          <th>検索
+          <td>
+            <a data-href-template="https://wiki.suikawiki.org/n/{url:radioProgram.title}?q={url:radioProgram.title}"><cite>SuikaWiki</cite></a>
+            <a data-href-template="https://ja.wikipedia.org/wiki/{url:radioProgram.title}"><cite>Wikipedia</cite></a>
+            <a data-href-template="https://dic.nicovideo.jp/a/{url:radioProgram.title}"><cite>ニコニコ大百科</cite></a>
+            <a data-href-template="https://www.google.com/search?ie=UTF-8&q={url:radioProgram.title}">Google</a>
+            <a data-href-template="https://twitter.com/search?q={url:radioProgram.title}">Twitter</a>
+            <sw-hashtag-list data-field=radioProgram.hashtags></sw-hashtag-list>
+    </table>
+
+    <!--<section class=episodes>
+      <h1>回</h1>
+
+      <table class=show-list>
+        <tbody>
+          <tr class=show>
+      </table>
+    </section>-->
+
+    <!--<section class=amazon data-data-q-field=radioProgram.amazon_keyword data-filled=data-q hidden>
+      <h1>関連商品</h1>
+    </section>
+
+  <script>
+    Array.prototype.forEach.call (document.querySelectorAll ('.amazon[data-q]'), function (aContainer) {
+      var xhr = new XMLHttpRequest;
+      xhr.open ('GET', 'https://asw.suikawiki.org/amazon/items?q=' + encodeURIComponent (aContainer.getAttribute ('data-q')), true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            var json = JSON.parse (xhr.responseText);
+            if (!json.items.length) return;
+            var df = document.createDocumentFragment ();
+            json.items.forEach (function (item) {
+              var fig = document.createElement ('span');
+              fig.className = 'amazon-item';
+              fig.setAttribute ('onclick', ' querySelector ("a").click () ');
+              fig.innerHTML = '<span><img src alt></span> <a href><cite class=title></cite></a> <span class=authors></span>';
+              fig.querySelector ('.title').textContent = item.Title;
+              fig.querySelector ('a').href = item.short_url;
+              fig.querySelector ('img').src = item.SmallImage || '';
+              var authorContainer = fig.querySelector ('.authors');
+              [item.Artist, item.Actor, item.Author, item.Director, item.Creator, item.Manufacturer].forEach (function (list) {
+                (list || []).forEach (function (x) {
+                  var a = document.createElement ('a');
+                  a.href = 'https://wiki.suikawiki.org/n/' + encodeURIComponent (x);
+                  a.textContent = x;
+                  authorContainer.appendChild (a);
+                });
+              });
+              df.appendChild (fig);
+            });
+            aContainer.appendChild (df);
+            aContainer.hidden = false;
+
+            var footer = document.querySelector ('footer') || document.body;
+            var amazon = footer.querySelector ('.amazon');
+            if (!amazon) {
+              amazon = document.createElement ('span');
+              amazon.className = 'amazon';
+              footer.appendChild (amazon);
+            }
+            amazon.textContent = json.credit;
+            amazon.hidden = false;
+          }
+        }
+      };
+      xhr.send (null);
+    });
+  </script>
+    -->
   </template>
   
   <template data-name=page-about>
@@ -1619,15 +1743,36 @@
 <template-set name=swAntennaDayListItem>
   <template>
     <article>
-      <a data-href-field=url>
-        <header>
-          <cite class=blog-title data-field=blog_title></cite>
-          <h1 data-field=title></h1>
-          <p class=author data-field=author></p>
-        </header>
-        <p class=summary data-field=body></p>
+      <header>
+        <sw-if-defined data-field=blog_title>
+          <a data-href-field=blogLinkURL class=blog-title data-field=blog_title></a>
+        </sw-if-defined>
+        <h1><a data-href-field=url data-field=title></a></h1>
+        <p class=props>
+          <sw-if-defined data-field=is_paywalled>有料</sw-if-defined>
+          <sw-if-defined data-field=is_live>生配信</sw-if-defined>
+          <enum-value data-field=media_type
+              label-audio=音声
+              label-video=動画
+              label-undefined
+          ></enum-value>
+          <sw-if-defined data-field=duration>
+            <unit-number type=duration data-field=duration></unit-number>
+          </sw-if-defined>
+        <p class=authors><sw-keyword-list data-field=authors></sw-keyword-list></p>
+      </header>
+      <blockquote class=summary>
+        <p data-field=body></p>
+      </blockquote>
+      <footer>
         <p class=timestamp><time data-field=timestamp></time></p>
-      </a>
+        <sw-if-defined data-field=expires>
+          <p class=timestamp>期限: <time data-field=expires></time></p>
+        </sw-if-defined>
+        <sw-if-defined data-field=station_name>
+          <p class=platform data-field=station_name></p>
+        </sw-if-defined>
+      </footer>
     </article>
   </template>
 </template-set>

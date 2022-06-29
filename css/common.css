@@ -583,20 +583,32 @@ a[rel~=bookmark] {
 }
 
 
-.summary:not([hidden]) {
+section.summary:not([hidden]) {
   display: block;
 }
+section.summary {
+  margin: 1em;
+}
 
-.summary blockquote {
+section.summary h1 {
+  margin: 0;
+  border: none;
+  padding: 0;
+  font-size: 100%;
+  line-height: 1.2;
+}
+
+section.summary blockquote {
   margin: 0;
 }
 
-.summary p {
+section.summary p {
+  margin: 0;
   text-indent: 1em;
-  margin: 0;
+  line-height: 1.2;
 }
 
-.summary cite {
+section.summary cite {
   display: block;
   font-size: 70%;
   color: #ccc;
@@ -605,11 +617,11 @@ a[rel~=bookmark] {
   font-style: italic;
 }
 
-.summary cite::before {
+section.summary cite::before {
   content: "\2015\2015  ";
 }
 
-.summary cite a {
+section.summary cite a {
   color: inherit;
   text-decoration: none;
 }
@@ -2045,7 +2057,7 @@ sw-antenna-recent-list ol li:not([hidden]) {
 sw-antenna-recent-list ol li {
   font-size: 90%;
 }
-sw-antenna-recent-list ol li:first-child {
+sw-antenna-recent-list ol li:nth-child(2) {
   font-weight: bolder;
 }
 
@@ -2062,34 +2074,56 @@ sw-antenna-recent-list ol li:first-child {
   background: rgb(255, 245, 230);
 }
 
-.antenna-day-list list-item a:not([hidden]) {
+.antenna-day-list list-item a.blog-title:not([hidden]),
+.antenna-day-list list-item h1 a:not([hidden]) {
   display: block;
 }
-.antenna-day-list list-item a {
+.antenna-day-list list-item a.blog-title,
+.antenna-day-list list-item h1 a {
   padding: .5em;
 }
-.antenna-day-list list-item a:not(:focus):not(:active):not(:hover) {
+.antenna-day-list list-item a.blog-title:not(:focus):not(:active):not(:hover),
+.antenna-day-list list-item h1 a:not(:focus):not(:active):not(:hover) {
   text-decoration: none;
   color: inherit;
   background: transparent;
 }
 
+.antenna-day-list header:not([hidden]) {
+  display: grid;
+}
+.antenna-day-list header {
+  grid-template: "blog-title  props"
+                 "entry-title props"
+                 "authors     authors" /
+                  1fr         auto;
+}
+
 .antenna-day-list .blog-title {
+  grid-area: blog-title;
+  padding: 6px;
+  line-height: 1.1;
   font-weight: bolder;
   font-style: italic;
 }
 
 .antenna-day-list h1 {
+  grid-area: entry-title;
   margin: 0;
-  margin-bottom: .5em;
+  padding: 0;
   font-size: 120%;
   line-height: 1.1;
 }
-.antenna-day-list a:link:not(:focus):not(:active):not(:hover) h1 {
+
+.antenna-day-list h1 a {
+  margin: 0;
+  padding: 6px;
+}
+.antenna-day-list h1 a:link:not(:focus):not(:active):not(:hover){
   color: blue;
   background: transparent;
 }
-.antenna-day-list a:visited:not(:focus):not(:active):not(:hover) h1 {
+.antenna-day-list h1 a:visited:not(:focus):not(:active):not(:hover) {
   color: purple;
   background: transparent;
 }
@@ -2098,29 +2132,44 @@ sw-antenna-recent-list ol li:first-child {
   margin: 0;
 }
 
-.antenna-day-list h1:empty,
-.antenna-day-list cite:empty,
-.antenna-day-list p:empty {
-  display: none;
+.antenna-day-list .props {
+  grid-area: props;
+  padding: 6px;
 }
 
-.antenna-day-list .author {
+.antenna-day-list .authors {
+  grid-area: authors;
+  padding: 6px;
   font-size: 90%;
   text-align: end;
 }
 
 .antenna-day-list .summary {
+  margin: 0;
+  padding: 6px;
   font-size: 80%;
   color: var(--gray-color);
   line-height: 1.1;
   background-color: var(--gray-background-color);
 }
 
-.antenna-day-list .timestamp {
+.antenna-day-list .summary p {
+  text-indent: 0;
+}
+
+.antenna-day-list footer {
   font-size: 90%;
   text-align: end;
   color: var(--gray-color);
   background-color: var(--gray-background-color);
+  text-align: end;
+}
+
+.antenna-day-list footer p:not([hidden]) {
+  display: inline-block;
+}
+.antenna-day-list footer p {
+  margin: 0 .5em;
 }
 
 page-main {

@@ -346,6 +346,13 @@ sub main ($$$) {
       $path->[3] =~ m{\A[0-9]{4}-[0-9]{2}\.json\z}) {
     # /data/antenna/{}/{}.json
     return static $app, 'application/json; charset=utf-8', 'local/aggregated/'.$path->[2] . '/' . $path->[3];
+  } elsif (@$path == 4 and
+           $path->[0] eq 'data' and
+           $path->[1] eq 'antenna' and
+           $path->[2] eq 'radio' and
+           $path->[3] eq 'programs.json') {
+    # /data/antenna/radio/programs.json
+    return static $app, 'application/json; charset=utf-8', 'local/aggregated/'.$path->[2] . '/' . $path->[3];
   }
 
   if (@$path == 2 and
