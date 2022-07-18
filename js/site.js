@@ -1895,7 +1895,7 @@ defineElement ({
                   }
                 });
                 if (matched) {
-                  fgout.kr_hangul = fgout.en = fgout.la =
+                  fgout.kr_hangul = fgout.en =
                   fgout.others = fgout.expandeds = [];
                 } else {
                   fgout = null;
@@ -1947,7 +1947,7 @@ defineElement ({
           s.textContent = '省略形';
           li.appendChild (s);
         }
-        
+
         var out = readFGs (label.form_groups, {});
         var dl = document.createElement ('dl');
         [
