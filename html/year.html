@@ -45,21 +45,7 @@
   </nav>
 
   <page-side>
-    <aside class="ads-rectangle">
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6943204637055835" crossorigin="anonymous"></script>
-    <!-- side 2 -->
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-6943204637055835"
-           data-ad-slot="3970136925"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
-      <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
-    </aside>
-
+    <page-area template=pageSideAdsTemplate></page-area>
     <page-area template=pageSideTemplate></page-area>
 
     <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
@@ -68,6 +54,8 @@
     </form>
   </page-side>
 </article>
+
+<page-area template=pageFootAdsTemplate class=ads-footer></page-area>
 
 <footer class=site>
   <a href=/ rel=top data-field=siteLabel>Data.SuikaWiki.org</a>
@@ -679,7 +667,7 @@
     <t-title><bdi data-field=era.name></bdi>
     [<code>y~<span data-field=era.id></span></code>] からの変遷</t-title>
     <t-category><a href=/e/>紀年法</a></t-category>
-
+    
     <p><a href=./>紀年法の情報</a> /
     <a href=graph class=active>その後の変遷</a> /
     <a href=kanshi>干支年</a></p>
@@ -725,7 +713,8 @@
   
   <template data-name=page-tag-item-index>
     <t-title>#<bdi data-field=tag.label></bdi></t-title>
-
+    <t-keyword data-field=tag.label></t-keyword>
+    
     <p><a href=./ class=active>紀年法の一覧</a> / <a href=graph>変遷</a></p>
 
     <section>
@@ -757,6 +746,7 @@
   <template data-name=page-tag-item-graph>
     <t-title>#<bdi data-field=tag.label></bdi> の紀年法の変遷</t-title>
     <t-category><a href=/e/>紀年法</a></t-category>
+    <t-keyword data-field=tag.label></t-keyword>
     
     <p><a href=./>紀年法の一覧</a> / <a href=graph class=active>変遷</a></p>
 
@@ -1352,6 +1342,37 @@
     </ul>
   </template>
 </template-set>
+
+<template-set name=pageSideAdsTemplate templateselector="selectAdsTemplate">
+  <template></template>
+  <template data-name=primary>
+    <aside class="ads-rectangle">
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6943204637055835" crossorigin="anonymous"></script>
+    <!-- side 2 -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-6943204637055835"
+           data-ad-slot="3970136925"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+      <p><script src="https://www.gstatic.com/xads/publisher_badge/contributor_badge.js" data-width="300" data-height="62" data-theme="white" data-pub-name="SuikaWiki" data-pub-id="ca-pub-6943204637055835"></script>
+    </aside>
+  </template>
+</template-set>
+
+<template-set name=pageFootAdsTemplate templateselector="selectAdsTemplate">
+  <template>
+    <aside>
+      <div class="admax-ads" data-admax-id="0c4a08687befb010aac87e9ece18dc2e" style="display:inline-block;"></div>
+      <script>(admaxads = window.admaxads || []).push({admax_id: "0c4a08687befb010aac87e9ece18dc2e",type: "banner"});</script>
+    </aside>
+  </template>
+  <template data-name=primary></template>
+</template-set>
+<script src="https://adm.shinobi.jp/st/t.js" async></script>
 
 <template-set name=swTransitionListItem>
   <template data-class-template="transition-type-{type}">

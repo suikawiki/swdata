@@ -452,6 +452,11 @@ SWD.openPage = function (url) {
       args.antennaCategory = await SWD.antennaCategory (m[1]);
       args.antennaDay = Date.UTC (m[2], m[3] - 1, m[4], 0, 0, 0) / 1000;
       args.site = 'antenna';
+
+      if (args.antennaCategory.isSensitive) args.isSensitive = true;
+      var data = await SWD.antennaDayList (args.antennaCategory.type, args.antennaDay * 1000);
+      if (!data.data.length) args.isEmpty = true;
+
       return args;
     }
     // //ANTENNA/{}/
@@ -462,6 +467,11 @@ SWD.openPage = function (url) {
       var d = new Date;
       args.antennaDay = Date.UTC (d.getFullYear (), d.getMonth (), d.getDate () - 1, 0, 0, 0) / 1000;
       args.site = 'antenna';
+
+      if (args.antennaCategory.isSensitive) args.isSensitive = true;
+      var data = await SWD.antennaDayList (args.antennaCategory.type, args.antennaDay * 1000);
+      if (!data.data.length) args.isEmpty = true;
+      
       return args;
     }
 
@@ -529,6 +539,8 @@ SWD.openPage = function (url) {
         'world.suikawiki.org': 'world',
       }[location.hostname];
     }
+
+    if (!args.name) args.isEmpty = true;
 
     return args;
   }).then (async args => {
@@ -654,6 +666,17 @@ defineElement ({
   def.pcHandler = function (templates, obj) {
     if (templates[obj.name]) return templates[obj.name];
     return templates[""];
+  };
+  document.head.appendChild (def);
+
+  var def = document.createElementNS ('data:,pc', 'templateselector');
+  def.setAttribute ('name', 'selectAdsTemplate');
+  def.pcHandler = function (templates, obj) {
+    if (obj.isEmpty || obj.isSensitive) {
+      return templates[""];
+    } else {
+      return templates.primary;
+    }
   };
   document.head.appendChild (def);
   
@@ -3687,7 +3710,7 @@ function createMapFromSpotList (mapId, selectors, onselect) {
 SWD._antennaCategories = {};
 [
   {type: 'web', name: 'Web', urlPrefix: '/web/'},
-  {type: 'houses', name: '住居', urlPrefix: '/houses/', noOld: true},
+  {type: 'houses', name: '住居', urlPrefix: '/houses/', noOld: true, isSensitive: true},
   {type: 'radio', name: 'アニメ関連番組', urlPrefix: '/radio/'},
   {type: 'date', name: '日', urlPrefix: 'https://data.suikawiki.org/datetime/'},
 ].map (_ => SWD._antennaCategories[_.type] = _);
@@ -3734,9 +3757,7 @@ SWD.antennaCategory = async function (t) {
   return SWD._antennaCategories[t]; // or undefined
 }; // SWD.antennaCategory
 
-defineListLoader ('swAntennaDayListLoader', async function (opts) {
-  var cat = this.getAttribute ('loader-category');
-  var dv = this.getAttribute ('loader-day') * 1000;
+SWD.antennaDayList = async function (cat, dv) {
   var day = new Date (dv);
   var c = await SWD.antennaCategory (cat);
   if (c.noOld && (new Date).valueOf () - dv > 100*24*60*60*1000) {
@@ -3744,10 +3765,11 @@ defineListLoader ('swAntennaDayListLoader', async function (opts) {
   }
   var ymd = day.toISOString ().replace (/T.*$/, '');
   var ym = ymd.replace (/-[0-9]+$/, '');
-  return fetch ('/data/antenna/' + cat + '/' + ym + '.json').then (res => {
-    if (res.status === 404) return {items: []};
-    if (res.status !== 200) throw res;
-    return res.json ();
+  return SWD.data ('antenna/' + cat + '/' + ym + '.json').catch (res => {
+    if (res.status === 404) return {json: () => {
+      return {items: []};
+    }};
+    throw res;
   }).then (json => {
     var start = new Date (ymd + 'T00:00:00Z') . valueOf () / 1000;
     var end = new Date (ymd + 'T24:00:00Z') . valueOf () / 1000;
@@ -3765,6 +3787,12 @@ defineListLoader ('swAntennaDayListLoader', async function (opts) {
     });
     return {data: list};
   });
+}; // SWD.antennaDayList
+
+defineListLoader ('swAntennaDayListLoader', async function (opts) {
+  var cat = this.getAttribute ('loader-category');
+  var dv = this.getAttribute ('loader-day') * 1000;
+  return SWD.antennaDayList (cat, dv);
 });
 
 defineElement ({
