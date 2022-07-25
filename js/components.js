@@ -1316,7 +1316,10 @@
     }
     return fetch (url, {
       credentials: "same-origin",
-    }).then ((res) => res.json ()).then ((json) => {
+    }).then ((res) => {
+      if (res.status !== 200) throw res;
+      return res.json ();
+    }).then ((json) => {
       if (!this.hasAttribute ('key')) throw new Error ("|key| is not specified");
       json = json || {};
       return {
@@ -1819,6 +1822,15 @@
     var e = this.querySelector (args.args[1]);
     this.pcSendFocus (e);
   }; // focus
+
+  defs.formsaved.fill = function (args) {
+    return args.json ().then ((json) => {
+      var e = this.querySelector (args.args[1]);
+      if (!e) throw new Error ('Element |'+args.args[1]+'| not found');
+      $fill (e, json);
+      e.hidden = false;
+    });
+  }; // fill
 
   defineElement ({
     name: 'before-unload-check',

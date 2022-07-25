@@ -652,6 +652,8 @@ form.input > button {
 }
 .search-form {
   flex-wrap: wrap;
+  padding-top: .5em;
+  padding-bottom: .5em;
 }
 
 .search-form input {
@@ -1905,11 +1907,27 @@ body {
       "breadcrumbs clinks      side        side"        
       "pager1      pager1      side        side"        
       "main        main        side        side"        1fr
-      "pager2      pager2      side        side"        
+      "pager2      pager2      side        side"
+      "fads        fads        side        side"
       "footer      footer      footer      footer"      
     /  2fr 1fr calc(var(--page-side-width) - var(--site-logo-width))
                                            var(--site-logo-width);
   --page-header-margin-right: var(--site-logo-width);
+  min-height: 100vh;
+}
+
+body.has-large {
+  grid-template:
+      "page-header page-header site-header" 
+      "breadcrumbs clinks      clinks"        
+      "pager1      pager1      pager1"        
+      "main        main        main"        1fr
+      "pager2      pager2      pager2"        
+      "fads        fsds        fads"
+      "side        side        side"
+      "footer      footer      footer"      
+    /  2fr         1fr         var(--site-logo-width);
+  --page-header-margin-right: 0;
 }
 
 @media (max-width: 600px) {
@@ -2265,6 +2283,9 @@ page-side .ads-rectangle {
   text-align: center;
 }
 
+.ads-footer {
+  grid-area: fads;
+}
 
 footer.site {
   grid-area: footer;
