@@ -367,6 +367,11 @@ sub main ($$$) {
     return $app->send_plain_text ('');
   }
 
+  if (@$path == 1 and $path->[0] eq 'favicon.ico') {
+    # /favicon.ico
+    return $app->send_redirect ('https://wiki.suikawiki.org/favicon.ico');
+  }
+
   return $app->send_error (404);
 } # main
 
