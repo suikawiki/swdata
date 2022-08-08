@@ -7,7 +7,7 @@ Capture::Tiny~0.48
 Carp~1.50
 Cwd~3.75
 Data::Dumper~2.183
-Digest::SHA~6.02
+Digest::SHA~6.03
 Exporter::Lite~0.09
 File::Path~2.18
 File::Temp~0.2311
@@ -22,7 +22,7 @@ Net::SSLeay~1.92
 Path::Class~0.37
 Path::Tiny~0.122
 Proc::FastSpawn~1.2
-Scalar::Util~1.62
+Scalar::Util~1.63
 Socket~2.035
 Test::Differences~0.69
 Test::More~1.302191
