@@ -8,24 +8,6 @@ SWD.data = function (name) {
   });
 }; // SWD.data
 
-SWD.charName = async function (charCode) {
-  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
-
-  var c = SWD._charNames.code_to_name[charCode.toString (16).toUpperCase () /* XXX %04X */];
-  if (!c) return undefined;
-
-  return c.name; // or undefined
-}; // SWD.charName
-
-SWD.charJaName = async function (unicode) {
-  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
-
-  var c = SWD._charNames.code_to_name[unicode.toString (16).toUpperCase () /* XXX %04X */];
-  if (!c) return undefined;
-
-  return c.ja_name; // or undefined
-}; // SWD.charJaName
-
 SWD.era = async function (eraId) {
   var list = await SWD.eraList ({});
   return list[eraId]; // or undefined
@@ -486,6 +468,18 @@ SWD.openPage = function (url) {
       }
     }
 
+    var m = path.match (/^\/char\/([0-9A-Fa-f]{4,8})$/);
+    if (m) { // /char/{code}
+      args.char = await SWD.char ('unicode', parseInt (m[1], 16));
+      args.name = 'page-char-index';
+      args.site = 'chars';
+      args.isSensitive = args.char.isSensitive;
+      return args;
+    }
+
+    // XXX /char/{name}
+    // XXX /string
+
     args.name = {
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
@@ -548,19 +542,25 @@ SWD.openPage = function (url) {
     await ma.ready;
     ma.swArgs = args;
     var mx = args.mx = ma.swUpdate ();
-    var title = (mx['t-title'] || {textContent: ''}).textContent;
-    document.title = [
-      title,
-      (mx['t-category'] || {textContent: ''}).textContent,
-      'SuikaWiki',
-    ].filter (_ => _.length).join (' - ');
+    var title;
+    var mxEls = {'t-title': mx['t-title'], 't-category': mx['t-category']};
+    var updateTitle = () => {
+      title = (mxEls['t-title'] || {textContent: ''}).textContent;
+      document.title = [
+        title,
+        (mxEls['t-category'] || {textContent: ''}).textContent,
+        'SuikaWiki',
+      ].filter (_ => _.length).join (' - ');
+    };
+    updateTitle ();
+    var pp = [];
     document.querySelectorAll ('page-area').forEach (_ => {
       var t = _.getAttribute ('template');
       if (t === 'pageMainTemplate') {
         //
       } else if (t === 'pageHeaderTemplate') {
         _.swArgs = args;
-        _.ready.then (() => {
+        pp.push (_.ready.then (() => {
           _.swUpdate ();
           _.querySelectorAll ('[data-html]').forEach (_ => {
             var k = _.getAttribute ('data-html');
@@ -568,9 +568,10 @@ SWD.openPage = function (url) {
               while (mx[k].firstChild) {
                 _.appendChild (mx[k].firstChild);
               }
+              mxEls[k] = _;
             }
           });
-        });
+        }));
       } else {
         _.ready.then (() => {
           _.swArgs = args;
@@ -579,6 +580,11 @@ SWD.openPage = function (url) {
       }
     });
     document.body.classList.toggle ('has-large', !!args.hasLargeContent);
+    Promise.all (pp).then (() => {
+      if (mxEls['t-title']) new MutationObserver (function (mutations) {
+        updateTitle ();
+      }).observe (mxEls['t-title'], {childList: true, subtree: true});
+    });
 
     var obj = {};
     var x = mx['t-sw'] ? 'https://wiki.suikawiki.org/n/' + encodeURIComponent (mx['t-sw'].textContent) : '';
@@ -889,6 +895,74 @@ defineElement ({
   },
 }); // <sw-data-number>
 
+/* ------ Characters ------ */
+
+SWD.charName = async function (charCode) {
+  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
+
+  var c = SWD._charNames.code_to_name[charCode.toString (16).toUpperCase () /* XXX %04X */];
+  if (!c) return undefined;
+
+  return c.name; // or undefined
+}; // SWD.charName
+
+SWD.charJaName = async function (unicode) {
+  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
+
+  var c = SWD._charNames.code_to_name[unicode.toString (16).toUpperCase () /* XXX %04X */];
+  if (!c) return undefined;
+
+  return c.ja_name; // or undefined
+}; // SWD.charJaName
+
+SWD.Char = function () {};
+
+Object.defineProperty (SWD.Char.prototype, 'text', {
+  get: function () {
+    if (this.type === 'unicode') {
+      return String.fromCodePoint (this.unicode);
+    } else {
+      return null;
+    }
+  },
+}); // char.text
+
+Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
+  get: function () {
+    if (this.type === 'unicode' || this.type === 'ucs1993' ||
+        this.type === 'code') {
+      return false;
+    } else {
+      return true;
+    }
+  },
+}); // char.isSensitive
+
+SWD.char = async function (type, value) {
+  if (type === 'unicode') {
+    var c = new SWD.Char;
+    if (0 <= value && value <= 0x10FFFF) {
+      c.type = type;
+      c.unicode = value;
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = 'Unicode 符号点';
+      return c;
+    } else if (value <= 0x7FFFFFFF) {
+      c.type = 'ucs1993';
+      c.charCode = value;
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = 'ISO/IEC 10646 符号位置';
+    } else {
+      c.type = 'code';
+      c.charCode = value;
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = '文字符号';
+    }
+  } else {
+    throw type;
+  }
+}; // SWD.char
+
 defineElement ({
   name: 'sw-data-charcode',
   fill: 'idlattribute',
@@ -958,8 +1032,13 @@ defineElement ({
       var v = this.value;
       if (this.hidden = v == null) return;
 
+      var delta = parseInt (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) {
+        v = String.fromCodePoint (v.codePointAt (0) + delta);
+      }
+
       var args = {string: v};
-      args.code = v.charCodeAt (0);
+      args.code = v.codePointAt (0);
       args.hex = args.code.toString (16).toUpperCase ();
       args.name = await SWD.charName (args.code);
       args.ja_name = await SWD.charJaName (args.code);

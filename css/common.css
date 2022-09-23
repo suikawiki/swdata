@@ -215,7 +215,17 @@ code {
   vertical-align: middle;
 }
 
-.char-sample.vertical {
+.char-sample.ltr {
+  writing-mode: horizontal-tb;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+.char-sample.rtl {
+  writing-mode: horizontal-tb;
+  direction: rtl;
+  unicode-bidi: embed;
+}
+.char-sample.ttb {
   writing-mode: vertical-rl;
 }
 

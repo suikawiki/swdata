@@ -541,7 +541,7 @@
               <a href=https://wiki.suikawiki.org/n/%E5%85%83%E5%8F%B7%E3%82%B3%E3%83%BC%E3%83%89#anchor-8003>#3</a>
               <span class=source-name>Unicode</span>
             <dd>
-              <sw-data-char data-field=era.unicode></sw-data-char>
+              <sw-data-char data-field=era.unicode template=sw-data-char-prop-value></sw-data-char>
           </div>
           <div>
             <dt>
@@ -1046,6 +1046,34 @@
       <input type=search name=q required placeholder="SuikaWiki 等の記事から検索">
       <button type="submit" data-icon="search" class="lsf-icon">検索</button>
     </form>
+  </template>
+  
+  <template data-name=page-char-index>
+    <t-title><sw-data-char data-field=char.text template=sw-data-char-text></sw-data-char></t-title>
+    <t-category><a data-href-field=char.categoryURL data-field=char.categoryName></a></t-category>
+    <t-keyword data-field=char.text></t-keyword>
+    <t-sw data-field=char.text></t-sw>
+
+    <table class=props>
+      <tbody>
+        <tr>
+          <th>Unicode
+          <td><sw-data-char data-field=char.text template=sw-data-char-prop-value></sw-data-char>
+    </table>
+
+    <section id=neighbors>
+      <h1>隣接</h1>
+
+      <table class=props>
+        <tbody>
+          <tr>
+            <th>前の符号点
+            <td><sw-data-char delta=-1 data-field=char.text></sw-data-char>
+          <tr>
+            <th>次の符号点
+            <td><sw-data-char delta=+1 data-field=char.text></sw-data-char>
+      </table>
+    </section>
   </template>
   
   <template data-name=page-antenna>
@@ -1658,6 +1686,24 @@
 
 <template-set name=sw-data-char>
   <template>
+    <a data-href-template="/char/{hex}">
+      <code>U+<span data-field=hex></span></code>
+      <code class=charname data-field=name lang=en></code>
+      (<data class="char-sample" data-field=string></data>)
+    </a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-char-text>
+  <template>
+    <code>U+<span data-field=hex></span></code>
+    <code class=charname data-field=name lang=en></code>
+    (<data class="char-sample" data-field=string></data>)
+  </template>
+</template-set>
+
+<template-set name=sw-data-char-prop-value>
+  <template>
     <can-copy><a data-href-template=https://chars.suikawiki.org/char/{hex}><code>U+<span data-field=hex></span></code></a></can-copy>
     
     <can-copy><code class=charname data-field=name lang=en></code></can-copy>
@@ -1670,10 +1716,12 @@
       <can-copy><code class=charname data-field=tw_name lang=zh-TW></code></can-copy>
     </sw-if-defined>
     
-    <can-copy><data class="char-sample horizontal" data-field=string></data>
-      <span class=info>(横書き)</span></can-copy>
-    <can-copy><data class="char-sample vertical" data-field=string></data>
-      <span class=info>(縦書き)</span></can-copy>
+    <can-copy><data class="char-sample ltr" data-field=string></data>
+      <span class=info>(左横書き)</span></can-copy>
+    <can-copy><data class="char-sample rtl" data-field=string></data>
+      <span class=info>(右横書き)</span></can-copy>
+    <can-copy><data class="char-sample ttb" data-field=string></data>
+      <span class=info>(上縦書き)</span></can-copy>
   </template>
 </template-set>
 
