@@ -254,6 +254,8 @@ sub main ($$$) {
         $path->[0] eq 'world' or
         $path->[0] eq 'antenna' or
         $path->[0] eq 'chars' or
+        $path->[0] eq 'char' or
+        $path->[0] eq 'string' or
         $path->[0] eq '' or
         $path->[0] eq 'web' or
         $path->[0] eq 'radio' or
@@ -266,6 +268,8 @@ sub main ($$$) {
       # /spots/...
       # /world
       # /chars
+      # /char
+      # /string
       # /antenna
       # /radio
       # /web
