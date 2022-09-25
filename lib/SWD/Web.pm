@@ -57,9 +57,10 @@ sub temma ($$$) {
 
 my $RootPath = path (__FILE__)->parent->parent->parent;
 
-sub static ($$$) {
-  my ($app, $type, $name) = @_;
+sub static ($$$;%) {
+  my ($app, $type, $name, %args) = @_;
   $app->http->set_response_header ('Content-Type' => $type);
+  $app->http->set_response_header ('Content-Encoding' => 'gzip') if $args{gzip};
   my $file = Promised::File->new_from_path ($RootPath->child ($name));
   return $file->stat->then (sub {
     $app->http->set_response_last_modified ($_[0]->mtime);
@@ -336,6 +337,21 @@ sub main ($$$) {
     return temma $app, ['lang.html.tm'], {tag => $tag};
   }
 
+  if (@$path == 2 and
+      $path->[0] eq 'data' and
+      $path->[1] =~ m{\Atbl-[0-9A-Za-z_-]+\.json\z}) {
+    # /data/tbl-{}.json
+    return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1].'.gz',
+        gzip => 1;
+  }
+  if (@$path == 2 and
+      $path->[0] eq 'data' and
+      $path->[1] =~ m{\Atbl-[0-9A-Za-z_-]+\.dat\z}) {
+    # /data/tbl-{}.dat
+    return static $app, 'application/octet-stream', 'local/data/'.$path->[1].'.gz',
+        gzip => 1;
+  }
+  
   if (@$path == 2 and
       $path->[0] eq 'data' and
       $path->[1] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {

@@ -1,5 +1,6 @@
 
 var SWD = {_load: {}};
+
 SWD.data = function (name) {
   if (SWD._load[name]) return SWD._load[name];
   return SWD._load[name] = fetch ('/data/' + name).then (res => {
@@ -7,6 +8,14 @@ SWD.data = function (name) {
     return res.json ();
   });
 }; // SWD.data
+
+SWD.dataAB = function (name) {
+  if (SWD._load[name]) return SWD._load[name];
+  return SWD._load[name] = fetch ('/data/' + name).then (res => {
+    if (res.status !== 200) throw res;
+    return res.arrayBuffer ();
+  });
+}; // SWD.dataAB
 
 SWD.era = async function (eraId) {
   var list = await SWD.eraList ({});
@@ -897,24 +906,6 @@ defineElement ({
 
 /* ------ Characters ------ */
 
-SWD.charName = async function (charCode) {
-  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
-
-  var c = SWD._charNames.code_to_name[charCode.toString (16).toUpperCase () /* XXX %04X */];
-  if (!c) return undefined;
-
-  return c.name; // or undefined
-}; // SWD.charName
-
-SWD.charJaName = async function (unicode) {
-  if (!SWD._charNames) SWD._charNames = await SWD.data ('char-names.json');
-
-  var c = SWD._charNames.code_to_name[unicode.toString (16).toUpperCase () /* XXX %04X */];
-  if (!c) return undefined;
-
-  return c.ja_name; // or undefined
-}; // SWD.charJaName
-
 SWD.Char = function () {};
 
 Object.defineProperty (SWD.Char.prototype, 'text', {
@@ -927,6 +918,58 @@ Object.defineProperty (SWD.Char.prototype, 'text', {
   },
 }); // char.text
 
+Object.defineProperty (SWD.Char.prototype, 'unicodeHex', {
+  get: function () {
+    if (this.type === 'unicode') {
+      var hex = this.unicode.toString (16).toUpperCase ();
+      if (hex.length < 4) {
+        hex = ('000' + hex).slice (3 + hex.length - 4);
+      }
+      return hex;
+    } else {
+      return null;
+    }
+  },
+}); // char.unicodeHex
+
+Object.defineProperty (SWD.Char.prototype, 'char', {
+  get: function () {
+    if (this.type === 'unicode') {
+      var u = this.unicode;
+      if (u === 0x002E ||
+          u === 0x003A ||
+          (0x0000 <= u && u <= 0x001F) ||
+          (0x007F <= u && u <= 0x009F) ||
+          (0xD800 <= u && u <= 0xDFFF)) {
+        //XXX noncharacter
+        return ':u' + u.toString (16);
+      } else {
+        return String.fromCodePoint (u);
+      }
+    } else if (this.type === 'char') {
+      return this._char;
+    } else if (this.type === 'string') {
+      if (this.string[0] === "." || this.string[0] === ":") {
+        return [...this.string].map (_ => ':u' + _.codePointAt (0).toString (16)).join ('');
+      } else {
+        return this.string;
+      }
+    } else {
+      return null;
+    }
+  },
+}); // char.char
+
+SWD.Char.prototype._getNames = async function () {
+  if (this.type === 'unicode') {
+    var names = await SWD.data ('char-names.json');
+    var c = names.code_to_name[this.unicodeHex];
+    return c || {};
+  } else {
+    return {name: this.char};
+  }
+}; // _getNames
+
 Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
   get: function () {
     if (this.type === 'unicode' || this.type === 'ucs1993' ||
@@ -937,8 +980,26 @@ Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
     }
   },
 }); // char.isSensitive
+      
+SWD.Char.prototype.applyDelta = function (delta) {
+  var delta = parseInt (delta);
+  if (Number.isFinite (delta)) {
+    if (this.type === 'unicode') {
+      var x = this.unicode + delta;
+      if (0x0000 <= x && x <= 0x10FFFF) {
+        return SWD.char ('unicode', x);
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } else {
+    return this;
+  }
+}; // char.applyDelta
 
-SWD.char = async function (type, value) {
+SWD.char = function (type, value) {
   if (type === 'unicode') {
     var c = new SWD.Char;
     if (0 <= value && value <= 0x10FFFF) {
@@ -952,11 +1013,65 @@ SWD.char = async function (type, value) {
       c.charCode = value;
       c.categoryURL = 'https://chars.suikawiki.org';
       c.categoryName = 'ISO/IEC 10646 符号位置';
+      return c;
     } else {
       c.type = 'code';
       c.charCode = value;
       c.categoryURL = 'https://chars.suikawiki.org';
       c.categoryName = '文字符号';
+      return c;
+    }
+  } else if (type === 'text') {
+    var c = new SWD.Char;
+    if ([...value].length === 1) {
+      c.type = 'unicode';
+      c.unicode = value.codePointAt (0);
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = 'Unicode 符号点';
+      return c;
+    } else {
+      c.type = 'string';
+      c.string = value;
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = '文字';
+      return c;
+    }
+  } else if (type === 'char') {
+    var c = new SWD.Char;
+    if ([...value].length === 1) {
+      c.type = 'unicode';
+      c.unicode = value.codePointAt (0);
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = 'Unicode 符号点';
+      return c;
+    } else if (value.charAt (0) === ':') {
+      var m = value.match (/^(?::u[1-9a-f][0-9a-f]{0,4}|:u10[0-9a-f]{4})+$/);
+      if (m) {
+        var v = m[0].split (/:u/);
+        v.shift ();
+        c.string = v.map (_ => String.fromCodePoint (parseInt (_, 16))).join ('');
+        if ([...c.string].length === 1) {
+          c.type = 'unicode';
+          c.unicode = c.string.codePointAt (0);
+          delete c.string;
+          c.categoryURL = 'https://chars.suikawiki.org';
+          c.categoryName = 'Unicode 符号点';
+        } else {
+          c.type = 'string';
+        }
+      } else {
+        c.type = 'char';
+        c._char = value;
+      }
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = '文字';
+      return c;
+    } else {
+      c.type = 'char';
+      c._char = value;
+      c.categoryURL = 'https://chars.suikawiki.org';
+      c.categoryName = '文字';
+      return c;
     }
   } else {
     throw type;
@@ -1017,6 +1132,262 @@ defineElement ({
   props: {
     pcInit: function () {
       var v = this.value;
+      var vt = this.getAttribute ('valuetype');
+      if (vt) v = SWD.char (vt, v);
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue; // or null
+          var vt = this.getAttribute ('valuetype');
+          if (vt) v = SWD.char (vt, v);
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+      if (this.hidden = v == null) return;
+
+      v = v.applyDelta (this.getAttribute ('delta'));
+      if (!v) {
+        this.hidden = true;
+        return;
+      }
+
+      if (!v.names) v.names = await v._getNames ();
+
+      var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
+      var e = ts.createFromTemplate ('div', v);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-char>
+
+SWD.Char._relDataSets = {
+  char: {key: 'char'},
+  han: {key: 'han'},
+};
+
+SWD.Char._relDataRoot = async function (ds) {
+  ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-root.json');
+}; // SWD.Char._relDataRoot
+
+SWD.Char._relDataClusters = async function (ds) {
+  ds.dataClusters = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-clusters.dat'));
+};
+
+SWD.Char._relClusterIndexFromTbl = function (ds, def, index) {
+  var offset = def.offset + index * 3;
+  if (def.offset_next <= offset) {
+    return null;
+  }
+  
+  var tbl = ds.dataClusters;
+  return tbl[offset] * 0x10000 + tbl[offset+1] * 0x100 + tbl[offset+2];
+}; // SWD.Char._relClusterIndexFromTbl
+
+SWD.Char._charsFromTbl = function (ds, level, index) {
+  var x0 = index >> 16;
+  var x1 = (index >> 8) % 0x100;
+  var x2 = index % 0x100;
+  var tbl = ds.dataClusters;
+  var length = tbl.length;
+  var chars = [];
+  var defs = ds.dataRoot.tables.slice ();
+  var i = 0;
+  while (i < length) {
+    if (x0 === tbl[i] && x1 === tbl[i+1] && x2 === tbl[i+2]) {
+      while (defs.length && defs[0].offset_next <= i) {
+        defs.shift ();
+      }
+      var def = defs[0];
+      if (def.level_key !== level) {
+        //
+      } else if (def.type === 'unicode') {
+        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.unicode_offset));
+      } else if (def.type === 'unicode-suffix') {
+        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.unicode_offset) + String.fromCodePoint (def.suffix));
+      } else {
+        throw def.type;
+      }
+    }
+    i += 3;
+  }
+  return chars;
+}; // SWD.Char._charsFromTbl
+
+SWD.Char._relDataRels = async function (ds) {
+  ds.dataRels = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-rels.dat'));
+};
+
+SWD.Char._relsFromTbl = function (ds, char) {
+  if (char.indexOf ("\x00") >= 0) return [];
+
+  var tbl = ds.dataRels;
+  var bchar = (new TextEncoder ("utf-8")).encode ("\u0000" + char + "\u0001");
+
+  var start = tbl.indexOf (bchar[0]);
+  while (true) {
+    if (start < 0) return [];
+    var bs = tbl.slice (start, start + bchar.byteLength);
+    if (bchar.every ((v, i) => v === bs[i])) {
+      break;
+    } else {
+      start = tbl.indexOf (bchar[0], start + 1);
+    }
+  }
+  start += bchar.byteLength;
+
+  var end = tbl.indexOf (0x00, start);
+  if (end < 0) return []; // broken
+
+  var r = tbl.slice (start, end);
+  var rels = [];
+  var i = 0;
+  var rL = r.byteLength;
+  while (i < rL) {
+    var bc2Start = i;
+    while (i < rL && r[i] !== 0x01) i++;
+    var bc2 = r.slice (bc2Start, i);
+    if (bc2.byteLength === 0) continue; // at end or broken
+    i++;
+
+    var v2Start = i;
+    while (i < rL && r[i] !== 0x01) i++;
+    var v2 = r.slice (v2Start, i);
+    i++;
+    var i2 = 0;
+    var l2 = v2.byteLength;
+    var rr = [];
+    while (i2 < l2) {
+      var v = ((v2[i2] & 0b01111111) << 7) + (v2[i2+1] & 0b01111111);
+      rr.push ([ds, v]);
+      i2 += 2;
+    }
+    rels.push ([(new TextDecoder ('utf-8')).decode (bc2), rr]);
+  }
+  return rels;
+}; // SWD.Char._relsFromTbl
+
+SWD.Char._dsGetCluster = function (ds, level, char) {
+  var charLength = [...char].length;
+  
+  if (charLength === 1) {
+    var cc = char.codePointAt (0);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === 'unicode' &&
+          d.unicode_offset <= cc && cc < d.unicode_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc - def.unicode_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  } // charLength 1
+
+  if (charLength === 2) {
+    var cc1 = char.codePointAt (0);
+    var cc2 = char.codePointAt (1);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === 'unicode-suffix' &&
+          d.suffix === cc2 &&
+          d.unicode_offset <= cc1 && cc1 < d.unicode_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.unicode_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  } // charLength 2
+
+  {
+    var index = (ds.dataRoot.others[level] || {})[char];
+    if (index == null) return null;
+
+    return {index};
+  }
+}; // SWD.Char._dsGetCluster
+
+SWD.Char.getCluster = async function (level, char) {
+  var cluster = {indexes: {}};
+
+  for (var _ in SWD.Char._relDataSets) {
+    var ds = SWD.Char._relDataSets[_];
+    await SWD.Char._relDataRoot (ds);
+    await SWD.Char._relDataClusters (ds);
+    
+    var r = SWD.Char._dsGetCluster (ds, level, char);
+    if (r) cluster.indexes[ds.key] = r.index;
+  }
+  
+  return cluster;
+}; // SWD.Char.getCluster
+
+SWD.Char.getChars = function (level, cluster, dsKey) {
+  var ds = SWD.Char._relDataSets[dsKey];
+  var chars = [];
+  var index = cluster.indexes[ds.key];
+  if (index == null) return chars;
+
+  for (var _ in (ds.dataRoot.others[level] || {})) {
+    if (ds.dataRoot.others[level][_] === index) {
+      chars.push (_);
+    }
+  }
+
+  return chars.concat (SWD.Char._charsFromTbl (ds, level, index));
+}; // SWD.Char.getChars
+
+SWD.Char.getRels = async function (dsKey, char) {
+  var ds = SWD.Char._relDataSets[dsKey];
+  await SWD.Char._relDataRoot (ds);
+  await SWD.Char._relDataRels (ds);
+
+  return SWD.Char._relsFromTbl (ds, char);
+}; // SWD.Char.getRels
+
+SWD.Char.getRelsAll = async function (char) {
+  var rels = {};
+
+  for (var _ in SWD.Char._relDataSets) {
+    var ds = SWD.Char._relDataSets[_];
+    await SWD.Char._relDataRoot (ds);
+    await SWD.Char._relDataRels (ds);
+
+    SWD.Char._relsFromTbl (ds, char).forEach (_ => {
+      rels[_[0]] = rels[_[0]] || [_[0], []];
+      rels[_[0]][1] = rels[_[0]][1].concat (_[1]);
+    });
+  }
+
+  return Object.values (rels);
+}; // SWD.Char.getRelsAll
+
+defineElement ({
+  name: 'sw-char-cluster',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
       Object.defineProperty (this, 'value', {
         get: function () {
           return v;
@@ -1030,29 +1401,66 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
-      if (this.hidden = v == null) return;
+      if (this.parentNode.hidden = v == null) return;
 
-      var delta = parseInt (this.getAttribute ('delta'));
-      if (Number.isFinite (delta)) {
-        v = String.fromCodePoint (v.codePointAt (0) + delta);
-      }
-
-      var args = {string: v};
-      args.code = v.codePointAt (0);
-      args.hex = args.code.toString (16).toUpperCase ();
-      args.name = await SWD.charName (args.code);
-      args.ja_name = await SWD.charJaName (args.code);
-      
-      var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
-      var e = ts.createFromTemplate ('div', args);
       this.textContent = '';
-      while (e.firstChild) {
-        this.appendChild (e.firstChild);
-      }
+
+      var dsKey = this.getAttribute ('type') || 'char';
+      var cluster = await SWD.Char.getCluster ("EQUIV", v.char);
+      var chars = await SWD.Char.getChars ("EQUIV", cluster, dsKey);
+      var inCluster = new Set (chars);
       
+      if (chars.length === 0) {
+        this.parentNode.hidden = true;
+        return;
+      }
+
+      var c = document.createElement ('ul');
+      for (var i = 0; i < chars.length; i++) {
+        var char = chars[i];
+        var li = document.createElement ('li');
+
+        var e = document.createElement ('sw-data-char');
+        e.value = SWD.char ('char', char);
+        e.setAttribute ('template', 'sw-data-char-item');
+        if (inCluster.has (char)) e.classList.toggle ('in-cluster');
+        li.appendChild (e);
+
+        var rels = await SWD.Char.getRels (dsKey, char);
+        var ul = document.createElement ('ul');
+        rels.forEach (rel => {
+          var li2 = document.createElement ('li');
+
+          var f = document.createElement ('sw-data-char');
+          f.value = SWD.char ('char', rel[0]);
+          f.setAttribute ('template', 'sw-data-char-item');
+          if (inCluster.has (rel[0])) f.classList.toggle ('in-cluster');
+          li2.appendChild (f);
+
+          var ul2 = document.createElement ('ul');
+          rel[1].forEach (_ => {
+            var li3 = document.createElement ('li');
+            var code = document.createElement ('code');
+            var rel = _[0].dataRoot.rels[_[1]];
+            code.textContent = rel.key;
+            li3.appendChild (code);
+            ul2.appendChild (li3);
+          });
+          li2.appendChild (ul2);
+          
+          ul.appendChild (li2);
+        });
+        li.appendChild (ul);
+        
+        c.appendChild (li);
+      }
+
+      this.appendChild (c);
     }, // swUpdate
   },
-}); // <sw-data-char>
+}); // <sw-char-cluster>
+
+/* ------ Kanshi ------ */
 
 defineElement ({
   name: 'sw-data-kanshi',

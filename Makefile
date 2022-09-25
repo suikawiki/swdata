@@ -58,7 +58,8 @@ build-local: local/data \
     local/data/countries.json \
     local/data/macroregions.json \
     local/data/jp-regions-full-flatten.json \
-    local/data/sww-pages.json
+    local/data/sww-pages.json \
+    build-local-tbls
 
 build-repo: js/components.js css/default.css
 local/data:
@@ -124,6 +125,27 @@ local/sww-pages-2.jsonl:
 	$(WGET) -O $@ https://gist.githubusercontent.com/wakaba/d708f869625459c1c80068513ba0d083/raw/pages-2.jsonl
 local/data/sww-pages.json: local/sww-pages-1.jsonl local/sww-pages-2.jsonl
 	$(PERL) -MJSON::PS -MWeb::URL::Encoding -e 'while(<>){$$v=json_bytes2perl$$_;$$d->{$$v->[1]}=(percent_encode_c$$v->[3]->[0]).q{$$}.$$v->[2]};print perl2json_bytes$$d' local/sww-pages-1.jsonl local/sww-pages-2.jsonl > $@
+
+build-local-tbls: \
+    local/data/tbl-char-tbl-root.json.gz \
+    local/data/tbl-char-tbl-clusters.dat.gz \
+    local/data/tbl-char-tbl-rels.dat.gz \
+    local/data/tbl-han-tbl-root.json.gz \
+    local/data/tbl-han-tbl-clusters.dat.gz \
+    local/data/tbl-han-tbl-rels.dat.gz
+
+local/data/tbl-char-tbl-root.json.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/charrels/tbl-root.json.gz
+local/data/tbl-char-tbl-clusters.dat.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/charrels/tbl-clusters.dat.gz
+local/data/tbl-char-tbl-rels.dat.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/charrels/tbl-rels.dat.gz
+local/data/tbl-han-tbl-root.json.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/variants/tbl-root.json.gz
+local/data/tbl-han-tbl-clusters.dat.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/variants/tbl-clusters.dat.gz
+local/data/tbl-han-tbl-rels.dat.gz:
+	$(WGET) -O $@ https://manakai.github.io/data-chars/intermediate/variants/tbl-rels.dat.gz
 
 local/generated:
 	touch $@

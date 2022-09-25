@@ -39,7 +39,10 @@ html {
   --flavor-background-color: transparent;
   --flavor-background-foreground-color: black;
   --flavor-border-color: #004000;
+  --active-color: black;
+  --active-background-color: #deffe2;
   --paragraph-margin-block: 1em;
+  --row-border: 1px #eee solid;
   --site-header-z-index: 1000;
   --data-header-z-index: 1001;
   --floating-z-index: 100000;
@@ -117,8 +120,8 @@ colgroup + colgroup {
 }
 
 tr {
-  border-top: 1px #eee solid;
-  border-bottom: 1px #eee solid;
+  border-top: var(--row-border);
+  border-bottom: var(--row-border);
 }
 
 th, td {
@@ -202,6 +205,7 @@ code {
   color: #800000;
   background: transparent;
   font-family: "Courier New", monospace;
+  word-break: break-all;
 }
 
 .char-sample:not([hidden]) {
@@ -287,6 +291,90 @@ sw-label-set can-copy button {
 .era-code-list sw-data-char can-copy .charname:not([hidden]) {
   display: block;
 }
+
+
+.char-item:not([hidden]) {
+  display: block;
+}
+.char-item {
+  width: min-content;
+  min-width: 6em;
+  padding: var(--data-cell-padding);
+  text-align: center;
+}
+.char-item:not(:focus):not(:hover):not(:active) {
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+}
+
+.char-item .char-sample {
+  font-size: 200%;
+}
+
+.in-cluster .char-item .char-sample {
+  color: var(--active-color);
+  background: var(--active-background-color);
+}
+
+.char-item > code:not([hidden]) {
+  display: block;
+}
+.char-item > code {
+  font-size: 80%;
+  line-height: 1;
+}
+
+sw-char-cluster > ul:not([hidden]]) {
+  display: block;
+}
+sw-char-cluster > ul {
+  margin: 0;
+  padding: 0;
+}
+
+sw-char-cluster > ul > li:not([hidden]) {
+  display: inline-block;
+}
+sw-char-cluster > ul > li {
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+
+sw-char-cluster > ul > li > ul > li:not([hidden]) {
+  display: flex;
+}
+sw-char-cluster > ul > li > ul > li {
+  flex-direction: row-reverse;
+  align-items: center;
+  width: fit-content;
+  margin-left: auto;
+  border-bottom: var(--row-border);
+  padding: var(--data-cell-padding) 0;
+}
+
+sw-char-cluster > ul > li > ul > li > ul {
+  max-width: 15em;
+  font-size: 75%;
+  line-height: 1.0;
+  text-align: end;
+}
+sw-char-cluster > ul > li > ul > li > ul > li:not([hidden]) {
+  display: block;
+}
+sw-char-cluster > ul > li > ul > li > ul > li {
+  margin: 0;
+  padding: 0;
+}
+
+sw-char-cluster > ul > li > ul > li > ul > li > code::before {
+  content: " → ";
+}
+sw-char-cluster > ul > li > ul > li > ul > li > code::after {
+  content: " → ";
+}
+
 
 #yearless-date ul {
   padding: 0;
