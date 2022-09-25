@@ -479,7 +479,7 @@ SWD.openPage = function (url) {
 
     var m = path.match (/^\/char\/([0-9A-Fa-f]{4,8})$/);
     if (m) { // /char/{code}
-      args.char = await SWD.char ('unicode', parseInt (m[1], 16));
+      args.char = SWD.char ('unicode', parseInt (m[1], 16));
       args.name = 'page-char-index';
       args.site = 'chars';
       args.isSensitive = args.char.isSensitive;
@@ -488,6 +488,16 @@ SWD.openPage = function (url) {
 
     // XXX /char/{name}
     // XXX /string
+
+    if (path === '/char/routes') {
+      args.char1 = SWD.char ('char', url.searchParams.get ('char1') || '');
+      args.char2 = SWD.char ('char', url.searchParams.get ('char2') || '');
+      args.chars = [args.char1, args.char2];
+      args.name = 'page-char-routes';
+      args.site = 'chars';
+      args.isSensitive = args.char1.isSensitive || args.char2.isSensitive;
+      return args;
+    }
 
     args.name = {
       '/y/': 'page-year-index',
@@ -1437,16 +1447,19 @@ defineElement ({
           if (inCluster.has (rel[0])) f.classList.toggle ('in-cluster');
           li2.appendChild (f);
 
-          var ul2 = document.createElement ('ul');
-          rel[1].forEach (_ => {
-            var li3 = document.createElement ('li');
-            var code = document.createElement ('code');
-            var rel = _[0].dataRoot.rels[_[1]];
-            code.textContent = rel.key;
-            li3.appendChild (code);
-            ul2.appendChild (li3);
-          });
-          li2.appendChild (ul2);
+          {
+            var ul2 = document.createElement ('ul');
+            ul2.classList.toggle ('char-rel-list');
+            rel[1].forEach (_ => {
+              var li3 = document.createElement ('li');
+              var code = document.createElement ('sw-data-char-rel');
+              var rel = _[0].dataRoot.rels[_[1]];
+              code.setAttribute ('value', rel.key);
+              li3.appendChild (code);
+              ul2.appendChild (li3);
+            });
+            li2.appendChild (ul2);
+          }
           
           ul.appendChild (li2);
         });
@@ -1459,6 +1472,141 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-char-cluster>
+
+SWD.Char.routes = async function (char1, char2, opts) {
+  var maxDistance = opts.maxDistance || 30;
+  var p = [];
+
+  var char = char1;
+  var found = [];
+  var current = [ [[char1, []]] ];
+  var currentSeen = {};
+  currentSeen[char1.char] = true;
+  while (true) {
+    console.log ("length", current[0].length, "routes", current.length);
+    if (opts.onhop) p.push (Promise.resolve (current[0].length).then (opts.onhop));
+    var next = [];
+    var nextSeen = {};
+    for (var n in currentSeen) { nextSeen[n] = currentSeen[n] }
+    for (var i = 0; i < current.length; i++) {
+      var route = current[i];
+      var char = route.at (-1)[0];
+      var rels = await SWD.Char.getRelsAll (char.char);
+      rels.forEach (rel => {
+        //if (currentSeen[rel[0]]) {
+        if (nextSeen[rel[0]]) {
+          //
+        } else if (rel[0] === char2.char) {
+          var item = route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]);
+          found.push (item);
+          if (opts.onfound) p.push (Promise.resolve (item).then (opts.onfound));
+        } else {
+          next.push (route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]));
+        }
+        nextSeen[rel[0]] = true;
+      });
+
+      await new Promise (_ => setTimeout (_, 0));
+    } // route
+    if (!next.length) break;
+    if (found.length) break;
+    if (next[0].length > maxDistance) break;
+    current = next;
+    currentSeen = nextSeen;
+  } // while
+
+  await Promise.all (p);
+  return found;
+}; // SWD.Char.routes
+
+defineElement ({
+  name: 'sw-char-routes',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var char1 = this.value[0];
+      var char2 = this.value[1];
+
+      this.textContent = '';
+      var as = document.createElement ('action-status');
+      var progress = document.createElement ('progress');
+      as.appendChild (progress);
+      this.appendChild (as);
+      
+      var maxDistance = 30;
+      progress.max = maxDistance;
+      var n = 0;
+
+      var results = await SWD.Char.routes (char1, char2, {
+        maxDistance,
+        onhop: hop => {
+          progress.value = hop;
+        },
+        onfound: route => {
+          this.swInsertRoute (route);
+        },
+      });
+
+      if (results.length) {
+        as.remove ();
+      } else {
+        as.innerHTML = '<action-status-message></action-status-message>';
+        as.firstChild.textContent = this.getAttribute ('notfound');
+      }
+    }, // swUpdate
+    swInsertRoute: function (route) {
+      var ol = document.createElement ('ol');
+      route.forEach (step => {
+        var li = document.createElement ('li');
+
+        if (step[1].length) {
+          var ul = document.createElement ('ul');
+          ul.classList.toggle ('char-rel-list');
+          step[1].forEach (_ => {
+            var li = document.createElement ('li');
+            var code = document.createElement ('sw-data-char-rel');
+            var rel = _[0].dataRoot.rels[_[1]];
+            code.setAttribute ('value', rel.key);
+            li.appendChild (code);
+            ul.appendChild (li);
+          });
+          li.appendChild (ul);
+        }
+        
+        var c = document.createElement ('sw-data-char');
+        c.setAttribute ('template', 'sw-data-char-item');
+        c.value = step[0];
+        li.appendChild (c);
+
+        ol.appendChild (li);
+      });
+      this.appendChild (ol);
+    }, // swInsertRoute
+  },
+}); // <sw-char-routes>
+
+defineElement ({
+  name: 'sw-data-char-rel',
+  fill: 'contentattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: async function () {
+      var args = {value: this.getAttribute ('value')};
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+    }, // swUpdate
+  },
+}); // <sw-data-char-rel>
 
 /* ------ Kanshi ------ */
 

@@ -1082,7 +1082,56 @@
             <th>次の符号点
             <td><sw-data-char delta=+1 data-field=char></sw-data-char>
       </table>
+
+      <form action=/char/routes method=get class=search-form>
+        <table class=config>
+          <tbody>
+            <tr>
+              <th>文字1
+              <td>
+                <sw-data-char data-field=char></sw-data-char>
+                <input type=hidden name=char1 data-field=char.text>
+            <tr>
+              <th><label for=route-input-char2>文字2</label>
+              <td><input type=search name=char2 id=route-input-char2>
+        </table>
+        <p class=buttons>
+          <button type=submit data-icon="search" class=lsf-icon>経路を探す</button>
+      </form>
     </section>
+  </template>
+
+  <template data-name=page-char-routes>
+    <t-title><sw-data-char data-field=char1 template=sw-data-char-text-compact></sw-data-char>から<sw-data-char data-field=char2 template=sw-data-char-text-compact></sw-data-char></t-title>
+    <t-category><a href=https://chars.suikawiki.org>文字</a></t-category>
+    <t-keyword><span data-field=char1.text></span> <span data-field=char2.text></span></t-keyword>
+
+    <form action=/char/routes method=get class=search-form>
+      <table class=config>
+        <tbody>
+          <tr>
+            <th><label for=input-char1>文字1</label>
+            <td><input type=search name=char1 id=input-char1 data-field=char1.text>
+          <tr>
+            <th><label for=input-char2>文字2</label>
+            <td><input type=search name=char2 id=input-char2 data-field=char2.text>
+      </table>
+      <p class=buttons>
+        <button type=submit data-icon="search" class=lsf-icon>経路を探す</button>
+      </p>
+    </form>
+
+    <table class=props>
+      <tbody>
+        <tr>
+          <th>文字1
+          <td><sw-data-char data-field=char1 template=sw-data-char-prop-value></sw-data-char>
+        <tr>
+          <th>文字2
+          <td><sw-data-char data-field=char2 template=sw-data-char-prop-value></sw-data-char>
+    </table>
+
+    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。"></sw-char-routes>
   </template>
   
   <template data-name=page-antenna>
@@ -1711,6 +1760,12 @@
   </template>
 </template-set>
 
+<template-set name=sw-data-char-text-compact>
+  <template>
+    <code>U+<span data-field=unicodeHex></span></code>
+  </template>
+</template-set>
+
 <template-set name=sw-data-char-item>
   <template>
     <a data-href-template="/char/{unicodeHex}" class=char-item>
@@ -1750,6 +1805,12 @@
     
     <can-copy><data class=char-ja-name data-field=names.ja_name></data>
       <span class=info>(日本語通用名称)</span></can-copy>
+  </template>
+</template-set>
+
+<template-set name=sw-data-char-rel>
+  <template>
+    <code data-field=value></code>
   </template>
 </template-set>
 

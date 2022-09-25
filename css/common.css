@@ -325,6 +325,22 @@ sw-label-set can-copy button {
   line-height: 1;
 }
 
+
+.char-rel-list {
+  margin: 0;
+  padding: 0;
+  font-size: 75%;
+  line-height: 1.0;
+}
+
+.char-rel-list > li:not([hidden]) {
+  display: block;
+}
+.char-rel-list > li {
+  margin: 0;
+  padding: 0;
+}
+
 sw-char-cluster > ul:not([hidden]]) {
   display: block;
 }
@@ -354,25 +370,48 @@ sw-char-cluster > ul > li > ul > li {
   padding: var(--data-cell-padding) 0;
 }
 
-sw-char-cluster > ul > li > ul > li > ul {
+sw-char-cluster > ul > li > ul > li > .char-rel-list {
   max-width: 15em;
-  font-size: 75%;
-  line-height: 1.0;
   text-align: end;
 }
-sw-char-cluster > ul > li > ul > li > ul > li:not([hidden]) {
+
+sw-char-cluster > ul > li > ul > li > .char-rel-list code::before {
+  content: " → ";
+}
+sw-char-cluster > ul > li > ul > li > .char-rel-list code::after {
+  content: " → ";
+}
+
+sw-char-routes > ol:not([hidden]) {
   display: block;
 }
-sw-char-cluster > ul > li > ul > li > ul > li {
+sw-char-routes > ol {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+sw-char-routes > ol > li:not([hidden]) {
+  display: block;
+}
+sw-char-routes > ol > li {
   margin: 0;
   padding: 0;
 }
 
-sw-char-cluster > ul > li > ul > li > ul > li > code::before {
-  content: " → ";
+sw-char-routes .char-item {
+  margin: 0 auto;
 }
-sw-char-cluster > ul > li > ul > li > ul > li > code::after {
-  content: " → ";
+
+sw-char-routes .char-rel-list {
+  margin-top: var(--paragraph-margin-block);
+  margin-bottom: var(--paragraph-margin-block);
+}
+sw-char-routes .char-rel-list::before,
+sw-char-routes .char-rel-list::after {
+  content: "↓";
+  background: var(--gray-background-color);
+  color: var(--gray-color);
 }
 
 
