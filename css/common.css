@@ -39,6 +39,8 @@ html {
   --flavor-background-color: transparent;
   --flavor-background-foreground-color: black;
   --flavor-border-color: #004000;
+  --selected-color: black;
+  --selected-background-color: #eaecff;
   --active-color: black;
   --active-background-color: #deffe2;
   --paragraph-margin-block: 1em;
@@ -206,6 +208,11 @@ code {
   background: transparent;
   font-family: "Courier New", monospace;
   word-break: break-all;
+}
+
+sw-data-char.active {
+  background: var(--selected-background-color);
+  color: var(--selected-color);
 }
 
 .char-sample:not([hidden]) {
@@ -382,21 +389,32 @@ sw-char-cluster > ul > li > ul > li > .char-rel-list code::after {
   content: " → ";
 }
 
-sw-char-routes > ol:not([hidden]) {
-  display: block;
+sw-char-routes > list-main > ol:not([hidden]) {
+  display: inline-block;
 }
-sw-char-routes > ol {
-  margin: 0;
-  padding: 0;
+sw-char-routes > list-main > ol {
+  width: fit-content;
+  margin: 0 1em 1em 0;
+  border-top: var(--row-border);
+  padding: var(--data-cell-padding);
   text-align: center;
+  vertical-align: top;
 }
 
-sw-char-routes > ol > li:not([hidden]) {
+sw-char-routes > list-main > ol > li:not([hidden]) {
   display: block;
 }
-sw-char-routes > ol > li {
+sw-char-routes > list-main > ol > li {
   margin: 0;
   padding: 0;
+}
+
+sw-char-routes list-main sw-data-char:not([hidden]) {
+  display: block;
+}
+sw-char-routes list-main sw-data-char {
+  width: fit-content;
+  margin: 0 auto;
 }
 
 sw-char-routes .char-item {
@@ -406,6 +424,7 @@ sw-char-routes .char-item {
 sw-char-routes .char-rel-list {
   margin-top: var(--paragraph-margin-block);
   margin-bottom: var(--paragraph-margin-block);
+  max-width: 20em;
 }
 sw-char-routes .char-rel-list::before,
 sw-char-routes .char-rel-list::after {

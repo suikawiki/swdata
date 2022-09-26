@@ -1121,17 +1121,22 @@
       </p>
     </form>
 
-    <table class=props>
-      <tbody>
-        <tr>
-          <th>文字1
-          <td><sw-data-char data-field=char1 template=sw-data-char-prop-value></sw-data-char>
-        <tr>
-          <th>文字2
-          <td><sw-data-char data-field=char2 template=sw-data-char-prop-value></sw-data-char>
-    </table>
+    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。" nomatch=絞り込み条件に一致する経路は見つかりませんでした。 continue="続く">
+      <table class=props>
+        <tbody>
+          <tr>
+            <th>文字1
+            <td><sw-data-char data-field=char1 template=sw-data-char-prop-value></sw-data-char>
+          <tr>
+            <th>文字2
+            <td><sw-data-char data-field=char2 template=sw-data-char-prop-value></sw-data-char>
+          <tr>
+            <th><label for=routes-filterChar>絞り込み</label>
+            <td><input type=search name=filterChar id=routes-filterChar>
+      </table>
 
-    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。"></sw-char-routes>
+      <list-main></list-main>
+    </sw-char-routes>
   </template>
   
   <template data-name=page-antenna>
