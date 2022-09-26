@@ -1055,7 +1055,7 @@ SWD.char = function (type, value) {
       c.categoryName = 'Unicode 符号点';
       return c;
     } else if (value.charAt (0) === ':') {
-      var m = value.match (/^(?::u[1-9a-f][0-9a-f]{0,4}|:u10[0-9a-f]{4})+$/);
+      var m = value.match (/^(?::u[1-9a-f][0-9a-f]{0,4}|:u10[0-9a-f]{4}|:u0)+$/);
       if (m) {
         var v = m[0].split (/:u/);
         v.shift ();
@@ -1477,14 +1477,43 @@ SWD.Char.routes = async function (char1, char2, opts) {
   var maxDistance = opts.maxDistance || 30;
   var p = [];
 
+  if (char1.char === char2.char && char1.char !== null) {
+    var item = [[char1, []]];
+    if (opts.onfound) p.push (Promise.resolve (item).then (opts.onfound));
+    await Promise.all (p);
+    return [ item ];
+  }
+
+  var char1Char = char1.char;
+  var char2Char = char2.char;
   var char = char1;
   var found = [];
+  var dups = {};
+  var dupsNeedReport = {};
+  var reportDups = dd => {
+    dd.forEach (route => {
+      p.push (Promise.resolve (route).then (opts.ondup));
+      checkDups (route);
+    });
+  };
+  var checkDups = route => {
+    route.forEach (_ => {
+      var char = _[0].char;
+      if (!dupsNeedReport[char]) {
+        dupsNeedReport[char] = true;
+        var dd = dups[char];
+        delete dups[char];
+        if (dd) reportDups (dd);
+      }
+    });
+  };
   var current = [ [[char1, []]] ];
+  current[0].seen = new Set ([char1Char]);
   var currentSeen = {};
-  currentSeen[char1.char] = true;
+  currentSeen[char1Char] = true;
   while (true) {
-    console.log ("length", current[0].length, "routes", current.length);
-    if (opts.onhop) p.push (Promise.resolve (current[0].length).then (opts.onhop));
+    console.log ("length", current[0].length, "routes", current.length); // debug
+    p.push (Promise.resolve (current[0].length).then (opts.onhop));
     var next = [];
     var nextSeen = {};
     for (var n in currentSeen) { nextSeen[n] = currentSeen[n] }
@@ -1493,23 +1522,36 @@ SWD.Char.routes = async function (char1, char2, opts) {
       var char = route.at (-1)[0];
       var rels = await SWD.Char.getRelsAll (char.char);
       rels.forEach (rel => {
+        var item = route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]);
+        item.seen = new Set (route.seen);
         //if (currentSeen[rel[0]]) {
-        if (nextSeen[rel[0]]) {
-          //
-        } else if (rel[0] === char2.char) {
-          var item = route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]);
+        if (rel[0] === char2Char) {
           found.push (item);
-          if (opts.onfound) p.push (Promise.resolve (item).then (opts.onfound));
+          delete item.seen;
+          p.push (Promise.resolve (item).then (opts.onfound));
+          checkDups (item);
+        } else if (nextSeen[rel[0]]) {
+          if (item.seen.has (rel[0])) {
+            //
+          } else if (dupsNeedReport[rel[0]]) {
+            delete item.seen;
+            reportDups ([item]);
+          } else {
+            dups[rel[0]] = dups[rel[0]] || [];
+            delete item.seen;
+            dups[rel[0]].push (item);
+          }
         } else {
-          next.push (route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]));
+          next.push (item);
+          item.seen.add (rel[0]);
         }
         nextSeen[rel[0]] = true;
-      });
+      }); // rels
 
       await new Promise (_ => setTimeout (_, 0));
     } // route
     if (!next.length) break;
-    if (found.length) break;
+    //if (found.length) break;
     if (next[0].length > maxDistance) break;
     current = next;
     currentSeen = nextSeen;
@@ -1524,41 +1566,127 @@ defineElement ({
   fill: 'idlattribute',
   props: {
     pcInit: function () {
-      this.swUpdate ();
+      this.swInit ();
     }, // pcInit
-    swUpdate: async function () {
+    swInit: async function () {
       var char1 = this.value[0];
       var char2 = this.value[1];
 
-      this.textContent = '';
       var as = document.createElement ('action-status');
-      var progress = document.createElement ('progress');
-      as.appendChild (progress);
+      as.innerHTML = '<progress></progress><action-status-message></action-status-message>';
+      var progress = as.firstChild;
       this.appendChild (as);
+
+      this.querySelectorAll ('input[name=filterChar]').forEach (_ => {
+        _.oninput = () => {
+          clearTimeout (this.swUpdateRoutesTimer);
+          this.swUpdateRoutesTimer = setTimeout (() => this.swUpdateRoutes (), 500);
+        };
+      });
       
       var maxDistance = 30;
       progress.max = maxDistance;
       var n = 0;
 
+      this.swRunning = true;
+      this.swRoutes = [];
       var results = await SWD.Char.routes (char1, char2, {
         maxDistance,
         onhop: hop => {
           progress.value = hop;
         },
         onfound: route => {
-          this.swInsertRoute (route);
+          this.swInsertRoute (route, {});
+        },
+        ondup: route => {
+          this.swInsertRoute (route, {partial: true});
         },
       });
 
-      if (results.length) {
-        as.remove ();
+      delete this.swRunning;
+      this.swUpdateActionStatus ();
+    }, // swInit
+    swUpdateRoutes: function () {
+      var list = this.querySelector ('list-main');
+      list.textContent = '';
+
+      var match = this.swMatcher ();
+      this.swRoutes.forEach (([route, partial]) => {
+        if (!match (route)) return;
+        
+        list.appendChild (this.swCreateRouteElement (route, {
+          partial,
+          activeChar: match.char,
+        }));
+      });
+
+      this.swUpdateActionStatus ();
+    }, // swUpdateRoutes
+    swUpdateActionStatus: function () {
+      var as = this.querySelector ('action-status');
+
+      if (this.swRoutes.length) {
+        if (this.querySelector ('list-main ol')) {
+          as.hidden = ! this.swRunning;
+          as.querySelector ('action-status-message').hidden = false;
+        } else {
+          as.hidden = false;
+          var m = as.querySelector ('action-status-message');
+          m.hidden = false;
+          m.textContent = this.getAttribute ('nomatch');
+        }
       } else {
-        as.innerHTML = '<action-status-message></action-status-message>';
-        as.firstChild.textContent = this.getAttribute ('notfound');
+        as.hidden = false;
+        var m = as.querySelector ('action-status-message');
+        m.hidden = false;
+        m.textContent = this.getAttribute ('notfound');
       }
-    }, // swUpdate
-    swInsertRoute: function (route) {
+    }, // swUpdateRoutes
+    swInsertRoute: function (route, opts) {
+      this.swRoutes.push ([route, opts.partial]);
+
+      var match = this.swMatcher ();
+      if (match (route)) {
+        this.querySelector ('list-main').appendChild (this.swCreateRouteElement (route, {
+          partial: opts.partial,
+          activeChar: match.char,
+        }));
+      }
+
+      this.swUpdateActionStatus ();
+    }, // swInsertRoute
+    swMatcher: function () {
+      var char;
+      this.querySelectorAll ('input[name=filterChar]').forEach (_ => {
+        if (_.value.length) char = _.value;
+      });
+      if (char) {
+        char = SWD.char ('char', char).char;
+        var code = route => {
+          for (var i = 0; i < route.length; i++) {
+            if (route[i][0].char === char) {
+              return true;
+            }
+          }
+          return false;
+        };
+        code.char = char;
+        return code;
+      } else {
+        return (route) => true;
+      }
+    }, // swMatcher
+    swSetCharFilter: function (char) {
+      this.querySelectorAll ('input[name=filterChar]').forEach (_ => {
+        _.value = char;
+      });
+      this.swUpdateRoutes ();
+    }, // swSetCharFilter
+    swCreateRouteElement: function (route, {partial, activeChar}) {
       var ol = document.createElement ('ol');
+
+      if (partial) route.at (-1).partialLast = true;
+      
       route.forEach (step => {
         var li = document.createElement ('li');
 
@@ -1578,12 +1706,27 @@ defineElement ({
         
         var c = document.createElement ('sw-data-char');
         c.setAttribute ('template', 'sw-data-char-item');
+        c.classList.toggle ('active', activeChar === step[0].char);
         c.value = step[0];
         li.appendChild (c);
 
         ol.appendChild (li);
       });
-      this.appendChild (ol);
+
+      if (partial) {
+        var li = document.createElement ('li');
+        li.className = 'continue';
+        li.innerHTML = '<a href=javascript:></a>';
+        var a = li.firstChild;
+        var char = route.at (-1)[0].char;
+        a.onclick = () => this.swSetCharFilter (char);
+        a.textContent = this.getAttribute ('continue');
+        ol.appendChild (li);
+      }
+      
+      ol.querySelector (':scope > li:first-child sw-data-char').classList.add ('in-cluster');
+      if (!partial) ol.querySelector (':scope > li:last-child sw-data-char').classList.add ('in-cluster');
+      return ol;
     }, // swInsertRoute
   },
 }); // <sw-char-routes>
