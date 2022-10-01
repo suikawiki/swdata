@@ -88,9 +88,8 @@ sub main ($$$) {
   }
 
   if (@$path == 2 and $path->[0] eq 'js' and
-      ($path->[1] eq 'site.js' or $path->[1] eq 'components.js')) {
-    # /js/site.js
-    # /js/components.js
+      $path->[1] =~ /\A[a-z0-9]+\.js\z/) {
+    # /js/{name}.js
     return static $app, 'text/javascript; charset=utf-8', 'js/' . $path->[1];
   }
 

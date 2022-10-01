@@ -269,6 +269,11 @@ sw-data-char.active {
   line-height: 1.0;
 }
 
+.font-glyph {
+  vertical-align: bottom;
+  overflow: visible;
+}
+
 
 td.copy {
   width: 2em;
@@ -311,6 +316,26 @@ sw-label-set can-copy button {
   display: block;
 }
 
+sw-char-fonts figure:not([hidden]) {
+  display: inline-block;
+}
+sw-char-fonts figure {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+sw-char-fonts figcaption {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  text-align: center;
+  font-size: 80%;
+}
+
+sw-char-fonts .char-sample {
+  font-size: 600%;
+}
 
 .char-item:not([hidden]) {
   display: block;

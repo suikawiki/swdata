@@ -1821,6 +1821,117 @@ defineElement ({
   },
 }); // <sw-data-char-rel>
 
+/* ------ Fonts ------ */
+
+SWD.Font = {};
+
+SWD.Font._otjs = function () {
+  return this._otjsp = this._otjsp || new Promise ((ok, ng) => {
+    var s = document.createElement ('script');
+    s.src = '/js/opentype.js';
+    s.onload = ok;
+    s.onerror = ng;
+    document.head.appendChild (s);
+  });
+}; // SWD.Font._otjs
+
+SWD.Font.info = async function (opts) {
+  var info = opts;
+  if (!info.type && info.name) {
+    var json = await SWD.data ('fonts.json');
+    info = json[opts.name] || opts;
+  }
+  return info;
+}; // SWD.Font.info
+
+SWD.Font.load = async function (opts) {
+  var info = await SWD.Font.info (opts);
+  var f = new SWD.Font.Font;
+  f.info = info;
+  if (info.type === 'opentype') {
+    await SWD.Font._otjs ();
+    var otf = await opentype.load (info.url);
+    f.otf = otf;
+    return f;
+  } else if (info.type === 'native') {
+    return f;
+  } else {
+    throw opts;
+  }
+}; // SWD.Font.load
+
+SWD.Font.Font = function () { };
+
+SWD.Font.Font.prototype.getGlyphSVGByGlyphId = function (glyphId) {
+  if (this.otf) {
+    var glyph = this.otf.glyphs.get (glyphId);
+    var upem = this.otf.unitsPerEm;
+    var svg = document.createElementNS
+        ('http://www.w3.org/2000/svg', 'svg');
+    var h = this.otf.tables.os2.sTypoAscender - this.otf.tables.os2.sTypoDescender;
+    if (h < upem) h = upem;
+    svg.setAttribute ('viewBox', [0, 0, upem, h].join (' '));
+    svg.setAttribute ('class', 'font-glyph');
+    
+    var path = glyph.getPath (0, h + this.otf.tables.os2.sTypoDescender, upem, {});
+    svg.appendChild (path.toDOMElement ());
+    
+    return svg;
+  } else {
+    throw this;
+  }
+}; // getSVGByGlyphID
+
+defineElement ({
+  name: 'sw-font-glyph',
+  props: {
+    pcInit: function () {
+      return this.swUpdate ();
+    },
+    swUpdate: async function () {
+      var name = this.getAttribute ('name');
+      var font = await SWD.Font.load ({name});
+      var gid = this.getAttribute ('glyphid');
+      var svg = font.getGlyphSVGByGlyphId (gid);
+      this.appendChild (svg);
+    }, // swUpdate
+  },
+}); // <sw-font-glyph>
+
+defineElement ({
+  name: 'sw-char-fonts',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: async function () {
+      var char = this.value;
+      if (char.type === 'unicode' || char.type === 'vs' ||
+          char.type === 'string') {
+        var ts = await $getTemplateSet ('sw-char-fonts-string-item');
+        var e = ts.createFromTemplate ('figure', {
+          string: char.text,
+        });
+        this.appendChild (e);
+      } else if (char.type === 'char') {
+        var m = char.char.match (/^:aj([1-9][0-9]*|0)$/);
+        if (m) {
+          var glyphId = m[1];
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var info = await SWD.Font.info ({name: 'aj1'});
+          var e = ts.createFromTemplate ('figure', {
+            name: 'aj1',
+            glyphId,
+            info,
+          });
+          this.appendChild (e);
+        }
+      }
+    }, // swUpdate
+  },
+}); // <sw-char-fonts>
+
 /* ------ Kanshi ------ */
 
 defineElement ({
