@@ -12,6 +12,8 @@ html {
   --gray-border-color: #ccc;
   --highlighted-background-color: #999;
   --highlighted-color: white;
+  --error-color: white;
+  --error-background-color: red;
   --weight-1-background-color: #fafafa;
   --weight-1-color: black;
   --weight-2-background-color: #f0f0f0;
@@ -226,6 +228,16 @@ sw-data-char.active {
   vertical-align: middle;
 }
 
+.char-sample:empty::after {
+  content: "\FFFD";
+  background-color: var(--error-background-color);
+  color: var(--error-color);
+  font-size: 10px;
+  line-height: 1.0;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
 .char-sample.ltr {
   writing-mode: horizontal-tb;
   direction: ltr;
@@ -255,6 +267,11 @@ sw-data-char.active {
   font-size: 120%;
   margin-right: 0.3em;
   line-height: 1.0;
+}
+
+.font-glyph {
+  vertical-align: bottom;
+  overflow: visible;
 }
 
 
@@ -299,6 +316,26 @@ sw-label-set can-copy button {
   display: block;
 }
 
+sw-char-fonts figure:not([hidden]) {
+  display: inline-block;
+}
+sw-char-fonts figure {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+sw-char-fonts figcaption {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  text-align: center;
+  font-size: 80%;
+}
+
+sw-char-fonts .char-sample {
+  font-size: 600%;
+}
 
 .char-item:not([hidden]) {
   display: block;

@@ -485,6 +485,24 @@ SWD.openPage = function (url) {
       args.isSensitive = args.char.isSensitive;
       return args;
     }
+    var m = path.match (/^\/char\/([0-9A-Fa-f]{4,6}(?::[0-9A-Fa-f]{4,6})+)$/);
+    if (m) { // /char/{code}:{code}:...:{code}
+      args.char = SWD.char ('text', m[1].split (/:/).map (_ => String.fromCodePoint (parseInt (_, 16))).join (''));
+      args.name = 'page-char-index';
+      args.site = 'chars';
+      args.isSensitive = args.char.isSensitive;
+      return args;
+    }
+    var m = path.match (/^\/char\/char:([^/]+)$/);
+    if (m) { // /char/char:{char}
+      try {
+        args.char = SWD.char ('char', decodeURIComponent (m[1]));
+        args.name = 'page-char-index';
+        args.site = 'chars';
+        args.isSensitive = args.char.isSensitive;
+        return args;
+      } catch (e) { }
+    }
 
     // XXX /char/{name}
     // XXX /string
@@ -918,48 +936,75 @@ defineElement ({
 
 SWD.Char = function () {};
 
+SWD.Char.hex4 = function (n) {
+  var hex = n.toString (16).toUpperCase ();
+  if (hex.length < 4) {
+    hex = ('000' + hex).slice (3 + hex.length - 4);
+  }
+  return hex;
+}; // SWD.Char.hex4
+
+SWD.Char.uplus = function (n) {
+  var hex = n.toString (16).toUpperCase ();
+  if (hex.length < 4) {
+    hex = ('000' + hex).slice (3 + hex.length - 4);
+  }
+  return 'U+' + hex;
+}; // SWD.Char.uplus
+
 Object.defineProperty (SWD.Char.prototype, 'text', {
   get: function () {
     if (this.type === 'unicode') {
       return String.fromCodePoint (this.unicode);
+    } else if (this.type === 'vs') {
+      return String.fromCodePoint (this.unicode) +
+             String.fromCodePoint (this.unicode2);
+    } else if (this.type === 'string') {
+      return this.string;
     } else {
       return null;
     }
   },
 }); // char.text
 
-Object.defineProperty (SWD.Char.prototype, 'unicodeHex', {
+Object.defineProperty (SWD.Char.prototype, 'uplus', {
   get: function () {
     if (this.type === 'unicode') {
-      var hex = this.unicode.toString (16).toUpperCase ();
-      if (hex.length < 4) {
-        hex = ('000' + hex).slice (3 + hex.length - 4);
-      }
-      return hex;
+      return SWD.Char.uplus (this.unicode);
+    } else if (this.type === 'vs') {
+      return '<' + SWD.Char.uplus (this.unicode) + ', ' + SWD.Char.uplus (this.unicode2) + '>';
+    } else if (this.type === 'string') {
+      return '<' + [...this.string].map (_ => SWD.Char.uplus (_.codePointAt (0))).join (', ') + '>';
     } else {
       return null;
     }
   },
-}); // char.unicodeHex
+}); // char.uplus
 
 Object.defineProperty (SWD.Char.prototype, 'char', {
   get: function () {
-    if (this.type === 'unicode') {
+    if (this.type === 'unicode' || this.type === 'vs') {
       var u = this.unicode;
+      var s;
       if (u === 0x002E ||
           u === 0x003A ||
           (0x0000 <= u && u <= 0x001F) ||
           (0x007F <= u && u <= 0x009F) ||
           (0xD800 <= u && u <= 0xDFFF)) {
         //XXX noncharacter
-        return ':u' + u.toString (16);
+        s = ':u' + u.toString (16);
       } else {
-        return String.fromCodePoint (u);
+        s = String.fromCodePoint (u);
       }
+      if (this.type === 'vs') {
+        s += String.fromCodePoint (this.unicode2);
+      }
+      return s;
     } else if (this.type === 'char') {
       return this._char;
     } else if (this.type === 'string') {
       if (this.string[0] === "." || this.string[0] === ":") {
+        // XXX surrogate
         return [...this.string].map (_ => ':u' + _.codePointAt (0).toString (16)).join ('');
       } else {
         return this.string;
@@ -970,10 +1015,27 @@ Object.defineProperty (SWD.Char.prototype, 'char', {
   },
 }); // char.char
 
+Object.defineProperty (SWD.Char.prototype, 'url', {
+  get: function () {
+    if (this.type === 'unicode') {
+      return '/char/' + SWD.Char.hex4 (this.unicode);
+    } else if (this.type === 'vs') {
+      return '/char/' + SWD.Char.hex4 (this.unicode) + ':' + SWD.Char.hex4 (this.unicode2);
+    } else if (this.type === 'string') {
+      // XXX surrogate, noncharacter
+      return '/char/' + [...this.string].map (_ => SWD.Char.hex4 (_.codePointAt (0))).join (':');
+    } else if (this.type === 'char') {
+      return '/char/char:' + encodeURIComponent (this._char);
+    } else {
+      return null;
+    }
+  },
+}); // char.url
+
 SWD.Char.prototype._getNames = async function () {
   if (this.type === 'unicode') {
     var names = await SWD.data ('char-names.json');
-    var c = names.code_to_name[this.unicodeHex];
+    var c = names.code_to_name[SWD.Char.uplus (this.unicode)];
     return c || {};
   } else {
     return {name: this.char};
@@ -990,7 +1052,22 @@ Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
     }
   },
 }); // char.isSensitive
-      
+
+Object.defineProperty (SWD.Char.prototype, 'categoryURL', {
+  get: function () {
+    return 'https://chars.suikawiki.org';
+  },
+}); // char.categoryURL
+
+Object.defineProperty (SWD.Char.prototype, 'categoryName', {
+  get: function () {
+    return {
+      unicode: 'Unicode 符号点',
+      ucs1993: 'ISO/IEC 10646-1:1993 符号位置',
+    }[this.type] || '文字';
+  },
+}); // char.categoryName
+
 SWD.Char.prototype.applyDelta = function (delta) {
   var delta = parseInt (delta);
   if (Number.isFinite (delta)) {
@@ -1015,46 +1092,46 @@ SWD.char = function (type, value) {
     if (0 <= value && value <= 0x10FFFF) {
       c.type = type;
       c.unicode = value;
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = 'Unicode 符号点';
       return c;
     } else if (value <= 0x7FFFFFFF) {
       c.type = 'ucs1993';
       c.charCode = value;
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = 'ISO/IEC 10646 符号位置';
       return c;
     } else {
       c.type = 'code';
       c.charCode = value;
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = '文字符号';
       return c;
     }
-  } else if (type === 'text') {
+  }
+
+  if (type === 'char') {
+    if (value[0] === ':' || value[0] === '.') {
+      //
+    } else {
+      type = 'text';
+    }
+  }
+
+  if (type === 'text') {
     var c = new SWD.Char;
-    if ([...value].length === 1) {
+    if (value.length === 1 || [...value].length === 1) {
       c.type = 'unicode';
       c.unicode = value.codePointAt (0);
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = 'Unicode 符号点';
+      return c;
+    } else if (/^.[\u180B-\u180D\u180F\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/us.test (value)) {
+      c.type = 'vs';
+      c.unicode = value.codePointAt (0);
+      c.unicode2 = value.codePointAt (1);
       return c;
     } else {
       c.type = 'string';
       c.string = value;
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = '文字';
       return c;
     }
-  } else if (type === 'char') {
-    var c = new SWD.Char;
-    if ([...value].length === 1) {
-      c.type = 'unicode';
-      c.unicode = value.codePointAt (0);
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = 'Unicode 符号点';
-      return c;
-    } else if (value.charAt (0) === ':') {
+  }
+
+  if (type === 'char') {
+    if (value.charAt (0) === ':') {
       var m = value.match (/^(?::u[1-9a-f][0-9a-f]{0,4}|:u10[0-9a-f]{4}|:u0)+$/);
       if (m) {
         var v = m[0].split (/:u/);
@@ -1064,25 +1141,18 @@ SWD.char = function (type, value) {
           c.type = 'unicode';
           c.unicode = c.string.codePointAt (0);
           delete c.string;
-          c.categoryURL = 'https://chars.suikawiki.org';
-          c.categoryName = 'Unicode 符号点';
+          return c;
         } else {
           c.type = 'string';
+          return c;
         }
-      } else {
-        c.type = 'char';
-        c._char = value;
       }
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = '文字';
-      return c;
-    } else {
-      c.type = 'char';
-      c._char = value;
-      c.categoryURL = 'https://chars.suikawiki.org';
-      c.categoryName = '文字';
-      return c;
     }
+
+    var c = new SWD.Char;
+    c.type = 'char';
+    c._char = value;
+    return c;
   } else {
     throw type;
   }
@@ -1750,6 +1820,117 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-char-rel>
+
+/* ------ Fonts ------ */
+
+SWD.Font = {};
+
+SWD.Font._otjs = function () {
+  return this._otjsp = this._otjsp || new Promise ((ok, ng) => {
+    var s = document.createElement ('script');
+    s.src = '/js/opentype.js';
+    s.onload = ok;
+    s.onerror = ng;
+    document.head.appendChild (s);
+  });
+}; // SWD.Font._otjs
+
+SWD.Font.info = async function (opts) {
+  var info = opts;
+  if (!info.type && info.name) {
+    var json = await SWD.data ('fonts.json');
+    info = json[opts.name] || opts;
+  }
+  return info;
+}; // SWD.Font.info
+
+SWD.Font.load = async function (opts) {
+  var info = await SWD.Font.info (opts);
+  var f = new SWD.Font.Font;
+  f.info = info;
+  if (info.type === 'opentype') {
+    await SWD.Font._otjs ();
+    var otf = await opentype.load (info.url);
+    f.otf = otf;
+    return f;
+  } else if (info.type === 'native') {
+    return f;
+  } else {
+    throw opts;
+  }
+}; // SWD.Font.load
+
+SWD.Font.Font = function () { };
+
+SWD.Font.Font.prototype.getGlyphSVGByGlyphId = function (glyphId) {
+  if (this.otf) {
+    var glyph = this.otf.glyphs.get (glyphId);
+    var upem = this.otf.unitsPerEm;
+    var svg = document.createElementNS
+        ('http://www.w3.org/2000/svg', 'svg');
+    var h = this.otf.tables.os2.sTypoAscender - this.otf.tables.os2.sTypoDescender;
+    if (h < upem) h = upem;
+    svg.setAttribute ('viewBox', [0, 0, upem, h].join (' '));
+    svg.setAttribute ('class', 'font-glyph');
+    
+    var path = glyph.getPath (0, h + this.otf.tables.os2.sTypoDescender, upem, {});
+    svg.appendChild (path.toDOMElement ());
+    
+    return svg;
+  } else {
+    throw this;
+  }
+}; // getSVGByGlyphID
+
+defineElement ({
+  name: 'sw-font-glyph',
+  props: {
+    pcInit: function () {
+      return this.swUpdate ();
+    },
+    swUpdate: async function () {
+      var name = this.getAttribute ('name');
+      var font = await SWD.Font.load ({name});
+      var gid = this.getAttribute ('glyphid');
+      var svg = font.getGlyphSVGByGlyphId (gid);
+      this.appendChild (svg);
+    }, // swUpdate
+  },
+}); // <sw-font-glyph>
+
+defineElement ({
+  name: 'sw-char-fonts',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: async function () {
+      var char = this.value;
+      if (char.type === 'unicode' || char.type === 'vs' ||
+          char.type === 'string') {
+        var ts = await $getTemplateSet ('sw-char-fonts-string-item');
+        var e = ts.createFromTemplate ('figure', {
+          string: char.text,
+        });
+        this.appendChild (e);
+      } else if (char.type === 'char') {
+        var m = char.char.match (/^:aj([1-9][0-9]*|0)$/);
+        if (m) {
+          var glyphId = m[1];
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var info = await SWD.Font.info ({name: 'aj1'});
+          var e = ts.createFromTemplate ('figure', {
+            name: 'aj1',
+            glyphId,
+            info,
+          });
+          this.appendChild (e);
+        }
+      }
+    }, // swUpdate
+  },
+}); // <sw-char-fonts>
 
 /* ------ Kanshi ------ */
 

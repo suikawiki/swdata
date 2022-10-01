@@ -1061,6 +1061,12 @@
           <td><sw-data-char data-field=char template=sw-data-char-prop-value></sw-data-char>
     </table>
 
+    <section>
+      <h1>フォントの字形</h1>
+
+      <sw-char-fonts data-field=char></sw-char-fonts>
+    </section>
+
     <section id=neighbors>
       <h1>関連</h1>
 
@@ -1749,8 +1755,8 @@
 
 <template-set name=sw-data-char>
   <template>
-    <a data-href-template="/char/{unicodeHex}">
-      <code>U+<span data-field=unicodeHex></span></code>
+    <a data-href-field=url>
+      <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
       (<data class="char-sample" data-field=text></data>)
     </a>
@@ -1759,7 +1765,7 @@
 
 <template-set name=sw-data-char-text>
   <template>
-    <code>U+<span data-field=unicodeHex></span></code>
+    <code data-field=uplus></code>
     <code class=charname data-field=names.name lang=en></code>
     (<data class="char-sample" data-field=text></data>)
   </template>
@@ -1767,15 +1773,15 @@
 
 <template-set name=sw-data-char-text-compact>
   <template>
-    <code>U+<span data-field=unicodeHex></span></code>
+    <code data-field=uplus></code>
   </template>
 </template-set>
 
 <template-set name=sw-data-char-item>
   <template>
-    <a data-href-template="/char/{unicodeHex}" class=char-item>
+    <a data-href-field=url class=char-item>
       <data class="char-sample" data-field=text></data>
-      <code>U+<span data-field=unicodeHex></span></code>
+      <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
@@ -1783,7 +1789,7 @@
 
 <template-set name=sw-data-char-prop-value>
   <template>
-    <can-copy><a data-href-template=https://chars.suikawiki.org/char/{unicodeHex}><code>U+<span data-field=unicodeHex></span></code></a></can-copy>
+    <can-copy><a data-href-field=url><code data-field=uplus></code></a></can-copy>
     
     <can-copy><code class=charname data-field=names.name lang=en></code></can-copy>
 
@@ -1816,6 +1822,20 @@
 <template-set name=sw-data-char-rel>
   <template>
     <code data-field=value></code>
+  </template>
+</template-set>
+
+<template-set name=sw-char-fonts-string-item>
+  <template>
+    <data class=char-sample data-field=string></data>
+    <figcaption>プラットフォームのフォント</figcaption>
+  </template>
+</template-set>
+
+<template-set name=sw-char-fonts-font-item>
+  <template>
+    <sw-font-glyph class=char-sample data-name-field=name data-glyphid-field=glyphId data-filled="name glyphid"></sw-font-glyph>
+    <figcaption data-field=info.label></figcaption>
   </template>
 </template-set>
 
