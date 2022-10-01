@@ -1749,8 +1749,8 @@
 
 <template-set name=sw-data-char>
   <template>
-    <a data-href-template="/char/{unicodeHex}">
-      <code>U+<span data-field=unicodeHex></span></code>
+    <a data-href-field=url>
+      <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
       (<data class="char-sample" data-field=text></data>)
     </a>
@@ -1759,7 +1759,7 @@
 
 <template-set name=sw-data-char-text>
   <template>
-    <code>U+<span data-field=unicodeHex></span></code>
+    <code data-field=uplus></code>
     <code class=charname data-field=names.name lang=en></code>
     (<data class="char-sample" data-field=text></data>)
   </template>
@@ -1767,15 +1767,15 @@
 
 <template-set name=sw-data-char-text-compact>
   <template>
-    <code>U+<span data-field=unicodeHex></span></code>
+    <code data-field=uplus></code>
   </template>
 </template-set>
 
 <template-set name=sw-data-char-item>
   <template>
-    <a data-href-template="/char/{unicodeHex}" class=char-item>
+    <a data-href-field=url class=char-item>
       <data class="char-sample" data-field=text></data>
-      <code>U+<span data-field=unicodeHex></span></code>
+      <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
@@ -1783,7 +1783,7 @@
 
 <template-set name=sw-data-char-prop-value>
   <template>
-    <can-copy><a data-href-template=https://chars.suikawiki.org/char/{unicodeHex}><code>U+<span data-field=unicodeHex></span></code></a></can-copy>
+    <can-copy><a data-href-field=url><code data-field=uplus></code></a></can-copy>
     
     <can-copy><code class=charname data-field=names.name lang=en></code></can-copy>
 

@@ -12,6 +12,8 @@ html {
   --gray-border-color: #ccc;
   --highlighted-background-color: #999;
   --highlighted-color: white;
+  --error-color: white;
+  --error-background-color: red;
   --weight-1-background-color: #fafafa;
   --weight-1-color: black;
   --weight-2-background-color: #f0f0f0;
@@ -223,6 +225,16 @@ sw-data-char.active {
   min-height: 1em;
   border: 1px solid var(--gray-border-color);
   line-height: 1;
+  vertical-align: middle;
+}
+
+.char-sample:empty::after {
+  content: "\FFFD";
+  background-color: var(--error-background-color);
+  color: var(--error-color);
+  font-size: 10px;
+  line-height: 1.0;
+  letter-spacing: 0;
   vertical-align: middle;
 }
 
