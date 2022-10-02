@@ -320,7 +320,7 @@ sw-char-fonts figure:not([hidden]) {
   display: inline-block;
 }
 sw-char-fonts figure {
-  margin: 0;
+  margin: 0 1em 0 0;
   padding: 0;
   text-align: center;
 }
