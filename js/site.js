@@ -1982,6 +1982,9 @@ SWD.Font.load = async function (opts) {
     });
   } else if (info.type === 'opentype-ranged') {
     return f;
+  } else if (info.type === 'bitmap') {
+    f.bitmap = await SWD.dataAB (info.fileName);
+    return f;
   } else if (info.type === 'native') {
     return f;
   } else {
@@ -2044,6 +2047,48 @@ SWD.Font.Font.prototype.getGlyphSVGByCharacter = async function (character) {
   }
 }; // getGlyphSVGByCharacter
 
+SWD.Font.Font.prototype.getGlyphCanvasByGlyphId = function (glyphId) {
+  var size = this.info.size;
+  var blength = size * size / 8;
+  var bytes = this.bitmap.slice (blength * glyphId, blength * glyphId + blength);
+  var ta = new Uint8Array (bytes);
+
+  var canvas = document.createElement ('canvas');
+  canvas.width = canvas.height = size;
+  canvas.setAttribute ('class', 'font-glyph');
+  var ctx = canvas.getContext ('2d');
+
+  var id = ctx.getImageData (0, 0, size, size);
+  for (var i = 0; i < size*size; i++) {
+    var b = 7 - (i % 8);
+    if (ta[Math.floor (i / 8)] & (1 << b)) {
+      id.data[i*4] = id.data[i*4+1] = id.data[i*4+2] = 0x00;
+      id.data[i*4+3] = 0xFF;
+    }
+  }
+  ctx.putImageData (id, 0, 0);
+  
+  return canvas;
+}; // getGlyphCanvasByGlyphId
+
+SWD.Font.Font.prototype.canGetSVG = function () {
+  if (this.otf) {
+    return true;
+  } else if (this.info.type === 'opentype-ranged') {
+    return true;
+  }
+
+  return false;
+}; // canGetSVG
+
+SWD.Font.Font.prototype.canGetCanvas = function () {
+  if (this.bitmap) {
+    return true;
+  }
+
+  return false;
+}; // canGetCanvas
+
 defineElement ({
   name: 'sw-font-glyph',
   props: {
@@ -2075,29 +2120,39 @@ defineElement ({
         
         var gid = this.getAttribute ('glyphid') || '';
         if (gid !== "") {
-          var svg = await font.getGlyphSVGByGlyphId (gid);
-          this.appendChild (svg);
-          return;
+          if (font.canGetSVG ()) {
+            var svg = await font.getGlyphSVGByGlyphId (gid);
+            this.appendChild (svg);
+            return;
+          } else if (font.canGetCanvas ()) {
+            var svg = await font.getGlyphCanvasByGlyphId (gid);
+            this.appendChild (svg);
+            return;
+          }
         }
       
         gname = gname || this.getAttribute ('glyphname') || '';
         if (gname !== "") {
-          var svg = await font.getGlyphSVGByGlyphName (gname);
-          this.appendChild (svg);
-          return;
+          if (font.canGetSVG ()) {
+            var svg = await font.getGlyphSVGByGlyphName (gname);
+            this.appendChild (svg);
+            return;
+          }
         }
 
         string = string || this.getAttribute ('string') || '';
         if ([...string].length === 1) {
-          var svg = await font.getGlyphSVGByCharacter (string);
-          this.appendChild (svg);
-          return;
+          if (font.canGetSVG ()) {
+            var svg = await font.getGlyphSVGByCharacter (string);
+            this.appendChild (svg);
+            return;
+          }
         }
       } catch (e) {
         if (this.hasAttribute ('optional')) {
           this.parentNode.hidden = true;
         } else {
-          throw e;
+          throw ["sw-font-glyph swUpdate failed", e];
         }
       }
     }, // swUpdate
@@ -2182,7 +2237,7 @@ defineElement ({
           }
         }
         
-        var m = char.char.match (/^:jis[0-9]+-[0-9]+-[0-9]+$/);
+        var m = char.char.match (/^:jis([0-9]+)-([0-9]+)-([0-9]+)$/);
         if (m) {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var names = ['mj'];
@@ -2196,6 +2251,19 @@ defineElement ({
               info,
             });
             this.appendChild (e);
+          }
+          if (m[1] === "1") {
+            names = ['jiskan16', 'jiskan24'];
+            for (var i = 0; i < names.length; i++) {
+              var name = names[i];
+              var info = await SWD.Font.info ({name});
+              var e = ts.createFromTemplate ('figure', {
+                name,
+                glyphId: (parseInt (m[2]) - 1) * 94 + (parseInt (m[3]) - 1),
+                info,
+              });
+              this.appendChild (e);
+            }
           }
         }
         
