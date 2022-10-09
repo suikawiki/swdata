@@ -1,11 +1,14 @@
 
 var SWD = {_load: {}};
 
+SWD.isReload = location.search === "?reload";
 SWD.isLocal = !! location.hostname.match (/local/);
 
 SWD.data = function (name) {
   if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name).then (res => {
+  return SWD._load[name] = fetch ('/data/' + name, {
+    cache: (SWD.isReload ? 'reload' : undefined),
+  }).then (res => {
     if (res.status !== 200) throw res;
     return res.json ();
   });
@@ -13,7 +16,9 @@ SWD.data = function (name) {
 
 SWD.dataAB = function (name) {
   if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name).then (res => {
+  return SWD._load[name] = fetch ('/data/' + name, {
+    cache: (SWD.isReload ? 'reload' : undefined),
+  }).then (res => {
     if (res.status !== 200) throw res;
     return res.arrayBuffer ();
   });
@@ -1328,6 +1333,7 @@ defineElement ({
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
       }
+      //gb ks kps swc u-...-
     }
     
     return templates[""];
@@ -1345,7 +1351,7 @@ if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
 if (SWD.isLocal) SWD.Char._relDataSets.charrel = {key: 'test1'};
 
 SWD.Char._relDataRoot = async function (ds) {
-  ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-root.json');
+  ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-index.json');
 }; // SWD.Char._relDataRoot
 
 SWD.Char._relDataClusters = async function (ds) {
@@ -1380,9 +1386,28 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
       if (def.level_key !== level) {
         //
       } else if (def.type === 'unicode') {
-        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.unicode_offset));
+        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.code_offset));
       } else if (def.type === 'unicode-suffix') {
-        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.unicode_offset) + String.fromCodePoint (def.suffix));
+        chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.code_offset) + String.fromCodePoint (def.suffix));
+      } else if (def.type === 'MJ') {
+        var char = "00000" + ((i - def.offset) / 3 + def.code_offset);
+        char = char.substr (-6);
+        chars.push (':MJ' + char);
+      } else if (def.type === 'jis' || def.type === 'cns' ||
+                 def.type === 'gb' || def.type === 'ks' ||
+                 def.type === 'kps') {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        char = Math.floor (char / 94 / 94) + '-' + ((Math.floor (char / 94) % 94) + 1) + '-' + ((char % 94) + 1);
+        chars.push (':' + def.type + char);
+      } else if (def.type === 'swc' ||
+                 def.type === 'aj' || def.type === 'ac' || def.type === 'ag' ||
+                 def.type === 'ak' || def.type === 'aj2-' ||
+                 def.type === 'ak1-') {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        chars.push (':' + def.type + char);
+      } else if (def.type.match (/^u-[a-z]+-$/)) {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        chars.push (':' + def.type + char.toString (16));
       } else {
         throw def.type;
       }
@@ -1455,14 +1480,14 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
     for (var i = 0; i < defs.length; i++) {
       var d = defs[i];
       if (d.level_key === level && d.type === 'unicode' &&
-          d.unicode_offset <= cc && cc < d.unicode_offset_next) {
+          d.code_offset <= cc && cc < d.code_offset_next) {
         def = d;
         break;
       }
     }
     
     if (def) {
-      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc - def.unicode_offset);
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc - def.code_offset);
       if (index !== null) return index ? {index} : null;
     }
   } // charLength 1
@@ -1475,17 +1500,80 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
       var d = defs[i];
       if (d.level_key === level && d.type === 'unicode-suffix' &&
           d.suffix === cc2 &&
-          d.unicode_offset <= cc1 && cc1 < d.unicode_offset_next) {
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
         def = d;
         break;
       }
     }
     
     if (def) {
-      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.unicode_offset);
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
       if (index !== null) return index ? {index} : null;
     }
   } // charLength 2
+
+  var m = char.match (/^:(MJ|aj|ac|ag|ak|aj2-|ak1-|swc)([0-9]+)$/);
+  if (m) {
+    var type = m[1];
+    var cc1 = parseInt (m[2]);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === type &&
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  }
+
+  var m = char.match (/^:(u-[a-z]+-)([0-9a-f]+)$/);
+  if (m) {
+    var type = m[1];
+    var cc1 = parseInt (m[2], 16);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === type &&
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  }
+
+  var m = char.match (/^:(jis|cns|gb|ks|kps)([0-9]+)-([0-9]+)-([0-9]+)$/);
+  if (m) {
+    var type = m[1];
+    var cc1 = parseInt (m[2]) * 94*94 + (parseInt (m[3]) - 1) * 94 + (parseInt (m[4]) - 1);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === type &&
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  }
 
   {
     var index = (ds.dataRoot.others[level] || {})[char];
@@ -1495,17 +1583,15 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
   }
 }; // SWD.Char._dsGetCluster
 
-SWD.Char.getCluster = async function (level, char) {
+SWD.Char.getCluster = async function (level, char, dsKey) {
   var cluster = {indexes: {}};
 
-  for (var _ in SWD.Char._relDataSets) {
-    var ds = SWD.Char._relDataSets[_];
-    await SWD.Char._relDataRoot (ds);
-    await SWD.Char._relDataClusters (ds);
+  var ds = SWD.Char._relDataSets[dsKey];
+  await SWD.Char._relDataRoot (ds);
+  await SWD.Char._relDataClusters (ds);
     
-    var r = SWD.Char._dsGetCluster (ds, level, char);
-    if (r) cluster.indexes[ds.key] = r.index;
-  }
+  var r = SWD.Char._dsGetCluster (ds, level, char);
+  if (r) cluster.indexes[ds.key] = r.index;
   
   return cluster;
 }; // SWD.Char.getCluster
@@ -1536,18 +1622,26 @@ SWD.Char.getRels = async function (dsKey, char) {
 SWD.Char.getRelsAll = async function (char) {
   var rels = {};
 
+  var p = [];
   for (var _ in SWD.Char._relDataSets) {
     var ds = SWD.Char._relDataSets[_];
-    await SWD.Char._relDataRoot (ds);
-    await SWD.Char._relDataRels (ds);
-
-    SWD.Char._relsFromTbl (ds, char).forEach (_ => {
-      rels[_[0]] = rels[_[0]] || [_[0], []];
-      rels[_[0]][1] = rels[_[0]][1].concat (_[1]);
-    });
+    p.push (((async (ds) => {
+      await SWD.Char._relDataRoot (ds);
+      await SWD.Char._relDataRels (ds);
+      return ds;
+    }) (ds)));
   }
 
-  return Object.values (rels);
+  return Promise.all (p).then (dss => {
+    dss.forEach (ds => {
+      SWD.Char._relsFromTbl (ds, char).forEach (_ => {
+        rels[_[0]] = rels[_[0]] || [_[0], []];
+        rels[_[0]][1] = rels[_[0]][1].concat (_[1]);
+      });
+    });
+
+    return Object.values (rels);
+  });
 }; // SWD.Char.getRelsAll
 
 SWD.Char._mjc = {};
@@ -1555,7 +1649,7 @@ SWD.Char.getMJChar = async function (char) {
   if (SWD.Char._mjc[char]) return SWD.Char._mjc[char];
 
   return SWD.Char._mjc[char] = Promise.resolve ().then (async () => {
-    var ds = SWD.Char._relDataSets.charrel;
+    var ds = SWD.Char._relDataSets.han;
     var rr = await SWD.Char.getRels (ds.key, char);
 
     var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "rev:mj:X0213");
@@ -1608,8 +1702,10 @@ defineElement ({
 
       this.textContent = '';
 
-      var dsKey = this.getAttribute ('type') || 'char';
-      var cluster = await SWD.Char.getCluster ("EQUIV", v.char);
+      var dsKey = this.getAttribute ('type');
+      if (!dsKey) return;
+
+      var cluster = await SWD.Char.getCluster ("EQUIV", v.char, dsKey);
       var chars = await SWD.Char.getChars ("EQUIV", cluster, dsKey);
       var inCluster = new Set (chars);
       
@@ -1647,7 +1743,7 @@ defineElement ({
               var li3 = document.createElement ('li');
               var code = document.createElement ('sw-data-char-rel');
               var rel = _[0].dataRoot.rels[_[1]];
-              code.setAttribute ('value', rel.key);
+              code.value = rel;
               li3.appendChild (code);
               ul2.appendChild (li3);
             });
@@ -1890,7 +1986,7 @@ defineElement ({
             var li = document.createElement ('li');
             var code = document.createElement ('sw-data-char-rel');
             var rel = _[0].dataRoot.rels[_[1]];
-            code.setAttribute ('value', rel.key);
+            code.value = rel;
             li.appendChild (code);
             ul.appendChild (li);
           });
@@ -1926,13 +2022,13 @@ defineElement ({
 
 defineElement ({
   name: 'sw-data-char-rel',
-  fill: 'contentattribute',
+  fill: 'idlattribute',
   props: {
     pcInit: function () {
       this.swUpdate ();
     },
     swUpdate: async function () {
-      var args = {value: this.getAttribute ('value')};
+      var args = this.value;
       
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
@@ -5157,6 +5253,7 @@ defineListLoader ('swRecentListLoader', async function (opts) {
   var key = this.getAttribute ('loader-key');
   return fetch ('https://suikawiki.org/feed' + (key ? '/' + key : ''), {
     mode: 'cors',
+    cache: (SWD.isReload ? 'reload' : undefined),
   }).then (res => {
     if (res.status !== 200) throw res;
     return res.text ();
