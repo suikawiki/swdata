@@ -1358,6 +1358,102 @@ SWD.Char._relDataSets = {
 
 SWD.Char._relDataRoot = async function (ds) {
   ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-index.json');
+
+  var _eint = v => {
+    var r = [];
+
+    while (true) {
+      var x = v & 0b00111111;
+      v = v >> 6;
+      if (v) {
+        r.push (0b11000000 | x);
+      } else {
+        r.push (0b10000000 | x);
+        break;
+      }
+    }
+
+    return r;
+  }; // _eint
+  
+  var prefixToEChar = {};
+  var ecs = ds.dataRoot.echars;
+  for (var i = 0; i < ecs.length; i++) {
+    var ec = ecs[i];
+    prefixToEChar[ec.prefix] = ec;
+  }
+  
+  ds.nEncodeChar = c => {
+    var m = c.match (/^:([0-9A-Za-z_-]+[A-Za-z_-])([0-9]+)$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'dec') {
+      return Uint8Array.from ([0, ec.byte].concat (_eint (m[2])));
+    }
+    var m = c.match (/^:([0-9A-Za-z_-]+-)([0-9a-f]{1,8})$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'hex') {
+      return Uint8Array.from ([0, ec.byte].concat (_eint (parseInt (m[2], 16))));
+    }
+    var m = c.match (/^:([A-Za-z0-9_-]+)-([1-9][0-9]*)-([1-9]|[1-8][0-9]|9[0-4])$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'kt') {
+      var v = (m[2]-1)*94 + (m[3]-1);
+      return Uint8Array.from ([0, ec.byte].concat (_eint (v)));
+    }
+    var cc = [...c];
+    if (cc.length === 1) {
+      var cc1 = cc[0].codePointAt (0);
+      var ec = prefixToEChar[Math.floor (cc1 / 0x1000)];
+      if (ec && ec.type === 'urow') {
+        return Uint8Array.from ([0, ec.byte].concat (_eint (cc1 % 0x1000)));
+      }
+    } else if (cc.length === 2) {
+      var ec = prefixToEChar[cc[1].codePointAt (0)];
+      if (ec && ec.type === 'suffix') {
+        return Uint8Array.from ([0, ec.byte].concat (_eint (cc[0].codePointAt (0))));
+      }
+    }
+    return (new TextEncoder ("utf-8")).encode ("\u0000" + c + "\u0001");
+  }; // nEncodeChar
+
+  var ecByteToEC = [];
+  ds.dataRoot.echars.forEach (ec => {
+    ecByteToEC[ec.byte] = ec;
+  });
+  ds.toChar = (b, c) => {
+    var ec = ecByteToEC[b];
+    if (!ec) throw new Error ("Bad b: " + b);
+
+    if (ec.type === 'dec') {
+      if (ec.prefix === 'MJ' || ec.prefix === 'koseki') {
+        c = ("00000" + c) . substr (-6);
+      }
+      return ':' + ec.prefix + c;
+    } else if (ec.type === 'hex') {
+      return ':' + ec.prefix + c.toString (16);
+    } else if (ec.type === 'kt') {
+      var k = Math.floor (c / 94) + 1;
+      var t = (c % 94) + 1;
+      return ':' + ec.prefix + '-' + k + '-' + t;
+    } else if (ec.type === 'urow') {
+      c = parseInt (ec.prefix) * 0x1000 + c;
+      return String.fromCodePoint (c);
+    } else if (ec.type === 'suffix') {
+      return String.fromCodePoint (c) + String.fromCodePoint (parseInt (ec.prefix));
+    } else {
+      throw new Error ('Bad type: ' + ec.type);
+    }
+  }; // ds.toChar
+
+  
+  var rMap = ds.rMap = []
+  for (var i = 0; i < ds.dataRoot.rels.length; i++) {
+    var rels = ds.dataRoot.rels[i].rels;
+    if (rels) {
+      rMap[i] = rels;
+    }
+  }
+  
 }; // SWD.Char._relDataRoot
 
 SWD.Char._relDataClusters = async function (ds) {
@@ -1452,103 +1548,9 @@ SWD.Char._relDataRels = async function (ds) {
 };
 
 SWD.Char._relsFromTbl = function (ds, char) {
-
-  var _eint = v => {
-    var r = [];
-
-    while (true) {
-      var x = v & 0b00111111;
-      v = v >> 6;
-      if (v) {
-        r.push (0b11000000 | x);
-      } else {
-        r.push (0b10000000 | x);
-        break;
-      }
-    }
-
-    return r;
-  }; // _eint
-  
-  var prefixToEChar = {};
-  var ecs = ds.dataRoot.echars;
-  for (var i = 0; i < ecs.length; i++) {
-    var ec = ecs[i];
-    prefixToEChar[ec.prefix] = ec;
-  }
-  
-  var nEncodeChar = c => {
-    var m = c.match (/^:([0-9A-Za-z_-]+[A-Za-z_-])([0-9]+)$/);
-    var ec = prefixToEChar[m && m[1]];
-    if (ec && ec.type === 'dec') {
-      return Uint8Array.from ([0, ec.byte].concat (_eint (m[2])));
-    }
-    var m = c.match (/^:([0-9A-Za-z_-]+-)([0-9a-f]{1,8})$/);
-    var ec = prefixToEChar[m && m[1]];
-    if (ec && ec.type === 'hex') {
-      return Uint8Array.from ([0, ec.byte].concat (_eint (parseInt (m[2], 16))));
-    }
-    var m = c.match (/^:([A-Za-z0-9_-]+)-([1-9][0-9]*)-([1-9]|[1-8][0-9]|9[0-4])$/);
-    var ec = prefixToEChar[m && m[1]];
-    if (ec && ec.type === 'kt') {
-      var v = (m[2]-1)*94 + (m[3]-1);
-      return Uint8Array.from ([0, ec.byte].concat (_eint (v)));
-    }
-    var cc = [...c];
-    if (cc.length === 1) {
-      var cc1 = cc[0].charCodeAt (0);
-      var ec = prefixToEChar[Math.floor (cc1 / 0x1000)];
-      if (ec && ec.type === 'urow') {
-        return Uint8Array.from ([0, ec.byte].concat (_eint (cc1 % 0x1000)));
-      }
-    } else if (cc.length === 2) {
-      var ec = prefixToEChar[cc[0].charCodeAt (1)];
-      if (ec && ec.type === 'suffix') {
-        return Uint8Array.from ([0, ec.byte].concat (_eint (cc[0].charCodeAt (0))));
-      }
-    }
-    return (new TextEncoder ("utf-8")).encode ("\u0000" + c + "\u0001");
-  }; // nEncodeChar
-
-  var ecByteToEC = [];
-  ds.dataRoot.echars.forEach (ec => {
-    ecByteToEC[ec.byte] = ec;
-  });
-  var _toChar = (b, c) => {
-    var ec = ecByteToEC[b];
-    if (!ec) throw new Error ("Bad b: " + b);
-
-    if (ec.type === 'dec') {
-      if (ec.prefix === 'MJ' || ec.prefix === 'koseki') {
-        c = ("00000" + c) . substr (-6);
-      }
-      return ':' + ec.prefix + c;
-    } else if (ec.type === 'hex') {
-      return ':' + ec.prefix + c.toString (16);
-    } else if (ec.type === 'kt') {
-      var k = Math.floor (c / 94) + 1;
-      var t = (c % 94) + 1;
-      return ':' + ec.prefix + '-' + k + '-' + t;
-    } else if (ec.type === 'urow') {
-      c = parseInt (ec.prefix) * 0x1000 + c;
-      return String.fromCodePoint (c);
-    } else if (ec.type === 'suffix') {
-      return String.fromCodePoint (c) + String.fromCodePoint (parseInt (ec.prefix));
-    } else {
-      throw new Error ('Bad type: ' + ec.type);
-    }
-  }; // _toChar
-
-  var rMap = []
-  for (var i = 0; i < ds.dataRoot.rels.length; i++) {
-    var rels = ds.dataRoot.rels[i].rels;
-    if (rels) {
-      rMap[i] = rels;
-    }
-  }
-  
   var tbl = ds.dataRels;
-  var bchar = nEncodeChar (char);
+  var rMap = ds.rMap;
+  var bchar = ds.nEncodeChar (char);
 
   var start = tbl.indexOf (bchar[0]);
   while (true) {
@@ -1590,7 +1592,7 @@ SWD.Char._relsFromTbl = function (ds, char) {
       }
       c = c | ((r[i] & 0b00111111) << s);
       i++;
-      c2 = _toChar (b, c);
+      c2 = ds.toChar (b, c);
     }
 
     var v2Start = i;
@@ -1620,6 +1622,85 @@ SWD.Char._relsFromTbl = function (ds, char) {
   }
   return rels;
 }; // SWD.Char._relsFromTbl
+
+SWD.Char._relDataLeaders = async function (ds) {
+  ds.dataLeaders = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-leaders.dat'));
+};
+
+SWD.Char._leadersFromTbl = function (ds, char) {
+  var tbl = ds.dataLeaders;
+  var bchar = ds.nEncodeChar (char);
+
+  var start = tbl.indexOf (bchar[0]);
+  while (true) {
+    if (start < 0) return null; // not found
+    var bs = tbl.slice (start, start + bchar.byteLength);
+    if (bchar.every ((v, i) => v === bs[i])) {
+      break;
+    } else {
+      start = tbl.indexOf (bchar[0], start + 1);
+    }
+  }
+  start += bchar.byteLength;
+
+  var end = tbl.indexOf (0x00, start);
+  if (end < 0) return null; // broken
+  while (start >= end) {
+    start++;
+    end = tbl.indexOf (0x00, start);
+    if (end < 0) return null; // broken
+    
+    var r = tbl.slice (start, end);
+    var rL = r.byteLength;
+    var i = 0;
+    if ((0x20 <= r[i] && r[i] <= 0x7E) || (0xC2 <= r[i] && r[i] <= 0xF4)) {
+      while (i < rL && r[i] !== 0x01) i++;
+      i++;
+    } else {
+      i++;
+      while (i < rL && r[i] & 0b01000000) {
+        i++;
+      }
+      i++;
+    }
+    start += i;
+
+  }
+
+  var r = tbl.slice (start, end);
+  var rL = r.byteLength;
+  var i = 0;
+  var xx = [];
+  while (i < rL) {
+    var b = r[i];
+    var c2;
+    if ((0x20 <= b && b <= 0x7E) || (0xC2 <= b && b <= 0xF4)) {
+      var bc2Start = i;
+      while (i < rL && r[i] !== 0x01) i++;
+      var bc2 = r.slice (bc2Start, i);
+      if (bc2.byteLength === 0) continue; // at end or broken
+      c2 = (new TextDecoder ('utf-8')).decode (bc2);
+      i++;
+    } else if (b == 0x01) {
+      c2 = null;
+      i++;
+    } else { // b : type
+      i++;
+      var c = 0;
+      var s = 0;
+      while (i < rL && r[i] & 0b01000000) {
+        c = c | ((r[i] & 0b00111111) << s);
+        i++;
+        s += 6;
+      }
+      c = c | ((r[i] & 0b00111111) << s);
+      i++;
+      c2 = ds.toChar (b, c);
+    }
+    xx.push (c2);
+  }
+  return xx;
+}; // SWD.Char._leadersFromTbl
 
 SWD.Char._dsGetCluster = function (ds, level, char) {
   var charLength = [...char].length;
@@ -1876,6 +1957,14 @@ SWD.Char.getRelsAll = async function (char) {
   });
 }; // SWD.Char.getRelsAll
 
+SWD.Char.getLeaders = async function (char, dsKey) {
+  var ds = SWD.Char._relDataSets[dsKey];
+  await SWD.Char._relDataRoot (ds);
+  await SWD.Char._relDataLeaders (ds);
+  
+  return SWD.Char._leadersFromTbl (ds, char) || [char];
+}; // SWD.Char.getLeaders
+
 SWD.Char._mjc = {};
 SWD.Char.getMJChar = async function (char) {
   if (SWD.Char._mjc[char]) return SWD.Char._mjc[char];
@@ -1943,12 +2032,44 @@ defineElement ({
       var cluster = await SWD.Char.getCluster ("EQUIV", v.char, dsKey);
       var chars = await SWD.Char.getChars ("EQUIV", cluster, dsKey);
       var inCluster = new Set (chars);
+      var leaders = await SWD.Char.getLeaders (v.char, dsKey);
 
-      if (chars.length === 0) {
+      if (chars.length === 0 && leaders.length <= 1) {
         this.parentNode.hidden = true;
         return;
       }
 
+      if (leaders.length === 1) {
+        var c = document.createElement ('sw-char-leaders');
+        var ts = await $getTemplateSet ('sw-char-leader-single');
+        var e = ts.createFromTemplate ('figure', {
+          char: SWD.char ('char', leaders[0]),
+        });
+        c.appendChild (e);
+        this.appendChild (c);
+      } else if (leaders.length) {
+        var c = document.createElement ('sw-char-leaders');
+        var ts = await $getTemplateSet ('sw-char-leader-item');
+        var tse = await $getTemplateSet ('sw-char-leader-empty-item');
+        var ds = SWD.Char._relDataSets[dsKey];
+        ds.dataRoot.leader_types.forEach (lt => {
+          if (!lt) return;
+          if (leaders[lt.index]) {
+            var e = ts.createFromTemplate ('figure', {
+              char: SWD.char ('char', leaders[lt.index]),
+              def: lt,
+            });
+            c.appendChild (e);
+          } else {
+            var e = tse.createFromTemplate ('figure', {
+              def: lt,
+            });
+            c.appendChild (e);
+          }
+        });
+        this.appendChild (c);
+      }
+      
       var c = document.createElement ('ul');
       for (var i = 0; i < chars.length; i++) {
         var char = chars[i];

@@ -432,6 +432,33 @@ sw-char-cluster > ul > li > ul > li > .char-rel-list code::after {
   content: " → ";
 }
 
+sw-char-leaders:not([hidden]) {
+  display: block;
+}
+sw-char-leaders {
+  margin-bottom: .5em;
+  text-align: end;
+}
+
+sw-char-leaders figure:not([hidden]) {
+  display: inline-block;
+}
+sw-char-leaders figure {
+  margin: 0 .25em;
+  padding: 0;
+  text-align: center;
+  vertical-align: top;
+  min-width: 3em;
+}
+
+sw-char-leaders .char-item {
+  min-width: 3em;
+}
+
+sw-char-leaders figcaption {
+  font-size: 80%;
+}
+
 sw-char-routes > list-main > ol:not([hidden]) {
   display: inline-block;
 }

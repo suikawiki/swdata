@@ -1091,10 +1091,6 @@
         <h1>関係する文字</h1>
         <sw-char-cluster data-field=char type=chars></sw-char-cluster>
       </section>
-      <section>
-        <h1>関係する文字</h1>
-        <sw-char-cluster data-field=char type=test1></sw-char-cluster>
-      </section>
 
       <table class=props>
         <tbody>
@@ -1874,6 +1870,27 @@
   <template>
     <code data-field=key></code>
     (<data data-field=weight></data> / <data data-field=mergeable_weight></data>)
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-single>
+  <template>
+    <figcaption>代表</figcaption>
+    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-item>
+  <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
+    <figcaption data-field=def.short_label></figcaption>
+    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-empty-item>
+  <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
+    <figcaption data-field=def.short_label></figcaption>
+    <data>-</data>
   </template>
 </template-set>
 
