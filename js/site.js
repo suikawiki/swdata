@@ -946,7 +946,7 @@ SWD.Char = function () {};
 SWD.Char.hex4 = function (n) {
   var hex = n.toString (16).toUpperCase ();
   if (hex.length < 4) {
-    hex = ('000' + hex).slice (3 + hex.length - 4);
+    hex = ('000' + hex).substr (-4);
   }
   return hex;
 }; // SWD.Char.hex4
@@ -954,7 +954,7 @@ SWD.Char.hex4 = function (n) {
 SWD.Char.uplus = function (n) {
   var hex = n.toString (16).toUpperCase ();
   if (hex.length < 4) {
-    hex = ('000' + hex).slice (3 + hex.length - 4);
+    hex = ('000' + hex).substr (-4);
   }
   return 'U+' + hex;
 }; // SWD.Char.uplus
@@ -982,9 +982,14 @@ Object.defineProperty (SWD.Char.prototype, 'uplus', {
       return '<' + SWD.Char.uplus (this.unicode) + ', ' + SWD.Char.uplus (this.unicode2) + '>';
     } else if (this.type === 'string') {
       return '<' + [...this.string].map (_ => SWD.Char.uplus (_.codePointAt (0))).join (', ') + '>';
-    } else {
-      return null;
+    } else if (this.type === 'char') {
+      var m = this._char.match (/^:u-([a-z]+)-([0-9a-f]+)$/);
+      if (m) {
+        return SWD.Char.uplus (m[2]);
+      }
     }
+
+    return null;
   },
 }); // char.uplus
 
@@ -1015,7 +1020,7 @@ Object.defineProperty (SWD.Char.prototype, 'mjGlyphName', {
 Object.defineProperty (SWD.Char.prototype, 'mkt', {
   get: function () {
     if (this.type === 'char') {
-      var m = this._char.match (/^:(?:cns|jis)([0-9]+-[0-9]+-[0-9]+)$/);
+      var m = this._char.match (/^:(?:cns|cnsold|gb|jis|ks|kps|cccii)(?:-[a-z]+-|)([0-9]+-[0-9]+-[0-9]+)$/);
       if (m) return m[1];
     }
 
@@ -1108,8 +1113,7 @@ SWD.Char.prototype._getNames = async function () {
 
 Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
   get: function () {
-    if (this.type === 'unicode' || this.type === 'ucs1993' ||
-        this.type === 'code') {
+    if (this.type === 'unicode') {
       return false;
     } else if (this.type === 'char') {
       if (this._char.match (/^:[A-Za-z]+[0-9]+-[0-9]+-[0-9]+$/)) {
@@ -1131,7 +1135,6 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
   get: function () {
     return {
       unicode: 'Unicode 符号点',
-      ucs1993: 'ISO/IEC 10646-1:1993 符号位置',
     }[this.type] || '文字';
   },
 }); // char.categoryName
@@ -1162,13 +1165,11 @@ SWD.char = function (type, value) {
       c.unicode = value;
       return c;
     } else if (value <= 0x7FFFFFFF) {
-      c.type = 'ucs1993';
-      c.charCode = value;
-      return c;
+      type = 'char';
+      value = ':u-old-' + value.toString (16);
     } else {
-      c.type = 'code';
-      c.charCode = value;
-      return c;
+      type = 'char';
+      value = ':c' + value;
     }
   }
 
@@ -1330,10 +1331,14 @@ defineElement ({
         return templates.cns || templates[""];
       } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jis || templates[""];
+      } else if (/^:(?:jis)[0-9]+-[a-z]+-[0-9]+-[0-9]+$/.test (char)) {
+        return templates.jis || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
+      } else if (/:u-[a-z]+-[0-9a-f]+$/.test (char)) {
+        return templates.u || templates[""];
       }
-      //gb ks kps swc u-...-
+      //gb ks kps cnsold swc b5 cccii
     }
     
     return templates[""];
@@ -1343,12 +1348,13 @@ defineElement ({
 }) ();
 
 SWD.Char._relDataSets = {
-  char: {key: 'char'},
-  han: {key: 'han'},
+  chars: {key: 'chars'},
+  hans: {key: 'hans'},
+  kanas: {key: 'kanas'},
+  kchars: {key: 'kchars'},
 };
 
-if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
-if (SWD.isLocal) SWD.Char._relDataSets.charrel = {key: 'test1'};
+//if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
 
 SWD.Char._relDataRoot = async function (ds) {
   ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-index.json');
@@ -1363,7 +1369,7 @@ SWD.Char._relClusterIndexFromTbl = function (ds, def, index) {
   if (def.offset_next <= offset) {
     return null;
   }
-  
+
   var tbl = ds.dataClusters;
   return tbl[offset] * 0x10000 + tbl[offset+1] * 0x100 + tbl[offset+2];
 }; // SWD.Char._relClusterIndexFromTbl
@@ -1389,13 +1395,31 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
         chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.code_offset));
       } else if (def.type === 'unicode-suffix') {
         chars.push (String.fromCodePoint ((i - def.offset) / 3 + def.code_offset) + String.fromCodePoint (def.suffix));
+      } else if (def.type === 'unicode-hangul2') {
+        var v = (i - def.offset) / 3 + def.code_offset;
+        chars.push (String.fromCodePoint (Math.floor (v / (0xA7-0x5F)) + 0x1100) +
+                    String.fromCodePoint (v % (0xA7-0x5F) + 0x1160));
+      } else if (def.type === 'unicode-hangul3') {
+        var v = (i - def.offset) / 3 + def.code_offset;
+        chars.push (String.fromCodePoint (Math.floor (v / (0xC2-0xA7) / (0x75-0x5F)) + 0x1100) +
+                    String.fromCodePoint (Math.floor (v / (0xC2-0xA7)) % (0x75-0x5F) + 0x1160) +
+                    String.fromCodePoint (v % (0xC2-0xA7) + 0x11A8));
       } else if (def.type === 'MJ') {
         var char = "00000" + ((i - def.offset) / 3 + def.code_offset);
         char = char.substr (-6);
         chars.push (':MJ' + char);
-      } else if (def.type === 'jis' || def.type === 'cns' ||
+      } else if (def.type === 'UK-') {
+        var char = "0000" + ((i - def.offset) / 3 + def.code_offset);
+        char = char.substr (-5);
+        chars.push (':UK-' + char);
+      } else if (def.type === 'jis' || def.type.match (/^jis-[a-z]+-/)) {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        var tt = 94 + (0xFC-0xEF)*2;
+        char = Math.floor (char / 94 / tt) + '-' + ((Math.floor (char / 94) % tt) + 1) + '-' + ((char % 94) + 1);
+        chars.push (':' + def.type + char);
+      } else if (def.type === 'cns' || def.type.match (/^cns-[a-z]+-/) ||
                  def.type === 'gb' || def.type === 'ks' ||
-                 def.type === 'kps') {
+                 def.type === 'kps' || def.type === 'cccii') {
         var char = ((i - def.offset) / 3 + def.code_offset);
         char = Math.floor (char / 94 / 94) + '-' + ((Math.floor (char / 94) % 94) + 1) + '-' + ((char % 94) + 1);
         chars.push (':' + def.type + char);
@@ -1408,8 +1432,14 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
       } else if (def.type.match (/^u-[a-z]+-$/)) {
         var char = ((i - def.offset) / 3 + def.code_offset);
         chars.push (':' + def.type + char.toString (16));
+      } else if (def.type.match (/^b5-$/)) {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        chars.push (':' + def.type + char.toString (16));
+      } else if (def.type.match (/^b5-[a-z]+-$/)) {
+        var char = ((i - def.offset) / 3 + def.code_offset);
+        chars.push (':' + def.type + char.toString (16));
       } else {
-        throw def.type;
+        throw new Error ("bad table entry: " + def.type);
       }
     }
     i += 3;
@@ -1422,10 +1452,103 @@ SWD.Char._relDataRels = async function (ds) {
 };
 
 SWD.Char._relsFromTbl = function (ds, char) {
-  if (char.indexOf ("\x00") >= 0) return [];
 
+  var _eint = v => {
+    var r = [];
+
+    while (true) {
+      var x = v & 0b00111111;
+      v = v >> 6;
+      if (v) {
+        r.push (0b11000000 | x);
+      } else {
+        r.push (0b10000000 | x);
+        break;
+      }
+    }
+
+    return r;
+  }; // _eint
+  
+  var prefixToEChar = {};
+  var ecs = ds.dataRoot.echars;
+  for (var i = 0; i < ecs.length; i++) {
+    var ec = ecs[i];
+    prefixToEChar[ec.prefix] = ec;
+  }
+  
+  var nEncodeChar = c => {
+    var m = c.match (/^:([0-9A-Za-z_-]+[A-Za-z_-])([0-9]+)$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'dec') {
+      return Uint8Array.from ([0, ec.byte].concat (_eint (m[2])));
+    }
+    var m = c.match (/^:([0-9A-Za-z_-]+-)([0-9a-f]{1,8})$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'hex') {
+      return Uint8Array.from ([0, ec.byte].concat (_eint (parseInt (m[2], 16))));
+    }
+    var m = c.match (/^:([A-Za-z0-9_-]+)-([1-9][0-9]*)-([1-9]|[1-8][0-9]|9[0-4])$/);
+    var ec = prefixToEChar[m && m[1]];
+    if (ec && ec.type === 'kt') {
+      var v = (m[2]-1)*94 + (m[3]-1);
+      return Uint8Array.from ([0, ec.byte].concat (_eint (v)));
+    }
+    var cc = [...c];
+    if (cc.length === 1) {
+      var cc1 = cc[0].charCodeAt (0);
+      var ec = prefixToEChar[Math.floor (cc1 / 0x1000)];
+      if (ec && ec.type === 'urow') {
+        return Uint8Array.from ([0, ec.byte].concat (_eint (cc1 % 0x1000)));
+      }
+    } else if (cc.length === 2) {
+      var ec = prefixToEChar[cc[0].charCodeAt (1)];
+      if (ec && ec.type === 'suffix') {
+        return Uint8Array.from ([0, ec.byte].concat (_eint (cc[0].charCodeAt (0))));
+      }
+    }
+    return (new TextEncoder ("utf-8")).encode ("\u0000" + c + "\u0001");
+  }; // nEncodeChar
+
+  var ecByteToEC = [];
+  ds.dataRoot.echars.forEach (ec => {
+    ecByteToEC[ec.byte] = ec;
+  });
+  var _toChar = (b, c) => {
+    var ec = ecByteToEC[b];
+    if (!ec) throw new Error ("Bad b: " + b);
+
+    if (ec.type === 'dec') {
+      if (ec.prefix === 'MJ' || ec.prefix === 'koseki') {
+        c = ("00000" + c) . substr (-6);
+      }
+      return ':' + ec.prefix + c;
+    } else if (ec.type === 'hex') {
+      return ':' + ec.prefix + c.toString (16);
+    } else if (ec.type === 'kt') {
+      var k = Math.floor (c / 94) + 1;
+      var t = (c % 94) + 1;
+      return ':' + ec.prefix + '-' + k + '-' + t;
+    } else if (ec.type === 'urow') {
+      c = parseInt (ec.prefix) * 0x1000 + c;
+      return String.fromCodePoint (c);
+    } else if (ec.type === 'suffix') {
+      return String.fromCodePoint (c) + String.fromCodePoint (parseInt (ec.prefix));
+    } else {
+      throw new Error ('Bad type: ' + ec.type);
+    }
+  }; // _toChar
+
+  var rMap = []
+  for (var i = 0; i < ds.dataRoot.rels.length; i++) {
+    var rels = ds.dataRoot.rels[i].rels;
+    if (rels) {
+      rMap[i] = rels;
+    }
+  }
+  
   var tbl = ds.dataRels;
-  var bchar = (new TextEncoder ("utf-8")).encode ("\u0000" + char + "\u0001");
+  var bchar = nEncodeChar (char);
 
   var start = tbl.indexOf (bchar[0]);
   while (true) {
@@ -1447,11 +1570,28 @@ SWD.Char._relsFromTbl = function (ds, char) {
   var i = 0;
   var rL = r.byteLength;
   while (i < rL) {
-    var bc2Start = i;
-    while (i < rL && r[i] !== 0x01) i++;
-    var bc2 = r.slice (bc2Start, i);
-    if (bc2.byteLength === 0) continue; // at end or broken
-    i++;
+    var b = r[i];
+    var c2;
+    if ((0x20 <= b && b <= 0x7E) || (0xC2 <= b && b <= 0xF4)) {
+      var bc2Start = i;
+      while (i < rL && r[i] !== 0x01) i++;
+      var bc2 = r.slice (bc2Start, i);
+      if (bc2.byteLength === 0) continue; // at end or broken
+      c2 = (new TextDecoder ('utf-8')).decode (bc2);
+      i++;
+    } else { // b : type
+      i++;
+      var c = 0;
+      var s = 0;
+      while (i < rL && r[i] & 0b01000000) {
+        c = c | ((r[i] & 0b00111111) << s);
+        i++;
+        s += 6;
+      }
+      c = c | ((r[i] & 0b00111111) << s);
+      i++;
+      c2 = _toChar (b, c);
+    }
 
     var v2Start = i;
     while (i < rL && r[i] !== 0x01) i++;
@@ -1461,11 +1601,22 @@ SWD.Char._relsFromTbl = function (ds, char) {
     var l2 = v2.byteLength;
     var rr = [];
     while (i2 < l2) {
-      var v = ((v2[i2] & 0b01111111) << 7) + (v2[i2+1] & 0b01111111);
-      rr.push ([ds, v]);
-      i2 += 2;
+      var v = 0;
+      var s = 0;
+      while (i2 < l2 && v2[i2] & 0b01000000) {
+        v = v | ((v2[i2] & 0b00111111) << s);
+        i2++;
+        s += 6;
+      }
+      v = v | ((v2[i2] & 0b00111111) << s);
+      i2++;
+      if (rMap[v]) {
+        rr = rr.concat (rMap[v].map (_ => [ds, _]));
+      } else {
+        rr.push ([ds, v]);
+      }
     }
-    rels.push ([(new TextDecoder ('utf-8')).decode (bc2), rr]);
+    rels.push ([c2, rr]);
   }
   return rels;
 }; // SWD.Char._relsFromTbl
@@ -1505,14 +1656,53 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
         break;
       }
     }
-    
     if (def) {
       var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
       if (index !== null) return index ? {index} : null;
     }
+
+    if (0x1100 <= cc1 && cc1 <= 0xD7FF &&
+        0x1160 <= cc2 && cc2 <= 0x11A7) {
+      var cc = (cc1 - 0x1100) * (0xA7-0x5F) + (cc2 - 0x1160);
+      for (var i = 0; i < defs.length; i++) {
+        var d = defs[i];
+        if (d.level_key === level && d.type === 'unicode-hangul2' &&
+            d.code_offset <= cc && cc < d.code_offset_next) {
+          def = d;
+          break;
+        }
+      }
+    }
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
   } // charLength 2
 
-  var m = char.match (/^:(MJ|aj|ac|ag|ak|aj2-|ak1-|swc)([0-9]+)$/);
+  if (charLength === 3) {
+    var [cc1, cc2, cc3] = [...char].map (_ => _.codePointAt (0));
+    var def;
+    var defs = ds.dataRoot.tables;
+    if (0x1100 <= cc1 && cc1 <= 0xD7FF &&
+        0x1160 <= cc2 && cc2 <= 0x1175 &&
+        0x11A8 <= cc3 && cc3 <= 0x11C2) {
+      var cc = (cc1 - 0x1100) * (0x75-0x5F) * (0xC2-0xA7) + (cc2 - 0x1160) * (0xC2-0xA7) + (cc3 - 0x11A8);
+      for (var i = 0; i < defs.length; i++) {
+        var d = defs[i];
+        if (d.level_key === level && d.type === 'unicode-hangul3' &&
+            d.code_offset <= cc && cc < d.code_offset_next) {
+          def = d;
+          break;
+        }
+      }
+    }
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  } // charLength 3
+
+  var m = char.match (/^:(MJ|aj|ac|ag|ak|aj2-|ak1-|UK-|swc)([0-9]+)$/);
   if (m) {
     var type = m[1];
     var cc1 = parseInt (m[2]);
@@ -1554,7 +1744,49 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
     }
   }
 
-  var m = char.match (/^:(jis|cns|gb|ks|kps)([0-9]+)-([0-9]+)-([0-9]+)$/);
+  var m = char.match (/^:(b5-[a-z]+-|b5-)([0-9a-f]+)$/);
+  if (m) {
+    var type = m[1];
+    var cc1 = parseInt (m[2], 16);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === type &&
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  }
+
+  var m = char.match (/^:(jis|jis-[a-z]+-)([0-9]+)-([0-9]+)-([0-9]+)$/);
+  if (m) {
+    var type = m[1];
+    var cc1 = parseInt (m[2]) * 94*(94+(0xFC-0xEF)*2) + (parseInt (m[3]) - 1) * 94 + (parseInt (m[4]) - 1);
+    var def;
+    var defs = ds.dataRoot.tables;
+    for (var i = 0; i < defs.length; i++) {
+      var d = defs[i];
+      if (d.level_key === level && d.type === type &&
+          d.code_offset <= cc1 && cc1 < d.code_offset_next) {
+        def = d;
+        break;
+      }
+    }
+    
+    if (def) {
+      var index = SWD.Char._relClusterIndexFromTbl (ds, def, cc1 - def.code_offset);
+      if (index !== null) return index ? {index} : null;
+    }
+  }
+
+  var m = char.match (/^:(cns|cns-[a-z]+-|gb|ks|kps|cccii)([0-9]+)-([1-9][0-9]*)-([1-9][0-9]*)$/);
   if (m) {
     var type = m[1];
     var cc1 = parseInt (m[2]) * 94*94 + (parseInt (m[3]) - 1) * 94 + (parseInt (m[4]) - 1);
@@ -1649,7 +1881,7 @@ SWD.Char.getMJChar = async function (char) {
   if (SWD.Char._mjc[char]) return SWD.Char._mjc[char];
 
   return SWD.Char._mjc[char] = Promise.resolve ().then (async () => {
-    var ds = SWD.Char._relDataSets.han;
+    var ds = SWD.Char._relDataSets.hans;
     var rr = await SWD.Char.getRels (ds.key, char);
 
     var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "rev:mj:X0213");
@@ -1667,15 +1899,18 @@ SWD.Char.getCNSChar = async function (char) {
   if (SWD.Char._cnsc[char]) return SWD.Char._cnsc[char];
 
   return SWD.Char._cnsc[char] = Promise.resolve ().then (async () => {
-    var ds = SWD.Char._relDataSets.charrel;
-    var rr = await SWD.Char.getRels ('charrel', char);
+    var keys = ['hans', 'kanas', 'kchars', 'chars'];
+    for (var i = 0; i < keys.length; i++) {
+      var ds = SWD.Char._relDataSets[keys[i]];
+      var rr = await SWD.Char.getRels (ds.key, char);
 
-    var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "cns:unicode");
+      var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "cns:unicode");
 
-    var r = rr.find (_ => _[1].find (_ => _[1] === relId1));
-    if (!r) return null;
+      var r = rr.find (_ => _[1].find (_ => _[1] === relId1));
+      if (r) return r[0];
+    }
 
-    return r[0];
+    return null;
   });
 }; // SWD.Char.getCNSChar
 
@@ -1708,7 +1943,7 @@ defineElement ({
       var cluster = await SWD.Char.getCluster ("EQUIV", v.char, dsKey);
       var chars = await SWD.Char.getChars ("EQUIV", cluster, dsKey);
       var inCluster = new Set (chars);
-      
+
       if (chars.length === 0) {
         this.parentNode.hidden = true;
         return;
@@ -1727,22 +1962,28 @@ defineElement ({
 
         var rels = await SWD.Char.getRels (dsKey, char);
         var ul = document.createElement ('ul');
-        rels.forEach (rel => {
+        rels.map (_ => {
+          var c = _[0];
+          var relTypes = _[1].map (_ => _[0].dataRoot.rels[_[1]]);
+          var maxWeight = Math.max (...relTypes.map (_ => _.weight));
+          return {c, relTypes, maxWeight};
+        }).sort ((a, b) => b.maxWeight - a.maxWeight).forEach (_ => {
           var li2 = document.createElement ('li');
 
           var f = document.createElement ('sw-data-char');
-          f.value = SWD.char ('char', rel[0]);
+          f.value = SWD.char ('char', _.c);
           f.setAttribute ('template', 'sw-data-char-item');
-          if (inCluster.has (rel[0])) f.classList.toggle ('in-cluster');
+          if (inCluster.has (_.c)) f.classList.toggle ('in-cluster');
           li2.appendChild (f);
 
           {
             var ul2 = document.createElement ('ul');
             ul2.classList.toggle ('char-rel-list');
-            rel[1].forEach (_ => {
+            _.relTypes.sort ((a, b) => {
+              return b.weight - a.weight;
+            }).forEach (rel => {
               var li3 = document.createElement ('li');
               var code = document.createElement ('sw-data-char-rel');
-              var rel = _[0].dataRoot.rels[_[1]];
               code.value = rel;
               li3.appendChild (code);
               ul2.appendChild (li3);
@@ -2211,6 +2452,12 @@ defineElement ({
           var char2 = await SWD.Char.getCNSChar (char);
           if (char2 !== null) {
             string = char2;
+          }
+        } else if (mapper === 'u') {
+          var char = this.getAttribute ('char') || '';
+          var m = char.match (/^:u-([a-z]+)-([0-9a-f]+)$/);
+          if (m && m[1] === name) {
+            string = String.fromCodePoint (parseInt (m[2], 16));
           }
         }
         
