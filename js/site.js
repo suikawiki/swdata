@@ -4,6 +4,134 @@ var SWD = {_load: {}};
 SWD.isReload = location.search === "?reload";
 SWD.isLocal = !! location.hostname.match (/local/);
 
+SWD.Env = {workerMethodCode: [], workerMethodSI: []};
+SWD.Env.isWorker = !self.document;
+
+var defs = function (code) {
+  code ();
+};
+
+var defineElement = function (def) {
+  var e = document.createElementNS ('data:,pc', 'element');
+  e.pcDef = def;
+  document.head.appendChild (e);
+
+  if (def.fill) {
+    var e = document.createElementNS ('data:,pc', 'filltype');
+    e.setAttribute ('name', def.name);
+    e.setAttribute ('content', def.fill);
+    document.head.appendChild (e);
+    delete def.fill;
+  }
+}; // defineElement
+
+var defineListLoader = function (name, code) {
+  var e = document.createElementNS ('data:,pc', 'loader');
+  e.setAttribute ('name', name);
+  e.pcHandler = code;
+  document.head.appendChild (e);
+}; // defineListLoader
+
+var defineWorkerMethod = (name, toSerializableInput, workerCode) => {
+  SWD.Env.workerMethodSI[name] = toSerializableInput;
+};
+
+var hasWorkerMethod = (name, code) => {
+  return function () {
+    var self = this;
+    var args = arguments;
+    return SWD.Env.startWorker ().then (() => {
+      return SWD.Env.workerMethodSI[name].apply (self, args);
+    }).then (args => {
+      var mc = new MessageChannel ();
+      SWD.Env._workerPort.postMessage ({
+        type: 'method',
+        name,
+        args,
+      }, [mc.port2]);
+      return new Promise ((ok, ng) => {
+        mc.port1.onmessage = ev => {
+          if (ev.data.type === 'return') {
+            ok (ev.data.value);
+          } else if (ev.data.type === 'error') {
+            ng (ev.data.value);
+          } else {
+            console.log (ev);
+            ng (new Error ("Unknown method return message"));
+          }
+          mc.port1.close ();
+        };
+      });
+    });
+  };
+};
+
+if (SWD.Env.isWorker) {
+  defs = defineElement = defineListLoader = () => {};
+  addEventListener ('message', ev => {
+    if (ev.data.type === 'init') {
+      ev.ports[0].onmessage = ev => {
+        if (ev.data.type === 'method') {
+          Promise.resolve ().then (() => {
+            return SWD.Env.workerMethodCode[ev.data.name].apply (null, ev.data.args);
+          }).then (rv => {
+            ev.ports[0].postMessage ({type: 'return', value: rv});
+          }, e => {
+            ev.ports[0].postMessage ({type: 'error', value: e});
+          });
+        } else {
+          console.log (ev);
+          throw new Error ("Unknown message received: " + ev.data.type);
+        }
+      }
+      ev.ports[0].postMessage ({type: 'init'});
+    } else {
+      console.log ("message" , ev);
+      throw new Error ("Unknown message received: " + ev.data.type);
+    }
+  });
+
+  defineWorkerMethod = (name, toSerializableInput, workerCode) => {
+    SWD.Env.workerMethodCode[name] = workerCode;
+  };
+
+  hasWorkerMethod = (name, code) => code;
+}
+
+SWD.Env.startWorker = function () {
+  if (this._swP) return this._swP;
+  var name = 'swdEnvWorker';
+  
+  var start = (w, to) => {
+    return new Promise ((ok, ng) => {
+      var timer;
+      if (to) timer = setTimeout (ng, 300);
+      
+      this._worker = new w ('/js/site.js', {name});
+      this._worker.onerror = ng;
+      
+      var m = new MessageChannel ();
+      this._worker.postMessage ({type: 'init'}, [m.port2]);
+      m.port1.onmessage = ev => {
+        clearTimeout (timer);
+        if (ev.data.type === 'init') {
+          ok ();
+        } else {
+          console.log (ev);
+        }
+      };
+      this._workerPort = m.port1;
+    });
+  }; // start
+  
+  this._swP = start (self.SharedWorker || self.Worker, true).catch (() => {
+    console.log ("new SharedWorker failed; Retry with dedicated Worker");
+    return start (self.Worker, false);
+  });
+
+  return this._swP;
+}; // SWD.Env.startWorker
+
 SWD.data = function (name) {
   if (SWD._load[name]) return SWD._load[name];
   return SWD._load[name] = fetch ('/data/' + name, {
@@ -337,27 +465,6 @@ SWD.tagsByIds = async function (ids) {
   var tags = (await SWD.data ('tags.json')).tags;
   return ids.map (_ => tags[_]);
 }; // SWD.tagsByIds
-
-var defineElement = function (def) {
-  var e = document.createElementNS ('data:,pc', 'element');
-  e.pcDef = def;
-  document.head.appendChild (e);
-
-  if (def.fill) {
-    var e = document.createElementNS ('data:,pc', 'filltype');
-    e.setAttribute ('name', def.name);
-    e.setAttribute ('content', def.fill);
-    document.head.appendChild (e);
-    delete def.fill;
-  }
-}; // defineElement
-
-var defineListLoader = function (name, code) {
-  var e = document.createElementNS ('data:,pc', 'loader');
-  e.setAttribute ('name', name);
-  e.pcHandler = code;
-  document.head.appendChild (e);
-}; // defineListLoader
 
 var mod = (n, m) => ((n%m) + m) % m;
 
@@ -709,7 +816,7 @@ defineElement ({
   },
 });
 
-(() => {
+defs (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'selectPageTemplate');
@@ -730,7 +837,7 @@ defineElement ({
   };
   document.head.appendChild (def);
   
-}) ();
+});
 
 defineElement ({
   name: 'nav',
@@ -894,7 +1001,7 @@ defineElement ({
   },
 }); // <sw-data-boolean>
 
-(() => {
+defs (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'selectBooleanTemplate');
@@ -903,7 +1010,7 @@ defineElement ({
   };
   document.head.appendChild (def);
   
-}) ();
+});
 
 defineElement ({
   name: 'sw-data-number',
@@ -1318,7 +1425,7 @@ defineElement ({
   },
 }); // <sw-data-char>
 
-(() => {
+defs (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataCharItemSelector');
@@ -1345,7 +1452,7 @@ defineElement ({
   };
   document.head.appendChild (def);
 
-}) ();
+});
 
 SWD.Char._relDataSets = {
   chars: {key: 'chars'},
@@ -1924,13 +2031,19 @@ SWD.Char.getChars = function (level, cluster, dsKey) {
   return chars.concat (SWD.Char._charsFromTbl (ds, level, index));
 }; // SWD.Char.getChars
 
-SWD.Char.getRels = async function (dsKey, char) {
+defineWorkerMethod ('SWDCharGetRels', (dsKey, c) => {
+  return [dsKey, c];
+}, (dsKey, c) => {
+  return SWD.Char.getRels (dsKey, c);
+});
+
+SWD.Char.getRels = /*XXXhasWorkerMethod ('SWDCharGetRels',*/ async function (dsKey, char) {
   var ds = SWD.Char._relDataSets[dsKey];
   await SWD.Char._relDataRoot (ds);
   await SWD.Char._relDataRels (ds);
 
   return SWD.Char._relsFromTbl (ds, char);
-}; // SWD.Char.getRels
+}/*)*/; // SWD.Char.getRels
 
 SWD.Char.getRelsAll = async function (char) {
   var rels = {};
@@ -1957,13 +2070,17 @@ SWD.Char.getRelsAll = async function (char) {
   });
 }; // SWD.Char.getRelsAll
 
-SWD.Char.getLeaders = async function (char, dsKey) {
+SWD.Char.getLeaders = hasWorkerMethod ('SWDCharGetLeaders', async function (char, dsKey) {
   var ds = SWD.Char._relDataSets[dsKey];
   await SWD.Char._relDataRoot (ds);
   await SWD.Char._relDataLeaders (ds);
   
   return SWD.Char._leadersFromTbl (ds, char) || [char];
-}; // SWD.Char.getLeaders
+}); // SWD.Char.getLeaders
+
+defineWorkerMethod ('SWDCharGetLeaders', (c, d) => [c, d], (c, d) => {
+  return SWD.Char.getLeaders (c, d);
+});
 
 SWD.Char._mjc = {};
 SWD.Char.getMJChar = async function (char) {
@@ -2844,7 +2961,7 @@ defineElement ({
   },
 }); // <sw-data-year>
 
-(() => {
+defs (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataYearSelector');
@@ -2884,7 +3001,7 @@ defineElement ({
   };
   document.head.appendChild (def);
   
-}) ();
+});
 
 defineElement ({
   name: 'sw-data-era',
@@ -3984,7 +4101,7 @@ defineElement ({
   },
 }); // <sw-transition-desc>
 
-(() => {
+defs (() => {
 
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swTransitionDescSelector');
@@ -3993,7 +4110,7 @@ defineElement ({
   };
   document.head.appendChild (def);
 
-}) ();
+});
 
 defineElement ({
   name: 'sw-era-transition-graph',
