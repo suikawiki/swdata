@@ -21,7 +21,7 @@ Math::BigInt~1.999837
 Method::WeakCallback~0.04
 Net::SSLeay~1.92
 Path::Class~0.37
-Path::Tiny~0.142
+Path::Tiny~0.144
 Proc::FastSpawn~1.2
 Scalar::Util~1.63
 Socket~2.036
