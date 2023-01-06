@@ -2525,11 +2525,20 @@ SWD.Font = {};
 
 SWD.Font._otjs = function () {
   return this._otjsp = this._otjsp || new Promise ((ok, ng) => {
-    var s = document.createElement ('script');
-    s.src = '/js/opentype.js';
-    s.onload = ok;
-    s.onerror = ng;
-    document.head.appendChild (s);
+    if (self.importScripts) {
+      try {
+        importScripts ('/js/opentype.js');
+        ok ();
+      } catch (e) {
+        ng (e);
+      }
+    } else {
+      var s = document.createElement ('script');
+      s.src = '/js/opentype.js';
+      s.onload = ok;
+      s.onerror = ng;
+      document.head.appendChild (s);
+    }
   });
 }; // SWD.Font._otjs
 
@@ -2547,69 +2556,90 @@ SWD.Font.load = async function (opts) {
   var info = await SWD.Font.info (opts);
   var f = new SWD.Font.Font;
   f.info = info;
-  if (info.type === 'opentype') {
-    var key = info.url;
-    if (SWD.Font._fonts[key]) return SWD.Font._fonts[key];
-    return SWD.Font._fonts[key] = SWD.Font._otjs ().then (async () => {
-      var ab = await fetch (info.url).then (res => {
-        if (res.status !== 200) throw res;
-        return res.arrayBuffer ();
-      });
-      f.otf = await opentype.parse (ab, {});
-      return f;
-    });
-  } else if (info.type === 'opentype-ranged') {
-    return f;
-  } else if (info.type === 'bitmap') {
-    var ab = await fetch (info.url).then (res => {
-      if (res.status !== 200) throw res;
-      return res.arrayBuffer ();
-    });
-    f.bitmap = ab;
-    return f;
-  } else if (info.type === 'native') {
-    return f;
-  } else {
-    throw opts;
-  }
+  return f;
 }; // SWD.Font.load
 
 SWD.Font.Font = function () { };
 
-SWD.Font.Font.prototype.getGlyphSVGByGlyphId = function (glyphId) {
+SWD.Font.Font.prototype._load = async function () {
+  if (this._loaded) return;
+  this._loaded = true;
+  
+  var info = this.info;
+  if (info.type === 'opentype') {
+    var key = info.url;
+    if (SWD.Font._fonts[key]) return this.otf = await SWD.Font._fonts[key];
+    var abf = fetch (info.url).then (res => {
+      if (res.status !== 200) throw res;
+      return res.arrayBuffer ();
+    });
+    this.otf = await (SWD.Font._fonts[key] = SWD.Font._otjs ().then (async () => {
+      var ab = await abf;
+      return opentype.parse (ab, {});
+    }));
+  } else if (info.type === 'opentype-ranged') {
+    //
+  } else if (info.type === 'bitmap') {
+    var key = info.url;
+    if (SWD.Font._fonts[key]) return this.bitmap = SWD.Font._fonts[key];
+    this.bitmap = await (SWD.Font._fonts[key] = fetch (info.url).then (res => {
+      if (res.status !== 200) throw res;
+      return res.arrayBuffer ();
+    }));
+  } else if (info.type === 'native') {
+    //
+  } else {
+    throw ["glyph _load", f];
+  }
+}; // _load
+
+SWD.Font.Font.prototype._getGlyphDataById = async function (glyphId) {
+  await this._load ();
   if (this.otf) {
     var glyph = this.otf.glyphs.get (glyphId);
     var upem = this.otf.unitsPerEm;
-    var svg = document.createElementNS
-        ('http://www.w3.org/2000/svg', 'svg');
     var h = this.otf.tables.os2.sTypoAscender - this.otf.tables.os2.sTypoDescender;
     if (h < upem) h = upem;
-    svg.setAttribute ('viewBox', [0, 0, upem, h].join (' '));
-    svg.setAttribute ('class', 'font-glyph');
     
     var path = glyph.getPath (0, h + this.otf.tables.os2.sTypoDescender, upem, {});
-    svg.appendChild (path.toDOMElement ());
+    var pathData = path.toPathData ();
     
-    return svg;
+    return {
+      width: upem,
+      height: h,
+      pathData,
+    };
+  } else if (this.bitmap) {
+    var size = this.info.size;
+    var blength = size * size / 8;
+    var bytes = this.bitmap.slice (blength * glyphId, blength * glyphId + blength);
+    var ta = new Uint8Array (bytes);
+    return {
+      width: size,
+      height: size,
+      bitmap: ta,
+    };
   } else {
-    throw this;
+    throw ["glyph by id", this];
   }
-}; // getGlyphSVGByGlyphId
+}; // _getGlyphDataById
 
-SWD.Font.Font.prototype.getGlyphSVGByGlyphName = function (glyphName) {
+SWD.Font.Font.prototype._getGlyphDataByName = async function (glyphName) {
+  await this._load ();
   if (this.otf) {
     var glyphId = this.otf.glyphNames.names.indexOf (glyphName); // or -1
-    return this.getGlyphSVGByGlyphId (glyphId);
+    return this._getGlyphDataById (glyphId);
   } else {
-    throw this;
+    throw ["glyph by name", glyphName, this];
   }
-}; // getGlyphSVGByGlyphName
+}; // _getGlyphDataByName
 
-SWD.Font.Font.prototype.getGlyphSVGByCharacter = async function (character) {
+SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
+  await this._load ();
   if (this.otf) {
     var glyph = this.otf.charToGlyph (character);
     if (glyph.index === 0) throw glyph;
-    return this.getGlyphSVGByGlyphId (glyph.index);
+    return this._getGlyphDataById (glyph.index);
   } else if (this.info.type === 'opentype-ranged') {
     var c = character.codePointAt (0);
     var item;
@@ -2620,56 +2650,76 @@ SWD.Font.Font.prototype.getGlyphSVGByCharacter = async function (character) {
         break;
       }
     }
-    if (!item) throw this;
+    if (!item) throw ["glyph range not found", this];
 
     var font = await SWD.Font.load ({type: 'opentype', url: item.url});
-    return font.getGlyphSVGByCharacter (character);
+    return font._getGlyphDataByUniChar (character);
   } else {
-    throw this;
+    throw ["glyph by char", this];
   }
-}; // getGlyphSVGByCharacter
+}; // _getGlyphDataByUniChar
 
-SWD.Font.Font.prototype.getGlyphCanvasByGlyphId = function (glyphId) {
-  var size = this.info.size;
-  var blength = size * size / 8;
-  var bytes = this.bitmap.slice (blength * glyphId, blength * glyphId + blength);
-  var ta = new Uint8Array (bytes);
-
-  var canvas = document.createElement ('canvas');
-  canvas.width = canvas.height = size;
-  canvas.setAttribute ('class', 'font-glyph');
-  var ctx = canvas.getContext ('2d');
-
-  var id = ctx.getImageData (0, 0, size, size);
-  for (var i = 0; i < size*size; i++) {
-    var b = 7 - (i % 8);
-    if (ta[Math.floor (i / 8)] & (1 << b)) {
-      id.data[i*4] = id.data[i*4+1] = id.data[i*4+2] = 0x00;
-      id.data[i*4+3] = 0xFF;
-    }
+SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', async function (opts) {
+  if (opts.glyphId !== "") {
+    return this._getGlyphDataById (opts.glyphId); // or throw
+  } else if (opts.glyphName !== "") {
+    return this._getGlyphDataByName (opts.glyphName); // or throw
+  } else if ([...opts.string].length === 1) {
+    return this._getGlyphDataByUniChar (opts.string); // or throw
+  } else {
+    throw opts;
   }
-  ctx.putImageData (id, 0, 0);
+}, opts => {
+  return [this.info, opts];
+}); // getGlyphData
+
+defineWorkerMethod ('GetFontGlyphData', function (opts) {
+  return [this.info, opts];
+}, (info, opts) => {
+  var f = new SWD.Font.Font;
+  f.info = info;
+  return f.getGlyphData (opts);
+});
+
+SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
+  var gd = await this.getGlyphData (opts);
   
-  return canvas;
-}; // getGlyphCanvasByGlyphId
+  if (gd.pathData) {
+    var svg = document.createElementNS
+        ('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute ('viewBox', [0, 0, gd.width, gd.height].join (' '));
+    svg.setAttribute ('class', 'font-glyph');
 
-SWD.Font.Font.prototype.canGetSVG = function () {
-  if (this.otf) {
-    return true;
-  } else if (this.info.type === 'opentype-ranged') {
-    return true;
+    var path = document.createElementNS ('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute ('d', gd.pathData);
+
+    svg.appendChild (path);
+    return svg;
+  } else if (gd.bitmap) {
+    var blength = gd.width * gd.height / 8;
+    var ta = gd.bitmap;
+    
+    var canvas = document.createElement ('canvas');
+    canvas.width = gd.width;
+    canvas.height = gd.height;
+    canvas.setAttribute ('class', 'font-glyph');
+    var ctx = canvas.getContext ('2d');
+
+    var id = ctx.getImageData (0, 0, gd.width, gd.height);
+    for (var i = 0; i < gd.width*gd.height; i++) {
+      var b = 7 - (i % 8);
+      if (ta[Math.floor (i / 8)] & (1 << b)) {
+        id.data[i*4] = id.data[i*4+1] = id.data[i*4+2] = 0x00;
+        id.data[i*4+3] = 0xFF;
+      }
+    }
+    ctx.putImageData (id, 0, 0);
+    
+    return canvas;
+  } else {
+    throw ["getGlyphElement", this];
   }
-
-  return false;
-}; // canGetSVG
-
-SWD.Font.Font.prototype.canGetCanvas = function () {
-  if (this.bitmap) {
-    return true;
-  }
-
-  return false;
-}; // canGetCanvas
+}; // getGlyphElement
 
 defineElement ({
   name: 'sw-font-glyph',
@@ -2707,35 +2757,16 @@ defineElement ({
         }
         
         var gid = this.getAttribute ('glyphid') || '';
-        if (gid !== "") {
-          if (font.canGetSVG ()) {
-            var svg = await font.getGlyphSVGByGlyphId (gid);
-            this.appendChild (svg);
-            return;
-          } else if (font.canGetCanvas ()) {
-            var svg = await font.getGlyphCanvasByGlyphId (gid);
-            this.appendChild (svg);
-            return;
-          }
-        }
-      
         gname = gname || this.getAttribute ('glyphname') || '';
-        if (gname !== "") {
-          if (font.canGetSVG ()) {
-            var svg = await font.getGlyphSVGByGlyphName (gname);
-            this.appendChild (svg);
-            return;
-          }
-        }
-
         string = string || this.getAttribute ('string') || '';
-        if ([...string].length === 1) {
-          if (font.canGetSVG ()) {
-            var svg = await font.getGlyphSVGByCharacter (string);
-            this.appendChild (svg);
-            return;
-          }
-        }
+        if (gid === '' && gname === '' && string === '') return;
+        
+        var el = await font.getGlyphElement ({
+          glyphId: gid,
+          glyphName: gname,
+          string,
+        });
+        this.appendChild (el);
       } catch (e) {
         if (this.hasAttribute ('optional')) {
           this.parentNode.hidden = true;
