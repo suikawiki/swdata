@@ -1,0 +1,59 @@
+{
+  "mj": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/ipamjm00601/ipamjm.ttf",
+    "label": "IPAmj明朝",
+    "hasAJ1GlyphNames": true
+  },
+  "jiskan16": {
+    "type": "bitmap",
+    "url": "https://fonts.suikawiki.org/bdf/intlfonts-1.4.2/Japanese.X/jiskan16.dat",
+    "label": "jiskan16",
+    "size": 16
+  },
+  "jiskan24": {
+    "type": "bitmap",
+    "url": "https://fonts.suikawiki.org/bdf/intlfonts-1.4.2/Japanese.X/jiskan24.dat",
+    "label": "jiskan24",
+    "size": 24
+  },
+  "cns": {
+    "type": "opentype-ranged",
+    "label": "全字庫正宋體",
+    "files": [
+      {"range": ["0000", "1FFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-98_1.ttf"},
+      {"range": ["20000", "2FFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-Ext-B-98_1.ttf"},
+      {"range": ["F0000", "FFFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-Plus-98_1.ttf"}
+    ]
+  },
+  "aj": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/haranoaji-20220220/HaranoAjiGothic-ExtraLight.otf",
+    "label": "原ノ味角ゴシック"
+  },
+  "ac": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/haranoajitw-20220220/HaranoAjiGothicTW-ExtraLight.otf",
+    "label": "原ノ味角ゴシック"
+  },
+  "ag": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/haranoajicn-20220220/HaranoAjiGothicCN-ExtraLight.otf",
+    "label": "原ノ味角ゴシック"
+  },
+  "ak1-": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/haranoajik1-20220220/HaranoAjiGothicK1-ExtraLight.otf",
+    "label": "原ノ味角ゴシック"
+  },
+  "ak": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/SourceHanSerifAKR9-20190729/SourceHanSerifAKR9-Regular.otf",
+    "label": "Source Han Serif (AKR9)"
+  },
+  "HaranoAjiGothicKR": {
+    "type": "opentype",
+    "url": "https://fonts.suikawiki.org/opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
+    "label": "原ノ味角ゴシック"
+  }
+}

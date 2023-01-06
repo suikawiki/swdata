@@ -1067,16 +1067,29 @@
       <sw-char-fonts data-field=char></sw-char-fonts>
     </section>
 
+    <!--
+      https://www.cns11643.gov.tw/search.jsp?ID=7&cPage=1&SN=4E00
+      https://www.cns11643.gov.tw/search.jsp?ID=5&cPage=1&SN=2121
+    -->
+
     <section id=neighbors>
       <h1>関連</h1>
 
       <section>
-        <h1>関係する文字</h1>
-        <sw-char-cluster data-field=char type=char></sw-char-cluster>
+        <h1>関係する漢字</h1>
+        <sw-char-cluster data-field=char type=hans></sw-char-cluster>
       </section>
       <section>
-        <h1>関係する漢字</h1>
-        <sw-char-cluster data-field=char type=han></sw-char-cluster>
+        <h1>関係する仮名</h1>
+        <sw-char-cluster data-field=char type=kanas></sw-char-cluster>
+      </section>
+      <section>
+        <h1>関係する諺文</h1>
+        <sw-char-cluster data-field=char type=kchars></sw-char-cluster>
+      </section>
+      <section>
+        <h1>関係する文字</h1>
+        <sw-char-cluster data-field=char type=chars></sw-char-cluster>
       </section>
 
       <table class=props>
@@ -1096,7 +1109,7 @@
               <th>文字1
               <td>
                 <sw-data-char data-field=char></sw-data-char>
-                <input type=hidden name=char1 data-field=char.text>
+                <input type=hidden name=char1 data-field=char.char>
             <tr>
               <th><label for=route-input-char2>文字2</label>
               <td><input type=search name=char2 id=route-input-char2>
@@ -1777,12 +1790,46 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-char-item>
+<template-set name=sw-data-char-item templateselector=swDataCharItemSelector>
   <template>
     <a data-href-field=url class=char-item>
       <data class="char-sample" data-field=text></data>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
+  <template data-name=mj>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+      <code data-field=mj></code>
+    </a>
+  </template>
+  <template data-name=jis>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=cns>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=cns mapper=cns data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=u>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=cns mapper=u data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
+  <template data-name=cid>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
+      <code>CID+<span data-field=cid></span></code>
+      <code data-field=char></code>
     </a>
   </template>
 </template-set>
@@ -1821,7 +1868,29 @@
 
 <template-set name=sw-data-char-rel>
   <template>
-    <code data-field=value></code>
+    <code data-field=key></code>
+    (<data data-field=weight></data> / <data data-field=mergeable_weight></data>)
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-single>
+  <template>
+    <figcaption>代表</figcaption>
+    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-item>
+  <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
+    <figcaption data-field=def.short_label></figcaption>
+    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+  </template>
+</template-set>
+
+<template-set name=sw-char-leader-empty-item>
+  <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
+    <figcaption data-field=def.short_label></figcaption>
+    <data>-</data>
   </template>
 </template-set>
 
@@ -1834,7 +1903,7 @@
 
 <template-set name=sw-char-fonts-font-item>
   <template>
-    <sw-font-glyph class=char-sample data-name-field=name data-glyphid-field=glyphId data-filled="name glyphid"></sw-font-glyph>
+    <sw-font-glyph class=char-sample data-name-field=name data-glyphid-field=glyphId data-glyphname-field=glyphName data-string-field=string data-mapper-field=mapper data-char-field=char data-optional-field=optional data-filled="name glyphid glyphname string optional mapper char"></sw-font-glyph>
     <figcaption data-field=info.label></figcaption>
   </template>
 </template-set>

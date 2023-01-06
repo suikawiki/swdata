@@ -191,18 +191,26 @@
     } : upgradedElementProps[def.name][def.is || null].pcInit || function () { };
     upgrader[def.name][def.is || null] = function () {
       var e = this;
-      if (e.nextSibling ||
-          document.readyState === 'interactive' ||
+      var lc = undefined;
+      if (document.readyState === 'interactive' ||
           document.readyState === 'complete') {
         return init.call (e);
+      } else if (e.nextSibling) {
+        lc = e.lastChild;
       }
       return new Promise (function (ok) {
         var timer = setInterval (function () {
-          if (e.nextSibling ||
-              document.readyState === 'interactive' ||
+          if (document.readyState === 'interactive' ||
               document.readyState === 'complete') {
             ok ();
             clearInterval (timer);
+          } else if (e.nextSibling) {
+            if (lc === e.lastChild) { // unchanged
+              ok ();
+              clearInterval (timer);
+            } else {
+              lc = e.lastChild;
+            }
           }
         }, 100);
       }).then (function () {
@@ -421,7 +429,9 @@
       }
       var e = document.createElement (localName);
       e.appendChild (template.content.cloneNode (true));
-      ['class', 'title', 'id'].forEach (_ => {
+      var attrs = (template.getAttribute ('data-filled') || '').split (/\s+/);
+      attrs.push ('class', 'title', 'id');
+      attrs.forEach (_ => {
         if (template.hasAttribute (_)) {
           e.setAttribute (_, template.getAttribute (_));
         }
@@ -601,14 +611,18 @@
   }; // end
 
   commonMethods.pcActionStatus = function () {
-    var elements = this.querySelectorAll ('action-status');
+    return exportable.$paco.actionStatus (this);
+  }; // pcActionStatus
+
+  exportable.$paco.actionStatus = function (c) {
+    var elements = c.querySelectorAll ('action-status');
     elements.forEach (function (e) {
       if (e.hasChildNodes ()) return;
       e.hidden = true;
       e.innerHTML = '<action-status-message></action-status-message> <progress></progress>';
     });
     return new ActionStatus (elements);
-  }; // pcActionStatus
+  }; // $paco.actionStatus
 
   defineElement ({
     name: 'template-set',
@@ -990,6 +1004,33 @@
           }
         }
 
+        var mc = this.getAttribute ('menucontainer');
+        if (mc) {
+          var menuContainer = this;
+          while (menuContainer && !menuContainer.matches (mc)) {
+            menuContainer = menuContainer.parentElement;
+          }
+          if (menuContainer) {
+            var bop = button;
+            var l = 0;
+            var t = 0;
+            while (bop && bop !== menuContainer) {
+              l += bop.offsetLeft;
+              t += bop.offsetTop;
+              bop = bop.offsetParent;
+            }
+            menu.style.setProperty ('--paco-menu-button-left', l + 'px');
+            menu.style.setProperty ('--paco-menu-button-right', l + button.offsetWidth + 'px');
+            menu.style.setProperty ('--paco-menu-button-top', t + 'px');
+            menu.style.setProperty ('--paco-menu-button-bottom', t + button.offsetHeight + 'px');
+            
+            menu.style.setProperty ('--paco-avail-height', menuContainer.offsetHeight + 'px');
+            menu.style.setProperty ('--paco-avail-width', menuContainer.offsetWidth + 'px');
+          } else {
+            console.log ("Element |"+mc+"| not found");
+          }
+        }
+
         var ev = new Event ('toggle', {bubbles: true});
         this.dispatchEvent (ev);
       }, // pmLayout
@@ -1169,7 +1210,9 @@
             if (x.hash && y.hash === '') y += x.hash;
             
             if (x.href !== y.href) {
-              history.replaceState (null, null, y);
+              if (opts.initiatorType !== 'url') {
+                history.replaceState (null, null, y);
+              }
               var evc = new Event ('pcLocationChange', {bubbles: true});
               evc.pcInitiator = this;
               Promise.resolve ().then (() => window.dispatchEvent (evc));
@@ -1442,7 +1485,8 @@
           return 'tbody';
         } else if (type === 'tab-set') {
           return 'tab-set';
-        } else if (type === 'ul' || type === 'ol') {
+        } else if (type === 'ul' || type === 'ol' ||
+                   type === 'select' || type === 'datalist') {
           return type;
         } else {
           return 'list-main';
@@ -1603,6 +1647,8 @@
           'tab-set': 'section',
           ul: 'li',
           ol: 'li',
+          select: 'option',
+          datalist: 'option',
         }[listContainer.localName] || 'list-item';
       return Promise.resolve ().then (() => {
         if (changes.changed) {
