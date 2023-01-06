@@ -2548,17 +2548,24 @@ SWD.Font.load = async function (opts) {
   var f = new SWD.Font.Font;
   f.info = info;
   if (info.type === 'opentype') {
-    var key = info.fileName;
+    var key = info.url;
     if (SWD.Font._fonts[key]) return SWD.Font._fonts[key];
     return SWD.Font._fonts[key] = SWD.Font._otjs ().then (async () => {
-      var ab = await SWD.dataAB (info.fileName);
+      var ab = await fetch (info.url).then (res => {
+        if (res.status !== 200) throw res;
+        return res.arrayBuffer ();
+      });
       f.otf = await opentype.parse (ab, {});
       return f;
     });
   } else if (info.type === 'opentype-ranged') {
     return f;
   } else if (info.type === 'bitmap') {
-    f.bitmap = await SWD.dataAB (info.fileName);
+    var ab = await fetch (info.url).then (res => {
+      if (res.status !== 200) throw res;
+      return res.arrayBuffer ();
+    });
+    f.bitmap = ab;
     return f;
   } else if (info.type === 'native') {
     return f;
@@ -2615,7 +2622,7 @@ SWD.Font.Font.prototype.getGlyphSVGByCharacter = async function (character) {
     }
     if (!item) throw this;
 
-    var font = await SWD.Font.load ({type: 'opentype', fileName: item.fileName});
+    var font = await SWD.Font.load ({type: 'opentype', url: item.url});
     return font.getGlyphSVGByCharacter (character);
   } else {
     throw this;
@@ -5662,9 +5669,7 @@ SWD.antennaDayList = async function (cat, dv) {
   var ymd = day.toISOString ().replace (/T.*$/, '');
   var ym = ymd.replace (/-[0-9]+$/, '');
   return SWD.data ('antenna/' + cat + '/' + ym + '.json').catch (res => {
-    if (res.status === 404) return {json: () => {
-      return {items: []};
-    }};
+    if (res.status === 404) return {items: []};
     throw res;
   }).then (json => {
     var start = new Date (ymd + 'T00:00:00Z') . valueOf () / 1000;

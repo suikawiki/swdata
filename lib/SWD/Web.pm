@@ -353,6 +353,13 @@ sub main ($$$) {
   
   if (@$path == 2 and
       $path->[0] eq 'data' and
+      $path->[1] eq 'fonts.json') {
+    # /data/fonts.json
+    return static $app, 'application/json; charset=utf-8', 'fonts/list.json';
+  }
+  
+  if (@$path == 2 and
+      $path->[0] eq 'data' and
       $path->[1] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {
     # /data/{}.json
     return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1];
