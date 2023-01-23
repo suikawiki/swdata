@@ -2,7 +2,7 @@ Algorithm::Diff~1.201
 AnyEvent~7.17
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
-AnyEvent::Util
+AnyEvent::Handle
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -12,9 +12,9 @@ Digest::SHA~6.03
 Exporter::Lite~0.09
 File::Path~2.18
 File::Temp~0.2311
-FindBin~1.52
+FindBin~1.53
 IO::FDPass~1.3
-IO::Handle~1.48
+IO::Handle~1.51
 JSON~4.10
 MIME::Base64~3.16
 Math::BigInt~1.999837
