@@ -412,12 +412,22 @@
     <a href=graph>その後の変遷</a> /
     <a href=kanshi>干支年</a></p>
 
-    <sw-if-defined data-field=era.start_year hidden>
-      <p><dfn><bdi data-field=era.name></bdi></dfn>
-      (<code>y~<span data-field=era.id></span></code>)
-      は、
-      <sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-if-defined data-field=era.end_year><sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year></sw-if-defined><sw-if-defined data-field=era.end_year not>現在</sw-if-defined>の紀年法。</p>
-    </sw-if-defined>
+    <p><dfn><bdi data-field=era.name></bdi></dfn>
+    (<code>y~<span data-field=era.id></span></code>)
+    は、
+    <sw-if-defined data-field=era.country_tag_id hidden><!--
+   --><sw-data-tag data-field=era.country_tag_id template=sw-data-tag-label></sw-data-tag>の<!--
+ --></sw-if-defined><!--
+ --><sw-if-defined data-field=era.monarch_tag_id hidden><!--
+   --><sw-data-tag data-field=era.monarch_tag_id template=sw-data-tag-label></sw-data-tag>の<!--
+ --></sw-if-defined><!--
+ --><sw-if-defined data-field=era.start_year hidden><!--
+   --><sw-data-year data-field=era.start_year eraid=20 format=text></sw-data-year>から<sw-if-defined data-field=era.end_year><sw-data-year data-field=era.end_year eraid=20 format=text></sw-data-year></sw-if-defined><sw-if-defined data-field=era.end_year not>現在</sw-if-defined>の<!--
+ --></sw-if-defined><!--
+ -->紀年法<!--
+ --><sw-if-defined data-field=era.tag_ids.1463 hidden> (元号) </sw-if-defined><!--
+ --><sw-if-defined data-field=era.tag_ids.1372 hidden> (建国紀元) </sw-if-defined><!--
+ -->です。</p>
 
     <sw-if-defined data-field=era.tag_ids.2887 hidden>
       <p>
@@ -716,6 +726,22 @@
     <t-keyword data-field=tag.label></t-keyword>
     
     <p><a href=./ class=active>紀年法の一覧</a> / <a href=graph>変遷</a></p>
+
+    <p><bdi><dfn data-field=tag.label></dfn></bdi>は<enum-value data-field=tag.type
+        label-action=行動
+        label-calendar=暦
+        label-country=国
+        label-event=出来事
+        label-law=法令
+        label-org=組織
+        label-person=人物
+        label-people=民族
+        label-position=地位
+        label-region=地域
+        label-religion=宗教
+        label-source=典籍
+        label-tag=分類
+    ></enum-value>の1つです。
 
     <section>
       <h1>紀年法</h1>
@@ -1935,6 +1961,14 @@
 <template-set name=sw-data-era-in-menu>
   <template>
     <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
+      <span class=era-prefix>
+        <sw-if-defined data-field=country_tag_id hidden>
+          <sw-data-tag data-field=country_tag_id template=sw-data-tag-text class=era-country></sw-data-tag>
+        </sw-if-defined>
+        <sw-if-defined data-field=monarch_tag_id hidden>
+          <sw-data-tag data-field=monarch_tag_id template=sw-data-tag-text class=era-monarch></sw-data-tag>
+        </sw-if-defined>
+      </span>
       <bdi data-field=name data-empty=?></bdi>
       <code>[y~<span data-field=id></span>]</code>
       
@@ -1971,6 +2005,14 @@
     <p class=full-date data-hidden-field=nongli_wuzhou_hidden data-filled=hidden>農暦(武周) <span data-field=nongli_wuzhou.year></span>年<enum-value class=leap data-field=nongli_wuzhou.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_wuzhou.month></span>月<span data-field=nongli_wuzhou.day></span>日
     <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>旧暦 <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
   </template>
+</template-set>
+
+<template-set name=sw-data-tag-text>
+  <template><bdi data-field=label></bdi></template>
+</template-set>
+
+<template-set name=sw-data-tag-label>
+  <template><a data-href-template=/tag/{id}/><bdi data-field=label></bdi></a></template>
 </template-set>
 
 <template-set name=swRecentListItem>
