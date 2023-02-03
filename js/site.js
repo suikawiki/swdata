@@ -3703,7 +3703,7 @@ defineElement ({
                 if (fs.jp_new) out.ja.push (['ja', fs.jp_new, 'jp_new']);
                 if (fs.jp_old) out.ja.push (['ja', fs.jp_old, 'jp_old']);
                 if (fs.kr) out.kr.push (['ko-KR', fs.kr, 'kr_hanzi']);
-                (fs.others || []).forEach (_ => others.push (['und', _]));
+                (fs.others || []).forEach (_ => out.others.push (['und', _]));
               } else if (fs.form_set_type === 'yomi' ||
                          fs.form_set_type === 'kana') {
                 if (fs.kana) out.ja.push (['ja', fs.kana, opts.captioned ? 'jp' : null]);
@@ -3945,7 +3945,7 @@ defineElement ({
                 return;
               }
               
-              var data = document.createElement ('bdi');
+              var data = document.createElement ('data');
               data.lang = lang;
               data.classList.toggle ('primary', !variant);
               data.appendChild (stToHTML (st));
@@ -4011,7 +4011,6 @@ defineElement ({
                 li1.appendChild (s);
               }
               var cc = document.createElement ('can-copy');
-              cc.setAttribute ('selector', 'bdi');
               cc.appendChild (data);
               li1.appendChild (cc);
               //if (!found[li1.innerHTML]) {
@@ -5792,6 +5791,7 @@ defineListLoader ('swRecentListLoader', async function (opts) {
   });
 });
 
+/* ------ Tags ------ */
 
 defineElement ({
   name: 'sw-tags',
@@ -5839,10 +5839,41 @@ defineElement ({
   },
 }); // <sw-tags>
 
+defineElement ({
+  name: 'sw-data-tag',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var tags = await SWD.tagsByIds ([v]);
+      
+      var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
+      var e = ts.createFromTemplate ('div', tags[0]);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+    }, // swUpdate
+  },
+}); // <sw-data-tag>
 
 /*
 
-Copyright 2014-2022 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2023 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

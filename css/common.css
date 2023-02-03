@@ -1053,6 +1053,21 @@ nav.nearby ul > li > a {
   font-weight: bolder;
 }
 
+.menu-list .era-prefix:not([hidden]),
+.era-related-list .era-prefix:not([hidden]) {
+  display: block;
+}
+.menu-list .era-prefix,
+.era-related-list .era-prefix {
+  line-height: 1;
+}
+
+.menu-list .era-prefix bdi,
+.era-related-list .era-prefix bdi {
+  font-weight: normal;
+  font-size: 90%;
+}
+
 .era-related-list .year-range {
   margin: 0;
   text-align: end;
@@ -1356,6 +1371,7 @@ sw-era-transition-graph .era-header.incorrect bdi {
 
 sw-era-transition-graph .era-header code {
   line-height: 1.0;
+  font-size: 80%;
 }
 
 sw-era-transition-graph .year-header {
@@ -2577,7 +2593,7 @@ nav.toplink a:active {
 
 /*
 
-Copyright 2014-2022 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2023 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
