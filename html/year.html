@@ -214,6 +214,7 @@
             <option value=ad>西暦 (AD)
             <option value=bc>西暦紀元前 (BC)
             <option value=kouki>皇紀
+            <option value=bkouki>皇紀前
           </select>
           であるなら:
 
@@ -427,7 +428,9 @@
  -->紀年法<!--
  --><sw-if-defined data-field=era.tag_ids.1463 hidden> (元号) </sw-if-defined><!--
  --><sw-if-defined data-field=era.tag_ids.1372 hidden> (建国紀元) </sw-if-defined><!--
- -->です。</p>
+ -->です。
+    <sw-if-defined data-field=era.tag_ids.1813 hidden>元号名はわかっていません。</sw-if-defined>
+    </p>
 
     <sw-if-defined data-field=era.tag_ids.2887 hidden>
       <p>
@@ -1683,6 +1686,45 @@
     [<sw-tags data-field=subject_tag_ids></sw-tags>]
     が<strong>新元号に切り替え</strong>
   </template>
+  <template data-name=3724>
+    春秋戦国時代の
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>称元</strong>
+  </template>
+  <template data-name=4071>
+    漢の侯国
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>称元</strong>
+  </template>
+  <template data-name=4072>
+    漢の侯国設置に当たり
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    の
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    が<strong>称元</strong>
+  </template>
+  <template data-name=4074>
+    漢の<strong>転封</strong>:
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    →
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+    に当たり<strong>称元</strong>
+  </template>
+  <template data-name=4073>
+    漢の<strong>転封</strong>:
+    [<sw-tags data-field=subject_tag_ids></sw-tags>]
+    →
+    [<sw-tags data-field=object_tag_ids></sw-tags>]
+  </template>
+  <template data-name=4078>
+    漢の封国
+    [<sw-tags data-field=authority_tag_id></sw-tags>]
+    <strong>廃止</strong>
+  </template>
   <template data-name=1189><!-- 支那改元日 -->
     <sw-if-defined data-field=tag_ids.1359>
       <strong>新政権</strong>樹立に当たり
@@ -1760,7 +1802,17 @@
   <template data-name=eraTextCanCopyLink><can-copy><a data-href-template="/y/{value}/"><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</a></can-copy></template>
   <template data-name=eraTextCanCopy><can-copy><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</can-copy></template>
   <template data-name=eraWithYear>
-    <a data-href-template=/e/{era.id}/><span data-field=eraName data-empty=?></span></a>
+    <a data-href-template=/e/{era.id}/>
+      <span class=era-prefix>
+        <sw-if-defined data-field=era.country_tag_id hidden>
+          <sw-data-tag data-field=era.country_tag_id template=sw-data-tag-text-name class=era-country></sw-data-tag>
+        </sw-if-defined>
+        <sw-if-defined data-field=era.monarch_tag_id hidden>
+          <sw-data-tag data-field=era.monarch_tag_id template=sw-data-tag-text-name class=era-monarch></sw-data-tag>
+        </sw-if-defined>
+      </span>
+      <span class=era-name data-field=eraName data-empty=?></span>
+    </a>
     <code>[y~<span data-field=era.id></span>]</code>
     <strong data-field=eraValue></strong>年
   </template>
@@ -1963,10 +2015,10 @@
     <a data-href-template=/e/{id}/ data-class-template=incorrect-{tag_ids.1200}>
       <span class=era-prefix>
         <sw-if-defined data-field=country_tag_id hidden>
-          <sw-data-tag data-field=country_tag_id template=sw-data-tag-text class=era-country></sw-data-tag>
+          <sw-data-tag data-field=country_tag_id template=sw-data-tag-text-name class=era-country></sw-data-tag>
         </sw-if-defined>
         <sw-if-defined data-field=monarch_tag_id hidden>
-          <sw-data-tag data-field=monarch_tag_id template=sw-data-tag-text class=era-monarch></sw-data-tag>
+          <sw-data-tag data-field=monarch_tag_id template=sw-data-tag-text-name class=era-monarch></sw-data-tag>
         </sw-if-defined>
       </span>
       <bdi data-field=name data-empty=?></bdi>
@@ -2009,6 +2061,10 @@
 
 <template-set name=sw-data-tag-text>
   <template><bdi data-field=label></bdi></template>
+</template-set>
+
+<template-set name=sw-data-tag-text-name>
+  <template><bdi data-field=name></bdi></template>
 </template-set>
 
 <template-set name=sw-data-tag-label>

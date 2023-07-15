@@ -1053,16 +1053,22 @@ nav.nearby ul > li > a {
   font-weight: bolder;
 }
 
+sw-data-year .era-prefix:not([hidden]),
 .menu-list .era-prefix:not([hidden]),
+.era-list-item .era-prefix:not([hidden]),
 .era-related-list .era-prefix:not([hidden]) {
   display: block;
 }
+sw-data-year .era-prefix,
 .menu-list .era-prefix,
+.era-list-item .era-prefix,
 .era-related-list .era-prefix {
   line-height: 1;
 }
 
+sw-data-year .era-prefix bdi,
 .menu-list .era-prefix bdi,
+.era-list-item .era-prefix bdi,
 .era-related-list .era-prefix bdi {
   font-weight: normal;
   font-size: 90%;
@@ -1165,13 +1171,16 @@ p sw-data-era a:not(:active):not(:focus):not(:hover) {
 .transitions > tbody > tr > .neighbors code:not([hidden]) {
   display: block;
 }
-.transitions > tbody > tr > .neighbors a,
+.transitions > tbody > tr > .neighbors a {
+  white-space: nowrap;
+  line-height: 1.1;
+}
 .transitions > tbody > tr > .neighbors code {
   white-space: nowrap;
-  line-height: 1.0;
+  line-height: 1;
 }
 
-.transitions > tbody > tr > .neighbors a {
+.transitions > tbody > tr > .neighbors .era-name {
   font-size: 130%;
   font-weight: bolder;
 }
