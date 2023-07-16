@@ -132,24 +132,56 @@ SWD.Env.startWorker = function () {
   return this._swP;
 }; // SWD.Env.startWorker
 
-SWD.data = function (name) {
+SWD._dataRes = function (name, opts) {
   if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name, {
+
+  var url = '/data/' + name;
+  var gzipped = false;
+  if (!SWD.isLocal && /^charrels/.test (name)) {
+    url = 'https://manakai.github.io/data-chars/local/generated/' + name + '.gz';
+    gzipped = true;
+  }
+  
+  return SWD._load[name] = fetch (url, {
     cache: (SWD.isReload ? 'reload' : undefined),
-  }).then (res => {
+  }).then (async res => {
     if (res.status !== 200) throw res;
-    return res.json ();
+    if (gzipped) {
+      var ds = new DecompressionStream ('gzip');
+      var rs = res.body.pipeThrough (ds);
+      var reader = rs.getReader ();
+      var values = [];
+      while (true) {
+        var {value, done} = await reader.read ();
+        if (done) break;
+        values.push (value);
+      }
+      var blob = new Blob (values);
+      if (opts.type === 'json') {
+        return blob.text ().then (text => JSON.parse (text));
+      } else if (opts.type === 'arrayBuffer') {
+        return blob.arrayBuffer ();
+      } else {
+        throw opts.type;
+      }
+    } else {
+      if (opts.type === 'json') {
+        return res.json ();
+      } else if (opts.type === 'arrayBuffer') {
+        return res.arrayBuffer ();
+      } else {
+        throw opts.type;
+      }
+    }
   });
+}; // SWD._dataRes
+
+SWD.data = function (name) {
+  return SWD._dataRes (name, {type: 'json'});
 }; // SWD.data
 
 SWD.dataAB = function (name) {
-  if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name, {
-    cache: (SWD.isReload ? 'reload' : undefined),
-  }).then (res => {
-    if (res.status !== 200) throw res;
-    return res.arrayBuffer ();
-  });
+  return SWD._dataRes (name, {type: 'arrayBuffer'});
 }; // SWD.dataAB
 
 SWD.era = async function (eraId) {
@@ -183,7 +215,7 @@ SWD.eraList = async function (opts) {
       567 : 'BE xi',
       444 : 'BE omicron',
       1028 : 'BE pi',
-      // rho
+      557 : 'BE rho',
       // sigma
       // tau
       // upsilon
@@ -1464,7 +1496,7 @@ SWD.Char._relDataSets = {
 //if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
 
 SWD.Char._relDataRoot = async function (ds) {
-  ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-index.json');
+  ds.dataRoot = await SWD.data ('charrels/' + ds.key + '/tbl-index.json');
 
   var _eint = v => {
     var r = [];
@@ -1564,7 +1596,7 @@ SWD.Char._relDataRoot = async function (ds) {
 }; // SWD.Char._relDataRoot
 
 SWD.Char._relDataClusters = async function (ds) {
-  ds.dataClusters = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-clusters.dat'));
+  ds.dataClusters = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-clusters.dat'));
 };
 
 SWD.Char._relClusterIndexFromTbl = function (ds, def, index) {
@@ -1651,7 +1683,7 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
 }; // SWD.Char._charsFromTbl
 
 SWD.Char._relDataRels = async function (ds) {
-  ds.dataRels = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-rels.dat'));
+  ds.dataRels = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-rels.dat'));
 };
 
 SWD.Char._relsFromTbl = function (ds, char) {
@@ -1731,7 +1763,7 @@ SWD.Char._relsFromTbl = function (ds, char) {
 }; // SWD.Char._relsFromTbl
 
 SWD.Char._relDataLeaders = async function (ds) {
-  ds.dataLeaders = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-leaders.dat'));
+  ds.dataLeaders = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-leaders.dat'));
 };
 
 SWD.Char._leadersFromTbl = function (ds, char) {
@@ -3573,16 +3605,7 @@ defineListLoader ('swTransitionListLoader', async function (opts) {
   if (Number.isFinite (year)) {
     items = items.filter (_ => {
       var d = _.day || _.day_start
-      // XXX primary calendar
-      var ds;
-      if (_.tag_ids[1344]) {
-        ds = d.gregorian;
-      } else {
-        ds = d.nongli_tiger || d.kyuureki || d.gregorian;
-      }
-      var m = ds.match (/^(-?[0-9]+)/);
-      var y = parseFloat (m[1]);
-      return y === year;
+      return d.year === year;
     });
   }
 
@@ -3673,6 +3696,10 @@ defineElement ({
             c.appendChild (document.createTextNode ("'"));
           } else if (s === ".・") {
             c.appendChild (document.createTextNode (""));
+          } else if (s === ".(") {
+            c.appendChild (document.createTextNode (" ("));
+          } else if (s === ".)") {
+            c.appendChild (document.createTextNode (") "));
           } else {
             c.appendChild (document.createTextNode (s));
           }
@@ -4511,7 +4538,7 @@ defineElement ({
                 year: -Infinity,
                 yearAreas: [],
                 end_year: era.end_year,
-                known_latest_year: era.known_latest_year,
+                latest_year: era.table_latest_year != null ? era.table_latest_year : era.known_latest_year,
               };
             }
           }
@@ -4525,27 +4552,40 @@ defineElement ({
           year: -Infinity,
           yearAreas: [],
           end_year: era.end_year,
-          known_latest_year: era.known_latest_year,
+          latest_year: era.table_latest_year != null ? era.table_latest_year : era.known_latest_year,
         };
         var c = eraStates[era.id];
 
         if (c.era.tag_ids[2301] /* 継続中 */) {
         //c.era.start_year != null && c.end_year == null
           c.end_year = FUTURE;
-          c.known_latest_year = FUTURE;
+          c.latest_year = FUTURE;
         }
-        var future_year = c.era.tag_ids[2300] /* 利用中 */ ? FUTURE : year;
+        var future_year = year;
+        if (c.era.tag_ids[2300] /* 利用中 */) {
+          future_year = FUTURE;
+          c.latest_year = FUTURE;
+        }
 
         if (c.selected) {
           var year = era.known_oldest_year;
           if (year == null) year = era.start_year;
-          if (year == null) year = era.offset+1;
+          if (year == null && era.offset != null) year = era.offset+1;
+          if (year == null) year = era.table_oldest_year;
           if (!Number.isFinite (year)) year = FUTURE;
+
+          if (c.latest_year > FUTURE) c.latest_year = FUTURE;
+          if (c.end_year > FUTURE) c.end_year = FUTURE;
           
-          [era.known_oldest_year, c.known_latest_year,
+          [era.known_oldest_year,
+           era.table_latest_year,
+           era.known_latest_year,
+           c.latest_year,
            era.start_year, c.end_year,
-           (c.known_latest_year >= thisYear ? thisYear : year),
+           (c.latest_year >= thisYear ? thisYear : year),
            year, future_year].forEach (yy => {
+             if (yy > FUTURE) return;
+             
              if (!yearTrs[yy]) yearTrs[yy] = [];
         
              var tr = {relevant_era_ids: {}, prev_era_ids: {}, next_era_ids: {}};
@@ -4852,7 +4892,7 @@ defineElement ({
         inactivatedEraStates.forEach (c => delete c.column.assigned);
         inactivatedEraStates = [];
         activeEraStates = activeEraStates.filter (c => {
-          var cy = c.known_latest_year;
+          var cy = c.latest_year;
           if (lastYear < cy && cy <= year) {
             if (!c.dontUnassign) inactivatedEraStates.push (c);
             return false;
@@ -5013,7 +5053,7 @@ defineElement ({
           var first = years.length ? years[0] : null;
           if (c.era.known_oldest_year < first) first = c.era.known_oldest_year;
           var last = years.length ? years[years.length-1] : null;
-          if (last < c.known_latest_year) last = c.known_latest_year;
+          if (last < c.latest_year) last = c.latest_year;
           if (first != null && last != null) {
             insertLine ({
               start: [c.column.hCenter, c.yearAreas[first].vCenter],
@@ -5526,11 +5566,14 @@ defineElement ({
 
       var iy = form.elements.input_year.value;
       var ry = form.elements.input_ref_year.value;
+      var ry0 = ry;
       var re = form.elements.input_ref_era.value;
       if (re === 'bc') {
         ry = 1 - ry;
       } else if (re === 'kouki') {
         ry -= 660;
+      } else if (re === 'bkouki') {
+        ry = 1 - ry - 660;
       }
       var offset = ry - iy;
 
@@ -5573,7 +5616,7 @@ defineElement ({
         this.swAddYear (delta);
       };
 
-      var u = location.pathname + '?input_year=' + iy + '&input_ref_year=' + ry + '&input_ref_era=' + re;
+      var u = location.pathname + '?input_year=' + iy + '&input_ref_year=' + ry0 + '&input_ref_era=' + re;
       history.replaceState (null, null, u);
 
       setTimeout (() => {
