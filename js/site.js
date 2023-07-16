@@ -1,10 +1,15 @@
 
-var SWD = {_load: {}};
+var SWD = {
+  _load: {},
+  _cached: {},
+};
 
 SWD.isReload = location.search === "?reload";
 SWD.isLocal = !! location.hostname.match (/local/);
 
-SWD.Env = {workerMethodCode: [], workerMethodSI: []};
+SWD.Env = {workerMethodCode: [], workerMethodSI: [],
+           workerMethodPostprocessor: [],
+           workerMethodHandleOtherValues: []};
 SWD.Env.isWorker = !self.document;
 
 var defs = function (code) {
@@ -32,8 +37,11 @@ var defineListLoader = function (name, code) {
   document.head.appendChild (e);
 }; // defineListLoader
 
-var defineWorkerMethod = (name, toSerializableInput, workerCode) => {
+var defineWorkerMethod = (name, toSerializableInput, workerCode, opts) => {
   SWD.Env.workerMethodSI[name] = toSerializableInput;
+  if (opts) {
+    SWD.Env.workerMethodHandleOtherValues[name] = opts.handleOtherValues; // or undefined
+  }
 };
 
 var hasWorkerMethod = (name, code) => {
@@ -50,8 +58,13 @@ var hasWorkerMethod = (name, code) => {
         args,
       }, [mc.port2]);
       return new Promise ((ok, ng) => {
-        mc.port1.onmessage = ev => {
+        mc.port1.onmessage = async ev => {
           if (ev.data.type === 'return') {
+            if (ev.data.otherValues) {
+              var ho = SWD.Env.workerMethodHandleOtherValues[name];
+              if (!ho) throw new Error ('handleOtherValues for |'+name+'| is not defined');
+              ho (args, ev.data.otherValues);
+            }
             ok (ev.data.value);
           } else if (ev.data.type === 'error') {
             ng (ev.data.value);
@@ -74,8 +87,14 @@ if (SWD.Env.isWorker) {
         if (ev.data.type === 'method') {
           Promise.resolve ().then (() => {
             return SWD.Env.workerMethodCode[ev.data.name].apply (null, ev.data.args);
-          }).then (rv => {
-            ev.ports[0].postMessage ({type: 'return', value: rv});
+          }).then (async rv => {
+            var sCode = SWD.Env.workerMethodPostprocessor[ev.data.name];
+            if (sCode) {
+              var {value, otherValues} = await sCode (ev.data.args, rv);
+              ev.ports[0].postMessage ({type: 'return', value, otherValues});
+            } else {
+              ev.ports[0].postMessage ({type: 'return', value: rv});
+            }
           }, e => {
             ev.ports[0].postMessage ({type: 'error', value: e});
           });
@@ -91,8 +110,11 @@ if (SWD.Env.isWorker) {
     }
   });
 
-  defineWorkerMethod = (name, toSerializableInput, workerCode) => {
+  defineWorkerMethod = (name, toSerializableInput, workerCode, opts) => {
     SWD.Env.workerMethodCode[name] = workerCode;
+    if (opts) {
+      SWD.Env.workerMethodPostprocessor[name] = opts.postprocessor; // or undefined
+    }
   };
 
   hasWorkerMethod = (name, code) => code;
@@ -1595,6 +1617,27 @@ SWD.Char._relDataRoot = async function (ds) {
   
 }; // SWD.Char._relDataRoot
 
+defineWorkerMethod ('SWDCharGetRelationIndexMap', (dsKey) => [dsKey], (dsKey) => {
+  return SWD.Char._getRelationIndexMap (dsKey);
+});
+//
+SWD.Char._getRelationIndexMap = hasWorkerMethod ('SWDCharGetRelationIndexMap', async function (dsKey) {
+  var ds = SWD.Char._relDataSets[dsKey];
+  if (!ds) throw new Error ("Bad /dsKey/: |"+dsKey+"|");
+
+  if (!ds.dataRoot) {
+    await SWD.Char._relDataRoot (ds);
+  }
+  
+  return ds.dataRoot.rels;
+}); // SWD.Char._getRelationIndexMap
+
+SWD.Char.getRelationIndexMap = async function (dsKey) {
+  if (SWD._cached["CharGetRelationIndexMap:" + dsKey]) return SWD._cached["CharGetRelationIndexMap:" + dsKey];
+  var v = SWD._cached["CharGetRelationIndexMap:" + dsKey] = await SWD.Char._getRelationIndexMap (dsKey);
+  return v;
+};
+
 SWD.Char._relDataClusters = async function (ds) {
   ds.dataClusters = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-clusters.dat'));
 };
@@ -1752,9 +1795,9 @@ SWD.Char._relsFromTbl = function (ds, char) {
       v = v | ((v2[i2] & 0b00111111) << s);
       i2++;
       if (rMap[v]) {
-        rr = rr.concat (rMap[v].map (_ => [ds, _]));
+        rr = rr.concat (rMap[v].map (_ => [ds.key, _]));
       } else {
-        rr.push ([ds, v]);
+        rr.push ([ds.key, v]);
       }
     }
     rels.push ([c2, rr]);
@@ -2035,25 +2078,25 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
   }
 }; // SWD.Char._dsGetCluster
 
-SWD.Char.getCluster = async function (level, char, dsKey) {
-  var cluster = {indexes: {}};
 
+defineWorkerMethod ('SWDCharGetClusterChars', (level, char, dsKey) => {
+  return [level, char, dsKey];
+}, (level, char, dsKey) => {
+  return SWD.Char.getClusterChars (level, char, dsKey);
+});
+//
+SWD.Char.getClusterChars = hasWorkerMethod ('SWDCharGetClusterChars', async function (level, char, dsKey) {
   var ds = SWD.Char._relDataSets[dsKey];
+
   await SWD.Char._relDataRoot (ds);
   await SWD.Char._relDataClusters (ds);
     
-  var r = SWD.Char._dsGetCluster (ds, level, char);
-  if (r) cluster.indexes[ds.key] = r.index;
-  
-  return cluster;
-}; // SWD.Char.getCluster
-
-SWD.Char.getChars = function (level, cluster, dsKey) {
-  var ds = SWD.Char._relDataSets[dsKey];
   var chars = [];
-  var index = cluster.indexes[ds.key];
-  if (index == null) return chars;
-
+  
+  var r = SWD.Char._dsGetCluster (ds, level, char);
+  if (!r) return chars;
+  
+  var index = r.index;
   for (var _ in (ds.dataRoot.others[level] || {})) {
     if (ds.dataRoot.others[level][_] === index) {
       chars.push (_);
@@ -2061,23 +2104,28 @@ SWD.Char.getChars = function (level, cluster, dsKey) {
   }
 
   return chars.concat (SWD.Char._charsFromTbl (ds, level, index));
-}; // SWD.Char.getChars
+}); // SWD.Char.getClusterChars
+
 
 defineWorkerMethod ('SWDCharGetRels', (dsKey, c) => {
   return [dsKey, c];
 }, (dsKey, c) => {
   return SWD.Char.getRels (dsKey, c);
 });
-
-SWD.Char.getRels = /*XXXhasWorkerMethod ('SWDCharGetRels',*/ async function (dsKey, char) {
+//
+SWD.Char.getRels = hasWorkerMethod ('SWDCharGetRels', async function (dsKey, char) {
   var ds = SWD.Char._relDataSets[dsKey];
   await SWD.Char._relDataRoot (ds);
   await SWD.Char._relDataRels (ds);
 
   return SWD.Char._relsFromTbl (ds, char);
-}/*)*/; // SWD.Char.getRels
+}); // SWD.Char.getRels
 
-SWD.Char.getRelsAll = async function (char) {
+defineWorkerMethod ('SWDCharGetRelsAll', (char) => [char], (char) => {
+  return SWD.Char.getRelsAll (char);
+});
+//
+SWD.Char.getRelsAll = hasWorkerMethod ('SWDCharGetRelsAll', async function (char) {
   var rels = {};
 
   var p = [];
@@ -2100,8 +2148,25 @@ SWD.Char.getRelsAll = async function (char) {
 
     return Object.values (rels);
   });
-}; // SWD.Char.getRelsAll
+}); // SWD.Char.getRelsAll
 
+
+defineWorkerMethod ('SWDCharGetLeaders', (c, d) => [c, d], (c, d) => {
+  return SWD.Char.getLeaders (c, d);
+}, {
+  postprocessor: (args, rv) => {
+    var ds = SWD.Char._relDataSets[args[1]];
+    var otherValues = {
+      leaderTypes: ds.dataRoot.leader_types,
+    };
+    return {value: rv, otherValues};
+  },
+  handleOtherValues: (args, ov) => {
+    var ds = SWD.Char._relDataSets[args[1]];
+    ds.leaderTypes = ov.leaderTypes;
+  },
+});
+//
 SWD.Char.getLeaders = hasWorkerMethod ('SWDCharGetLeaders', async function (char, dsKey) {
   var ds = SWD.Char._relDataSets[dsKey];
   await SWD.Char._relDataRoot (ds);
@@ -2110,9 +2175,6 @@ SWD.Char.getLeaders = hasWorkerMethod ('SWDCharGetLeaders', async function (char
   return SWD.Char._leadersFromTbl (ds, char) || [char];
 }); // SWD.Char.getLeaders
 
-defineWorkerMethod ('SWDCharGetLeaders', (c, d) => [c, d], (c, d) => {
-  return SWD.Char.getLeaders (c, d);
-});
 
 SWD.Char._mjc = {};
 SWD.Char.getMJChar = async function (char) {
@@ -2178,13 +2240,16 @@ defineElement ({
       var dsKey = this.getAttribute ('type');
       if (!dsKey) return;
 
-      var cluster = await SWD.Char.getCluster ("EQUIV", v.char, dsKey);
-      var chars = await SWD.Char.getChars ("EQUIV", cluster, dsKey);
+      var progress = document.createElement ('progress');
+      this.appendChild (progress);
+
+      var chars = await SWD.Char.getClusterChars ("EQUIV", v.char, dsKey);
       var inCluster = new Set (chars);
       var leaders = await SWD.Char.getLeaders (v.char, dsKey);
 
       if (chars.length === 0 && leaders.length <= 1) {
         this.parentNode.hidden = true;
+        progress.remove ();
         return;
       }
 
@@ -2201,7 +2266,7 @@ defineElement ({
         var ts = await $getTemplateSet ('sw-char-leader-item');
         var tse = await $getTemplateSet ('sw-char-leader-empty-item');
         var ds = SWD.Char._relDataSets[dsKey];
-        ds.dataRoot.leader_types.forEach (lt => {
+        ds.leaderTypes.forEach (lt => {
           if (!lt) return;
           if (leaders[lt.index]) {
             var e = ts.createFromTemplate ('figure', {
@@ -2230,20 +2295,33 @@ defineElement ({
         if (inCluster.has (char)) e.classList.toggle ('in-cluster');
         li.appendChild (e);
 
-        var rels = await SWD.Char.getRels (dsKey, char);
+        var relItems = await SWD.Char.getRels (dsKey, char);
+        var relTypeSets = {};
+        for (let j = 0; j < relItems.length; j++) {
+          var relItem = relItems[j];
+          var relChar = relItem[0];
+          var relTypes = [];
+          for (let k = 0; k < relItem[1].length; k++) {
+            var relDSKey = relItem[1][k][0];
+            if (!relTypeSets[relDSKey]) {
+              relTypeSets[relDSKey] = await SWD.Char.getRelationIndexMap (relDSKey);
+            }
+          }
+        }
+        
         var ul = document.createElement ('ul');
-        rels.map (_ => {
-          var c = _[0];
-          var relTypes = _[1].map (_ => _[0].dataRoot.rels[_[1]]);
+        relItems.map (relItem => {
+          var relChar = relItem[0];
+          var relTypes = relItem[1].map (_ => relTypeSets[_[0]][_[1]]);
           var maxWeight = Math.max (...relTypes.map (_ => _.weight));
-          return {c, relTypes, maxWeight};
+          return {relChar, relTypes, maxWeight};
         }).sort ((a, b) => b.maxWeight - a.maxWeight).forEach (_ => {
           var li2 = document.createElement ('li');
 
           var f = document.createElement ('sw-data-char');
-          f.value = SWD.char ('char', _.c);
+          f.value = SWD.char ('char', _.relChar);
           f.setAttribute ('template', 'sw-data-char-item');
-          if (inCluster.has (_.c)) f.classList.toggle ('in-cluster');
+          if (inCluster.has (_.relChar)) f.classList.toggle ('in-cluster');
           li2.appendChild (f);
 
           {
@@ -2262,13 +2340,14 @@ defineElement ({
           }
           
           ul.appendChild (li2);
-        });
+        }); // relItems
         li.appendChild (ul);
         
         c.appendChild (li);
       }
 
       this.appendChild (c);
+      progress.remove ();
     }, // swUpdate
   },
 }); // <sw-char-cluster>
@@ -2312,7 +2391,7 @@ SWD.Char.routes = async function (char1, char2, opts) {
   var currentSeen = {};
   currentSeen[char1Char] = true;
   while (true) {
-    console.log ("length", current[0].length, "routes", current.length); // debug
+    //console.log ("length", current[0].length, "routes", current.length); // debug
     p.push (Promise.resolve (current[0].length).then (opts.onhop));
     var next = [];
     var nextSeen = {};
@@ -2320,33 +2399,46 @@ SWD.Char.routes = async function (char1, char2, opts) {
     for (var i = 0; i < current.length; i++) {
       var route = current[i];
       var char = route.at (-1)[0];
-      var rels = await SWD.Char.getRelsAll (char.char);
-      rels.forEach (rel => {
-        var item = route.concat ([ [SWD.char ('char', rel[0]), rel[1]] ]);
+      var relItems = await SWD.Char.getRelsAll (char.char);
+      var relTypeSets = {};
+      for (let j = 0; j < relItems.length; j++) {
+        var relItem = relItems[j];
+        var relChar = relItem[0];
+        var relTypes = [];
+        for (let k = 0; k < relItem[1].length; k++) {
+          var relDSKey = relItem[1][k][0];
+          if (!relTypeSets[relDSKey]) {
+            relTypeSets[relDSKey] = await SWD.Char.getRelationIndexMap (relDSKey);
+          }
+          relTypes.push (relTypeSets[relDSKey][relItem[1][k][1]]);
+        }
+        var item = route.concat ([
+          [SWD.char ('char', relChar), relTypes]
+        ]);
         item.seen = new Set (route.seen);
-        //if (currentSeen[rel[0]]) {
-        if (rel[0] === char2Char) {
+        //if (currentSeen[relChar]) {
+        if (relChar === char2Char) {
           found.push (item);
           delete item.seen;
           p.push (Promise.resolve (item).then (opts.onfound));
           checkDups (item);
-        } else if (nextSeen[rel[0]]) {
-          if (item.seen.has (rel[0])) {
+        } else if (nextSeen[relChar]) {
+          if (item.seen.has (relChar)) {
             //
-          } else if (dupsNeedReport[rel[0]]) {
+          } else if (dupsNeedReport[relChar]) {
             delete item.seen;
             reportDups ([item]);
           } else {
-            dups[rel[0]] = dups[rel[0]] || [];
+            dups[relChar] = dups[relChar] || [];
             delete item.seen;
-            dups[rel[0]].push (item);
+            dups[relChar].push (item);
           }
         } else {
           next.push (item);
-          item.seen.add (rel[0]);
+          item.seen.add (relChar);
         }
-        nextSeen[rel[0]] = true;
-      }); // rels
+        nextSeen[relChar] = true;
+      } // relItems
 
       await new Promise (_ => setTimeout (_, 0));
     } // route
@@ -2486,17 +2578,16 @@ defineElement ({
       var ol = document.createElement ('ol');
 
       if (partial) route.at (-1).partialLast = true;
-      
+
       route.forEach (step => {
         var li = document.createElement ('li');
 
         if (step[1].length) {
           var ul = document.createElement ('ul');
           ul.classList.toggle ('char-rel-list');
-          step[1].forEach (_ => {
+          step[1].forEach (rel => {
             var li = document.createElement ('li');
             var code = document.createElement ('sw-data-char-rel');
-            var rel = _[0].dataRoot.rels[_[1]];
             code.value = rel;
             li.appendChild (code);
             ul.appendChild (li);
@@ -2621,7 +2712,7 @@ SWD.Font.Font.prototype._load = async function () {
   } else if (info.type === 'native') {
     //
   } else {
-    throw ["glyph _load", f];
+    throw ["glyph _load", info];
   }
 }; // _load
 
