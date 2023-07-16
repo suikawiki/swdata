@@ -336,18 +336,24 @@ sub main ($$$) {
     return temma $app, ['lang.html.tm'], {tag => $tag};
   }
 
-  if (@$path == 2 and
+  if (@$path == 4 and
       $path->[0] eq 'data' and
-      $path->[1] =~ m{\Atbl-[0-9A-Za-z_-]+\.json\z}) {
-    # /data/tbl-{}.json
-    return static $app, 'application/json; charset=utf-8', 'local/data/'.$path->[1].'.gz',
+      $path->[1] eq 'charrels' and
+      $path->[2] =~ m{\A[a-z0-9]+\z} and
+      $path->[3] =~ m{\A[0-9A-Za-z_-]+\.json\z}) {
+    # /data/charrels/{}/{}.json
+    return static $app, 'application/json; charset=utf-8',
+        "local/$path->[1]/$path->[2]/$path->[3].gz",
         gzip => 1;
   }
-  if (@$path == 2 and
+  if (@$path == 4 and
       $path->[0] eq 'data' and
-      $path->[1] =~ m{\Atbl-[0-9A-Za-z_-]+\.dat\z}) {
-    # /data/tbl-{}.dat
-    return static $app, 'application/octet-stream', 'local/data/'.$path->[1].'.gz',
+      $path->[1] eq 'charrels' and
+      $path->[2] =~ m{\A[a-z0-9]+\z} and
+      $path->[3] =~ m{\A[0-9A-Za-z_-]+\.dat\z}) {
+    # /data/charrels/{}/{}.dat
+    return static $app, 'application/octet-stream',
+        "local/$path->[1]/$path->[2]/$path->[3].gz",
         gzip => 1;
   }
   

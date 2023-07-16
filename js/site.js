@@ -132,24 +132,56 @@ SWD.Env.startWorker = function () {
   return this._swP;
 }; // SWD.Env.startWorker
 
-SWD.data = function (name) {
+SWD._dataRes = function (name, opts) {
   if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name, {
+
+  var url = '/data/' + name;
+  var gzipped = false;
+  if (!SWD.isLocal && /^charrels/.test (name)) {
+    url = 'https://manakai.github.io/data-chars/local/generated/' + name + '.gz';
+    gzipped = true;
+  }
+  
+  return SWD._load[name] = fetch (url, {
     cache: (SWD.isReload ? 'reload' : undefined),
-  }).then (res => {
+  }).then (async res => {
     if (res.status !== 200) throw res;
-    return res.json ();
+    if (gzipped) {
+      var ds = new DecompressionStream ('gzip');
+      var rs = res.body.pipeThrough (ds);
+      var reader = rs.getReader ();
+      var values = [];
+      while (true) {
+        var {value, done} = await reader.read ();
+        if (done) break;
+        values.push (value);
+      }
+      var blob = new Blob (values);
+      if (opts.type === 'json') {
+        return blob.text ().then (text => JSON.parse (text));
+      } else if (opts.type === 'arrayBuffer') {
+        return blob.arrayBuffer ();
+      } else {
+        throw opts.type;
+      }
+    } else {
+      if (opts.type === 'json') {
+        return res.json ();
+      } else if (opts.type === 'arrayBuffer') {
+        return res.arrayBuffer ();
+      } else {
+        throw opts.type;
+      }
+    }
   });
+}; // SWD._dataRes
+
+SWD.data = function (name) {
+  return SWD._dataRes (name, {type: 'json'});
 }; // SWD.data
 
 SWD.dataAB = function (name) {
-  if (SWD._load[name]) return SWD._load[name];
-  return SWD._load[name] = fetch ('/data/' + name, {
-    cache: (SWD.isReload ? 'reload' : undefined),
-  }).then (res => {
-    if (res.status !== 200) throw res;
-    return res.arrayBuffer ();
-  });
+  return SWD._dataRes (name, {type: 'arrayBuffer'});
 }; // SWD.dataAB
 
 SWD.era = async function (eraId) {
@@ -1464,7 +1496,7 @@ SWD.Char._relDataSets = {
 //if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
 
 SWD.Char._relDataRoot = async function (ds) {
-  ds.dataRoot = await SWD.data ('tbl-' + ds.key + '-tbl-index.json');
+  ds.dataRoot = await SWD.data ('charrels/' + ds.key + '/tbl-index.json');
 
   var _eint = v => {
     var r = [];
@@ -1564,7 +1596,7 @@ SWD.Char._relDataRoot = async function (ds) {
 }; // SWD.Char._relDataRoot
 
 SWD.Char._relDataClusters = async function (ds) {
-  ds.dataClusters = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-clusters.dat'));
+  ds.dataClusters = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-clusters.dat'));
 };
 
 SWD.Char._relClusterIndexFromTbl = function (ds, def, index) {
@@ -1651,7 +1683,7 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
 }; // SWD.Char._charsFromTbl
 
 SWD.Char._relDataRels = async function (ds) {
-  ds.dataRels = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-rels.dat'));
+  ds.dataRels = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-rels.dat'));
 };
 
 SWD.Char._relsFromTbl = function (ds, char) {
@@ -1731,7 +1763,7 @@ SWD.Char._relsFromTbl = function (ds, char) {
 }; // SWD.Char._relsFromTbl
 
 SWD.Char._relDataLeaders = async function (ds) {
-  ds.dataLeaders = new Uint8Array (await SWD.dataAB ('tbl-' + ds.key + '-tbl-leaders.dat'));
+  ds.dataLeaders = new Uint8Array (await SWD.dataAB ('charrels/' + ds.key + '/tbl-leaders.dat'));
 };
 
 SWD.Char._leadersFromTbl = function (ds, char) {
