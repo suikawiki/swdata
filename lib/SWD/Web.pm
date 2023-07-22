@@ -355,6 +355,15 @@ sub main ($$$) {
     return static $app, 'application/octet-stream',
         "local/$path->[1]/$path->[2]/$path->[3].gz",
         gzip => 1;
+  } elsif (@$path == 5 and
+           $path->[0] eq 'data' and
+           $path->[1] eq 'charrels' and
+           $path->[2] =~ m{\A[a-z0-9]+\z} and
+           $path->[3] =~ m{\A[a-z0-9][a-z0-9-]+\z} and
+           $path->[4] =~ m{\A[a-z0-9][0-9A-Za-z_-]*\.[0-9a-z]+\z}) {
+    # /data/charrels/{}/{}/{}.{}
+    return static $app, 'application/octet-stream',
+        "local/$path->[1]/$path->[2]/$path->[3]/$path->[4]";
   }
   
   if (@$path == 2 and

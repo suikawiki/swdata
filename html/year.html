@@ -1120,6 +1120,14 @@
         <h1>関係する文字</h1>
         <sw-char-cluster data-field=char type=chars></sw-char-cluster>
       </section>
+      <section>
+        <h1>関係する字形</h1>
+        <sw-char-cluster data-field=char type=glyphs></sw-char-cluster>
+      </section>
+      <section>
+        <h1>関係する記述</h1>
+        <sw-char-cluster data-field=char type=idses></sw-char-cluster>
+      </section>
 
       <table class=props>
         <tbody>
@@ -1876,6 +1884,13 @@
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
+  <template data-name=text>
+    <a data-href-field=url class=char-item>
+      <data class="char-sample approximate" data-field=text></data>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
   <template data-name=mj>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
@@ -1886,6 +1901,31 @@
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=touki>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=kosekiKana>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=KS>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=juki>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=uplus></code>
       <code data-field=char></code>
     </a>
   </template>
