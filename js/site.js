@@ -1542,22 +1542,26 @@ defs (() => {
         return templates.mj || templates[""];
       } else if (/^:koseki90[01][0-9]{3}$/.test (char)) {
         return templates.kosekiKana || templates.touki || templates[""];
-      } else if (/^:(?:KS|TK)[0-9]+$/.test (char)) {
-        return templates.KS || templates[""];
+      } else if (/^:(?:J[ABCDEFT]|KS|TK)[0-9A-F]+S*$/.test (char)) {
+        return templates.heisei || templates[""];
       } else if (/^:(?:koseki|touki|ninjal)[0-9]+$/.test (char)) {
         return templates.touki || templates[""];
       } else if (/^:(?:cns)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.cns || templates[""];
       } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jis || templates[""];
-      } else if (/^:(?:jis)[0-9]+-[a-z]+-[0-9]+-[0-9]+$/.test (char)) {
-        return templates.jis || templates[""];
+      } else if (/^:(?:jis-[a-z][0-9a-z]*-)[12]-[0-9]+-[0-9]+$/.test (char)) {
+        return templates.jisVariant || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
       } else if (/:u-juki-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
       } else if (/:u-[a-z]+-[0-9a-f]+$/.test (char)) {
         return templates.u || templates[""];
+      } else if (/:b5-[0-9a-f]+$/.test (char)) {
+        return templates.big5 || templates[""];
+      } else if (/:b5-[a-z]+-[0-9a-f]+$/.test (char)) {
+        return templates.big5 || templates[""];
       }
       //gb ks kps cnsold swc b5 cccii
     }
@@ -2415,71 +2419,135 @@ SWD.Char.RelData.getRels = hasWorkerMethod ('SWDCharRelDataGetRels', async funct
   return part[char] || {};
 }); // SWD.Char.RelData.getRels
 
-defineWorkerMethod ('SWDCharRelDataMJGlyphInfo', (c) => [c], (char) => {
-  return SWD.Char.RelData._mjGlyphInfo (char);
-});
-//
-SWD.Char.RelData._mjGlyphInfo = hasWorkerMethod ('SWDCharRelDataMJGlyphInfo', function (char) {
-  return SWD._cached['mjGlyphInfo:' + char] = SWD._cached['mjGlyphInfo:' + char] || Promise.resolve ().then (async () => {
-    var keys = ['hans', 'kanas', 'chars'];
+SWD.Char.RelData._relGlyphInfo = function (opts) {
+  return SWD._cached[opts.key] = SWD._cached[opts.key] || Promise.resolve ().then (async () => {
+    var keys = opts.dsKeys;
     for (let i = 0; i < keys.length; i++) {
       var rds = await SWD.Char.RelData.getRelDefs (keys[i]);
-      var rr = await SWD.Char.RelData.getRels (keys[i], char);
+      var rr = await SWD.Char.RelData.getRels (keys[i], opts.char);
       for (let c2 in rr) {
         var relIds = rr[c2];
         for (let k = 0; k < relIds.length; k++) {
           var rel = rds[relIds[k]];
-          if (rel.key === 'rev:mj:X0213' ||
-              rel.key === 'rev:mj:X0212' ||
-              rel.key === 'rev:mj:戸籍統一文字番号' ||
-              rel.key === 'rev:mj:登記統一文字番号' ||
-              rel.key === 'rev:mj:住基ネット統一文字コード') {
-            return {glyphName: c2.replace (/^:/, '').toLowerCase (),
-                    approximate: true};
-          } else if (rel.key === 'ninjal:MJ文字図形名') {
-            return {glyphName: c2.replace (/^:/, '').toLowerCase ()};
-          }
+          var r = opts.code (c2, rel);
+          if (r) return r;
         }
       }
     }
     return null;
   });
-}); // SWD.Char.RelData._mjGlyphInfo
+}; // SWD.Char.RelData._relGlyphInfo
 
-defineWorkerMethod ('SWDCharRelDataCNSGlyphInfo', (c) => [c], (char) => {
-  return SWD.Char.RelData._cnsGlyphInfo (char);
+defineWorkerMethod ('SWDCharRelDataGetGlyphInfo', (c) => [c], (opts) => {
+  return SWD.Char.RelData._getGlyphInfo (opts);
 });
 //
-SWD.Char.RelData._cnsGlyphInfo = hasWorkerMethod ('SWDCharRelDataCNSGlyphInfo', function (char) {
-  return SWD._cached['cnsGlyphInfo:' + char] = SWD._cached['cnsGlyphInfo:' + char] || Promise.resolve ().then (async () => {
-    var keys = ['hans', 'kanas', 'kchars', 'chars'];
-    for (let i = 0; i < keys.length; i++) {
-      var rds = await SWD.Char.RelData.getRelDefs (keys[i]);
-      var rr = await SWD.Char.RelData.getRels (keys[i], char);
-      for (let c2 in rr) {
-        var relIds = rr[c2];
-        for (let k = 0; k < relIds.length; k++) {
-          var rel = rds[relIds[k]];
-          if (rel.key === 'cns:unicode') {
-            return {string: c2};
-          }
-        }
-      }
+SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', async function (opts) {
+  if (opts.mapper === 'auto') {
+    let m;
+    if (m = opts.char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
+      var glyphId = (m[2] - 1) * 94 + (m[3] - 1);
+      var fontName = /16/.test (m[1]) ? 'jiskan16' : 'jiskan24';
+      return {
+        fontName,
+        glyphId,
+        approximate: (!! /v/.test (m[1])),
+      };
     }
-    return null;
-  });
-}); // SWD.Char.RelData._mjGlyphInfo
-
-SWD.Char.RelData.getGlyphInfo = async function (opts) {
+  }
+  
   if (opts.mapper === 'mj') {
-    return await SWD.Char.RelData._mjGlyphInfo (opts.char);
+    var char = opts.char;
+    var approximate = false;
+    if (/^:(?:J[ABCDEFT]|KS|TK)/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'mjGlyphInfo.KS:' + char,
+        dsKeys: ['hans', 'kanas', 'chars'],
+        code: (c2, rel) => {
+          if ((rel.key === 'manakai:implements') &&
+              /^:(?:jis[12]|u-juki|koseki|touki)/.test (c2)) {
+            return {char: c2};
+          } else if (rel.key === 'manakai:implements:juki') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'mjGlyphInfo:' + opts.char + ':' + approximate,
+      dsKeys: ['hans', 'kanas', 'chars'],
+      code: (c2, rel) => {
+        if (rel.key === 'rev:mj:X0213' ||
+            rel.key === 'rev:mj:X0212' ||
+            rel.key === 'rev:mj:戸籍統一文字番号' ||
+            rel.key === 'rev:mj:登記統一文字番号' ||
+            rel.key === 'rev:mj:住基ネット統一文字コード') {
+          return {glyphName: c2.replace (/^:/, '').toLowerCase (),
+                  approximate: true};
+        } else if (rel.key === 'ninjal:MJ文字図形名') {
+          return {glyphName: c2.replace (/^:/, '').toLowerCase (),
+                  approximate};
+        }
+        return null;
+      },
+    });
   } else if (opts.mapper === 'cns') {
-    return await SWD.Char.RelData._cnsGlyphInfo (opts.char);
+    var char = opts.char;
+    var approximate = false;
+    if (/^:b5-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'cnsGlyphInfo.b5:' + char,
+        dsKeys: ['hans', 'kanas', 'chars'],
+        code: (c2, rel) => {
+          if (rel.key === 'rev:cns:big5' ||
+              rel.key === 'rev:cns:big5:符號') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'cnsGlyphInfo:' + char + ':' + approximate,
+      dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
+      code: (c2, rel) => {
+        if (rel.key === 'cns:unicode') {
+          return {string: c2, approximate};
+        }
+        return null;
+      },
+    });
   } else if (opts.mapper === 'u') {
     var m = (opts.char || '').match (/^:u-([a-z]+)-([0-9a-f]+)$/);
     if (m && m[1] === name) {
-      opts.string = String.fromCodePoint (parseInt (m[2], 16));
+      return {string: String.fromCodePoint (parseInt (m[2], 16))};
     }
+  }
+
+  return null;
+}); // SWD.Char.RelData._getGlyphInfo
+
+SWD.Char.RelData.getGlyphInfo = async function (opts) {
+  if (opts.mapper) {
+    var mapped = await SWD.Char.RelData._getGlyphInfo (opts);
+    return mapped || null;
   }
         
   if (opts.glyphId === '' && opts.glyphName === '' && opts.string === '') return null;
@@ -3029,8 +3097,8 @@ SWD.Font.Font.prototype._load = async function () {
     //
   } else if (info.type === 'bitmap') {
     var key = info.url;
-    if (SWD.Font._fonts[key]) return this.bitmap = SWD.Font._fonts[key];
-    this.bitmap = await (SWD.Font._fonts[key] = fetch (info.url).then (res => {
+    if (SWD.Font._fonts[key]) return this.bitmap = await SWD.Font._fonts[key];
+    this.bitmap = SWD.Font._fonts[key] = await (fetch (info.url).then (res => {
       if (res.status !== 200) throw res;
       return res.arrayBuffer ();
     }));
@@ -3179,7 +3247,8 @@ defineElement ({
     },
     swUpdate: async function () {
       var name = this.getAttribute ('name');
-      var font = await SWD.Font.load ({name});
+      var fontLoading;
+      if (name) fontLoading = SWD.Font.load ({name});
 
       var glyphInfo = await SWD.Char.RelData.getGlyphInfo ({
         char: this.getAttribute ('char'),
@@ -3189,6 +3258,12 @@ defineElement ({
         string: this.getAttribute ('string'),
       });
       if (!glyphInfo) return;
+      var font;
+      if (glyphInfo.fontName) {
+        font = await SWD.Font.load ({name: glyphInfo.fontName});
+      } else {
+        font = await fontLoading;
+      }
 
       try {
         var el = await font.getGlyphElement (glyphInfo);
@@ -3317,6 +3392,18 @@ defineElement ({
               this.appendChild (e);
             }
           }
+        }
+        var m = char.char.match (/^:jis-dot(16|24)-1-([0-9]+)-([0-9]+)$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var name = 'jiskan' + m[1];
+          var info = await SWD.Font.info ({name});
+          var e = ts.createFromTemplate ('figure', {
+            name,
+            glyphId: (parseInt (m[2]) - 1) * 94 + (parseInt (m[3]) - 1),
+            info,
+          });
+          this.appendChild (e);
         }
         
         var m = char.char.match (/^:cns[0-9]+-[0-9]+-[0-9]+$/);

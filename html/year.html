@@ -1862,17 +1862,67 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-char-text>
-  <template>
-    <code data-field=uplus></code>
-    <code class=charname data-field=names.name lang=en></code>
-    (<data class="char-sample" data-field=text></data>)
-  </template>
-</template-set>
-
 <template-set name=sw-data-char-text-compact>
   <template>
     <code data-field=uplus></code>
+  </template>
+</template-set>
+
+<template-set name=sw-data-char-text templateselector=swDataCharItemSelector>
+  <template>
+    <code data-field=char></code>
+    (<data class="char-sample" data-field=text></data>)
+  </template>
+  <template data-name=text>
+    <code data-field=uplus></code>
+    (<data class="char-sample approximate" data-field=text></data>)
+  </template>
+  <template data-name=mj>
+    <code data-field=mj></code>
+    (<sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>)
+  </template>
+  <template data-name=jis>
+    JIS <code data-field=mkt></code>
+    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=jisVariant>
+    <code data-field=char></code>
+    <!--XXX<code data-field=mkt></code>-->
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=touki>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=kosekiKana>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=heisei>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=juki>
+    <code data-field=char></code>
+    <!--XXX<code data-field=uplus></code>-->
+    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=cns>
+    CNS <code data-field=mkt></code>
+    (<sw-font-glyph class="char-sample" name=cns mapper=cns data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=big5>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" name=cns mapper=cns data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=u>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" name=cns mapper=u data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=cid>
+    <!--XXX<code>CID+<span data-field=cid></span></code>-->
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>)
   </template>
 </template-set>
 
@@ -1904,6 +1954,13 @@
       <code data-field=char></code>
     </a>
   </template>
+  <template data-name=jisVariant>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
   <template data-name=touki>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
@@ -1916,7 +1973,7 @@
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=KS>
+  <template data-name=heisei>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
@@ -1933,6 +1990,12 @@
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" name=cns mapper=cns data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=big5>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=cns mapper=cns data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
