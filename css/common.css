@@ -34,6 +34,9 @@ html {
   --incorrect-opaque-background-color: var(--gray-opaque-background-color);
   --incorrect-color: var(--gray-color);
   --incorrect-border-color: var(--gray-border-color);
+  --warning-border-color: rgba(255, 128, 0, 0.2);
+  --warning-border-style: dashed;
+  --warning-border: var(--warning-border-color) var(--warning-border-style) 4px;
   --dialog-background-color: white;
   --dialog-color: black;
   --dialog-border-color: gray;
@@ -250,6 +253,11 @@ sw-data-char.active {
 }
 .char-sample.ttb {
   writing-mode: vertical-rl;
+}
+
+.char-sample.approximate {
+  outline: var(--warning-border);
+  outline-offset: -5px;
 }
 
 @font-face {

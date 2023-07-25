@@ -123,13 +123,16 @@ if (SWD.Env.isWorker) {
 SWD.Env.startWorker = function () {
   if (this._swP) return this._swP;
   var name = 'swdEnvWorker';
-  
+  if (SWD.isReload) name += '?reload';
+
   var start = (w, to) => {
     return new Promise ((ok, ng) => {
       var timer;
       if (to) timer = setTimeout (ng, 300);
-      
-      this._worker = new w ('/js/site.js', {name});
+
+      var url = '/js/site.js';
+      if (SWD.isReload) url += '?reload';
+      this._worker = new w (url, {name});
       this._worker.onerror = ng;
       
       var m = new MessageChannel ();
@@ -155,19 +158,31 @@ SWD.Env.startWorker = function () {
 }; // SWD.Env.startWorker
 
 SWD._dataRes = function (name, opts) {
-  if (SWD._load[name]) return SWD._load[name];
-
   var url = '/data/' + name;
   var gzipped = false;
   if (!SWD.isLocal && /^charrels/.test (name)) {
     url = 'https://manakai.github.io/data-chars/local/generated/' + name + '.gz';
     gzipped = true;
+  } else if (opts.dsKey) {
+    if (SWD.isLocal) {
+      url = '/data/charrels/' + opts.dsKey + '/' + name;
+    } else {
+      url = 'https://manakai.github.io/data-chars/local/generated/charrels/' + opts.dsKey + '/' + name;
+    }
   }
+
+  if (SWD._load[url]) return SWD._load[url];
   
-  return SWD._load[name] = fetch (url, {
+  return SWD._load[url] = fetch (url, {
     cache: (SWD.isReload ? 'reload' : undefined),
   }).then (async res => {
-    if (res.status !== 200) throw res;
+    if (res.status !== 200) {
+      if (res.status === 404 && opts.allow404) {
+        return {};
+      } else {
+        throw res;
+      }
+    }
     if (gzipped) {
       var ds = new DecompressionStream ('gzip');
       var rs = res.body.pipeThrough (ds);
@@ -181,6 +196,23 @@ SWD._dataRes = function (name, opts) {
       var blob = new Blob (values);
       if (opts.type === 'json') {
         return blob.text ().then (text => JSON.parse (text));
+      } else if (opts.type === 'jsonlKeyed') {
+        return res.text ().then (text => {
+          var obj = {};
+          text.split (/\n/).forEach (line => {
+            if (line) {
+              var json = JSON.parse (line);
+              obj[json[0]] = json[1];
+            }
+          });
+          return obj;
+        });
+      } else if (opts.type === 'jsonlLined') {
+        return res.text ().then (text => {
+          return text.split (/\n/).map (line => {
+            if (line) return JSON.parse (line);
+          });
+        });
       } else if (opts.type === 'arrayBuffer') {
         return blob.arrayBuffer ();
       } else {
@@ -189,6 +221,23 @@ SWD._dataRes = function (name, opts) {
     } else {
       if (opts.type === 'json') {
         return res.json ();
+      } else if (opts.type === 'jsonlKeyed') {
+        return res.text ().then (text => {
+          var obj = {};
+          text.split (/\n/).forEach (line => {
+            if (line) {
+              var json = JSON.parse (line);
+              obj[json[0]] = json[1];
+            }
+          });
+          return obj;
+        });
+      } else if (opts.type === 'jsonlLined') {
+        return res.text ().then (text => {
+          return text.split (/\n/).map (line => {
+            if (line) return JSON.parse (line);
+          });
+        });
       } else if (opts.type === 'arrayBuffer') {
         return res.arrayBuffer ();
       } else {
@@ -198,12 +247,12 @@ SWD._dataRes = function (name, opts) {
   });
 }; // SWD._dataRes
 
-SWD.data = function (name) {
-  return SWD._dataRes (name, {type: 'json'});
+SWD.data = function (name, opts) {
+  return SWD._dataRes (name, {type: 'json', ...opts});
 }; // SWD.data
 
-SWD.dataAB = function (name) {
-  return SWD._dataRes (name, {type: 'arrayBuffer'});
+SWD.dataAB = function (name, opts) {
+  return SWD._dataRes (name, {...opts, type: 'arrayBuffer'});
 }; // SWD.dataAB
 
 SWD.era = async function (eraId) {
@@ -1484,20 +1533,35 @@ defs (() => {
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataCharItemSelector');
   def.pcHandler = function (templates, obj) {
-    if (obj.type === 'char') {
+    if (obj.type === 'unicode' || obj.type === 'vs' ||
+        obj.type === 'string') {
+      return templates.text || templates[""];
+    } else if (obj.type === 'char') {
       var char = obj.char;
       if (/^:MJ[0-9]+$/.test (char)) {
         return templates.mj || templates[""];
+      } else if (/^:koseki90[01][0-9]{3}$/.test (char)) {
+        return templates.kosekiKana || templates.touki || templates[""];
+      } else if (/^:(?:J[ABCDEFT]|KS|TK)[0-9A-F]+S*$/.test (char)) {
+        return templates.heisei || templates[""];
+      } else if (/^:(?:koseki|touki|ninjal)[0-9]+$/.test (char)) {
+        return templates.touki || templates[""];
       } else if (/^:(?:cns)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.cns || templates[""];
       } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jis || templates[""];
-      } else if (/^:(?:jis)[0-9]+-[a-z]+-[0-9]+-[0-9]+$/.test (char)) {
-        return templates.jis || templates[""];
+      } else if (/^:(?:jis-[a-z][0-9a-z]*-)[12]-[0-9]+-[0-9]+$/.test (char)) {
+        return templates.jisVariant || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
+      } else if (/:u-juki-[0-9a-f]+$/.test (char)) {
+        return templates.juki || templates[""];
       } else if (/:u-[a-z]+-[0-9a-f]+$/.test (char)) {
         return templates.u || templates[""];
+      } else if (/:b5-[0-9a-f]+$/.test (char)) {
+        return templates.big5 || templates[""];
+      } else if (/:b5-[a-z]+-[0-9a-f]+$/.test (char)) {
+        return templates.big5 || templates[""];
       }
       //gb ks kps cnsold swc b5 cccii
     }
@@ -1513,6 +1577,7 @@ SWD.Char._relDataSets = {
   hans: {key: 'hans'},
   kanas: {key: 'kanas'},
   kchars: {key: 'kchars'},
+  glyphs: {key: 'glyphs'},
 };
 
 //if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
@@ -1586,8 +1651,10 @@ SWD.Char._relDataRoot = async function (ds) {
     if (!ec) throw new Error ("Bad b: " + b);
 
     if (ec.type === 'dec') {
-      if (ec.prefix === 'MJ' || ec.prefix === 'koseki') {
+      if (ec.prefix === 'MJ' || ec.prefix === 'koseki' || ec.prefix === 'KS') {
         c = ("00000" + c) . substr (-6);
+      } else if (ec.prefix === 'touki' || ec.prefix === 'TK') {
+        c = ("0000000" + c) . substr (-8);
       }
       return ':' + ec.prefix + c;
     } else if (ec.type === 'hex') {
@@ -1704,7 +1771,8 @@ SWD.Char._charsFromTbl = function (ds, level, index) {
       } else if (def.type === 'swc' ||
                  def.type === 'aj' || def.type === 'ac' || def.type === 'ag' ||
                  def.type === 'ak' || def.type === 'aj2-' ||
-                 def.type === 'ak1-') {
+                 def.type === 'ak1-' ||
+                 def.type === 'm') {
         var char = ((i - def.offset) / 3 + def.code_offset);
         chars.push (':' + def.type + char);
       } else if (def.type.match (/^u-[a-z]+-$/)) {
@@ -2181,16 +2249,24 @@ SWD.Char.getMJChar = async function (char) {
   if (SWD.Char._mjc[char]) return SWD.Char._mjc[char];
 
   return SWD.Char._mjc[char] = Promise.resolve ().then (async () => {
-    var ds = SWD.Char._relDataSets.hans;
-    var rr = await SWD.Char.getRels (ds.key, char);
+    var keys = ['hans', 'kanas', 'chars'];
+    for (var i = 0; i < keys.length; i++) {
+      var ds = SWD.Char._relDataSets[keys[i]];
+      var rr = await SWD.Char.getRels (ds.key, char);
 
-    var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "rev:mj:X0213");
-    var relId2 = ds.dataRoot.rels.findIndex (_ => _.key === "rev:mj:X0212");
+      var relTypes = await SWD.Char.getRelationIndexMap (ds.key);
+      var relId1 = relTypes.findIndex (_ => _.key === "rev:mj:X0213");
+      var relId2 = relTypes.findIndex (_ => _.key === "rev:mj:X0212");
+      var relId3 = relTypes.findIndex (_ => _.key === "rev:mj:戸籍統一文字番号");
+      var relId4 = relTypes.findIndex (_ => _.key === "rev:mj:登記統一文字番号");
+      var relId5 = relTypes.findIndex (_ => _.key === "rev:mj:住基ネット統一文字コード");
+      var relId6 = relTypes.findIndex (_ => _.key === "ninjal:MJ文字図形名");
 
-    var r = rr.find (_ => _[1].find (_ => _[1] === relId1 || _[1] === relId2));
-    if (!r) return null;
+      var r = rr.find (_ => _[1].find (_ => _[1] === relId1 || _[1] === relId2 || _[1] === relId3 || _[1] === relId4 || _[1] === relId5 || _[1] === relId6));
+      if (r) return r[0];
+    }
 
-    return r[0];
+    return null;
   });
 }; // SWD.Char.getMJChar
 
@@ -2204,7 +2280,8 @@ SWD.Char.getCNSChar = async function (char) {
       var ds = SWD.Char._relDataSets[keys[i]];
       var rr = await SWD.Char.getRels (ds.key, char);
 
-      var relId1 = ds.dataRoot.rels.findIndex (_ => _.key === "cns:unicode");
+      var relTypes = await SWD.Char.getRelationIndexMap (ds.key);
+      var relId1 = relTypes.findIndex (_ => _.key === "cns:unicode");
 
       var r = rr.find (_ => _[1].find (_ => _[1] === relId1));
       if (r) return r[0];
@@ -2213,6 +2290,270 @@ SWD.Char.getCNSChar = async function (char) {
     return null;
   });
 }; // SWD.Char.getCNSChar
+
+
+SWD.Char.RelData = {};
+
+SWD.Char.RelData._charToIndex = function (index, char) {
+  var len = [...char].length;
+
+  var m;
+  if (len === 1) {
+    var c = char.codePointAt (0);
+    if (c <= 0x10FFFF) {
+      return 1 + Math.floor (c / 0x200);
+    }
+  } else if (len == 2) {
+    var [c1, c2] = [...char];
+    var code1 = c1.codePointAt (0);
+    var x = (code1 % 2) ? 0x100 : 0;
+    var vs = c2.codePointAt (0);
+    if (0xE0100 <= vs && vs <= 0xE01FF) {
+      return vs - 0xE0000 + x;
+    } else {
+      return 0xFF;
+    }
+  } else if (m = char.match (index.prefixPattern)) {
+    return index.prefix_to_index[m[1]];
+  } else if (/^:u-/.test (char)) {
+    return 0x300;
+  } else if (3 <= len && len <= 10) {
+    return 0x400 - 2 + len;
+  }
+
+  return 0;
+}; // _charToIndex
+
+SWD.Char.RelData._load = async function (dsKey) {
+  var k = 'dsIndex' + dsKey;
+  var index = SWD._cached[k];
+  if (!index) {
+    index = SWD._cached[k] = await SWD.data ('merged-rels/index.json', {dsKey});
+    index.prefixPattern = new RegExp ('^:(' + index.prefix_pattern + ')');
+    index.relDefs = [];
+    Object.keys (index.rel_types).forEach (rel => {
+      index.relDefs[index.rel_types[rel].id] = index.rel_types[rel];
+      index.rel_types[rel].key = rel;
+    });
+    index.leaderTypes = [];
+    Object.values (index.leader_types).forEach (lt => {
+      index.leaderTypes[lt.index] = lt;
+    });
+    index.clusterLevels = [];
+    Object.values (index.cluster_levels).forEach (lt => {
+      index.clusterLevels[lt.index] =
+      index.clusterLevels[lt.key] = lt;
+    });
+  }
+  return index;
+}; // _load
+
+defineWorkerMethod ('SWDCharRelDataGetClusterChars', (level, char, dsKey) => {
+  return [level, char, dsKey];
+}, (level, char, dsKey) => {
+  return SWD.Char.RelData.getClusterChars (level, char, dsKey);
+});
+//
+SWD.Char.RelData.getClusterChars = hasWorkerMethod ('SWDCharRelDataGetClusterChars', async function (level, char, dsKey) {
+  var index = await SWD.Char.RelData._load (dsKey);
+  
+  var fileIndex = SWD.Char.RelData._charToIndex (index, char);
+  var part = await SWD.data ('char-cluster/part-' + fileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
+  var clusters = (part[char] || []);
+
+  var clusterIndex = index.clusterLevels[level].index;
+  var clusterId = clusters[clusterIndex];
+  if (clusterId === undefined) return [];
+
+  const cPartSize = 5000;
+  var cFileIndex = Math.floor (clusterId / cPartSize);
+  var part = await SWD.data ('cluster-chars/part-' + clusterIndex + '-' + cFileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
+
+  return part[clusterId] || [];
+}); // SWD.Char.RelData.getClusterChars
+
+
+defineWorkerMethod ('SWDCharRelDataGetLeaderTypes', (dsKey) => [dsKey], (dsKey) => {
+  return SWD.Char.RelData.getLeaderTypes (dsKey);
+});
+//
+SWD.Char.RelData.getLeaderTypes = hasWorkerMethod ('SWDCharRelDataGetLeaderTypes', async function (dsKey) {
+  var index = await SWD.Char.RelData._load (dsKey);
+
+  return index.leaderTypes;
+}); // SWD.Char.RelData.getLeaderTypes
+
+defineWorkerMethod ('SWDCharRelDataGetLeaders', (c, d) => [c, d], (c, d) => {
+  return SWD.Char.RelData.getLeaders (c, d);
+});
+//
+SWD.Char.RelData.getLeaders = hasWorkerMethod ('SWDCharRelDataGetLeaders', async function (char, dsKey) {
+  var index = await SWD.Char.RelData._load (dsKey);
+  
+  var fileIndex = SWD.Char.RelData._charToIndex (index, char);
+  var part = await SWD.data ('char-leaders/part-' + fileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
+
+  return part[char] || [];
+}); // SWD.Char.RelData.getLeaders
+
+defineWorkerMethod ('SWDCharRelDataGetRelDefs', (dsKey) => [dsKey], (dsKey) => {
+  return SWD.Char.RelData.getRelDefs (dsKey);
+});
+//
+SWD.Char.RelData.getRelDefs = hasWorkerMethod ('SWDCharRelDataGetRelDefs', async function (dsKey) {
+  var index = await SWD.Char.RelData._load (dsKey);
+
+  return index.relDefs;
+}); // SWD.Char.RelData.getRelDefs
+
+defineWorkerMethod ('SWDCharRelDataGetRels', (dsKey, c) => [dsKey, c], (dsKey, c) => {
+  return SWD.Char.RelData.getRels (dsKey, c);
+});
+//
+SWD.Char.RelData.getRels = hasWorkerMethod ('SWDCharRelDataGetRels', async function (dsKey, char) {
+  var index = await SWD.Char.RelData._load (dsKey);
+  
+  var fileIndex = SWD.Char.RelData._charToIndex (index, char);
+  var part = await SWD.data ('merged-rels/part-' + fileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
+
+  return part[char] || {};
+}); // SWD.Char.RelData.getRels
+
+SWD.Char.RelData._relGlyphInfo = function (opts) {
+  return SWD._cached[opts.key] = SWD._cached[opts.key] || Promise.resolve ().then (async () => {
+    var keys = opts.dsKeys;
+    for (let i = 0; i < keys.length; i++) {
+      var rds = await SWD.Char.RelData.getRelDefs (keys[i]);
+      var rr = await SWD.Char.RelData.getRels (keys[i], opts.char);
+      for (let c2 in rr) {
+        var relIds = rr[c2];
+        for (let k = 0; k < relIds.length; k++) {
+          var rel = rds[relIds[k]];
+          var r = opts.code (c2, rel);
+          if (r) return r;
+        }
+      }
+    }
+    return null;
+  });
+}; // SWD.Char.RelData._relGlyphInfo
+
+defineWorkerMethod ('SWDCharRelDataGetGlyphInfo', (c) => [c], (opts) => {
+  return SWD.Char.RelData._getGlyphInfo (opts);
+});
+//
+SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', async function (opts) {
+  if (opts.mapper === 'auto') {
+    let m;
+    if (m = opts.char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
+      var glyphId = (m[2] - 1) * 94 + (m[3] - 1);
+      var fontName = /16/.test (m[1]) ? 'jiskan16' : 'jiskan24';
+      return {
+        fontName,
+        glyphId,
+        approximate: (!! /v/.test (m[1])),
+      };
+    }
+  }
+  
+  if (opts.mapper === 'mj') {
+    var char = opts.char;
+    var approximate = false;
+    if (/^:(?:J[ABCDEFT]|KS|TK)/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'mjGlyphInfo.KS:' + char,
+        dsKeys: ['hans', 'kanas', 'chars'],
+        code: (c2, rel) => {
+          if ((rel.key === 'manakai:implements') &&
+              /^:(?:jis[12]|u-juki|koseki|touki)/.test (c2)) {
+            return {char: c2};
+          } else if (rel.key === 'manakai:implements:juki') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'mjGlyphInfo:' + opts.char + ':' + approximate,
+      dsKeys: ['hans', 'kanas', 'chars'],
+      code: (c2, rel) => {
+        if (rel.key === 'rev:mj:X0213' ||
+            rel.key === 'rev:mj:X0212' ||
+            rel.key === 'rev:mj:戸籍統一文字番号' ||
+            rel.key === 'rev:mj:登記統一文字番号' ||
+            rel.key === 'rev:mj:住基ネット統一文字コード') {
+          return {glyphName: c2.replace (/^:/, '').toLowerCase (),
+                  approximate: true};
+        } else if (rel.key === 'ninjal:MJ文字図形名') {
+          return {glyphName: c2.replace (/^:/, '').toLowerCase (),
+                  approximate};
+        }
+        return null;
+      },
+    });
+  } else if (opts.mapper === 'cns') {
+    var char = opts.char;
+    var approximate = false;
+    if (/^:b5-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'cnsGlyphInfo.b5:' + char,
+        dsKeys: ['hans', 'kanas', 'chars'],
+        code: (c2, rel) => {
+          if (rel.key === 'rev:cns:big5' ||
+              rel.key === 'rev:cns:big5:符號') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'cnsGlyphInfo:' + char + ':' + approximate,
+      dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
+      code: (c2, rel) => {
+        if (rel.key === 'cns:unicode') {
+          return {string: c2, approximate};
+        }
+        return null;
+      },
+    });
+  } else if (opts.mapper === 'u') {
+    var m = (opts.char || '').match (/^:u-([a-z]+)-([0-9a-f]+)$/);
+    if (m && m[1] === name) {
+      return {string: String.fromCodePoint (parseInt (m[2], 16))};
+    }
+  }
+
+  return null;
+}); // SWD.Char.RelData._getGlyphInfo
+
+SWD.Char.RelData.getGlyphInfo = async function (opts) {
+  if (opts.mapper) {
+    var mapped = await SWD.Char.RelData._getGlyphInfo (opts);
+    return mapped || null;
+  }
+        
+  if (opts.glyphId === '' && opts.glyphName === '' && opts.string === '') return null;
+
+  return opts;
+}; // SWD.Char.RelData.getGlyphInfo
 
 defineElement ({
   name: 'sw-char-cluster',
@@ -2239,13 +2580,14 @@ defineElement ({
 
       var dsKey = this.getAttribute ('type');
       if (!dsKey) return;
+      var relDefs = await SWD.Char.RelData.getRelDefs (dsKey);
 
       var progress = document.createElement ('progress');
       this.appendChild (progress);
 
-      var chars = await SWD.Char.getClusterChars ("EQUIV", v.char, dsKey);
+      var chars = await SWD.Char.RelData.getClusterChars ("EQUIV", v.char, dsKey);
       var inCluster = new Set (chars);
-      var leaders = await SWD.Char.getLeaders (v.char, dsKey);
+      var leaders = await SWD.Char.RelData.getLeaders (v.char, dsKey);
 
       if (chars.length === 0 && leaders.length <= 1) {
         this.parentNode.hidden = true;
@@ -2265,8 +2607,8 @@ defineElement ({
         var c = document.createElement ('sw-char-leaders');
         var ts = await $getTemplateSet ('sw-char-leader-item');
         var tse = await $getTemplateSet ('sw-char-leader-empty-item');
-        var ds = SWD.Char._relDataSets[dsKey];
-        ds.leaderTypes.forEach (lt => {
+        var lts = await SWD.Char.RelData.getLeaderTypes (dsKey);
+        lts.forEach (lt => {
           if (!lt) return;
           if (leaders[lt.index]) {
             var e = ts.createFromTemplate ('figure', {
@@ -2295,6 +2637,7 @@ defineElement ({
         if (inCluster.has (char)) e.classList.toggle ('in-cluster');
         li.appendChild (e);
 
+        /*
         var relItems = await SWD.Char.getRels (dsKey, char);
         var relTypeSets = {};
         for (let j = 0; j < relItems.length; j++) {
@@ -2342,7 +2685,42 @@ defineElement ({
           ul.appendChild (li2);
         }); // relItems
         li.appendChild (ul);
-        
+        */
+
+        var relItems = await SWD.Char.RelData.getRels (dsKey, char);
+        var ul = document.createElement ('ul');
+        Object.keys (relItems).map (rc => {
+          var rds = relItems[rc].map (_ => relDefs[_] || console.log ("RelDef not found", relDefs, relItems[rc], char, rc, _));
+          var mw = Math.max (...rds.map (_ => _.weight));
+          return {rc, rds, mw};
+        }).sort ((a, b) => b.mw - a.mw).forEach (_ => {
+          var li2 = document.createElement ('li');
+
+          var f = document.createElement ('sw-data-char');
+          f.value = SWD.char ('char', _.rc);
+          f.setAttribute ('template', 'sw-data-char-item');
+          if (inCluster.has (_.rc)) f.classList.toggle ('in-cluster');
+          li2.appendChild (f);
+
+          {
+            var ul2 = document.createElement ('ul');
+            ul2.classList.toggle ('char-rel-list');
+            _.rds.sort ((a, b) => {
+              return b.weight - a.weight;
+            }).forEach (rd => {
+              var li3 = document.createElement ('li');
+              var code = document.createElement ('sw-data-char-rel');
+              code.value = rd;
+              li3.appendChild (code);
+              ul2.appendChild (li3);
+            });
+            li2.appendChild (ul2);
+          }
+          
+          ul.appendChild (li2);
+        }); // relItems
+        li.appendChild (ul);
+
         c.appendChild (li);
       }
 
@@ -2399,6 +2777,16 @@ SWD.Char.routes = async function (char1, char2, opts) {
     for (var i = 0; i < current.length; i++) {
       var route = current[i];
       var char = route.at (-1)[0];
+      var relItems = [];
+      for (let dsKey in SWD.Char._relDataSets) {
+        var relDefs = await SWD.Char.RelData.getRelDefs (dsKey);
+        var items = await SWD.Char.RelData.getRels (dsKey, char.char)
+        for (let c2 in items) {
+          relItems[c2] = (relItems[c2] || []).concat (items[c2].map (_ => relDefs[_]));
+        }
+      }
+      Object.keys (relItems).forEach (relChar => {
+      /*
       var relItems = await SWD.Char.getRelsAll (char.char);
       var relTypeSets = {};
       for (let j = 0; j < relItems.length; j++) {
@@ -2414,6 +2802,10 @@ SWD.Char.routes = async function (char1, char2, opts) {
         }
         var item = route.concat ([
           [SWD.char ('char', relChar), relTypes]
+        ]);
+        */
+        var item = route.concat ([
+          [SWD.char ('char', relChar), relItems[relChar]]
         ]);
         item.seen = new Set (route.seen);
         //if (currentSeen[relChar]) {
@@ -2438,7 +2830,8 @@ SWD.Char.routes = async function (char1, char2, opts) {
           item.seen.add (relChar);
         }
         nextSeen[relChar] = true;
-      } // relItems
+      //} // relItems
+      }); // relItems
 
       await new Promise (_ => setTimeout (_, 0));
     } // route
@@ -2533,7 +2926,7 @@ defineElement ({
         m.hidden = false;
         m.textContent = this.getAttribute ('notfound');
       }
-    }, // swUpdateRoutes
+    }, // swUpdateActionStatus
     swInsertRoute: function (route, opts) {
       this.swRoutes.push ([route, opts.partial]);
 
@@ -2704,8 +3097,8 @@ SWD.Font.Font.prototype._load = async function () {
     //
   } else if (info.type === 'bitmap') {
     var key = info.url;
-    if (SWD.Font._fonts[key]) return this.bitmap = SWD.Font._fonts[key];
-    this.bitmap = await (SWD.Font._fonts[key] = fetch (info.url).then (res => {
+    if (SWD.Font._fonts[key]) return this.bitmap = await SWD.Font._fonts[key];
+    this.bitmap = SWD.Font._fonts[key] = await (fetch (info.url).then (res => {
       if (res.status !== 200) throw res;
       return res.arrayBuffer ();
     }));
@@ -2751,6 +3144,7 @@ SWD.Font.Font.prototype._getGlyphDataByName = async function (glyphName) {
   await this._load ();
   if (this.otf) {
     var glyphId = this.otf.glyphNames.names.indexOf (glyphName); // or -1
+    if (glyphId === -1) return null;
     return this._getGlyphDataById (glyphId);
   } else {
     throw ["glyph by name", glyphName, this];
@@ -2783,10 +3177,10 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
 }; // _getGlyphDataByUniChar
 
 SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', async function (opts) {
-  if (opts.glyphId !== "") {
+  if (opts.glyphId != null && opts.glyphId !== "") {
     return this._getGlyphDataById (opts.glyphId); // or throw
-  } else if (opts.glyphName !== "") {
-    return this._getGlyphDataByName (opts.glyphName); // or throw
+  } else if (opts.glyphName != null && opts.glyphName !== "") {
+    return this._getGlyphDataByName (opts.glyphName); // or throw or null
   } else if ([...opts.string].length === 1) {
     return this._getGlyphDataByUniChar (opts.string); // or throw
   } else {
@@ -2806,6 +3200,7 @@ defineWorkerMethod ('GetFontGlyphData', function (opts) {
 
 SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
   var gd = await this.getGlyphData (opts);
+  if (!gd) return null;
   
   if (gd.pathData) {
     var svg = document.createElementNS
@@ -2852,44 +3247,33 @@ defineElement ({
     },
     swUpdate: async function () {
       var name = this.getAttribute ('name');
-      var font = await SWD.Font.load ({name});
+      var fontLoading;
+      if (name) fontLoading = SWD.Font.load ({name});
+
+      var glyphInfo = await SWD.Char.RelData.getGlyphInfo ({
+        char: this.getAttribute ('char'),
+        mapper: this.getAttribute ('mapper'),
+        glyphId: this.getAttribute ('glyphid'),
+        glyphName: this.getAttribute ('glyphname'),
+        string: this.getAttribute ('string'),
+      });
+      if (!glyphInfo) return;
+      var font;
+      if (glyphInfo.fontName) {
+        font = await SWD.Font.load ({name: glyphInfo.fontName});
+      } else {
+        font = await fontLoading;
+      }
 
       try {
-        var gname;
-        var string;
-        
-        var mapper = this.getAttribute ('mapper');
-        if (mapper === 'mj') {
-          var char = this.getAttribute ('char');
-          var char2 = await SWD.Char.getMJChar (char);
-          if (char2) {
-            gname = char2.replace (/^:/, '').toLowerCase ();
-          }
-        } else if (mapper === 'cns') {
-          var char = this.getAttribute ('char');
-          var char2 = await SWD.Char.getCNSChar (char);
-          if (char2 !== null) {
-            string = char2;
-          }
-        } else if (mapper === 'u') {
-          var char = this.getAttribute ('char') || '';
-          var m = char.match (/^:u-([a-z]+)-([0-9a-f]+)$/);
-          if (m && m[1] === name) {
-            string = String.fromCodePoint (parseInt (m[2], 16));
-          }
+        var el = await font.getGlyphElement (glyphInfo);
+        this.classList.toggle ('approximate', !!glyphInfo.approximate);
+        if (el) {
+          this.hidden = false;
+          this.appendChild (el);
+        } else {
+          this.hidden = true;
         }
-        
-        var gid = this.getAttribute ('glyphid') || '';
-        gname = gname || this.getAttribute ('glyphname') || '';
-        string = string || this.getAttribute ('string') || '';
-        if (gid === '' && gname === '' && string === '') return;
-        
-        var el = await font.getGlyphElement ({
-          glyphId: gid,
-          glyphName: gname,
-          string,
-        });
-        this.appendChild (el);
       } catch (e) {
         if (this.hasAttribute ('optional')) {
           this.parentNode.hidden = true;
@@ -2940,6 +3324,7 @@ defineElement ({
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var key = m[1];
           var names = [key];
+          if (key === 'aj') names.push ('mj');
           if (key === 'ak') names.push ('HaranoAjiGothicKR');
           for (var i = 0; i < names.length; i++) {
             var name = names[i];
@@ -3007,6 +3392,18 @@ defineElement ({
               this.appendChild (e);
             }
           }
+        }
+        var m = char.char.match (/^:jis-dot(16|24)-1-([0-9]+)-([0-9]+)$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var name = 'jiskan' + m[1];
+          var info = await SWD.Font.info ({name});
+          var e = ts.createFromTemplate ('figure', {
+            name,
+            glyphId: (parseInt (m[2]) - 1) * 94 + (parseInt (m[3]) - 1),
+            info,
+          });
+          this.appendChild (e);
         }
         
         var m = char.char.match (/^:cns[0-9]+-[0-9]+-[0-9]+$/);
