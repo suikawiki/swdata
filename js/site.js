@@ -157,6 +157,39 @@ SWD.Env.startWorker = function () {
   return this._swP;
 }; // SWD.Env.startWorker
 
+SWD.loadScript = function (url) {
+  return SWD._cached['script:' + url] = SWD._cached['script:' + url] || new Promise ((ok, ng) => {
+    if (self.importScripts) {
+      try {
+        importScripts (url);
+        ok ();
+      } catch (e) {
+        ng (e);
+      }
+    } else {
+      var s = document.createElement ('script');
+      s.src = url;
+      s.onload = ok;
+      s.onerror = ng;
+      document.head.appendChild (s);
+    }
+  });
+}; // SWD.loadScripts
+
+SWD.loadCSS = function (url) {
+  return SWD._cached['css:' + url] = SWD._cached['css:' + url] || new Promise ((ok, ng) => {
+    var l = document.createElement ('link');
+    l.rel = 'stylesheet';
+    l.href = url;
+    l.onload = ok;
+    l.onerror = ng;
+    document.head.appendChild (l);
+  });
+}; // SWD.loadCSS
+
+
+// ------ Data ------
+
 SWD._dataRes = function (name, opts) {
   var url = '/data/' + name;
   var gzipped = false;
@@ -172,7 +205,7 @@ SWD._dataRes = function (name, opts) {
   }
 
   if (SWD._load[url]) return SWD._load[url];
-  
+
   return SWD._load[url] = fetch (url, {
     cache: (SWD.isReload ? 'reload' : undefined),
   }).then (async res => {
@@ -1533,9 +1566,14 @@ defs (() => {
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataCharItemSelector');
   def.pcHandler = function (templates, obj) {
-    if (obj.type === 'unicode' || obj.type === 'vs' ||
-        obj.type === 'string') {
+    if (obj.type === 'unicode' || obj.type === 'vs') {
       return templates.text || templates[""];
+    } else if (obj.type === 'string') {
+      if (/^[\u2FF0-\u2FFB]/.test (obj.string)) {
+        return templates.ids || templates.text || templates[""];
+      } else {
+        return templates.text || templates[""];
+      }
     } else if (obj.type === 'char') {
       var char = obj.char;
       if (/^:MJ[0-9]+$/.test (char)) {
@@ -1544,7 +1582,7 @@ defs (() => {
         return templates.kosekiKana || templates.touki || templates[""];
       } else if (/^:(?:J[ABCDEFT]|KS|TK)[0-9A-F]+S*$/.test (char)) {
         return templates.heisei || templates[""];
-      } else if (/^:(?:koseki|touki|ninjal)[0-9]+$/.test (char)) {
+      } else if (/^:(?:ninjal)[0-9]+$/.test (char)) {
         return templates.touki || templates[""];
       } else if (/^:(?:cns)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.cns || templates[""];
@@ -1554,16 +1592,17 @@ defs (() => {
         return templates.jisVariant || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
-      } else if (/:u-juki-[0-9a-f]+$/.test (char)) {
+      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|UK-)/.test (char)) {
+        return templates.gw || templates[""];
+      } else if (/^:u-(?:juki|immi)-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
-      } else if (/:u-[a-z]+-[0-9a-f]+$/.test (char)) {
+      } else if (/^:u-[a-z]+-[0-9a-f]+$/.test (char)) {
         return templates.u || templates[""];
-      } else if (/:b5-[0-9a-f]+$/.test (char)) {
+      } else if (/^:b5-[0-9a-f]+$/.test (char)) {
         return templates.big5 || templates[""];
-      } else if (/:b5-[a-z]+-[0-9a-f]+$/.test (char)) {
+      } else if (/^:b5-[a-z]+-[0-9a-f]+$/.test (char)) {
         return templates.big5 || templates[""];
       }
-      //gb ks kps cnsold swc b5 cccii
     }
     
     return templates[""];
@@ -2329,7 +2368,7 @@ SWD.Char.RelData._load = async function (dsKey) {
   var index = SWD._cached[k];
   if (!index) {
     index = SWD._cached[k] = await SWD.data ('merged-rels/index.json', {dsKey});
-    index.prefixPattern = new RegExp ('^:(' + index.prefix_pattern + ')');
+    index.prefixPattern = new RegExp ('^:(?:gw-(?:[a-z0-9]+_|)|)(' + index.prefix_pattern + ')');
     index.relDefs = [];
     Object.keys (index.rel_types).forEach (rel => {
       index.relDefs[index.rel_types[rel].id] = index.rel_types[rel];
@@ -2443,9 +2482,12 @@ defineWorkerMethod ('SWDCharRelDataGetGlyphInfo', (c) => [c], (opts) => {
 });
 //
 SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', async function (opts) {
+  var char = opts.char;
+  var approximate = false;
+  
   if (opts.mapper === 'auto') {
     let m;
-    if (m = opts.char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
+    if (m = char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
       var glyphId = (m[2] - 1) * 94 + (m[3] - 1);
       var fontName = /16/.test (m[1]) ? 'jiskan16' : 'jiskan24';
       return {
@@ -2454,11 +2496,64 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         approximate: (!! /v/.test (m[1])),
       };
     }
+
+    if (/^:(?:mh?[0-9]|b5-cdp-|irg2017-|extf|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|UK-)/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'mjGlyphInfo.GW:' + char,
+        dsKeys: ['glyphs'],
+        code: (c2, rel) => {
+          if ((rel.key === 'rev:manakai:implements' ||
+               rel.key === 'rev:glyphwiki:implements:g-kx') && /^:gw-/.test (c2)) {
+            return {char: c2};
+          } else if (rel.key === 'uk:font-code-point') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    
+    if (m = char.match (/^:u-(nom)-([0-9a-f]+)$/)) {
+      var string = String.fromCodePoint (parseInt (m[2], 16));
+      var fontName = 'NomNaTong';
+      return {
+        fontName,
+        string,
+      };
+    } else if (m = char.match (/^:u-uk([ab])-([0-9a-f]+)$/)) {
+      var string = String.fromCodePoint (parseInt (m[2], 16));
+      var fontName = m[1] === 'a' ? 'IRGN2107' : 'IRGN2232'; 
+      return {
+        fontName,
+        string,
+      };
+    }
+    
+    if (m = char.match (/^:gw-./)) {
+      return {
+        fontName: 'glyphwiki',
+        glyphName: char.replace (/^:gw-/, ''),
+        approximate,
+      };
+    }
+
+    if (m = char.match (/^:jistype-(?:jouyou-|)(.)$/)) {
+      return {
+        fontName: 'JIS-Engraving-080803',
+        string: m[1],
+        approximate: true,
+      };
+    }
   }
   
-  if (opts.mapper === 'mj') {
-    var char = opts.char;
-    var approximate = false;
+  if (opts.mapper === 'mj' || opts.mapper === 'auto') {
     if (/^:(?:J[ABCDEFT]|KS|TK)/.test (char)) {
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
@@ -2490,7 +2585,8 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
             rel.key === 'rev:mj:X0212' ||
             rel.key === 'rev:mj:戸籍統一文字番号' ||
             rel.key === 'rev:mj:登記統一文字番号' ||
-            rel.key === 'rev:mj:住基ネット統一文字コード') {
+            rel.key === 'rev:mj:住基ネット統一文字コード' ||
+            rel.key === 'rev:mj:入管外字コード') {
           return {glyphName: c2.replace (/^:/, '').toLowerCase (),
                   approximate: true};
         } else if (rel.key === 'ninjal:MJ文字図形名') {
@@ -2501,8 +2597,6 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       },
     });
   } else if (opts.mapper === 'cns') {
-    var char = opts.char;
-    var approximate = false;
     if (/^:b5-/.test (char)) {
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
@@ -3040,22 +3134,7 @@ defineElement ({
 SWD.Font = {};
 
 SWD.Font._otjs = function () {
-  return this._otjsp = this._otjsp || new Promise ((ok, ng) => {
-    if (self.importScripts) {
-      try {
-        importScripts ('/js/opentype.js');
-        ok ();
-      } catch (e) {
-        ng (e);
-      }
-    } else {
-      var s = document.createElement ('script');
-      s.src = '/js/opentype.js';
-      s.onload = ok;
-      s.onerror = ng;
-      document.head.appendChild (s);
-    }
-  });
+  return SWD.loadScript ('/js/opentype.js');
 }; // SWD.Font._otjs
 
 SWD.Font.info = async function (opts) {
@@ -3102,6 +3181,10 @@ SWD.Font.Font.prototype._load = async function () {
       if (res.status !== 200) throw res;
       return res.arrayBuffer ();
     }));
+  } else if (info.type === 'kage') {
+    this.kage = true;
+  } else if (info.type === 'webfont') {
+    //
   } else if (info.type === 'native') {
     //
   } else {
@@ -3146,6 +3229,8 @@ SWD.Font.Font.prototype._getGlyphDataByName = async function (glyphName) {
     var glyphId = this.otf.glyphNames.names.indexOf (glyphName); // or -1
     if (glyphId === -1) return null;
     return this._getGlyphDataById (glyphId);
+  } else if (this.kage) {
+    return SWD.Font.getGlyphWikiGlyph (glyphName);
   } else {
     throw ["glyph by name", glyphName, this];
   }
@@ -3171,11 +3256,86 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
 
     var font = await SWD.Font.load ({type: 'opentype', url: item.url});
     return font._getGlyphDataByUniChar (character);
+  } else if (this.info.type === 'webfont') {
+    return {string: character, fontFamily: this.info.fontFamily};
   } else {
     throw ["glyph by char", this];
   }
 }; // _getGlyphDataByUniChar
 
+SWD.Font._glyphNameToFileIndex = function (index, char) {
+  let m;
+  if (m = char.match (index.prefixPattern)) {
+    return index.prefix_to_index[m[1]];
+  }
+
+  if (m = char.match (/([0-9a-f]+)/)) {
+    return 0x100 + parseInt (m[1], 16) % 10;
+  }
+  
+  return 0;
+}; // SWD.Font._glyphNameToFileIndex
+
+SWD.Font._loadGlyphIndex = async function (key) {
+  var k = 'fontGlyphIndex:' + key;
+  var index = SWD._cached[k];
+  if (!index) {
+    index = SWD._cached[k] = await SWD.data (key + '/index.json', {dsKey: 'glyphs'});
+    index.prefixPattern = new RegExp ('^(' + index.prefix_pattern + ')');
+  }
+  return index;
+}; // _loadIndex
+
+SWD.Font._loadGlyphSourceData = async function (key, glyphName) {
+  var index = await SWD.Font._loadGlyphIndex (key);
+  var fileIndex = SWD.Font._glyphNameToFileIndex (index, glyphName);
+  var part = await SWD.data (key + '/part-' + fileIndex + '.jsonl?' + index.timestamp, {dsKey: 'glyphs', type: 'jsonlKeyed', allow404: true});
+
+  var sd = part[glyphName];
+  if (sd) return sd;
+
+  // XXX nesting depth
+  var rds = await SWD.Char.RelData.getRelDefs ('glyphs');
+  var rr = await SWD.Char.RelData.getRels ('glyphs', ':gw-' + glyphName);
+  for (let c2 in rr) {
+    var relIds = rr[c2];
+    for (let k = 0; k < relIds.length; k++) {
+      var rel = rds[relIds[k]];
+      if (rel.key === 'glyphwiki:alias') {
+        return SWD.Font._loadGlyphSourceData (key, c2.replace (/^:gw-/, ''));
+      }
+    }
+  }
+  
+  return null;
+}; // _loadGlyphSourceData
+
+defineWorkerMethod ('GetGlyphWikiGlyph', name => [name], (name) => {
+  return SWD.Font.getGlyphWikiGlyph (name);
+});
+//
+SWD.Font.getGlyphWikiGlyph = hasWorkerMethod ('GetGlyphWikiGlyph', async function (name) {
+  await SWD.loadScript ('/js/kage.js');
+  var key = 'fontGlyphWikiGlyphSVG:' + name;
+  var got = SWD._cached[key] = SWD._cached[key] || await getKageGlyphSVG ((n) => {
+    var q = n.split (/\@/);
+    if (q.length > 1) {
+      // XXX
+      console.log ("|"+name+"|: Glyph source data |"+n+"| is requested but |"+q[0]+"| is used instead");
+    }
+    return SWD.Font._loadGlyphSourceData ('gwglyphs', q[0]);
+  }, name);
+  return {svg: got.svg, approximate: got.incorrect};
+}); // SWD.Font.getGlyphWikiGlyph
+
+defineWorkerMethod ('GetFontGlyphData', function (opts) {
+  return [this.info, opts];
+}, (info, opts) => {
+  var f = new SWD.Font.Font;
+  f.info = info;
+  return f.getGlyphData (opts);
+});
+//
 SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', async function (opts) {
   if (opts.glyphId != null && opts.glyphId !== "") {
     return this._getGlyphDataById (opts.glyphId); // or throw
@@ -3190,13 +3350,6 @@ SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', asyn
   return [this.info, opts];
 }); // getGlyphData
 
-defineWorkerMethod ('GetFontGlyphData', function (opts) {
-  return [this.info, opts];
-}, (info, opts) => {
-  var f = new SWD.Font.Font;
-  f.info = info;
-  return f.getGlyphData (opts);
-});
 
 SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
   var gd = await this.getGlyphData (opts);
@@ -3234,6 +3387,25 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
     ctx.putImageData (id, 0, 0);
     
     return canvas;
+  } else if (gd.svg) {
+    var div = document.createElement ('div');
+    div.innerHTML = gd.svg;
+    var svg = div.firstChild;
+    svg.removeAttribute ('width');
+    svg.removeAttribute ('height');
+    svg.setAttribute ('class', 'font-glyph ' + (gd.approximate ? 'approximate' : ''));
+    return svg;
+  } else if (gd.fontFamily) {
+    var url = 'https://fonts.suikawiki.org/opentype/index/all.css';
+    if (SWD.isLocal) {
+      url = '/data/opentype/index/all.css';
+    }
+    SWD.loadCSS (url);
+
+    var text = document.createElement ('span');
+    text.textContent = gd.string;
+    text.style.fontFamily = gd.fontFamily;
+    return text;
   } else {
     throw ["getGlyphElement", this];
   }
@@ -3421,6 +3593,18 @@ defineElement ({
             });
             this.appendChild (e);
           }
+        }
+        
+        var m = char.char.match (/^:gw-/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var info = await SWD.Font.info ({name: 'glyphwiki'});
+          var e = ts.createFromTemplate ('figure', {
+            name: 'glyphwiki',
+            glyphName: char.char.replace (/^:gw-/, ''),
+            info,
+          });
+          this.appendChild (e);
         }
       }
     }, // swUpdate

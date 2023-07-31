@@ -62,7 +62,7 @@ build-local: local/data \
     local/data/jp-regions-full-flatten.json \
     local/data/sww-pages.json
 
-build-repo: js/components.js css/default.css
+build-repo: js/components.js js/kage.js css/default.css
 local/data:
 	mkdir -p local/data
 
@@ -71,6 +71,24 @@ js/components.js: local/page-components.js local/time.js intermediate/md5.js \
 	cat local/page-components.js local/time.js > $@
 	cat local/unit-number.js >> $@
 	cat intermediate/md5.js >> $@
+
+local/kage-engine:
+	git clone https://github.com/kamichikoichi/kage-engine $@
+js/kage.js: local/kage-engine/*.js local/kage-engine/COPYING js/kage-api.js
+	echo '(function () {' > $@
+	echo '/* Original: <https://github.com/kamichikoichi/kage-engine> */' >> $@
+	cat local/kage-engine/2d.js >> $@
+	cat local/kage-engine/buhin.js >> $@
+	cat local/kage-engine/curve.js >> $@
+	cat local/kage-engine/kage.js >> $@
+	cat local/kage-engine/kagecd.js >> $@
+	cat local/kage-engine/kagedf.js >> $@
+	cat local/kage-engine/polygon.js >> $@
+	cat local/kage-engine/polygons.js >> $@
+	cat js/kage-api.js >> $@
+	echo '}) () /*' >> $@
+	cat local/kage-engine/COPYING >> $@
+	echo '*/' >> $@
 
 local/page-components.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-page-components/master/src/page-components.js

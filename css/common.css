@@ -255,7 +255,8 @@ sw-data-char.active {
   writing-mode: vertical-rl;
 }
 
-.char-sample.approximate {
+.char-sample.approximate,
+.char-sample .approximate {
   outline: var(--warning-border);
   outline-offset: -5px;
 }
@@ -368,6 +369,11 @@ sw-char-fonts .char-sample {
 
 .char-item .char-sample {
   font-size: 200%;
+}
+
+.char-item .char-sample.ids {
+  font-size: 100%;
+  line-height: 2;
 }
 
 .in-cluster .char-item .char-sample {

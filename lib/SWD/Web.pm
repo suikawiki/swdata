@@ -364,6 +364,17 @@ sub main ($$$) {
     # /data/charrels/{}/{}/{}.{}
     return static $app, 'application/octet-stream',
         "local/$path->[1]/$path->[2]/$path->[3]/$path->[4]";
+  } elsif (@$path == 4 and
+           $path->[0] eq 'data' and
+           $path->[1] eq 'opentype' and
+           $path->[2] =~ m{\A[a-z0-9][0-9A-Za-z_-]*\z} and
+           $path->[3] =~ m{\A[A-Za-z0-9][0-9A-Za-z_-]*\.([0-9a-z]+)\z}) {
+    # /data/opentype/{}/{}
+    my $mime = {
+      css => 'text/css;charset=utf-8',
+    }->{$1} // 'application/octet-stream';
+    return static $app, $mime,
+        "local/fonts/opentype/$path->[2]/$path->[3]";
   }
   
   if (@$path == 2 and

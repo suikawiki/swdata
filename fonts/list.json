@@ -55,5 +55,29 @@
     "type": "opentype",
     "url": "https://fonts.suikawiki.org/opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
+  },
+  "IRGN2107": {
+    "type": "webfont",
+    "label": "IRG N2107",
+    "fontFamily": "IRGN2107"
+  },
+  "IRGN2232": {
+    "type": "webfont",
+    "label": "IRG N2232",
+    "fontFamily": "IRGN2232"
+  },
+  "JIS-Engraving-080803": {
+    "type": "webfont",
+    "label": "JIS彫刻書体両かなフォント",
+    "fontFamily": "JIS-Engraving-080803"
+  },
+  "NomNaTong": {
+    "type": "webfont",
+    "label": "Nom Na Tong",
+    "fontFamily": "NomNaTong"
+  },
+  "glyphwiki": {
+    "type": "kage",
+    "label": "GlyphWiki"
   }
 }
