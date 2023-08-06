@@ -1,59 +1,47 @@
 {
   "mj": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/ipamjm00601/ipamjm.ttf",
+    "url": "opentype/ipamjm00601/ipamjm.ttf",
     "label": "IPAmj明朝",
     "hasAJ1GlyphNames": true
-  },
-  "jiskan16": {
-    "type": "bitmap",
-    "url": "https://fonts.suikawiki.org/bdf/intlfonts-1.4.2/Japanese.X/jiskan16.dat",
-    "label": "jiskan16",
-    "size": 16
-  },
-  "jiskan24": {
-    "type": "bitmap",
-    "url": "https://fonts.suikawiki.org/bdf/intlfonts-1.4.2/Japanese.X/jiskan24.dat",
-    "label": "jiskan24",
-    "size": 24
   },
   "cns": {
     "type": "opentype-ranged",
     "label": "全字庫正宋體",
     "files": [
-      {"range": ["0000", "1FFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-98_1.ttf"},
-      {"range": ["20000", "2FFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-Ext-B-98_1.ttf"},
-      {"range": ["F0000", "FFFFF"], "url": "https://fonts.suikawiki.org/opentype/cns11643-20221114/TW-Sung-Plus-98_1.ttf"}
+      {"range": ["0000", "1FFFF"], "url": "opentype/cns11643-20221114/TW-Sung-98_1.ttf"},
+      {"range": ["20000", "2FFFF"], "url": "opentype/cns11643-20221114/TW-Sung-Ext-B-98_1.ttf"},
+      {"range": ["F0000", "FFFFF"], "url": "opentype/cns11643-20221114/TW-Sung-Plus-98_1.ttf"}
     ]
   },
   "aj": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/haranoaji-20220220/HaranoAjiGothic-ExtraLight.otf",
+    "url": "opentype/haranoaji-20220220/HaranoAjiGothic-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
   "ac": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/haranoajitw-20220220/HaranoAjiGothicTW-ExtraLight.otf",
+    "url": "opentype/haranoajitw-20220220/HaranoAjiGothicTW-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
   "ag": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/haranoajicn-20220220/HaranoAjiGothicCN-ExtraLight.otf",
+    "url": "opentype/haranoajicn-20220220/HaranoAjiGothicCN-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
   "ak1-": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/haranoajik1-20220220/HaranoAjiGothicK1-ExtraLight.otf",
+    "url": "opentype/haranoajik1-20220220/HaranoAjiGothicK1-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
   "ak": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/SourceHanSerifAKR9-20190729/SourceHanSerifAKR9-Regular.otf",
+    "url": "opentype/SourceHanSerifAKR9-20190729/SourceHanSerifAKR9-Regular.otf",
     "label": "Source Han Serif (AKR9)"
   },
   "HaranoAjiGothicKR": {
     "type": "opentype",
-    "url": "https://fonts.suikawiki.org/opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
+    "url": "opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
   "IRGN2107": {
@@ -75,6 +63,289 @@
     "type": "webfont",
     "label": "Nom Na Tong",
     "fontFamily": "NomNaTong"
+  },
+  "GNU Unifont": {
+    "type": "webfont",
+    "label": "GNU Unifont",
+    "fontFamily": "GNU Unifont"
+  },
+  
+  "jiskan16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese.X/jiskan16.dat",
+    "label": "jiskan16",
+    "size": 16
+  },
+  "j78-16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese/j78-16.dat",
+    "label": "j78-16",
+    "size": 16,
+    "has_local": true
+  },
+  "j90-16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese/j90-16.dat",
+    "label": "j90-16",
+    "size": 16,
+    "has_local": true
+  },
+  "jiskan24": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese.X/jiskan24.dat",
+    "label": "jiskan24",
+    "size": 24
+  },
+  "jksp16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese/jksp16.dat",
+    "label": "jksp16",
+    "size": 16,
+    "has_local": true
+  },
+  "j00-1-16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese/j00-1-16.dat",
+    "label": "j00-1-16",
+    "size": 16,
+    "has_local": true
+  },
+  "j00-2-16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Japanese/j00-2-16.dat",
+    "label": "j00-2-16",
+    "size": 16,
+    "has_local": true
+  },
+  "taipei16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Chinese/taipei16.dat",
+    "label": "taipei16",
+    "size": 16,
+    "has_local": true
+  },
+  "guob16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Chinese/guob16.dat",
+    "label": "guob16",
+    "size": 16
+  },
+  "gb16fs": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Chinese.X/gb16fs.dat",
+    "label": "gb16fs",
+    "size": 16,
+    "has_local": true
+  },
+  "hanglg16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Korean.X/hanglg16.dat",
+    "label": "hanglg16",
+    "size": 16,
+    "has_local": true
+  },
+  "sish16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Chinese/sish16-etl.dat",
+    "label": "sish16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "ind1c24-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/ind1c24-mule.dat",
+    "label": "ind1c24-mule",
+    "size": 24,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "ind24-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/ind24-mule.dat",
+    "label": "ind24-mule",
+    "size": 24,
+    "has_local": true
+  },
+  "isci24-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/isci24-mule.dat",
+    "label": "isci24-mule",
+    "size": 24,
+    "has_local": true
+  },
+  "lao16-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/lao16-mule.dat",
+    "label": "lao16-mule",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "thai16": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/thai16.dat",
+    "label": "thai16",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "xtis24": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/xtis24.dat",
+    "label": "xtis24",
+    "size": 24,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "visc16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/visc16-etl.dat",
+    "label": "visc16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "tib1c24-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/tib1c24-mule.dat",
+    "label": "tib1c24-mule",
+    "size": 24,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "tib24-mule": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Asian/tib24-mule.dat",
+    "label": "tib24-mule",
+    "size": 24,
+    "has_local": true
+  },
+  "ipa16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/ipa16-etl.dat",
+    "label": "ipa16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "bmp16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/bmp16-etl.dat",
+    "label": "bmp16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "heb16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/heb16-etl.dat",
+    "label": "heb16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "arab16-0-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/arab16-0-etl.dat",
+    "label": "arab16-0-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "arab16-1-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/arab16-1-etl.dat",
+    "label": "arab16-1-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "arab16-2-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/Misc/arab16-2-etl.dat",
+    "label": "arab16-2-etl",
+    "size": 16,
+    "has_local": true
+  },
+  "cyr16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/cyr16-etl.dat",
+    "label": "cyr16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "koi16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/koi16-etl.dat",
+    "label": "koi16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "grk16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/grk16-etl.dat",
+    "label": "grk16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "lt1-16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/lt1-16-etl.dat",
+    "label": "lt1-16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "lt2-16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/lt2-16-etl.dat",
+    "label": "lt2-16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "lt3-16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/lt3-16-etl.dat",
+    "label": "lt3-16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "lt4-16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/lt4-16-etl.dat",
+    "label": "lt4-16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "lt5-16-etl": {
+    "type": "bitmap",
+    "url": "bdf/intlfonts-1.4.2/European/lt5-16-etl.dat",
+    "label": "lt5-16-etl",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "cgreek16": {
+    "type": "bitmap",
+    "url": "bdf/cgreek/cgreek16.dat",
+    "label": "cgreek16",
+    "size": 16,
+    "halfwidth": true,
+    "has_local": true
+  },
+  "wqy-unibit": {
+    "type": "bitmap",
+    "url": "bdf/wqy-unibit110/wqy-unibit.dat",
+    "label": "Wen Quan Yi Unibit",
+    "size": 16,
+    "has_local": true
   },
   "glyphwiki": {
     "type": "kage",

@@ -1592,7 +1592,7 @@ defs (() => {
         return templates.jisVariant || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
-      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|UK-)/.test (char)) {
+      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi)/.test (char)) {
         return templates.gw || templates[""];
       } else if (/^:u-(?:juki|immi)-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
@@ -2484,9 +2484,9 @@ defineWorkerMethod ('SWDCharRelDataGetGlyphInfo', (c) => [c], (opts) => {
 SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', async function (opts) {
   var char = opts.char;
   var approximate = false;
-  
+  let m;
+
   if (opts.mapper === 'auto') {
-    let m;
     if (m = char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
       var glyphId = (m[2] - 1) * 94 + (m[3] - 1);
       var fontName = /16/.test (m[1]) ? 'jiskan16' : 'jiskan24';
@@ -2551,6 +2551,198 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         approximate: true,
       };
     }
+
+    if (m = char.match (/^:(omronzh|iscii|mulelao|viscii|muleviscii[12]|mulebitmap|muleipa|mulearabic[012]|isohebrew|isogreek|isocyrillic|koi|isolatin[12345]|koi|mulecgreek)-([0-9a-f]+)$/)) {
+      var fontName = {
+        'iscii': 'isci24-mule',
+        'omronzh': 'sish16-etl',
+        'mulelao': 'lao16-mule',
+        'viscii': 'visc16-etl',
+        'muleviscii1': 'visc16-etl',
+        'muleviscii2': 'visc16-etl',
+        'mulebitmap': 'bmp16-etl',
+        'muleipa': 'ipa16-etl',
+        'mulearabic0': 'arab16-0-etl',
+        'mulearabic1': 'arab16-1-etl',
+        'mulearabic2': 'arab16-2-etl',
+        'isohebrew': 'heb16-etl',
+        'isogreek': 'grk16-etl',
+        'isocyrillic': 'cyr16-etl',
+        'isolatin1': 'lt1-16-etl',
+        'isolatin2': 'lt2-16-etl',
+        'isolatin3': 'lt3-16-etl',
+        'isolatin4': 'lt4-16-etl',
+        'isolatin5': 'lt5-16-etl',
+        'koi': 'koi16-etl',
+        'mulecgreek': 'cgreek16',
+      }[m[1]];
+      var delta = {
+        'mulelao': 0x80,
+        'muleviscii1': 0x80,
+        'muleviscii2': 0x60,
+        'muleipa': 0x80,
+        'isohebrew': 0x80,
+        'isogreek': 0x80,
+        'isocyrillic': 0x80,
+        'isolatin1': 0x80,
+        'isolatin2': 0x80,
+        'isolatin3': 0x80,
+        'isolatin4': 0x80,
+        'isolatin5': 0x80,
+        'mulecgreek': 0x80,
+      }[m[1]] || 0;
+      var approximate = {
+        'iscii': true,
+        'viscii': true,
+        'isohebrew': true,
+        'isogreek': true,
+        'isocyrillic': true,
+        'isolatin1': true,
+        'isolatin2': true,
+        'isolatin3': true,
+        'isolatin4': true,
+        'isolatin5': true,
+        'koi': true,
+      }[m[1]];
+      return {
+        fontName,
+        glyphId: parseInt (m[2], 16) + delta,
+        approximate,
+      };
+    }
+
+    if (m = char.match (/^:(muleindian[12]|mulextis|muletibetan[12])-([0-9]+)-([0-9]+)$/)) {
+      var fontName = {
+        'muleindian1': 'ind1c24-mule',
+        'muleindian2': 'ind24-mule',
+        'mulextis': 'xtis24',
+        'muletibetan1': 'tib1c24-mule',
+        'muletibetan2': 'tib24-mule',
+      }[m[1]];
+      return {
+        fontName,
+        glyphId: (m[2] - 1) * 94 + (m[3] - 1),
+      };
+    }
+  }
+
+  if (m = char.match (/^:u-([a-z]+)-([0-9a-f]+)$/)) {
+    let fontName = null;
+    let approximate = false;
+    if (opts.mapper === 'auto') {
+      fontName = {
+        cns: 'cns',
+        csur: 'GNU Unifont',
+        nom: 'NomNaTong',
+      }[m[1]];
+      approximate = {
+        csur: true,
+      }[m[1]];
+    }
+    if (fontName || opts.mapper === 'u') {
+      return {fontName, approximate,
+              string: String.fromCodePoint (parseInt (m[2], 16))};
+    }
+  }
+
+  if (opts.mapper === 'dbcs' &&
+      (m = char.match (/^:b5-([0-9a-f]+)$/))) {
+    return {
+      fontName: 'taipei16',
+      glyphId: (parseInt (m[1], 16) - 0x8140),
+    };
+  } else if ((opts.mapper === 'auto' || opts.mapper === 'right') &&
+             (m = char.match (/^:(?:tis)-([0-9a-f]+)$/))) {
+    if (opts.mapper === 'auto') {
+      return {
+        fontName: 'thai16',
+        glyphId: (parseInt (m[1], 16) + 0x80),
+        approximate: true,
+      };
+    } else {
+      return {
+        glyphId: (parseInt (m[1], 16) + 0x80),
+      };
+    }
+  } else if (opts.mapper === 'auto' &&
+             (m = char.match (/^:gb0-([0-9]+)-([0-9]+)$/))) {
+    return {
+      fontName: 'guob16',
+      glyphId: (parseInt (m[1]) - 1) * 94 + parseInt (m[2]) - 1,
+      approximate: true,
+    };
+  } else if (opts.mapper === 'auto' &&
+             (m = char.match (/^:ks0-([0-9]+)-([0-9]+)$/))) {
+    return {
+      fontName: 'hanglg16',
+      glyphId: (parseInt (m[1]) - 1) * 94 + parseInt (m[2]) - 1,
+      approximate: true,
+    };
+  } else if (opts.mapper === 'gl' &&
+             (m = char.match (/^:\w+-([0-9]+)-([0-9]+)$/))) {
+    return {
+      glyphId: (parseInt (m[1]) - 1) * 94 + parseInt (m[2]) - 1,
+    };
+  }
+
+  if (opts.mapper === 'auto' && /^:cns[1-9]|^:b5-/.test (char)) {
+    if (/^:b5-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'cnsGlyphInfo.b5:' + char,
+        dsKeys: ['hans', 'kanas', 'chars'],
+        code: (c2, rel) => {
+          if (rel.key === 'rev:cns:big5' ||
+              rel.key === 'rev:cns:big5:符號') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+        approximate = true;
+      } else {
+        return null;
+      }
+    }
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'cnsGlyphInfo:' + char + ':' + approximate,
+      dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
+      code: (c2, rel) => {
+        if (rel.key === 'cns:unicode') {
+          let fontName;
+          if (opts.mapper === 'auto') fontName = 'cns';
+          if (m = c2.match (/^:u-cns-([0-9a-f]+)$/)) {
+            return {string: String.fromCodePoint (parseInt (m[1], 16)),
+                    fontName, approximate};
+          } else {
+            return {string: c2, fontName, approximate};
+          }
+        }
+        return null;
+      },
+    });
+  }
+
+  if (opts.mapper === 'auto' && /^:gb[0-9]/.test (char)) {
+    return SWD.Char.RelData._relGlyphInfo ({
+      char: char,
+      key: 'gbGlyphInfo:' + char + ':' + approximate,
+      dsKeys: ['hans'],
+      code: (c2, rel) => {
+        if (/^rev:unihan(?:3\.0|):k(?:IRG_GSource|GB)/.test (rel.key) &&
+            c2.length === 1) {
+          var code2 = c2.codePointAt (0);
+          if ((0x3400 <= code2 && code2 <= 0x4DB5) ||
+              (0x4E00 <= code2 && code2 <= 0x9FA5)) {
+            return {string: c2, fontName: 'wqy-unibit', approximate: true};
+          }
+        }
+        return null;
+      },
+    });
   }
   
   if (opts.mapper === 'mj' || opts.mapper === 'auto') {
@@ -2596,45 +2788,8 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         return null;
       },
     });
-  } else if (opts.mapper === 'cns') {
-    if (/^:b5-/.test (char)) {
-      var m1 = await SWD.Char.RelData._relGlyphInfo ({
-        char: char,
-        key: 'cnsGlyphInfo.b5:' + char,
-        dsKeys: ['hans', 'kanas', 'chars'],
-        code: (c2, rel) => {
-          if (rel.key === 'rev:cns:big5' ||
-              rel.key === 'rev:cns:big5:符號') {
-            return {char: c2};
-          }
-          return null;
-        },
-      });
-      if (m1) {
-        char = m1.char
-        approximate = true;
-      } else {
-        return null;
-      }
-    }
-    return SWD.Char.RelData._relGlyphInfo ({
-      char: char,
-      key: 'cnsGlyphInfo:' + char + ':' + approximate,
-      dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
-      code: (c2, rel) => {
-        if (rel.key === 'cns:unicode') {
-          return {string: c2, approximate};
-        }
-        return null;
-      },
-    });
-  } else if (opts.mapper === 'u') {
-    var m = (opts.char || '').match (/^:u-([a-z]+)-([0-9a-f]+)$/);
-    if (m && m[1] === name) {
-      return {string: String.fromCodePoint (parseInt (m[2], 16))};
-    }
   }
-
+  
   return null;
 }); // SWD.Char.RelData._getGlyphInfo
 
@@ -3164,7 +3319,13 @@ SWD.Font.Font.prototype._load = async function () {
   if (info.type === 'opentype') {
     var key = info.url;
     if (SWD.Font._fonts[key]) return this.otf = await SWD.Font._fonts[key];
-    var abf = fetch (info.url).then (res => {
+    var url = info.url;
+    if (SWD.isLocal && info.has_local) {
+      url = '/data/' + url;
+    } else {
+      url = 'https://fonts.suikawiki.org/' + url;
+    }
+    var abf = fetch (url).then (res => {
       if (res.status !== 200) throw res;
       return res.arrayBuffer ();
     });
@@ -3177,7 +3338,13 @@ SWD.Font.Font.prototype._load = async function () {
   } else if (info.type === 'bitmap') {
     var key = info.url;
     if (SWD.Font._fonts[key]) return this.bitmap = await SWD.Font._fonts[key];
-    this.bitmap = SWD.Font._fonts[key] = await (fetch (info.url).then (res => {
+    var url = info.url;
+    if (SWD.isLocal && info.has_local) {
+      url = '/data/' + url;
+    } else {
+      url = 'https://fonts.suikawiki.org/' + url;
+    }
+    this.bitmap = SWD.Font._fonts[key] = await (fetch (url).then (res => {
       if (res.status !== 200) throw res;
       return res.arrayBuffer ();
     }));
@@ -3210,12 +3377,16 @@ SWD.Font.Font.prototype._getGlyphDataById = async function (glyphId) {
     };
   } else if (this.bitmap) {
     var size = this.info.size;
-    var blength = size * size / 8;
+    var width = size;
+    var height = size;
+    if (this.info.halfwidth) width /= 2;
+    var pw = Math.ceil (width / 8) * 8;
+    var blength = height * pw / 8;
     var bytes = this.bitmap.slice (blength * glyphId, blength * glyphId + blength);
     var ta = new Uint8Array (bytes);
     return {
-      width: size,
-      height: size,
+      width: pw,
+      height: height,
       bitmap: ta,
     };
   } else {
@@ -3258,9 +3429,13 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
     return font._getGlyphDataByUniChar (character);
   } else if (this.info.type === 'webfont') {
     return {string: character, fontFamily: this.info.fontFamily};
-  } else {
-    throw ["glyph by char", this];
+  } else if (this.info.type === 'bitmap') {
+    var cc = [...character];
+    if (cc.length === 1) {
+      return this._getGlyphDataById (character.codePointAt (0));
+    }
   }
+  throw ["glyph by char", this];
 }; // _getGlyphDataByUniChar
 
 SWD.Font._glyphNameToFileIndex = function (index, char) {
@@ -3436,6 +3611,7 @@ defineElement ({
       } else {
         font = await fontLoading;
       }
+      if (!font) throw ['sw-font-glyph font not specified', glyphInfo];
 
       try {
         var el = await font.getGlyphElement (glyphInfo);
@@ -3450,7 +3626,7 @@ defineElement ({
         if (this.hasAttribute ('optional')) {
           this.parentNode.hidden = true;
         } else {
-          throw ["sw-font-glyph swUpdate failed", e];
+          throw ["sw-font-glyph swUpdate failed", e, glyphInfo];
         }
       }
     }, // swUpdate
@@ -3476,7 +3652,7 @@ defineElement ({
 
         if (char.type === 'unicode') {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
-          var names = ['mj', 'cns', 'ak'];
+          var names = ['mj', 'cns', 'ak', 'GNU Unifont', 'wqy-unibit'];
           for (var i = 0; i < names.length; i++) {
             var name = names[i];
             var info = await SWD.Font.info ({name});
@@ -3552,17 +3728,21 @@ defineElement ({
             this.appendChild (e);
           }
           if (m[1] === "1") {
-            names = ['jiskan16', 'jiskan24'];
-            for (var i = 0; i < names.length; i++) {
-              var name = names[i];
-              var info = await SWD.Font.info ({name});
-              var e = ts.createFromTemplate ('figure', {
-                name,
-                glyphId: (parseInt (m[2]) - 1) * 94 + (parseInt (m[3]) - 1),
-                info,
-              });
-              this.appendChild (e);
-            }
+            names = ['j78-16', 'jiskan16', 'jiskan24', 'j90-16', 'j00-1-16'];
+          } else if (m[1] === "2") {
+            names = ['jksp16', 'j00-2-16'];
+          } else {
+            names = [];
+          }
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              glyphId: (parseInt (m[2]) - 1) * 94 + (parseInt (m[3]) - 1),
+              info,
+            });
+            this.appendChild (e);
           }
         }
         var m = char.char.match (/^:jis-dot(16|24)-1-([0-9]+)-([0-9]+)$/);
@@ -3578,7 +3758,7 @@ defineElement ({
           this.appendChild (e);
         }
         
-        var m = char.char.match (/^:cns[0-9]+-[0-9]+-[0-9]+$/);
+        var m = char.char.match (/^:cns[0-9]+-[0-9]+-[0-9]+$|^:b5-[0-9a-f]+$/);
         if (m) {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var names = ['cns'];
@@ -3587,7 +3767,96 @@ defineElement ({
             var info = await SWD.Font.info ({name});
             var e = ts.createFromTemplate ('figure', {
               name,
-              mapper: 'cns',
+              mapper: 'auto',
+              char: char.char,
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        
+        var m = char.char.match (/^:b5-[0-9a-f]+$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var names = ['taipei16'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              mapper: "dbcs",
+              char: char.char,
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        
+        var m = char.char.match (/^:gb0-[0-9]+-[0-9]+$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var names = ['guob16', 'gb16fs'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              mapper: "gl",
+              char: char.char,
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        
+        var m = char.char.match (/^:ks0-[0-9]+-[0-9]+$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var names = ['hanglg16'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              mapper: "gl",
+              char: char.char,
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        
+        var m = char.char.match (/^:tis-[0-9a-f]+$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var names = ['thai16'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              mapper: "right",
+              char: char.char,
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        
+        var m = char.char.match (/^:u-(csur|cns|nom)-[0-9a-f]+$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var names = {
+            cns: ['cns'],
+            csur: ['GNU Unifont'],
+            nom: ['NomNaTong'],
+          }[m[1]];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              mapper: 'u',
               char: char.char,
               info,
             });
