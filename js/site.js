@@ -96,6 +96,12 @@ if (SWD.Env.isWorker) {
               ev.ports[0].postMessage ({type: 'return', value: rv});
             }
           }, e => {
+            if (e instanceof Response) {
+              e = {
+                type: 'response',
+                status: e.status,
+              };
+            }
             ev.ports[0].postMessage ({type: 'error', value: e});
           });
         } else {
@@ -1274,7 +1280,7 @@ Object.defineProperty (SWD.Char.prototype, 'mkt', {
 Object.defineProperty (SWD.Char.prototype, 'cid', {
   get: function () {
     if (this.type === 'char') {
-      var m = this._char.match (/^:(?:ac|ag|aj|ak|aj2-|ak1-)([0-9]+)$/);
+      var m = this._char.match (/^:(?:ac|ag|aj|ak|aj2-|ak1-|aj-ext-)([0-9]+)$/);
       if (m) return m[1];
     }
 
@@ -1285,8 +1291,10 @@ Object.defineProperty (SWD.Char.prototype, 'cid', {
 Object.defineProperty (SWD.Char.prototype, 'cidFontKey', {
   get: function () {
     if (this.type === 'char') {
-      var m = this._char.match (/^:(ac|ag|aj|ak|aj2-|ak1-)(?:[0-9]+)$/);
-      if (m) return m[1];
+      var m = this._char.match (/^:(ac|ag|aj|ak|ak1-|aj-ext-)(?:[0-9]+)$/);
+      if (m) return {
+        'aj-ext-': '霧明朝',
+      }[m[1]] || m[1];
     }
 
     return null;
@@ -1584,15 +1592,15 @@ defs (() => {
         return templates.heisei || templates[""];
       } else if (/^:(?:ninjal)[0-9]+$/.test (char)) {
         return templates.touki || templates[""];
-      } else if (/^:(?:cns)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
+      } else if (/^:(?:cns|cns-old-)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.cns || templates[""];
       } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jis || templates[""];
       } else if (/^:(?:jis-[a-z][0-9a-z]*-)[12]-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jisVariant || templates[""];
-      } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-)[0-9]+$/.test (char)) {
+      } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-|aj-ext-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
-      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi)/.test (char)) {
+      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|u-gbdot|u-dakuten|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi|wingreek|dsf)/.test (char)) {
         return templates.gw || templates[""];
       } else if (/^:u-(?:juki|immi)-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
@@ -1617,6 +1625,8 @@ SWD.Char._relDataSets = {
   kanas: {key: 'kanas'},
   kchars: {key: 'kchars'},
   glyphs: {key: 'glyphs'},
+  descs: {key: 'descs'},
+  components: {key: 'components'},
 };
 
 //if (SWD.isLocal) SWD.Char._relDataSets.test1 = {key: 'test1'};
@@ -2483,6 +2493,7 @@ defineWorkerMethod ('SWDCharRelDataGetGlyphInfo', (c) => [c], (opts) => {
 //
 SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', async function (opts) {
   var char = opts.char;
+  var char0 = char;
   var approximate = false;
   let m;
 
@@ -2497,7 +2508,45 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       };
     }
 
-    if (/^:(?:mh?[0-9]|b5-cdp-|irg2017-|extf|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|UK-)/.test (char)) {
+    if (/^:u-cdp-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'ucdpGlyphInfo.GW:' + char,
+        dsKeys: ['hans'],
+        code: (c2, rel) => {
+          if (rel.key === 'manakai:same' && /^:b5-cdp-/.test (c2)) {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+      } else {
+        return null;
+      }
+    }
+
+    if (/^:cns-old-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'cnsOldGlyphInfo.GW:' + char,
+        dsKeys: ['hans'],
+        code: (c2, rel) => {
+          if (rel.key === 'cns11643:moved') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+      } else {
+        return null;
+      }
+    }
+    
+    if (m = char.match (/^:(mh?[0-9]|b5-cdp-|irg2017-|extf|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|UK-)/)) {
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'mjGlyphInfo.GW:' + char,
@@ -2514,19 +2563,49 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       });
       if (m1) {
         char = m1.char
-        approximate = true;
+        if (m[1] !== 'b5-cdp-') approximate = true;
       } else {
         return null;
       }
     }
-    
-    if (m = char.match (/^:u-(nom)-([0-9a-f]+)$/)) {
+
+    if (/^:mulecgreek-/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'mulecgreekGlyphInfo.b5:' + char,
+        dsKeys: ['chars'],
+        code: (c2, rel) => {
+          if (rel.key === 'rev:emacs:ccl-decode-cgreek') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+      } else {
+        return null;
+      }
+    }
+
+    if (m = char.match (/^:u-(nom|dakuten|jitaichou)-([0-9a-f]+)$/)) {
       var string = String.fromCodePoint (parseInt (m[2], 16));
-      var fontName = 'NomNaTong';
+      var fontName = {
+        nom: 'NomNaTong',
+        dakuten: "源暎こぶり明朝",
+        jitaichou: "字躰帳変体仮名",
+      }[m[1]];
       return {
         fontName,
         string,
       };
+    } else if (m = char.match (/^:u-gbdot16-([0-9a-f]+)$/)) {
+      var code = parseInt (m[1], 16);
+      if ((0x3400 <= code && code <= 0x4DB5) ||
+          (0x4E00 <= code && code <= 0x9FA5)) {
+        return {string: String.fromCodePoint (code),
+                fontName: 'wqy-unibit'};
+      }
     } else if (m = char.match (/^:u-uk([ab])-([0-9a-f]+)$/)) {
       var string = String.fromCodePoint (parseInt (m[2], 16));
       var fontName = m[1] === 'a' ? 'IRGN2107' : 'IRGN2232'; 
@@ -2552,7 +2631,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       };
     }
 
-    if (m = char.match (/^:(omronzh|iscii|mulelao|viscii|muleviscii[12]|mulebitmap|muleipa|mulearabic[012]|isohebrew|isogreek|isocyrillic|koi|isolatin[12345]|koi|mulecgreek)-([0-9a-f]+)$/)) {
+    if (m = char.match (/^:(omronzh|iscii|mulelao|viscii|muleviscii[12]|mulebitmap|muleipa|mulearabic[012]|isohebrew|isogreek|isocyrillic|koi|isolatin[12345]|koi|wingreek)-([0-9a-f]+)$/)) {
       var fontName = {
         'iscii': 'isci24-mule',
         'omronzh': 'sish16-etl',
@@ -2574,7 +2653,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         'isolatin4': 'lt4-16-etl',
         'isolatin5': 'lt5-16-etl',
         'koi': 'koi16-etl',
-        'mulecgreek': 'cgreek16',
+        'wingreek': 'cgreek16',
       }[m[1]];
       var delta = {
         'mulelao': 0x80,
@@ -2589,7 +2668,6 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         'isolatin3': 0x80,
         'isolatin4': 0x80,
         'isolatin5': 0x80,
-        'mulecgreek': 0x80,
       }[m[1]] || 0;
       var approximate = {
         'iscii': true,
@@ -2603,6 +2681,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         'isolatin4': true,
         'isolatin5': true,
         'koi': true,
+        'wingreek': !(/^:mulecgreek-/.test (char0)),
       }[m[1]];
       return {
         fontName,
@@ -2643,6 +2722,17 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       return {fontName, approximate,
               string: String.fromCodePoint (parseInt (m[2], 16))};
     }
+  }
+
+  if (m = char.match (/^:(dsfff|dsffull|dsf)([0-9]+)$/)) {
+    return {
+      fontName: {
+        dsfff: "DroidSansFallback (free-fonts)",
+        dsf: "DroidSansFallback",
+        dsffull: "DroidSansFallbackFull",
+      }[m[1]],
+      glyphId: parseInt (m[2]),
+    };
   }
 
   if (opts.mapper === 'dbcs' &&
@@ -3666,12 +3756,13 @@ defineElement ({
           }
         }
       } else if (char.type === 'char') {
-        var m = char.char.match (/^:(a[jcgk]|ak1-)([1-9][0-9]*|0)$/);
+        var m = char.char.match (/^:(a[jcgk]|ak1-|aj-ext-)([1-9][0-9]*|0)$/);
         if (m) {
           var glyphId = m[2];
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var key = m[1];
-          var names = [key];
+          var names = [];
+          if (key !== 'aj-ext-') names.push (key);
           if (key === 'aj') names.push ('mj');
           if (key === 'ak') names.push ('HaranoAjiGothicKR');
           for (var i = 0; i < names.length; i++) {
@@ -3681,6 +3772,27 @@ defineElement ({
               var e = ts.createFromTemplate ('figure', {
                 name,
                 glyphName: key + glyphId,
+                info,
+              });
+              this.appendChild (e);
+            } else {
+              var e = ts.createFromTemplate ('figure', {
+                name,
+                glyphId,
+                info,
+              });
+              this.appendChild (e);
+            }
+          }
+
+          if (key === 'aj' || key === 'aj-ext-') names = ['霧明朝'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            if (info.hasAJ1GlyphNames) {
+              var e = ts.createFromTemplate ('figure', {
+                name,
+                glyphId: glyphId,
                 info,
               });
               this.appendChild (e);

@@ -289,6 +289,11 @@ canvas.font-glyph {
   image-rendering: pixelated;
 }
 
+sw-font-glyph canvas.font-glyph {
+  height: 1em;
+  width: auto;
+}
+
 
 td.copy {
   width: 2em;

@@ -44,6 +44,28 @@
     "url": "opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
+  "霧明朝": {
+    "type": "opentype",
+    "url": "opentype/KiriMinL4002/KiriMinL.otf",
+    "label": "霧明朝",
+    "has_local": true
+  },
+  "DroidSansFallback (free-fonts)": {
+    "type": "opentype",
+    "label": "DroidSansFallback (free-fonts)",
+    "url": "opentype/DroidSansFallback/DroidSansFallback-ff.ttf"
+  },
+  "DroidSansFallback": {
+    "type": "opentype",
+    "label": "DroidSansFallback",
+    "url": "opentype/DroidSansFallback/DroidSansFallback-aosp.ttf"
+  },
+  "DroidSansFallbackFull": {
+    "type": "opentype",
+    "label": "DroidSansFallbackFull",
+    "url": "opentype/DroidSansFallback/DroidSansFallbackFull-aosp.ttf"
+  },
+
   "IRGN2107": {
     "type": "webfont",
     "label": "IRG N2107",
@@ -69,7 +91,17 @@
     "label": "GNU Unifont",
     "fontFamily": "GNU Unifont"
   },
-  
+  "源暎こぶり明朝": {
+    "type": "webfont",
+    "label": "源暎こぶり明朝",
+    "fontFamily": "源暎こぶり明朝"
+  },
+  "字躰帳変体仮名": {
+    "type": "webfont",
+    "label": "字躰帳変体仮名",
+    "fontFamily": "字躰帳変体仮名"
+  },
+
   "jiskan16": {
     "type": "bitmap",
     "url": "bdf/intlfonts-1.4.2/Japanese.X/jiskan16.dat",
