@@ -1557,6 +1557,7 @@ defineElement ({
       }
 
       if (!v.names) v.names = await v._getNames ();
+      v.idPrefix = this.getAttribute ('idprefix');
 
       var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
       var e = ts.createFromTemplate ('div', v);
@@ -2927,6 +2928,7 @@ defineElement ({
       var chars = await SWD.Char.RelData.getClusterChars ("EQUIV", v.char, dsKey);
       var inCluster = new Set (chars);
       var leaders = await SWD.Char.RelData.getLeaders (v.char, dsKey);
+      var idPrefix = this.id;
 
       if (chars.length === 0 && leaders.length <= 1) {
         this.parentNode.hidden = true;
@@ -2939,9 +2941,10 @@ defineElement ({
         var ts = await $getTemplateSet ('sw-char-leader-single');
         var e = ts.createFromTemplate ('figure', {
           char: SWD.char ('char', leaders[0]),
+          idPrefix,
         });
         c.appendChild (e);
-        this.appendChild (c);
+        this.insertBefore (c, progress);
       } else if (leaders.length) {
         var c = document.createElement ('sw-char-leaders');
         var ts = await $getTemplateSet ('sw-char-leader-item');
@@ -2953,78 +2956,30 @@ defineElement ({
             var e = ts.createFromTemplate ('figure', {
               char: SWD.char ('char', leaders[lt.index]),
               def: lt,
+              idPrefix,
             });
             c.appendChild (e);
           } else {
             var e = tse.createFromTemplate ('figure', {
               def: lt,
+              idPrefix,
             });
             c.appendChild (e);
           }
         });
-        this.appendChild (c);
+        this.insertBefore (c, progress);
       }
-      
-      var c = document.createElement ('ul');
-      for (var i = 0; i < chars.length; i++) {
-        var char = chars[i];
-        var li = document.createElement ('li');
 
+      var insertCharItem = async function (c, char, acts) {
+        var li = document.createElement ('li');
+        li.id = idPrefix + 'char-' + char;
+        
         var e = document.createElement ('sw-data-char');
         e.value = SWD.char ('char', char);
         e.setAttribute ('template', 'sw-data-char-item');
         if (inCluster.has (char)) e.classList.toggle ('in-cluster');
         li.appendChild (e);
-
-        /*
-        var relItems = await SWD.Char.getRels (dsKey, char);
-        var relTypeSets = {};
-        for (let j = 0; j < relItems.length; j++) {
-          var relItem = relItems[j];
-          var relChar = relItem[0];
-          var relTypes = [];
-          for (let k = 0; k < relItem[1].length; k++) {
-            var relDSKey = relItem[1][k][0];
-            if (!relTypeSets[relDSKey]) {
-              relTypeSets[relDSKey] = await SWD.Char.getRelationIndexMap (relDSKey);
-            }
-          }
-        }
-        
-        var ul = document.createElement ('ul');
-        relItems.map (relItem => {
-          var relChar = relItem[0];
-          var relTypes = relItem[1].map (_ => relTypeSets[_[0]][_[1]]);
-          var maxWeight = Math.max (...relTypes.map (_ => _.weight));
-          return {relChar, relTypes, maxWeight};
-        }).sort ((a, b) => b.maxWeight - a.maxWeight).forEach (_ => {
-          var li2 = document.createElement ('li');
-
-          var f = document.createElement ('sw-data-char');
-          f.value = SWD.char ('char', _.relChar);
-          f.setAttribute ('template', 'sw-data-char-item');
-          if (inCluster.has (_.relChar)) f.classList.toggle ('in-cluster');
-          li2.appendChild (f);
-
-          {
-            var ul2 = document.createElement ('ul');
-            ul2.classList.toggle ('char-rel-list');
-            _.relTypes.sort ((a, b) => {
-              return b.weight - a.weight;
-            }).forEach (rel => {
-              var li3 = document.createElement ('li');
-              var code = document.createElement ('sw-data-char-rel');
-              code.value = rel;
-              li3.appendChild (code);
-              ul2.appendChild (li3);
-            });
-            li2.appendChild (ul2);
-          }
-          
-          ul.appendChild (li2);
-        }); // relItems
-        li.appendChild (ul);
-        */
+        c.appendChild (li);
 
         var relItems = await SWD.Char.RelData.getRels (dsKey, char);
         var ul = document.createElement ('ul');
@@ -3037,9 +2992,15 @@ defineElement ({
 
           var f = document.createElement ('sw-data-char');
           f.value = SWD.char ('char', _.rc);
-          f.setAttribute ('template', 'sw-data-char-item');
-          if (inCluster.has (_.rc)) f.classList.toggle ('in-cluster');
+          f.setAttribute ('idprefix', idPrefix);
+          if (inCluster.has (_.rc)) {
+            f.classList.toggle ('in-cluster');
+            f.setAttribute ('template', 'sw-data-char-item-in-rel');
+          } else {
+            f.setAttribute ('template', 'sw-data-char-item');
+          }
           li2.appendChild (f);
+          acts.neighbor (_.rc);
 
           {
             var ul2 = document.createElement ('ul');
@@ -3055,15 +3016,38 @@ defineElement ({
             });
             li2.appendChild (ul2);
           }
-          
           ul.appendChild (li2);
         }); // relItems
+          
         li.appendChild (ul);
+      }; // insertCharItem
+      
+      var c = document.createElement ('ul');
+      this.insertBefore (c, progress);
 
-        c.appendChild (li);
+      var toBeAdded = [v.char];
+      var added = new Set;
+      var acts = {
+        neighbor: char => {
+          if (! added.has (char) && inCluster.has (char)) {
+            toBeAdded.push (char);
+          }
+        },
+      };
+      while (toBeAdded.length) {
+        var char = toBeAdded.shift ();
+        if (added.has (char)) continue;
+        added.add (char);
+        await insertCharItem (c, char, acts);
+      }
+      
+      for (var i = 0; i < chars.length; i++) {
+        var char = chars[i];
+        if (added.has (char)) continue;
+        added.add (char);
+        await insertCharItem (c, char, acts);
       }
 
-      this.appendChild (c);
       progress.remove ();
     }, // swUpdate
   },

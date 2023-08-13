@@ -1106,31 +1106,31 @@
 
       <section>
         <h1>関係する漢字</h1>
-        <sw-char-cluster data-field=char type=hans></sw-char-cluster>
+        <sw-char-cluster data-field=char type=hans id=neighbors-hans-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する仮名</h1>
-        <sw-char-cluster data-field=char type=kanas></sw-char-cluster>
+        <sw-char-cluster data-field=char type=kanas id=neighbors-kanas-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する諺文</h1>
-        <sw-char-cluster data-field=char type=kchars></sw-char-cluster>
+        <sw-char-cluster data-field=char type=kchars id=neighbors-kchars-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する文字</h1>
-        <sw-char-cluster data-field=char type=chars></sw-char-cluster>
+        <sw-char-cluster data-field=char type=chars id=neighbors-chars-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する字形</h1>
-        <sw-char-cluster data-field=char type=glyphs></sw-char-cluster>
+        <sw-char-cluster data-field=char type=glyphs id=neighbors-glyphs-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する記述</h1>
-        <sw-char-cluster data-field=char type=descs></sw-char-cluster>
+        <sw-char-cluster data-field=char type=descs id=neighbors-descs-></sw-char-cluster>
       </section>
       <section>
         <h1>関係する部品</h1>
-        <sw-char-cluster data-field=char type=components></sw-char-cluster>
+        <sw-char-cluster data-field=char type=components id=neighbors-components-></sw-char-cluster>
       </section>
 
       <table class=props>
@@ -2040,6 +2040,107 @@
   </template>
 </template-set>
 
+<template-set name=sw-data-char-item-in-rel templateselector=swDataCharItemSelector>
+  <template>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <data class="char-sample" data-field=text></data>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
+  <template data-name=text>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <data class="char-sample approximate" data-field=text></data>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
+  <template data-name=ids>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <data class="char-sample approximate ids" data-field=text></data>
+      <code data-field=uplus></code>
+    </a>
+  </template>
+  <template data-name=mj>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+      <code data-field=mj></code>
+    </a>
+  </template>
+  <template data-name=jis>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=jisVariant>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=touki>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=kosekiKana>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=heisei>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=juki>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=uplus></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=cns>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=big5>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=u>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+    </a>
+  </template>
+  <template data-name=cid>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
+      <code>CID+<span data-field=cid></span></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=gw>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+</template-set>
+
 <template-set name=sw-data-char-prop-value>
   <template>
     <can-copy><a data-href-field=url><code data-field=uplus></code></a></can-copy>
@@ -2082,14 +2183,14 @@
 <template-set name=sw-char-leader-single>
   <template>
     <figcaption>代表</figcaption>
-    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+    <sw-data-char data-field=char template=sw-data-char-item-in-rel class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
   </template>
 </template-set>
 
 <template-set name=sw-char-leader-item>
   <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
     <figcaption data-field=def.short_label></figcaption>
-    <sw-data-char data-field=char template=sw-data-char-item class=in-cluster></sw-data-char>
+    <sw-data-char data-field=char template=sw-data-char-item-in-rel class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
   </template>
 </template-set>
 
