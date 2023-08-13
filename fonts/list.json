@@ -382,5 +382,12 @@
   "glyphwiki": {
     "type": "kage",
     "label": "GlyphWiki"
+  },
+  "wakan": {
+    "type": "imageset",
+    "label": "和翰名苑",
+    "index_url": "https://fonts.suikawiki.org/imageset/wakan/image-index.json",
+    "image_url_prefix": "https://fonts.suikawiki.org/imageset/wakan/wakan-kokkai_",
+    "image_url_suffix": ".jpg"
   }
 }

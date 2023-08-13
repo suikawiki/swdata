@@ -261,6 +261,12 @@ sw-data-char.active {
   outline-offset: -5px;
 }
 
+.char-sample img {
+  max-height: 1em;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
 @font-face {
   font-family: 'LigatureSymbols';
   src: url('/fonts/LigatureSymbols.ttf') format('truetype');
@@ -449,6 +455,70 @@ sw-char-cluster > ul > li > ul > li > .char-rel-list code::before {
 }
 sw-char-cluster > ul > li > ul > li > .char-rel-list code::after {
   content: " → ";
+}
+
+sw-char-cluster .cluster-item > sw-data-char:not([hidden]) {
+  display: block;
+}
+sw-char-cluster .cluster-item > sw-data-char {
+}
+
+sw-char-cluster .cluster-item > sw-data-char .char-sample {
+  font-size: 400%;
+}
+
+sw-char-cluster .cluster-item > sw-data-char > a:not([hidden]) {
+  display: inline-block;
+}
+
+sw-char-cluster .cluster-item > sw-data-char p:not([hidden]) {
+  display: inline-block;
+}
+sw-char-cluster .cluster-item > sw-data-char p {
+  margin: 0;
+  padding: 0;
+  max-width: 15em;
+  font-size: 80%;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+sw-char-cluster .cluster-item > sw-data-char p can-copy {
+  white-space: nowrap;
+}
+
+sw-char-cluster .imageset:not([hidden]) {
+  display: block;
+}
+sw-char-cluster .imageset {
+  margin: 0;
+  padding: 0;
+}
+ 
+sw-char-cluster .imageset li:not([hidden]) {
+ display: inline-block;
+}
+sw-char-cluster .imageset li {
+  vertical-align: middle;
+}
+
+sw-char-cluster .imageset > li .char-item {
+  min-width: 4em;
+}
+
+sw-char-cluster .imageset > li .char-item sw-font-glyph:not([hidden]) {
+  display: block;
+}
+sw-char-cluster .imageset > li .char-item sw-font-glyph {
+  margin: 0 auto;
+  width: fit-content;
+  font-size: 400%;
+  text-align: center;
+}
+
+sw-char-cluster .imageset > li p {
+  margin: 0;
+  font-size: 80%;
 }
 
 sw-char-leaders:not([hidden]) {

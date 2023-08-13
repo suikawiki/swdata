@@ -1408,9 +1408,9 @@
     </section>
 
     <section id=data lang=en>
-      <h1>Data on this site</h1>
+      <h1>Data and resources on this site</h1>
 
-      <p>See the license documentations for the relevant data files:
+      <p>See the license documentations for the relevant files:
 
       <ul>
         <li><a href=https://github.com/manakai/data-locale/#:~:text=License><code>manakai/data-locale</code></a>
@@ -1420,16 +1420,8 @@
         <li><a href=https://github.com/geocol/data-jp-areas/#:~:text=License><code>geocol/data-jp-areas</code></a>
         <li><a href=https://github.com/geocol/data-days/#:~:text=License><code>geocol/data-days</code></a>
         <li><a href=https://github.com/suikawiki/fonts/#:~:text=License><code>suikawiki/fonts</code></a>
-      </ul>
-    </section>
-    
-    <section lang=en>
-      <h1>Resources</h1>
-
-      <p>See the license documentation<!--s--> for the relevant resource files:
-
-      <ul>
         <li><a href=https://github.com/suikawiki/swdata/blob/master/fonts/LICENSE><code>fonts/LICENSE</code></a>
+        <li><a href=https://fonts.suikawiki.org><code>fonts.suikawiki.org</code></a>
       </ul>
       
     </section>
@@ -1939,7 +1931,129 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-char-item templateselector=swDataCharItemSelector>
+<template-set name=sw-data-char-item-header templateselector=swDataCharItemSelector>
+  <template>
+    <a data-href-field=url class=char-item>
+      <data class="char-sample" data-field=text></data>
+    </a>
+    <p>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+      <code data-field=char></code>
+    </p>
+  </template>
+  <template data-name=text>
+    <a data-href-field=url class=char-item>
+      <data class="char-sample approximate" data-field=text></data>
+    </a>
+    <p>
+      <can-copy><code data-field=uplus></code></can-copy>
+      <can-copy><code class=charname data-field=names.name lang=en></code></can-copy>
+    </p>
+  </template>
+  <template data-name=ids>
+    <a data-href-field=url class=char-item>
+      <data class="char-sample approximate ids" data-field=text></data>
+      <code data-field=uplus></code>
+    </a>
+  </template>
+  <template data-name=mj>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+    </a>
+    <p>
+      <can-copy><code data-field=mj></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=jis>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <can-copy><code data-field=mkt></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=jisVariant>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <code data-field=mkt></code>
+      <code data-field=char></code>
+    </p>
+  </template>
+  <template data-name=touki>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=heisei>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=juki>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=uplus></code>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=cns>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=mkt></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>                                          
+  </template>
+  <template data-name=big5>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=char></code>
+    </a>
+  </template>
+  <template data-name=u>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <code data-field=uplus></code>
+      <code class=charname data-field=names.name lang=en></code>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=cid>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code>CID+<span data-field=cid></span></ccode></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=gw>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+</template-set>
+
+<template-set name=sw-data-char-item-in-rel-external templateselector=swDataCharItemSelector>
   <template>
     <a data-href-field=url class=char-item>
       <data class="char-sample" data-field=text></data>
@@ -2040,7 +2154,7 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-char-item-in-rel templateselector=swDataCharItemSelector>
+<template-set name=sw-data-char-item-in-rel-internal templateselector=swDataCharItemSelector>
   <template>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <data class="char-sample" data-field=text></data>
@@ -2198,6 +2312,15 @@
   <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
     <figcaption data-field=def.short_label></figcaption>
     <data>-</data>
+  </template>
+</template-set>
+
+<template-set name=sw-char-imageset-item>
+  <template>
+    <a data-href-template=/char/char:{url:char} class=char-item>
+      <sw-font-glyph class=char-sample data-name-field=fontName data-glyphname-field=glyphName data-filled="name glyphname"></sw-font-glyph>
+      <p><code data-field=glyphName></code></p>
+    </a>
   </template>
 </template-set>
 
@@ -2416,7 +2539,7 @@
   
 <!--
 
-Copyright 2014-2022 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2023 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
