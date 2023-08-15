@@ -389,5 +389,21 @@
     "index_url": "https://fonts.suikawiki.org/imageset/wakan/image-index.json",
     "image_url_prefix": "https://fonts.suikawiki.org/imageset/wakan/wakan-kokkai_",
     "image_url_suffix": ".jpg"
+  },
+  "tensho": {
+    "type": "imageset",
+    "label": "篆書字体データセット",
+    "index_url": "https://fonts.suikawiki.org/imageset/tensho/image-index.json",
+    "image_url_prefix": "https://clever-sprite-f9ae27.netlify.app/tensho/",
+    "image_url_suffix": ".png"
+  },
+  "modmag": {
+    "type": "imageset",
+    "label": "近代雑誌OCR学習用データセット",
+    "index_url_prefix": "https://fonts.suikawiki.org/imageset/modmag/image-index/",
+    "index_parted": "0x100",
+    "image_url_prefix": "https://clever-sprite-f9ae27.netlify.app/modmag/",
+    "image_url_suffix": ".png",
+    "image_is_line": true
   }
 }

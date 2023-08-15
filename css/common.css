@@ -267,6 +267,22 @@ sw-data-char.active {
   vertical-align: middle;
 }
 
+.char-sample .line-image-container:not([hidden]) {
+  display: block;
+}
+.char-sample .line-image-container {
+  position: relative;
+  overflow: hidden;
+  width: 1em;
+  height: 2em;
+}
+
+.char-sample .line-image-container img {
+  position: absolute;
+  max-height: none;
+  left: 0;
+}
+
 @font-face {
   font-family: 'LigatureSymbols';
   src: url('/fonts/LigatureSymbols.ttf') format('truetype');
@@ -399,6 +415,7 @@ sw-char-fonts .char-sample {
   font-size: 80%;
   line-height: 1;
 }
+
 
 
 .char-rel-list {
