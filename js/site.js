@@ -206,7 +206,7 @@ SWD._dataRes = function (name, opts) {
     if (SWD.isLocal) {
       url = '/data/charrels/' + opts.dsKey + '/' + name;
     } else {
-      url = 'https://manakai.github.io/data-chars/local/generated/charrels/' + opts.dsKey + '/' + name;
+      url = 'https://swdata-items-3.netlify.app/chars/charrels/' + opts.dsKey + '/' + name;
     }
   }
 
@@ -1377,7 +1377,7 @@ Object.defineProperty (SWD.Char.prototype, 'isSensitive', {
   },
 }); // char.isSensitive
 
-Object.defineProperty (SWD.Char.prototype, 'categoryURL', {
+Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
   get: function () {
     var m = this.char.match (/^:([A-Za-z]+)/);
     var t = m ? {
@@ -1392,28 +1392,56 @@ Object.defineProperty (SWD.Char.prototype, 'categoryURL', {
       dsfff: "Droid Sans Fallback",
       gb: "GB",
       gw: 'GlyphWiki',
+      inherited: '傳承字形推薦形體表',
       jis: "JIS漢字",
+      jisfusai: "JIS X 0213:2000",
+      jistype: "機械彫刻用標準書体",
       koseki: '戸籍統一文字',
+      kuzushiji: "日本古典籍くずし字データセット",
       ks: "出典K",
       kx: "康熙字典",
       m: '大漢和辞典',
       MJ: "文字情報基盤",
       modmag: "近代雑誌OCR学習用データセット",
       ninjal: "学術情報交換用変体仮名",
-      touki: '登記統一文字',
+      swc: "Wiki//外字",
       tensho: '篆書字体データセット',
+      touki: '登記統一文字',
+      tron: "TRONコード",
       wakan: "『和翰名苑』仮名字体データベース",
+      wm: "Wikimedia",
+      wmc: "Wikimedia Commons",
+    }[m[1]] : null;
+
+    if (!t) m = this.char.match (/^:u-([A-Za-z0-9]+)-/);
+    if (!t) t = m ? {
+      cns: 'CNS 11643',
+      b5: 'Big5',
+      dakuten: '源暎こぶり明朝',
+      gb: 'GB 18030',
+      hkscs: 'HKSCS',
+      hannomkhai: "Han-Nom Khai",
+      gothicnguyen: "Gothic Nguyen",
+      jitaichou: '字躰帳変体仮名',
+      minhnguyen: "Minh Nguyen",
+      rcv: '榜𡨸漢喃準常用',
     }[m[1]] : null;
 
     if (!t && this.char.match (/^:(.)([甲乙])$/)) {
       t = '上代特殊仮名遣';
     }
 
+    return t; // or null
+  },
+}); // char.categorySWName
+
+Object.defineProperty (SWD.Char.prototype, 'categoryURL', {
+  get: function () {
+    var t = this.categorySWName;
     if (t) return 'https://wiki.suikawiki.org/n/' + encodeURIComponent (t);
-    
     return 'https://chars.suikawiki.org';
   },
-}); // char.categoryURL
+}); // categoryURL
 
 Object.defineProperty (SWD.Char.prototype, 'categoryName', {
   get: function () {
@@ -1429,19 +1457,26 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       ak: "Adobe-Korea CID",
       cccii: "CCCII面区点位置",
       cns: 'CNS 11643面区点位置',
-      dsf: "Droid Sans Fallback グリフ",
-      dsffull: "Droid Sans Fallback グリフ",
-      dsfff: "Droid Sans Fallback グリフ",
+      dsf: "『Droid Sans Fallback』グリフ",
+      dsffull: "『Droid Sans Fallback』グリフ",
+      dsfff: "『Droid Sans Fallback』グリフ",
       gb: "GB区点位置",
       gw: 'GlyphWiki グリフ',
+      inherited: '『傳承字形推薦形體表』 字形',
       jis: "JIS面区点位置",
+      jisfusai: "『新JIS漢字公開レビュー資料-非漢字不採録文字一覧』文字",
+      jistype: "『機械彫刻用標準書体』文字",
       koseki: '戸籍統一文字',
       ks: "KS区点位置",
       kx: "『康熙字典』漢字",
       m: '『大漢和辞典』漢字',
       MJ: "文字情報基盤",
       ninjal: "学術情報交換用変体仮名",
+      swc: "『SuikaWiki』 外字",
       touki: '登記統一文字',
+      tron: 'TRONコード文字',
+      wm: "Wikimedia 内の文字表現",
+      wmc: "『Wikimedia Commons』 画像",
     }[m[1]] : null;
     if (t) return t;
 
@@ -1461,6 +1496,13 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
         return '『篆書字体データセット』 文字';
       }
     }
+    if (m && m[1] === 'kuzushiji') {
+      if (this.char.match (/^:kuzushiji-.$/)) {
+        return '『日本古典籍くずし字データセット』 文字種';
+      } else {
+        return '『日本古典籍くずし字データセット』 字形';
+      }
+    }
     if (m && m[1] === 'modmag') {
       if (this.char.match (/^:modmag-.$/)) {
         return '『近代雑誌OCR学習用データセット』 文字種';
@@ -1469,6 +1511,21 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       }
     }
 
+    var m = this.char.match (/^:u-([A-Za-z0-9]+)-/);
+    var t = m ? {
+      b5: 'Unicode (Big5) 符号点',
+      cns: 'UCS (CNS 11643) 符号位置',
+      dakuten: 'Unicode (『源暎こぶり明朝』, 『ネオ濁点明朝』) 符号点',
+      gb: 'UCS (GB) 符号位置',
+      hkscs: 'UCS (HKSCS) 符号位置',
+      hannomkhai: "『Han-Nom Khai』 グリフ",
+      gothicnguyen: "『Gothic Nguyen』 グリフ",
+      jitaichou: "『字躰帳変体仮名』グリフ",
+      minhnguyen: "『Minh Nguyen』グリフ",
+      rcv: '『榜𡨸漢喃準常用』 𡨸漢喃',
+    }[m[1]] : null;
+    if (t) return t;
+    
     if (m = this.char.match (/^:(.)([甲乙])$/)) {
       return '上代特殊仮名遣 ('+m[2]+'類)';
     }
@@ -1477,9 +1534,25 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
   },
 }); // char.categoryName
 
+Object.defineProperty (SWD.Char.prototype, 'swName', {
+  get: function () {
+    var char = this.char;
+    if (/^:/.test (char)) {
+      var m = char.match (/^:(swc[0-9]+)$/);
+      if (m) return m[1];
+      
+      m = char.match (/^:u([0-9a-f]+)$/);
+      if (m) return this.uplus;
+      
+      return this.categorySWName;
+    }
+    return char;
+  },
+}); // swName
+
 Object.defineProperty (SWD.Char.prototype, 'hasImageSet', {
   get: function () {
-    return !! this.char.match (/^:(?:wakan-[\u3042-\u3093][0-9]+|tensho-..?|modmag-.)$/);
+    return !! this.char.match (/^:(?:cns[1-9].+|wakan-[\u3042-\u3093][0-9]+|tensho-..?|kuzushiji-.|modmag-.)$/);
   },
 }); // char.hasImageSet
 
@@ -1498,12 +1571,17 @@ SWD.Char.prototype.getImageSetInfo = function () {
     return {name: m[1], keys};
   });
 
-  m = this.char.match (/^:(modmag)-(.)$/);
+  m = this.char.match (/^:(modmag|kuzushiji)-(.)$/);
   if (m) return SWD.Font.load ({name: m[1]}).then (async (font) => {
     await font._load ();
     var keys = (await font._getImageIndexPart (m[2])).images[m[2]] || [];
     return {name: m[1], keys};
   });
+
+  m = this.char.match (/^:cns([0-9]+-[0-9]+-[0-9]+)$/);
+  if (m) {
+    return {keys: [':cns-kai-' + m[1], ':cns-sung-' + m[1]]};
+  }
 }; // char.getImageSetInfo
 
 SWD.Char.prototype.applyDelta = function (delta) {
@@ -1709,7 +1787,7 @@ defs (() => {
         return templates.heisei || templates[""];
       } else if (/^:(?:ninjal)[0-9]+$/.test (char)) {
         return templates.touki || templates[""];
-      } else if (/^:(?:cns|cns-old-)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
+      } else if (/^:(?:cns|cns-[a-z]+-)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.cns || templates[""];
       } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
         return templates.jis || templates[""];
@@ -1717,7 +1795,7 @@ defs (() => {
         return templates.jisVariant || templates[""];
       } else if (/^:(?:ac|ag|aj|ak|aj2-|ak1-|aj-ext-)[0-9]+$/.test (char)) {
         return templates.cid || templates[""];
-      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jistype-|u-nom-|u-uk[ab]-|u-gbdot|u-dakuten|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi|wingreek|dsf|wakan|tensho|kuzushiji|modmag)/.test (char)) {
+      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jis|u-nom-|u-rcv-|u-uk[ab]-|u-gbdot|u-dakuten|u-jitaichou|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi|wingreek|dsf|wakan|tensho|kuzushiji|modmag|tron|inherited|wmc|u-gothic|u-minh|u-hannomkhai|swc)/.test (char)) {
         return templates.gw || templates[""];
       } else if (/^:u-(?:juki|immi)-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
@@ -2663,7 +2741,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       }
     }
     
-    if (m = char.match (/^:(mh?[0-9]|b5-cdp-|irg2017-|extf|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|UK-)/)) {
+    if (m = char.match (/^:(mh?[0-9]|b5-cdp-|irg2017-|extf|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|UK-|tron)/)) {
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'mjGlyphInfo.GW:' + char,
@@ -2705,12 +2783,15 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       }
     }
 
-    if (m = char.match (/^:u-(nom|dakuten|jitaichou)-([0-9a-f]+)$/)) {
+    if (m = char.match (/^:u-(nom|dakuten|jitaichou|hannomkhai|gothicnguyen|minhnguyen)-([0-9a-f]+)$/)) {
       var string = String.fromCodePoint (parseInt (m[2], 16));
       var fontName = {
         nom: 'NomNaTong',
         dakuten: "源暎こぶり明朝",
         jitaichou: "字躰帳変体仮名",
+        hannomkhai: "Han-Nom Khai",
+        gothicnguyen: "Gothic Nguyen",
+        minhnguyen: "Minh Nguyen",
       }[m[1]];
       return {
         fontName,
@@ -2732,10 +2813,11 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       };
     }
     
-    if (m = char.match (/^:(gw|wakan|tensho|modmag)-(.+)$/)) {
+    if (m = char.match (/^:(gw|wakan|tensho|kuzushiji|modmag)-(.+)$/)) {
       return {
         fontName: {
           gw: 'glyphwiki',
+          kuzushiji: 'kuzushiji',
           tensho: 'tensho',
           modmag: 'modmag',
           wakan: 'wakan',
@@ -2744,12 +2826,27 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         approximate,
       };
     }
-
-    if (m = char.match (/^:jistype-(?:jouyou-|)(.)$/)) {
+    
+    if (m = char.match (/^:((swc)[0-9]+)$/)) {
       return {
-        fontName: 'JIS-Engraving-080803',
-        string: m[1],
-        approximate: true,
+        fontName: m[2],
+        glyphName: m[1],
+        approximate,
+      };
+    }
+
+    if (m = char.match (/^:(jistype(?:-jouyou|)|inherited)-(.)$/)) {
+      return {
+        fontName: {
+          jistype: 'JIS-Engraving-080803',
+          'jistype-jouyou': 'JIS-Engraving-080803',
+          inherited: 'I.Ming',
+        }[m[1]],
+        string: m[2],
+        approximate: {
+          jistype: true,
+          'jistype-jouyou': true,
+        }[m[1]],
       };
     }
 
@@ -2832,9 +2929,12 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     let approximate = false;
     if (opts.mapper === 'auto') {
       fontName = {
-        cns: 'cns',
+        cns: '全字庫正楷體',
         csur: 'GNU Unifont',
         nom: 'NomNaTong',
+        hannomkhai: "Han-Nom Khai",
+        gothicnguyen: "Gothic Nguyen",
+        minhnguyen: "Minh Nguyen",
       }[m[1]];
       approximate = {
         csur: true,
@@ -2843,6 +2943,23 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     if (fontName || opts.mapper === 'u') {
       return {fontName, approximate,
               string: String.fromCodePoint (parseInt (m[2], 16))};
+    }
+  }
+
+  if (m = char.match (/^:u-([a-z]+)-([0-9a-f]+)-([0-9a-f]+)$/)) {
+    let fontName = null;
+    let approximate = false;
+    if (opts.mapper === 'auto') {
+      fontName = {
+        hannomkhai: "Han-Nom Khai",
+        gothicnguyen: "Gothic Nguyen",
+        minhnguyen: "Minh Nguyen",
+        rcv: "Minh Nguyen",
+      }[m[1]];
+    }
+    if (fontName || opts.mapper === 'u') {
+      return {fontName, approximate,
+              string: String.fromCodePoint (parseInt (m[2], 16)) + String.fromCodePoint (parseInt (m[3], 16))};
     }
   }
 
@@ -2897,7 +3014,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     };
   }
 
-  if (opts.mapper === 'auto' && /^:cns[1-9]|^:b5-/.test (char)) {
+  if (opts.mapper === 'auto' && /^:cns|^:b5-/.test (char)) {
     if (/^:b5-/.test (char)) {
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
@@ -2918,14 +3035,21 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         return null;
       }
     }
+    let fontName;
+    if (opts.mapper === 'auto') fontName = '全字庫正宋體';
+    if (m = char.match (/^:cns-(kai|sung)-([0-9]+-[0-9]+-[0-9]+)$/)) {
+      fontName = {
+        kai: '全字庫正楷體',
+        sung: '全字庫正宋體',
+      }[m[1]] || fontName;
+      char = ':cns' + m[2];
+    }
     return SWD.Char.RelData._relGlyphInfo ({
       char: char,
-      key: 'cnsGlyphInfo:' + char + ':' + approximate,
+      key: 'cnsGlyphInfo:' + char + ':' + fontName + ':' + approximate,
       dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
       code: (c2, rel) => {
         if (rel.key === 'cns:unicode') {
-          let fontName;
-          if (opts.mapper === 'auto') fontName = 'cns';
           if (m = c2.match (/^:u-cns-([0-9a-f]+)$/)) {
             return {string: String.fromCodePoint (parseInt (m[1], 16)),
                     fontName, approximate};
@@ -3067,6 +3191,7 @@ defineElement ({
         c.appendChild (e);
         this.insertBefore (c, progress);
       } else if (leaders.length) {
+        SWD.Font.loadFontsCSS ();
         var c = document.createElement ('sw-char-leaders');
         var ts = await $getTemplateSet ('sw-char-leader-item');
         var tse = await $getTemplateSet ('sw-char-leader-empty-item');
@@ -3162,15 +3287,25 @@ defineElement ({
       }; // insertImageSet
       var _insertImageList = (ul, fontName, keys, ts1, ts2, more) => {
         var nextKeys = keys.splice (100);
-        
-        keys.forEach (key => {
-          var li = ts1.createFromTemplate ('li', {
-            fontName,
-            glyphName: key,
-            char: ':' + fontName + '-' + key,
+
+        if (fontName) {
+          keys.forEach (key => {
+            var li = ts1.createFromTemplate ('li', {
+              fontName,
+              glyphName: key,
+              char: ':' + fontName + '-' + key,
+            });
+            ul.appendChild (li);
           });
-          ul.appendChild (li);
-        });
+        } else {
+          keys.forEach (key => {
+            var li = ts1.createFromTemplate ('li', {
+              char: key,
+              mapper: 'auto',
+            });
+            ul.appendChild (li);
+          });
+        }
         if (nextKeys.length) {
           var li = ts2.createFromTemplate ('li', {});
           li.querySelectorAll ('a').forEach (a => {
@@ -3543,6 +3678,14 @@ SWD.Font.load = async function (opts) {
   return f;
 }; // SWD.Font.load
 
+SWD.Font.loadFontsCSS = function () {
+  var url = 'https://fonts.suikawiki.org/opentype/index/all.css';
+  if (SWD.isLocal) {
+    //url = '/data/opentype/index/all.css';
+  }
+  return SWD.loadCSS (url);
+}; // loadFontsCSS
+
 SWD.Font.Font = function () { };
 
 SWD.Font.Font.prototype._load = async function () {
@@ -3600,6 +3743,8 @@ SWD.Font.Font.prototype._load = async function () {
         return res.json ();
       }));
     }
+  } else if (info.type === 'images') {
+    this.images = true;
   } else if (info.type === 'kage') {
     this.kage = true;
   } else if (info.type === 'webfont') {
@@ -3686,16 +3831,30 @@ SWD.Font.Font.prototype._getGlyphDataByName = async function (glyphName) {
       var list = part.images[glyphName];
       if (list) glyphName = list[0];
     }
-    if (!this.info.image_is_line) throw "Not |image_is_line|";
-
-    var m = glyphName.match (/^(.+)-([0-9]+)\/([0-9]+)$/);
-    if (!m) throw ['Bad resolved glyph name', glyphName, this];
-    
-    return {
-      imageURL: this.info.image_url_prefix + m[1] + this.info.image_url_suffix,
-      lineCharPosition: parseInt (m[2]),
-      lineCharCount: parseInt (m[3]),
-    };
+    if (this.info.image_is_line) {
+      var m = glyphName.match (/^(.+)-([0-9]+)\/([0-9]+)$/);
+      if (!m) throw ['Bad resolved glyph name', glyphName, this];
+      
+      return {
+        imageURL: this.info.image_url_prefix + m[1] + this.info.image_url_suffix,
+        lineCharPosition: parseInt (m[2]),
+        lineCharLength: 1,
+        lineCharCount: parseInt (m[3]),
+      };
+    } else { // ! is_line
+      if (!/^[0-9A-Za-z_-]+$/.test (glyphName)) {
+        throw ['Bad resolved glyph name', glyphName, this];
+      }
+      if (this.info.image_url_parted == 1) {
+        var m = glyphName.match (/^([0-9a-z]+)/);
+        if (!m) throw ['Bad resolved glyph name', glyphName, this];
+        return {imageURL: this.info.image_url_prefix + m[1] + '/' + glyphName + this.info.image_url_suffix};
+      } else {
+        return {imageURL: this.info.image_url_prefix + glyphName + this.info.image_url_suffix};
+      }
+    }
+  } else if (this.images) {
+    return {imageURL: this.info.image_url_prefix + glyphName + this.info.image_url_suffix};
   } else {
     throw ["glyph by name", glyphName, this];
   }
@@ -3732,6 +3891,21 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
   throw ["glyph by char", this];
 }; // _getGlyphDataByUniChar
 
+SWD.Font.Font.prototype._getGlyphDataByUniCharPair = async function (c1, c2) {
+  await this._load ();
+  if (this.otf) {
+    var cmap = this.otf.tables.cmap.subtables.filter (_ => _.format === 14) [0];
+    if (cmap) {
+      cmap.parse ();
+      var glyphId = (cmap.varGlyphIndexMap[c2.codePointAt (0)] || [])[c1.codePointAt (0)];
+      if (glyphId) {
+        return this._getGlyphDataById (glyphId);
+      }
+    }
+  }
+  throw ["glyph by charpair", this];
+}; // _getGlyphDataByUniCharPair
+            
 SWD.Font._glyphNameToFileIndex = function (index, char) {
   let m;
   if (m = char.match (index.prefixPattern)) {
@@ -3810,9 +3984,13 @@ SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', asyn
     return this._getGlyphDataById (opts.glyphId); // or throw
   } else if (opts.glyphName != null && opts.glyphName !== "") {
     return this._getGlyphDataByName (opts.glyphName); // or throw or null
-  } else if ([...opts.string].length === 1) {
-    return this._getGlyphDataByUniChar (opts.string); // or throw
   } else {
+    var cc = [...opts.string];
+    if (cc.length === 1) {
+      return this._getGlyphDataByUniChar (opts.string); // or throw
+    } else if (cc.length === 2) {
+      return this._getGlyphDataByUniCharPair (cc[0], cc[1]); // or throw
+    }
     throw opts;
   }
 }, opts => {
@@ -3865,11 +4043,7 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
     svg.setAttribute ('class', 'font-glyph ' + (gd.approximate ? 'approximate' : ''));
     return svg;
   } else if (gd.fontFamily) {
-    var url = 'https://fonts.suikawiki.org/opentype/index/all.css';
-    if (SWD.isLocal) {
-      url = '/data/opentype/index/all.css';
-    }
-    SWD.loadCSS (url);
+    SWD.Font.loadFontsCSS ();
 
     var text = document.createElement ('span');
     text.textContent = gd.string;
@@ -3888,7 +4062,7 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
 
         var lineHeight = img.naturalHeight;
         var charHeight = lineHeight / gd.lineCharCount;
-        var charTop = (gd.lineCharPosition - 1 - 0.5) * charHeight;
+        var charTop = (gd.lineCharPosition - 1 - 0.5 + (gd.lineCharLength - 1) / 2) * charHeight;
         img.style.top = -charTop + 'px';
         span.appendChild (img);
 
@@ -3929,7 +4103,7 @@ defineElement ({
       });
       if (!glyphInfo) return;
       var font;
-      if (glyphInfo.fontName) {
+      if (glyphInfo.fontName && !name) {
         font = await SWD.Font.load ({name: glyphInfo.fontName});
       } else {
         font = await fontLoading;
@@ -3975,7 +4149,11 @@ defineElement ({
 
         if (char.type === 'unicode') {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
-          var names = ['mj', 'cns', 'ak', 'GNU Unifont', 'wqy-unibit'];
+          var names = ['mj',
+                       '全字庫正楷體', '全字庫正宋體',
+                       'ak', 'GNU Unifont', 'wqy-unibit',
+                       'NomNaTong',
+                       "Minh Nguyen", "Han-Nom Khai", "Gothic Nguyen"];
           for (var i = 0; i < names.length; i++) {
             var name = names[i];
             var info = await SWD.Font.info ({name});
@@ -4106,9 +4284,9 @@ defineElement ({
         var m = char.char.match (/^:cns[0-9]+-[0-9]+-[0-9]+$|^:b5-[0-9a-f]+$/);
         if (m) {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
-          var names = ['cns'];
+          var names = ['全字庫正楷體', '全字庫正宋體', 'I.Ming'];
           for (var i = 0; i < names.length; i++) {
-            var name = names[i];
+            let name = names[i];
             var info = await SWD.Font.info ({name});
             var e = ts.createFromTemplate ('figure', {
               name,
@@ -4188,16 +4366,19 @@ defineElement ({
           }
         }
         
-        var m = char.char.match (/^:u-(csur|cns|nom)-[0-9a-f]+$/);
+        var m = char.char.match (/^:u-(csur|cns|nom|hannomkhai|gothicnguyen|minhnguyen)-[0-9a-f]+$/);
         if (m) {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var names = {
-            cns: ['cns'],
+            cns: ['全字庫正楷體', '全字庫正宋體'],
             csur: ['GNU Unifont'],
             nom: ['NomNaTong'],
+            hannomkhai: ["Han-Nom Khai"],
+            gothicnguyen: ["Gothic Nguyen"],
+            minhnguyen: ["Minh Nguyen"],
           }[m[1]];
           for (var i = 0; i < names.length; i++) {
-            var name = names[i];
+            let name = names[i];
             var info = await SWD.Font.info ({name});
             var e = ts.createFromTemplate ('figure', {
               name,

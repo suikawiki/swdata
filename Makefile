@@ -62,7 +62,7 @@ build-local: local/data \
     local/data/jp-regions-full-flatten.json \
     local/data/sww-pages.json
 
-build-repo: js/components.js js/kage.js css/default.css
+build-repo: js/components.js js/kage.js js/opentype.js css/default.css
 local/data:
 	mkdir -p local/data
 
@@ -98,6 +98,11 @@ local/time.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/timejs/master/src/time.js
 local/unit-number.js: local/generated
 	$(WGET) -O $@ https://raw.githubusercontent.com/wakaba/html-unit-number/master/src/unit-number.js
+
+local/opentype.js: local/generated
+	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/opentypejs/master/dist/opentype.js
+js/opentype.js: local/opentype.js
+	cp $< $@
 
 intermediate/md5.js:
 	$(WGET) -O $@ https://raw.githubusercontent.com/blueimp/JavaScript-MD5/master/js/md5.js

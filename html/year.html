@@ -1080,8 +1080,8 @@
   <template data-name=page-char-index>
     <t-title><sw-data-char data-field=char template=sw-data-char-text></sw-data-char></t-title>
     <t-category><a data-href-field=char.categoryURL data-field=char.categoryName></a></t-category>
-    <t-keyword data-field=char.text></t-keyword>
-    <t-sw data-field=char.text></t-sw>
+    <t-keyword data-field=char.char></t-keyword>
+    <t-sw data-field=char.swName></t-sw>
 
     <table class=props>
       <tbody>
@@ -2297,14 +2297,14 @@
 <template-set name=sw-char-leader-single>
   <template>
     <figcaption>代表</figcaption>
-    <sw-data-char data-field=char template=sw-data-char-item-in-rel class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
+    <sw-data-char data-field=char template=sw-data-char-item-in-rel-internal class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
   </template>
 </template-set>
 
 <template-set name=sw-char-leader-item>
   <template data-lang-field=def.lang_tag data-title-field=def.label data-filled=lang>
     <figcaption data-field=def.short_label></figcaption>
-    <sw-data-char data-field=char template=sw-data-char-item-in-rel class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
+    <sw-data-char data-field=char template=sw-data-char-item-in-rel-internal class=in-cluster data-idprefix-field=idPrefix data-filled=idprefix></sw-data-char>
   </template>
 </template-set>
 
@@ -2318,15 +2318,15 @@
 <template-set name=sw-char-imageset-item>
   <template>
     <a data-href-template=/char/char:{url:char} class=char-item>
-      <sw-font-glyph class=char-sample data-name-field=fontName data-glyphname-field=glyphName data-filled="name glyphname"></sw-font-glyph>
-      <p><code data-field=glyphName></code></p>
+      <sw-font-glyph class=char-sample data-name-field=fontName data-glyphname-field=glyphName data-char-field=char data-mapper-field=mapper data-filled="name char glyphname mapper"></sw-font-glyph>
     </a>
+    <p><can-copy><code data-field=char></code></can-copy></p>
   </template>
 </template-set>
 <template-set name=sw-char-imageset-item-more>
   <template>
     <a href=javascript: class="char-item more">
-      <p>もっとみる
+      <p>もっとみる</p>
     </a>
   </template>
 </template-set>

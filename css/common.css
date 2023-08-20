@@ -213,6 +213,12 @@ code {
   background: transparent;
   font-family: "Courier New", monospace;
   word-break: break-all;
+  white-space: pre-wrap;
+}
+
+data {
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 
 sw-data-char.active {
@@ -281,6 +287,18 @@ sw-data-char.active {
   position: absolute;
   max-height: none;
   left: 0;
+}
+
+sw-char-leaders figure[title="臺灣"] .char-sample {
+  font-family: "全字庫正宋體";
+}
+
+sw-char-leaders figure[title=越南] .char-sample {
+  font-family: "Minh Nguyen";
+}
+
+sw-char-leaders figure[title=傳承] .char-sample {
+  font-family: "I.Ming";
 }
 
 @font-face {
@@ -521,6 +539,7 @@ sw-char-cluster .imageset li {
 
 sw-char-cluster .imageset > li .char-item {
   min-width: 4em;
+  margin: 0 auto;
 }
 
 sw-char-cluster .imageset > li .char-item sw-font-glyph:not([hidden]) {
@@ -534,8 +553,12 @@ sw-char-cluster .imageset > li .char-item sw-font-glyph {
 }
 
 sw-char-cluster .imageset > li p {
-  margin: 0;
-  font-size: 80%;
+  margin: 0 auto;
+  padding: .3em;
+  max-width: 8em;
+  line-height: 1;
+  font-size: 60%;
+  text-align: center;
 }
 
 sw-char-leaders:not([hidden]) {

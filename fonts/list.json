@@ -5,7 +5,16 @@
     "label": "IPAmj明朝",
     "hasAJ1GlyphNames": true
   },
-  "cns": {
+  "全字庫正楷體": {
+    "type": "opentype-ranged",
+    "label": "全字庫正楷體",
+    "files": [
+      {"range": ["0000", "1FFFF"], "url": "opentype/cns11643-20221114/TW-Kai-98_1.ttf"},
+      {"range": ["20000", "2FFFF"], "url": "opentype/cns11643-20221114/TW-Kai-Ext-B-98_1.ttf"},
+      {"range": ["F0000", "FFFFF"], "url": "opentype/cns11643-20221114/TW-Kai-Plus-98_1.ttf"}
+    ]
+  },
+  "全字庫正宋體": {
     "type": "opentype-ranged",
     "label": "全字庫正宋體",
     "files": [
@@ -65,7 +74,31 @@
     "label": "DroidSansFallbackFull",
     "url": "opentype/DroidSansFallback/DroidSansFallbackFull-aosp.ttf"
   },
-
+  "Han-Nom Khai": {
+    "type": "opentype",
+    "label": "Han-Nom Khai",
+    "webfont": true,
+    "url": "opentype/hannomrcv/HanNomKhaiRegular300623.ttf"
+  },
+  "Gothic Nguyen": {
+    "type": "opentype",
+    "label": "Gothic Nguyen",
+    "webfont": true,
+    "url": "opentype/hannomrcv/GothicNguyenRegular.ttf"
+  },
+  "Minh Nguyen": {
+    "type": "opentype",
+    "label": "Minh Nguyen",
+    "webfont": true,
+    "url": "opentype/hannomrcv/MinhNguyenExtraLight.ttf"
+  },
+  "I.Ming": {
+    "type": "opentype",
+    "label": "I.Ming",
+    "webfont": true,
+    "url": "opentype/iming-800/IMing.ttf"
+  },
+  
   "IRGN2107": {
     "type": "webfont",
     "label": "IRG N2107",
@@ -394,7 +427,15 @@
     "type": "imageset",
     "label": "篆書字体データセット",
     "index_url": "https://fonts.suikawiki.org/imageset/tensho/image-index.json",
-    "image_url_prefix": "https://clever-sprite-f9ae27.netlify.app/tensho/",
+    "image_url_prefix": "https://swdata-items-1.netlify.app/tensho/",
+    "image_url_suffix": ".png"
+  },
+  "kuzushiji": {
+    "type": "imageset",
+    "label": "日本古典籍くずし字データセット",
+    "index_url_prefix": "https://fonts.suikawiki.org/imageset/kuzushiji/image-index/",
+    "index_parted": "0x100",
+    "image_url_prefix": "https://swdata-items-2.suikawiki.org/kuzushiji/",
     "image_url_suffix": ".png"
   },
   "modmag": {
@@ -402,8 +443,14 @@
     "label": "近代雑誌OCR学習用データセット",
     "index_url_prefix": "https://fonts.suikawiki.org/imageset/modmag/image-index/",
     "index_parted": "0x100",
-    "image_url_prefix": "https://clever-sprite-f9ae27.netlify.app/modmag/",
+    "image_url_prefix": "https://swdata-items-1.netlify.app/modmag/",
     "image_url_suffix": ".png",
     "image_is_line": true
+  },
+  "swc": {
+    "type": "images",
+    "label": "SuikaWiki",
+    "image_url_prefix": "https://fonts.suikawiki.org/images/glyphs/",
+    "image_url_suffix": ".svg"
   }
 }
