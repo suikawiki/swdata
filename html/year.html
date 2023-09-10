@@ -1880,11 +1880,11 @@
   </template>
   <template data-name=mj>
     <code data-field=mj></code>
-    (<sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>)
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=jis>
     JIS <code data-field=mkt></code>
-    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=jisVariant>
     <code data-field=char></code>
@@ -1893,20 +1893,16 @@
   </template>
   <template data-name=touki>
     <code data-field=char></code>
-    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=kosekiKana>
-    <code data-field=char></code>
-    (<sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=heisei>
     <code data-field=char></code>
-    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=juki>
     <code data-field=char></code>
     <!--XXX<code data-field=uplus></code>-->
-    (<sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>)
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=cns>
     CNS <code data-field=mkt></code>
@@ -1959,7 +1955,7 @@
   </template>
   <template data-name=mj>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
       <can-copy><code data-field=mj></code></can-copy>
@@ -1968,7 +1964,7 @@
   </template>
   <template data-name=jis>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
       <can-copy><code data-field=mkt></code></can-copy>
@@ -1986,7 +1982,7 @@
   </template>
   <template data-name=touki>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
       <bdi data-field=categoryName></bdi>
@@ -1995,13 +1991,13 @@
   </template>
   <template data-name=heisei>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=juki>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code data-field=char></code>
     </a>
@@ -2076,13 +2072,13 @@
   </template>
   <template data-name=mj>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mj></code>
     </a>
   </template>
   <template data-name=jis>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mkt></code>
       <code data-field=char></code>
     </a>
@@ -2096,25 +2092,19 @@
   </template>
   <template data-name=touki>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=kosekiKana>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=heisei>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=juki>
     <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code data-field=char></code>
     </a>
@@ -2177,13 +2167,13 @@
   </template>
   <template data-name=mj>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" name=mj data-glyphname-field=mjGlyphName data-filled=glyphname></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mj></code>
     </a>
   </template>
   <template data-name=jis>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mkt></code>
       <code data-field=char></code>
     </a>
@@ -2197,25 +2187,19 @@
   </template>
   <template data-name=touki>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=kosekiKana>
-    <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample approximate" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=heisei>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=juki>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" name=mj mapper=mj data-char-field=char data-filled=char></sw-font-glyph>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code data-field=char></code>
     </a>

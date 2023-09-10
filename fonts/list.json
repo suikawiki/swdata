@@ -1,8 +1,14 @@
 {
-  "mj": {
+  "IPAmj明朝": {
     "type": "opentype",
     "url": "opentype/ipamjm00601/ipamjm.ttf",
     "label": "IPAmj明朝",
+    "hasAJ1GlyphNames": true
+  },
+  "IPAmj明朝 Ver.001.01": {
+    "type": "opentype",
+    "url": "opentype/ipamjm00101/ipamjm.ttf",
+    "label": "IPAmj明朝 Ver.001.01",
     "hasAJ1GlyphNames": true
   },
   "全字庫正楷體": {
@@ -97,6 +103,18 @@
     "label": "I.Ming",
     "webfont": true,
     "url": "opentype/iming-800/IMing.ttf"
+  },
+  "IPAex明朝": {
+    "type": "opentype",
+    "label": "IPAex明朝",
+    "webfont": true,
+    "url": "opentype/ipaexfont00401/ipaexm.ttf"
+  },
+  "IPAexゴシック": {
+    "type": "opentype",
+    "label": "IPAexゴシック",
+    "webfont": true,
+    "url": "opentype/ipaexfont00401/ipaexg.ttf"
   },
   
   "IRGN2107": {
