@@ -79,6 +79,15 @@ sub main ($$$) {
   my ($class, $app) = @_;
   my $path = $app->path_segments;
 
+  if ($app->http->request_method eq 'GET' and
+      keys %$SWD::Web::CORSAllowedOrigins) {
+    $app->http->add_response_header ('vary', 'origin');
+    my $origin = $app->http->get_request_header ('origin') // '';
+    if ($origin and $SWD::Web::CORSAllowedOrigins->{$origin}) {
+      $app->http->set_response_header ('access-control-allow-origin', $origin);
+    }
+  }
+
   if (@$path == 2 and $path->[0] eq 'css' and $path->[1] eq 'common.css') {
     # /css/common.css
     return static $app, 'text/css; charset=utf-8', 'css/common.css';

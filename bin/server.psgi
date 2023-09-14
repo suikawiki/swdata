@@ -10,11 +10,13 @@ use SWD::Days;
 $ENV{LANG} = 'C';
 $ENV{TZ} = 'UTC';
 
+$SWD::Web::CORSAllowedOrigins = {map { $_ => 1 } split /\s+/, $ENV{SWD_CORS_ALLOWED_ORIGINS} // ''};
+
 return SWD::Web->psgi_app;
 
 =head1 LICENSE
 
-Copyright 2015-2016 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2023 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

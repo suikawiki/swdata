@@ -1882,6 +1882,10 @@
     <code data-field=mj></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
+  <template data-name=mjVariant>
+    <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
   <template data-name=jis>
     JIS <code data-field=mkt></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
@@ -2076,6 +2080,13 @@
       <code data-field=mj></code>
     </a>
   </template>
+  <template data-name=mjVariant>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mj></code>
+      <code data-field=char></code>
+    </a>
+  </template>
   <template data-name=jis>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
@@ -2169,6 +2180,13 @@
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=mj></code>
+    </a>
+  </template>
+  <template data-name=mjVariant>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <code data-field=mj></code>
+      <code data-field=char></code>
     </a>
   </template>
   <template data-name=jis>

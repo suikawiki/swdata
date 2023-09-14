@@ -115,7 +115,8 @@ if (SWD.Env.isWorker) {
       throw new Error ("Unknown message received: " + ev.data.type);
     }
   });
-
+}
+if (SWD.Env.isWorker || self.swdNoWorker) {
   defineWorkerMethod = (name, toSerializableInput, workerCode, opts) => {
     SWD.Env.workerMethodCode[name] = workerCode;
     if (opts) {
@@ -1248,24 +1249,14 @@ Object.defineProperty (SWD.Char.prototype, 'mj', {
     if (this.type === 'char') {
       var m = this._char.match (/^:(MJ[0-9]+)$/);
       if (m) return m[1];
+
+      m = this._char.match (/^:MJ-v[0-9]+-([0-9]+)$/);
+      if (m) return 'MJ' + m[1];
     }
 
     return null;
   },
 }); // char.mj
-
-Object.defineProperty (SWD.Char.prototype, 'mjGlyphName', {
-  get: function () {
-    if (this.type === 'char') {
-      var m = this._char.match (/^:MJ([0-9]+)$/);
-      if (m) {
-        return 'mj' + m[1];
-      }
-    }
-
-    return null;
-  },
-}); // char.mjGlyphName
 
 Object.defineProperty (SWD.Char.prototype, 'mkt', {
   get: function () {
@@ -1403,6 +1394,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       m: '大漢和辞典',
       MJ: "文字情報基盤",
       modmag: "近代雑誌OCR学習用データセット",
+      muleethiopic: "MuleEthiopic",
       ninjal: "学術情報交換用変体仮名",
       swc: "Wiki//外字",
       tensho: '篆書字体データセット',
@@ -1471,6 +1463,7 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       kx: "『康熙字典』漢字",
       m: '『大漢和辞典』漢字',
       MJ: "文字情報基盤",
+      muleethiopic: "MuleEthiopic 文字",
       ninjal: "学術情報交換用変体仮名",
       swc: "『SuikaWiki』 外字",
       touki: '登記統一文字',
@@ -1781,6 +1774,8 @@ defs (() => {
       var char = obj.char;
       if (/^:MJ[0-9]+$/.test (char)) {
         return templates.mj || templates[""];
+      } else if (/^:MJ-v[0-9]+-[0-9]+$/.test (char)) {
+        return templates.mjVariant || templates.mj || templates[""];
       } else if (/^:koseki90[01][0-9]{3}$/.test (char)) {
         return templates.touki || templates[""];
       } else if (/^:(?:J[ABCDEFT]|KS|TK)[0-9A-F]+S*$/.test (char)) {
@@ -3104,12 +3099,12 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         return null;
       }
     }
-    if (m = char.match (/^:(MJ|MJ-0010[01]-)([0-9]+)$/)) {
+    if (m = char.match (/^:(MJ|MJ-v0010[01]-)([0-9]+)$/)) {
       return {
         fontName: {
           MJ: 'IPAmj明朝',
-          'MJ-00100-': 'IPAmj明朝 (Ver.001.01)',
-          'MJ-00101-': 'IPAmj明朝 (Ver.001.01)',
+          'MJ-v00100-': 'IPAmj明朝 (Ver.001.01)',
+          'MJ-v00101-': 'IPAmj明朝 (Ver.001.01)',
         }[m[1]],
         glyphName: 'mj' + m[2],
         approximate,
@@ -3250,8 +3245,9 @@ defineElement ({
         Object.keys (relItems).map (rc => {
           var rds = relItems[rc].map (_ => relDefs[_] || console.log ("RelDef not found", relDefs, relItems[rc], char, rc, _));
           var mw = Math.max (...rds.map (_ => _.weight));
-          return {rc, rds, mw};
-        }).sort ((a, b) => b.mw - a.mw).forEach (_ => {
+          let rdsl = rds.length;
+          return {rc, rds, mw, rdsl};
+        }).sort ((a, b) => b.mw - a.mw || b.rdsl - a.rdsl).forEach (_ => {
           var li2 = document.createElement ('li');
 
           var f = document.createElement ('sw-data-char');
@@ -3690,6 +3686,7 @@ SWD.Font.load = async function (opts) {
   if (!info.type) {
     let error = new Error ("Font not found");
     error.info = info;
+    console.log (info);
     throw error;
   }
   
@@ -4169,7 +4166,7 @@ defineElement ({
 
         if (char.type === 'unicode') {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
-          var names = ['IPAmj明朝', 'IPAmj明朝 Ver.001.01',
+          var names = ['IPAmj明朝', 'IPAmj明朝 (Ver.001.01)',
                        'IPAex明朝', 'IPAexゴシック',
                        '全字庫正楷體', '全字庫正宋體',
                        'ak', 'GNU Unifont', 'wqy-unibit',
@@ -4243,13 +4240,29 @@ defineElement ({
         if (m) {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var key = m[1];
-          var names = ['IPAmj明朝', 'IPAmj明朝 Ver.001.01'];
+          var names = ['IPAmj明朝', 'IPAmj明朝 (Ver.001.01)'];
           for (var i = 0; i < names.length; i++) {
             var name = names[i];
             var info = await SWD.Font.info ({name});
             var e = ts.createFromTemplate ('figure', {
               name,
               glyphName: key.toLowerCase (),
+              info,
+            });
+            this.appendChild (e);
+          }
+        }
+        m = char.char.match (/^:MJ-v0010[01]-([0-9]+)$/);
+        if (m) {
+          var ts = await $getTemplateSet ('sw-char-fonts-font-item');
+          var key = 'mj' + m[1];
+          var names = ['IPAmj明朝 (Ver.001.01)'];
+          for (var i = 0; i < names.length; i++) {
+            var name = names[i];
+            var info = await SWD.Font.info ({name});
+            var e = ts.createFromTemplate ('figure', {
+              name,
+              glyphName: key,
               info,
             });
             this.appendChild (e);
@@ -4265,7 +4278,7 @@ defineElement ({
             var info = await SWD.Font.info ({name});
             var e = ts.createFromTemplate ('figure', {
               name,
-              mapper: 'mj',
+              mapper: 'auto',
               char: char.char,
               info,
             });
