@@ -24,7 +24,7 @@ Path::Tiny~0.144
 Proc::FastSpawn~1.2
 Scalar::Util~1.63
 Socket~2.037
-Test::Differences~0.70
+Test::Differences~0.71
 Test::More~1.302195
 Text::Diff~1.45
 Time::HiRes~1.9764
