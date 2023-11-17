@@ -1879,11 +1879,16 @@
     (<data class="char-sample approximate" data-field=text></data>)
   </template>
   <template data-name=mj>
-    <code data-field=mj></code>
+    <code data-field=localId></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=mjVariant>
+    <code data-field=localId></code>
     <code data-field=char></code>
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=heisei>
+    <code data-field=localId></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=jis>
@@ -1896,10 +1901,6 @@
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=touki>
-    <code data-field=char></code>
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=heisei>
     <code data-field=char></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
@@ -1962,7 +1963,31 @@
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
-      <can-copy><code data-field=mj></code></can-copy>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=localId></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=heisei>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=localId></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
+  <template data-name=heisei94>
+    <a data-href-field=url class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=localId></code></can-copy>
+      <can-copy><code data-field=mkt></code></can-copy>
+      <can-copy>GL <code data-field=gl></code></can-copy>
+      <can-copy>GR <code data-field=gr></code></can-copy>
       <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
@@ -1971,7 +1996,10 @@
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
+      <bdi data-field=categoryName></bdi>
       <can-copy><code data-field=mkt></code></can-copy>
+      <can-copy>GL <code data-field=gl></code></can-copy>
+      <can-copy>GR <code data-field=gr></code></can-copy>
       <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
@@ -1980,8 +2008,11 @@
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=mkt></code></can-copy>
+      <can-copy>GL <code data-field=gl></code></can-copy>
+      <can-copy>GR <code data-field=gr></code></can-copy>
+      <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
   <template data-name=touki>
@@ -1992,12 +2023,6 @@
       <bdi data-field=categoryName></bdi>
       <can-copy><code data-field=char></code></can-copy>
     </p>
-  </template>
-  <template data-name=heisei>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
-    </a>
   </template>
   <template data-name=juki>
     <a data-href-field=url class=char-item>
@@ -2077,13 +2102,13 @@
   <template data-name=mj>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mj></code>
+      <code data-field=localId></code>
     </a>
   </template>
   <template data-name=mjVariant>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mj></code>
+      <code data-field=localId></code>
       <code data-field=char></code>
     </a>
   </template>
@@ -2102,12 +2127,6 @@
     </a>
   </template>
   <template data-name=touki>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=heisei>
     <a data-href-field=url class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
@@ -2179,13 +2198,13 @@
   <template data-name=mj>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mj></code>
+      <code data-field=localId></code>
     </a>
   </template>
   <template data-name=mjVariant>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mj></code>
+      <code data-field=localId></code>
       <code data-field=char></code>
     </a>
   </template>
@@ -2204,12 +2223,6 @@
     </a>
   </template>
   <template data-name=touki>
-    <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=heisei>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>

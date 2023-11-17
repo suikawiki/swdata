@@ -1,4 +1,4 @@
-(function () {
+(function (self) {
 
   self.getKageGlyphSVG = async function (getSource, name) {
     var kage = new Kage ();
@@ -45,4 +45,4 @@
   };
 
   /* License: Public Domain. */
-}) (self);
+}) (this.self ? self : module.exports);
