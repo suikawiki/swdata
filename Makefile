@@ -74,7 +74,7 @@ js/components.js: local/page-components.js local/time.js intermediate/md5.js \
 
 local/kage-engine:
 	git clone https://github.com/kamichikoichi/kage-engine $@
-js/kage.js:
+js/kage.js: js/kage-api.js
 	$(MAKE) local/kage-engine/*.js local/kage-engine/COPYING js/kage-api.js
 	echo '(function () {' > $@
 	echo '/* Original: <https://github.com/kamichikoichi/kage-engine> */' >> $@

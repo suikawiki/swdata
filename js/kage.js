@@ -2837,7 +2837,7 @@ function Polygons(){
   
   return this;
 }
-(function () {
+(function (self) {
 
   self.getKageGlyphSVG = async function (getSource, name) {
     var kage = new Kage ();
@@ -2884,7 +2884,7 @@ function Polygons(){
   };
 
   /* License: Public Domain. */
-}) (self);
+}) (this.self ? self : module.exports);
 }) () /*
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007

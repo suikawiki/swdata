@@ -373,6 +373,14 @@ sub main ($$$) {
     # /data/charrels/{}/{}/{}.{}
     return static $app, 'application/octet-stream',
         "local/$path->[1]/$path->[2]/$path->[3]/$path->[4]";
+  } elsif (@$path == 3 and
+           $path->[0] eq 'data' and
+           ($path->[1] eq 'swg') and
+           $path->[2] =~ m{\A[A-Za-z0-9][0-9A-Za-z_-]*\.([0-9a-z]+)\z}) {
+    # /data/swg/{}
+    my $mime = {
+    }->{$1} // 'application/octet-stream';
+    return static $app, $mime, "local/fonts/$path->[1]/$path->[2]";
   } elsif (@$path == 4 and
            $path->[0] eq 'data' and
            ($path->[1] eq 'opentype' or $path->[1] eq 'bdf') and

@@ -34,6 +34,11 @@
     "url": "opentype/haranoaji-20220220/HaranoAjiGothic-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
   },
+  "HaranoAjiMincho": {
+    "type": "opentype",
+    "url": "opentype/haranoaji-20230610/HaranoAjiMincho-Regular.otf",
+    "label": "原ノ味明朝"
+  },
   "ac": {
     "type": "opentype",
     "url": "opentype/haranoajitw-20220220/HaranoAjiGothicTW-ExtraLight.otf",
@@ -58,6 +63,11 @@
     "type": "opentype",
     "url": "opentype/haranoajikr-20220220/HaranoAjiGothicKR-ExtraLight.otf",
     "label": "原ノ味角ゴシック"
+  },
+  "CJK Symbols": {
+    "type": "webfont",
+    "fontFamily": "CJK Symbols",
+    "label": "CJK Symbols"
   },
   "霧明朝": {
     "type": "opentype",
@@ -108,12 +118,14 @@
     "type": "opentype",
     "label": "IPAex明朝",
     "webfont": true,
+    "hasAJ1GlyphNames": true,
     "url": "opentype/ipaexfont00401/ipaexm.ttf"
   },
   "IPAexゴシック": {
     "type": "opentype",
     "label": "IPAexゴシック",
     "webfont": true,
+    "hasAJ1GlyphNames": true,
     "url": "opentype/ipaexfont00401/ipaexg.ttf"
   },
   
@@ -467,8 +479,14 @@
   },
   "swc": {
     "type": "images",
-    "label": "SuikaWiki",
+    "label": "SuikaWiki 文字",
     "image_url_prefix": "https://fonts.suikawiki.org/images/glyphs/",
     "image_url_suffix": ".svg"
+  },
+  "swg": {
+    "type": "kage",
+    "label": "SuikaWiki 明朝体字形",
+    "has_local": true,
+    "patch_json_url": "swg/glyphs.json"
   }
 }
