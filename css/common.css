@@ -289,6 +289,10 @@ sw-data-char.active {
   left: 0;
 }
 
+.cluster-item .char-sample {
+  font-family: var(--suikawiki-composed-font-family);
+}
+
 sw-char-leaders figure[title="臺灣"] .char-sample {
   font-family: "全字庫正宋體";
 }
@@ -332,6 +336,10 @@ canvas.font-glyph {
 sw-font-glyph canvas.font-glyph {
   height: 1em;
   width: auto;
+}
+
+sw-font-glyph > span {
+  vertical-align: bottom;
 }
 
 

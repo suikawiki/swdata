@@ -488,5 +488,10 @@
     "label": "SuikaWiki 明朝体字形",
     "has_local": true,
     "patch_json_url": "swg/glyphs.json"
+  },
+  "swcfhanmin": {
+    "type": "webfont",
+    "css": "var(--suikawiki-composed-font-family)",
+    "label": "SuikaWiki Composed (Han Min)"
   }
 }
