@@ -4142,7 +4142,8 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
     var font = await SWD.Font.load ({type: 'opentype', url: item.url});
     return font._getGlyphDataByUniChar (character);
   } else if (this.info.type === 'webfont') {
-    return {string: character, fontFamily: this.info.fontFamily};
+    return {string: character, fontFamily: this.info.fontFamily,
+            css: this.info.css};
   } else if (this.info.type === 'bitmap') {
     var cc = [...character];
     if (cc.length === 1) {
@@ -4329,7 +4330,12 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
 
     var text = document.createElement ('span');
     text.textContent = gd.string;
-    text.style.fontFamily = gd.fontFamily;
+    text.style.fontFamily = gd.fontFamily + ", Fallback Red Question";
+    return text;
+  } else if (gd.css) {
+    var text = document.createElement ('span');
+    text.textContent = gd.string;
+    text.style.fontFamily = gd.css + ", Fallback Red Question";
     return text;
   } else if (gd.imageURL) {
     var img = document.createElement ('img');
@@ -4436,6 +4442,7 @@ defineElement ({
         if (char.type === 'unicode') {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
           var names = ["CJK Symbols",
+                       "swcfhanmin",
                        'IPAmj明朝', 'IPAmj明朝 (Ver.001.01)',
                        'IPAex明朝', 'IPAexゴシック',
                        "HaranoAjiMincho",
