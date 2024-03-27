@@ -289,7 +289,15 @@ sw-data-char.active {
   left: 0;
 }
 
+sw-char-routes .char-sample,
 .cluster-item .char-sample {
+  font-family: var(--suikawiki-composed-font-family);
+}
+
+sw-char-leaders figure[title="日本(新字体)"] .char-sample,
+sw-char-leaders figure[title="日本(舊字體)"] .char-sample,
+sw-char-leaders figure[title="日本(平成22年)"] .char-sample,
+sw-char-leaders figure[title="日本"] .char-sample {
   font-family: var(--suikawiki-composed-font-family);
 }
 

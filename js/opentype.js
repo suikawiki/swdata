@@ -1393,6 +1393,11 @@
 	        var d = new TextDecoder ('shift_jis');
 	        var dv = new DataView (dataView.buffer, offset, dataLength);
 	        return d.decode (dv);
+	    } else if (encoding === "x-mac-chinesetrad") {
+	        // XXX wrong
+	        var d = new TextDecoder ('big5');
+	        var dv = new DataView (dataView.buffer, offset, dataLength);
+	        return d.decode (dv);
 	    }
 	  
 	    var table = eightBitMacEncodings[encoding];
@@ -7172,13 +7177,16 @@
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6meta.html
 	function parseMetaTable(data, start) {
 	    var p = new parse.Parser(data, start);
+	    var table = {};
 	    var tableVersion = p.parseULong();
 	    check.argument(tableVersion === 1, 'Unsupported META table version.');
-	    p.parseULong(); // flags - currently unused and set to 0
+	    table.version = tableVersion;
+	    table.flags = p.parseULong(); // flags - currently unused and set to 0
 	    p.parseULong(); // tableOffset
 	    var numDataMaps = p.parseULong();
 
 	    var tags = {};
+	    tags._table = table;
 	    for (var i = 0; i < numDataMaps; i++) {
 	        var tag = p.parseTag();
 	        var dataOffset = p.parseULong();
@@ -14492,8 +14500,9 @@
 	        var pp = subtableParsers$1[extensionLookupType];
 	        if (pp) {
 	            return {
+	                posFormat: posFormat,
 	                extensionLookupType: extensionLookupType,
-	              extension: this.parsePointer32(pp),
+	                extension: this.parsePointer32(pp),
 	            };
 	        }
 	    } else {

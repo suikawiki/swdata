@@ -778,6 +778,7 @@ SWD.openPage = function (url) {
     args.name = {
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
+      '/y/determination/kanshi': 'page-year-determination-kanshi',
       '/e/': 'page-era-index',
       '/e/first': 'page-era-first',
     }[path]; // or undefined
@@ -2667,6 +2668,8 @@ SWD.Char.RelData._charToIndex = function (index, char) {
     } else {
       return 0xFF;
     }
+  } else if (m = char.match (/([\u2FF0-\u2FFF])/)) {
+    return 0x300 - 0x30 - 0x2FF0 + m[1].codePointAt (0) + (([...m].at (-2) || "").codePointAt (0) || 0) % 0x10 + [...m].at (-1).codePointAt (0) % 0x10;
   } else if (m = char.match (index.prefixPattern)) {
     return index.prefix_to_index[m[1]];
   } else if (/^:u-/.test (char)) {
@@ -2683,7 +2686,7 @@ SWD.Char.RelData._load = async function (dsKey) {
   var index = SWD._cached[k];
   if (!index) {
     index = SWD._cached[k] = await SWD.data ('merged-rels/index.json', {dsKey});
-    index.prefixPattern = new RegExp ('^:(?:gw-(?:[a-z0-9]+_|)|)(' + index.prefix_pattern + ')');
+    index.prefixPattern = new RegExp ('^:(?:gw-(?:[a-z0-9-]+_|heisei-|)|)(' + index.prefix_pattern + ')');
     index.relDefs = [];
     Object.keys (index.rel_types).forEach (rel => {
       index.relDefs[index.rel_types[rel].id] = index.rel_types[rel];
@@ -2719,7 +2722,7 @@ SWD.Char.RelData.getClusterChars = hasWorkerMethod ('SWDCharRelDataGetClusterCha
   var clusterId = clusters[clusterIndex];
   if (clusterId === undefined) return [];
 
-  const cPartSize = 5000;
+  const cPartSize = 1000;
   var cFileIndex = Math.floor (clusterId / cPartSize);
   var part = await SWD.data ('cluster-chars/part-' + clusterIndex + '-' + cFileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
 
@@ -4141,9 +4144,6 @@ SWD.Font.Font.prototype._getGlyphDataByUniChar = async function (character) {
 
     var font = await SWD.Font.load ({type: 'opentype', url: item.url});
     return font._getGlyphDataByUniChar (character);
-  } else if (this.info.type === 'webfont') {
-    return {string: character, fontFamily: this.info.fontFamily,
-            css: this.info.css};
   } else if (this.info.type === 'bitmap') {
     var cc = [...character];
     if (cc.length === 1) {
@@ -4256,9 +4256,16 @@ SWD.Font.getGlyphWikiGlyph = hasWorkerMethod ('GetGlyphWikiGlyph', async functio
 
 defineWorkerMethod ('GetFontGlyphData', function (opts) {
   return [this.info, opts];
-}, (info, opts) => {
-  var f = new SWD.Font.Font;
-  f.info = info;
+}, async (info, opts) => {
+  let key = "gfgd;;" + Object.keys (info).sort ((a, b) => a - b).map (_ => _ + "," + info[_]).join (";");
+  let f;
+  if (SWD._cached[key]) {
+    f = await SWD._cached[key];
+  } else {
+    f = new SWD.Font.Font;
+    f.info = info;
+    await (SWD._cached[key] = f._load ().then (_ => f));
+  }
   return f.getGlyphData (opts);
 });
 //
@@ -4282,8 +4289,14 @@ SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', asyn
 
 
 SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
-  var gd = await this.getGlyphData (opts);
-  if (!gd) return null;
+  let gd;
+  if (this.info.type === 'webfont') {
+    gd = {string: opts.string,
+          fontFamily: this.info.fontFamily, css: this.info.css};
+  } else {
+    gd = await this.getGlyphData (opts);
+    if (!gd) return null;
+  }
   
   if (gd.pathData) {
     var svg = document.createElementNS
@@ -4330,7 +4343,7 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
 
     var text = document.createElement ('span');
     text.textContent = gd.string;
-    text.style.fontFamily = gd.fontFamily + ", Fallback Red Question";
+    text.style.fontFamily = "'" + gd.fontFamily + "', Fallback Red Question";
     return text;
   } else if (gd.css) {
     var text = document.createElement ('span');
@@ -4433,16 +4446,17 @@ defineElement ({
       var char = this.value;
       if (char.type === 'unicode' || char.type === 'vs' ||
           char.type === 'string') {
-        var ts = await $getTemplateSet ('sw-char-fonts-string-item');
-        var e = ts.createFromTemplate ('figure', {
-          string: char.text,
-        });
-        this.appendChild (e);
-
-        if (char.type === 'unicode') {
+        {
+          var ts = await $getTemplateSet ('sw-char-fonts-string-item');
+          var e = ts.createFromTemplate ('figure', {
+            string: char.text,
+          });
+          this.appendChild (e);
+        }
+        {
           var ts = await $getTemplateSet ('sw-char-fonts-font-item');
-          var names = ["CJK Symbols",
-                       "swcfhanmin",
+          var names = ["swcfhanmin",
+                       "CJK Symbols",
                        'IPAmj明朝', 'IPAmj明朝 (Ver.001.01)',
                        'IPAex明朝', 'IPAexゴシック',
                        "HaranoAjiMincho",
@@ -4462,6 +4476,7 @@ defineElement ({
             this.appendChild (e);
           }
         }
+        
       } else if (char.type === 'char') {
         var m = char.char.match (/^:(a[jcgk]|ak1-|aj-shs-|aj-ext-)([1-9][0-9]*|0)$/);
         if (m) {
@@ -4733,6 +4748,27 @@ defineElement ({
 
 /* ------ Kanshi ------ */
 
+SWD.Kanshi = {};
+
+SWD.Kanshi.labels = [
+  '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未',
+  '壬申', '癸酉', '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯',
+  '庚辰', '辛巳', '壬午', '癸未', '甲申', '乙酉', '丙戌', '丁亥',
+  '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳', '甲午', '乙未',
+  '丙申', '丁酉', '戊戌', '己亥', '庚子', '辛丑', '壬寅', '癸卯',
+  '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥',
+  '壬子', '癸丑', '甲寅', '乙卯', '丙辰', '丁巳', '戊午', '己未',
+  '庚申', '辛酉', '壬戌', '癸亥',
+];
+
+SWD.Kanshi.labels12 = [
+  '子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥',
+];
+
+SWD.Kanshi.labels10 = [
+  '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸',
+];
+
 defineElement ({
   name: 'sw-data-kanshi',
   fill: 'idlattribute',
@@ -4754,16 +4790,7 @@ defineElement ({
       var v = this.value;
 
       var args = {value0: v, value1: v+1, context: this};
-      args.label = [
-        '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未',
-        '壬申', '癸酉', '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯',
-        '庚辰', '辛巳', '壬午', '癸未', '甲申', '乙酉', '丙戌', '丁亥',
-        '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳', '甲午', '乙未',
-        '丙申', '丁酉', '戊戌', '己亥', '庚子', '辛丑', '壬寅', '癸卯',
-        '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥',
-        '壬子', '癸丑', '甲寅', '乙卯', '丙辰', '丁巳', '戊午', '己未',
-        '庚申', '辛酉', '壬戌', '癸亥',
-      ][v];
+      args.label = SWD.Kanshi.labels[v];
       
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
@@ -4775,6 +4802,74 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-kanshi>
+
+defineElement ({
+  name: 'sw-data-jukkan',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var args = {value0: v, value1: v+1, context: this};
+      args.label = SWD.Kanshi.labels10[v];
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-jukkan>
+
+defineElement ({
+  name: 'sw-data-juunishi',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      var args = {value0: v, value1: v+1, context: this};
+      args.label = SWD.Kanshi.labels12[v];
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-juunishi>
 
 defineElement ({
   name: 'sw-data-year',
@@ -4841,6 +4936,8 @@ defs (() => {
         return templates.eraWithYear;
       } else if (obj.format === 'eraADYear') {
         return templates.eraADYear;
+      } else if (obj.format === 'eraSWML') {
+        return templates.eraSWML;
       } else {
         return templates.era;
       }
@@ -5027,6 +5124,12 @@ defineElement ({
         } else if (name === 'kanshi-year') {
           var y = parseFloat (this.getAttribute ('arg-year'));
           return ['kanshi', mod (y - 4, 60)];
+        } else if (name === 'jukkan-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return ['jukkan', mod (y - 4, 10)];
+        } else if (name === 'juunishi-year') {
+          var y = parseFloat (this.getAttribute ('arg-year'));
+          return ['juunishi', mod (y - 4, 12)];
         } else {
           throw new TypeError ('Unknown algorithm |'+name+'|');
         }
@@ -5051,6 +5154,16 @@ defineElement ({
             return s;
           } else if (r[0] === 'kanshi') {
             var s = document.createElement ('sw-data-kanshi');
+            s.value = r[1];
+            if (this.hasAttribute ('value-text')) s.setAttribute ('text', '');
+            return s;
+          } else if (r[0] === 'jukkan') {
+            var s = document.createElement ('sw-data-jukkan');
+            s.value = r[1];
+            if (this.hasAttribute ('value-text')) s.setAttribute ('text', '');
+            return s;
+          } else if (r[0] === 'juunishi') {
+            var s = document.createElement ('sw-data-juunishi');
             s.value = r[1];
             if (this.hasAttribute ('value-text')) s.setAttribute ('text', '');
             return s;
@@ -7344,8 +7457,26 @@ defineElement ({
 
       var s = new window.URL (location.href).searchParams;
       this.elements.input_year.value = s.get ('input_year') || 1;
-      this.elements.input_ref_year.value = s.get ('input_ref_year') || thisYear;
-      this.elements.input_ref_era.value = s.get ('input_ref_era') || 'ad';
+      if (this.elements.input_ref_year) this.elements.input_ref_year.value = s.get ('input_ref_year') || thisYear;
+      if (this.elements.input_ref_era) this.elements.input_ref_era.value = s.get ('input_ref_era') || 'ad';
+      if (this.elements.input_ref_kanshi) {
+        let select = this.elements.input_ref_kanshi;
+        let i = 0;
+        SWD.Kanshi.labels.forEach (l => {
+          let opt = document.createElement ('option');
+          opt.label = l + ' ('+i+')';
+          opt.value = '60-' + i++;
+          select.appendChild (opt);
+        });
+        i = 0;
+        SWD.Kanshi.labels12.forEach (l => {
+          let opt = document.createElement ('option');
+          opt.label = l + ' ('+i+')';
+          opt.value = '12-' + i++;
+          select.appendChild (opt);
+        });
+        select.value = s.get ('input_ref_kanshi');
+      }
       
       this.swUpdate ();
     }, // pcInit
@@ -7357,9 +7488,11 @@ defineElement ({
       var form = this;
 
       var iy = form.elements.input_year.value;
-      var ry = form.elements.input_ref_year.value;
-      var ry0 = ry;
-      var re = form.elements.input_ref_era.value;
+
+      if (form.elements.input_ref_year) {
+        var ry = form.elements.input_ref_year.value;
+        var ry0 = ry;
+        var re = form.elements.input_ref_era.value;
       if (re === 'bc') {
         ry = 1 - ry;
       } else if (re === 'kouki') {
@@ -7394,13 +7527,13 @@ defineElement ({
         }
       });
 
-      SWD.eraList ({}).then (eras => {
-        form.querySelectorAll ('list-container[data-name=output_era_list]').forEach (l => {
-          var delta = parseFloat (l.getAttribute ('data-delta'));
-          l.swValue = eras.filter (_ => _.offset === offset + delta);
-          l.load ({});
+        SWD.eraList ({}).then (eras => {
+          form.querySelectorAll ('list-container[data-name=output_era_list]').forEach (l => {
+            let delta = parseFloat (l.getAttribute ('data-delta'));
+            l.swValue = eras.filter (_ => _.offset === offset + delta).sort ((a, b) => a.offset - b.offset);
+            l.load ({});
+          });
         });
-      });
       
       form.elements.output_ad_year_new.onclick = () => {
         var delta = parseFloat (form.elements.output_ad_year_new_delta.value);
@@ -7408,14 +7541,30 @@ defineElement ({
         this.swAddYear (delta);
       };
 
-      var u = location.pathname + '?input_year=' + iy + '&input_ref_year=' + ry0 + '&input_ref_era=' + re;
-      history.replaceState (null, null, u);
+        let u = location.pathname + '?input_year=' + iy + '&input_ref_year=' + ry0 + '&input_ref_era=' + re;
+        history.replaceState (null, null, u);
 
-      setTimeout (() => {
-        form.querySelectorAll ('.active').forEach (_ => {
-          _.parentNode.scrollLeft = _.offsetLeft + _.offsetWidth/2 - _.parentNode.offsetWidth/2;
+        setTimeout (() => {
+          form.querySelectorAll ('.active').forEach (_ => {
+            _.parentNode.scrollLeft = _.offsetLeft + _.offsetWidth/2 - _.parentNode.offsetWidth/2;
+          });
+        }, 100);
+      } else if (form.elements.input_ref_kanshi) {
+        let rk = form.elements.input_ref_kanshi.value;
+        let rkk = rk.split (/-/);
+        let x = parseInt (rkk[0]);
+        let y = (parseInt (rkk[1]) + 3 - iy + 1) % x;
+        SWD.eraList ({}).then (eras => {
+          form.querySelectorAll ('list-container[data-name=output_era_list]').forEach (l => {
+            let delta = parseFloat (l.getAttribute ('data-delta'));
+            l.swValue = eras.filter (_ => _.offset % x === y).sort ((a, b) => a.offset - b.offset);
+            l.load ({});
+          });
         });
-      }, 100);
+        
+        let u = location.pathname + '?input_year=' + iy + '&input_ref_kanshi=' + rk;
+        history.replaceState (null, null, u);
+      }
     }, // _swUpdate
     swAddYear: function (delta) {
       var found = [];

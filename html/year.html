@@ -197,6 +197,10 @@
     <t-title>年の決定</t-title>
     <t-category><a href=/y/>年</a></t-category>
 
+    <p>
+      <a href=/y/determination class=active>年数</a> /
+      <a href=/y/determination/kanshi>干支</a>
+
     <section>
       <h1>紀年法を調べる</h1>
 
@@ -360,6 +364,48 @@
     </section>
     
   </template><!-- page-year-determination -->
+  
+  <template data-name=page-year-determination-kanshi>
+    <t-title>年の決定</t-title>
+    <t-category><a href=/y/>年</a></t-category>
+
+    <p>
+      <a href=/y/determination>年数</a> /
+      <a href=/y/determination/kanshi class=active>干支</a>
+
+    <section>
+      <h1>紀年法を調べる</h1>
+
+      <form is=sw-year-determination-form>
+        <p>
+          <label>
+            <input type=number name=input_year value=1 step=1 required>
+            (年)
+          </label>
+          が、
+          <select name=input_ref_kanshi required>
+          </select>
+          であるなら:
+
+        <dl class=matched-era-list>
+          <template-set name=matchedEraListItem>
+            <template>
+              <sw-data-era data-field=id template=sw-data-era-in-menu class=era-list-item></sw-data-era>
+            </template>
+          </template-set>
+          <div class=active>
+            <dt>一致
+            <dd>
+              <list-container loader=swValueListLoader data-name=output_era_list data-delta=0 template=matchedEraListItem>
+                <list-main></list-main>
+                <list-is-empty>見つかりませんでした。</list-is-empty>
+              </list-container>
+          </div>
+        </dl>
+      </form>
+    </section>
+    
+  </template><!-- page-year-determination-kanshi -->
 
   <template data-name=page-era-index>
     <t-title>紀年法の一覧</t-title>
@@ -630,6 +676,11 @@
               <tbody>
             </table>
           </list-container>
+          <p>
+            <can-copy>
+              <code><sw-data-year data-field=year format=eraSWML data-eraid-field=eraId data-filled=eraid></sw-data-year> ([TIME[y~<span data-field=eraId></span>]])</code>
+            </can-copy>
+          </p>
         </template>
       </list-container>
     </section>
@@ -1797,6 +1848,28 @@
   <template data-name=text><data data-field=label></data></template>
 </template-set>
 
+<template-set name=sw-data-jukkan templateselector=swDataValueSelector>
+  <template>
+    <a data-href-template=/jukkan/{value1}>
+      <data data-field=label></data>
+      (<data data-field=value0></data><sub>0</sub>,
+       <data data-field=value1></data><sub>1</sub>)<!--
+    --></a>
+  </template>
+  <template data-name=text><data data-field=label></data></template>
+</template-set>
+
+<template-set name=sw-data-juunishi templateselector=swDataValueSelector>
+  <template>
+    <a data-href-template=/juunishi/{value1}>
+      <data data-field=label></data>
+      (<data data-field=value0></data><sub>0</sub>,
+       <data data-field=value1></data><sub>1</sub>)<!--
+    --></a>
+  </template>
+  <template data-name=text><data data-field=label></data></template>
+</template-set>
+
 <template-set name=sw-data-year templateselector=swDataYearSelector>
   <template>
     <a data-href-template=/y/{value}/>西暦<span data-field=value></span>年</a>
@@ -1805,6 +1878,7 @@
     <a data-href-template=/y/{value}/><span data-field=era.name></span><span data-field=eraValue></span>(<span data-field=value></span>)年<sw-algorithm name=kanshi-year data-arg-year-field=value value-text data-filled=arg-year></sw-algorithm></a>
   </template>
   <template data-name=eraText><span data-field=eraName data-empty=?></span><span data-field=eraValue></span>年</template>
+  <template data-name=eraSWML>[TIME[<span data-field=eraName data-empty=?></span><span data-field=eraValue></span>年[LINES(smaller)[<sw-algorithm name=jukkan-year data-arg-year-field=value value-text data-filled=arg-year></sw-algorithm>][<sw-algorithm name=juunishi-year data-arg-year-field=value value-text data-filled=arg-year></sw-algorithm>]]][<span data-field=value></span>]]</template>
   <template data-name=eraTextCanCopyLink><can-copy><a data-href-template="/y/{value}/"><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</a></can-copy></template>
   <template data-name=eraTextCanCopy><can-copy><span data-field=eraName data-empty=?></span><data data-field=eraValue></data>年</can-copy></template>
   <template data-name=eraWithYear>
