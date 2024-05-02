@@ -220,6 +220,8 @@ SWD._dataRes = function (name, opts) {
     if (res.status !== 200) {
       if (res.status === 404 && opts.allow404) {
         return {};
+      } else if (res.status === 404 && opts.null404) {
+        return null;
       } else {
         throw res;
       }
@@ -775,6 +777,35 @@ SWD.openPage = function (url) {
       return args;
     }
 
+    // /p/{}/{}/
+    {
+      let m = path.match (/^\/p\/([^/]+)\/([^/]+)\/$/);
+      if (m) {
+        args.packageList = SWD.packageList (
+          decodeURIComponent (m[1]),
+          decodeURIComponent (m[2]),
+        );
+        args.name = 'page-package-item-index';
+        return args;
+      }
+    }
+    // /p/{}/{}/{}/
+    {
+      let m = path.match (/^\/p\/([^/]+)\/([^/]+)\/([^/]+)\/$/);
+      if (m) {
+        args.package = await SWD.package (
+          decodeURIComponent (m[1]),
+          decodeURIComponent (m[2]),
+          decodeURIComponent (m[3]),
+        );
+        if (args.package) {
+          args.name = 'page-package-item-item-index';
+          return args;
+        }
+      }
+    }
+
+    
     args.name = {
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
@@ -1114,6 +1145,56 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-if-defined>
+
+defineElement ({
+  name: 'sw-if-true',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      setTimeout (() => this.swUpdate (), 0);
+    }, // pcInit
+    swUpdate: function () {
+      var v = !! this.value;
+      if (this.hasAttribute ('not')) v = ! v;
+      this.hidden = ! v;
+    }, // swUpdate
+  },
+}); // <sw-if-defined>
+
+defineElement ({
+  name: 'sw-if-insecure-url',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      setTimeout (() => this.swUpdate (), 0);
+    }, // pcInit
+    swUpdate: function () {
+      var v = (this.value || "").match (/^http:/);
+      if (this.hasAttribute ('not')) v = ! v;
+      this.hidden = ! v;
+    }, // swUpdate
+  },
+}); // <sw-if-insecure-url>
 
 defineElement ({
   name: 'sw-data-boolean',
@@ -7746,6 +7827,24 @@ defineElement ({
   },
 }); // <sw-hashtag-list>
 
+defineElement ({
+  name: 'sw-data-tag-list',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      this.swUpdate ();
+    },
+    swUpdate: function () {
+      (this.value || []).forEach (_ => {
+        this.appendChild (document.createTextNode (' '));
+        var a = this.appendChild (document.createElement ('a'));
+        a.textContent = _;
+        a.href = '/p/tag/' + encodeURIComponent (_) + '/';
+      });
+    }, // swUpdate
+  },
+}); // <sw-data-tag-list>
+
 SWD.radioProgram = async function (key) {
   var programs = await SWD.data ('antenna/radio/programs.json');
   return programs[key]; // or undefined
@@ -7856,9 +7955,98 @@ defineElement ({
   },
 }); // <sw-data-tag>
 
+/* ------ Package list ------ */
+
+SWD.ppEscape = function (_) { return _.replace (/([^0-9A-Za-z])/g, _ => '_' + _.codePointAt (0).toString (16).toUpperCase ()) };
+
+SWD.packageList = function (a, b) {
+  SWD._cached.packageList = SWD._cached.packageList || {};
+  let key = [a, b].join ("\u001C");
+  return SWD._cached.packageList[key] = SWD._cached.packageList[key] || new SWD.PackageList (a, b);
+}; // SWD.packageList
+
+SWD.PackageList = function (a, b) {
+  this.path = [a, b];
+  this.pathKey = this.path.join ("\u001C");
+}; // SWD.PackageList
+
+defineListLoader ('swPackageListLoader', async function (opts) {
+  let p = this.getAttribute ('loader-path').split (/\u001C/);
+
+  let pl = SWD.packageList.apply (null, p);
+  let data = await pl.getAll ();
+  
+  return {data};
+}); // swPackageListLoader
+
+SWD.PackageList.prototype.getAll = async function () {
+  let list = await SWD.data ('packs/indexes/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/all.jsonl', {type: 'jsonlLined', allow404: true});
+  list = list.sort ((a, b) => {
+    return b[3] - a[3];
+  });
+  return list;
+}; // getAll
+
+/* ------ Packages ------ */
+
+SWD.package = async function (a, b, c) {
+  let pathKey = [a, b, c].join ('\u001C');
+  let pack = SWD._cached['package\u001C' + pathKey];
+  if (pack) {
+    await pack._load ();
+    return pack;
+  }
+  
+  let vers = await SWD.data ('packs/indexes/' + SWD.ppEscape (a) + '/' + SWD.ppEscape (b) + '/packages/' + SWD.ppEscape (c) + '.json', {type: 'json', null404: true});
+  if (!vers) return null;
+
+  pack = new SWD.Package;
+  pack.path = [a, b, c];
+  pack.pathKey = pathKey;
+
+  pack.current = vers[0]; // [0] timestamp [1] sha
+  pack.revisions = vers[1];
+
+  SWD._cached['package\u001C' + pack.pathKey] = pack;
+  await pack._load ();
+
+  return pack;
+}; // package
+
+SWD.Package = function () { };
+
+SWD.Package.prototype._load = async function () {
+  return Promise.all ([
+    SWD.data ('packs/snapshots/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/summaries/' + SWD.ppEscape (this.current[1]) + '.json', {type: 'json'}).then (json => this.summary = json),
+  ]);
+}; // _load
+
+defineListLoader ('swPackageFileListLoader', async function (opts) {
+  let p = this.getAttribute ('loader-path').split (/\u001C/);
+
+  let pl = await SWD.package.apply (null, p);
+  let data = Object.keys (pl.summary.files).sort ((a, b) => a < b ? -1 : +1).map (_ => {
+    let value = pl.summary.files[_];
+    value.fileKey = _;
+    value.package = pl.summary.package;
+    return value;
+  });
+  
+  return {data};
+}); // swPackageRevisionListLoader
+
+defineListLoader ('swPackageRevisionListLoader', async function (opts) {
+  let p = this.getAttribute ('loader-path').split (/\u001C/);
+
+  let pl = await SWD.package.apply (null, p);
+  let data = await pl.revisions;
+  
+  return {data};
+}); // swPackageRevisionListLoader
+
 /*
 
-Copyright 2014-2023 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2024 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

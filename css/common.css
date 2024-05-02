@@ -37,6 +37,10 @@ html {
   --warning-border-color: rgba(255, 128, 0, 0.2);
   --warning-border-style: dashed;
   --warning-border: var(--warning-border-color) var(--warning-border-style) 4px;
+  --warning-background-color: transparent;
+  --warning-color: red;
+  --note-background-color: transparent;
+  --note-color: green;
   --dialog-background-color: white;
   --dialog-color: black;
   --dialog-border-color: gray;
@@ -159,6 +163,10 @@ tbody th:last-of-type::after {
 
 table.nnv > tbody > tr > th {
   width: auto;
+}
+
+td p {
+  margin: 0 0 0.5em 0;
 }
 
 td > a:only-child:not(.inline) {
@@ -926,6 +934,32 @@ a[rel~=bookmark] {
   color: red;
 }
 
+.warning {
+  background: var(--warning-background-color);
+  color: var(--warning-color);
+  font-weight: bolder;
+}
+
+.note {
+  margin-inline-start: 2em;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  font-size: 90%;
+  background: var(--note-background-color);
+  color: var(--note-color);
+}
+
+.note::before {
+  content: "注意: ";
+}
+
+li p.info {
+  margin: 0;
+  font-size: smaller;
+  background: var(--gray-background-color);
+  color: var(--gray-color);
+}
+
 .toc {
   margin: .3rem 0;
   padding: 0;
@@ -1384,11 +1418,13 @@ p sw-data-era a:not(:active):not(:focus):not(:hover) {
   text-decoration: line-through !important;
 }
 
-sw-tags a {
+sw-tags a,
+sw-data-tag-list a {
   text-decoration: none;
 }
 
-sw-tags a::before {
+sw-tags a::before,
+sw-data-tag-list a::before {
   content: "#";
 }
 

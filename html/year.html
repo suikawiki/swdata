@@ -1415,6 +1415,146 @@
     -->
   </template>
   
+  <template data-name=page-package-item-index>
+    <t-title><code data-field=packageList.path></code></t-title>
+    <t-category><a href=/p/>パッケージ</a>群</t-category>
+
+    <list-container loader=swPackageListLoader type=ul data-loader-path-field=packageList.pathKey data-filled=loader-path>
+      <ul>
+        <template>
+          <p>
+            <a data-href-template="/p/{url:0}/{url:1}/{url:2}/#rev={url:4}"><cite data-field=8 data-empty=■></cite></a>
+            <sw-if-true data-field=5>[不完全]</sw-if-true>
+          <p class=info>
+            <bdi data-field=10 data-empty></bdi>
+            <bdi data-field=9 data-empty></bdi>
+            <time data-field=3></time>
+
+            <sw-if-true data-field=6><span class=warning>非安全</span></sw-if-true>
+        </template>
+      </ul>
+      <list-is-empty>該当するパッケージは見つかりませんでした。</list-is-empty>
+    </list-container>
+      
+  </template>
+  
+  <template data-name=page-package-item-item-index>
+    <t-title data-field=package.summary.package.title data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></t-title>
+    <t-category><a href=/p/>パッケージ</a></t-category>
+
+    <sw-data-tag-list data-field=package.summary.package.tags></sw-data-tag-list>
+
+    <table class=props>
+      <tbody>
+        <tr>
+          <th>題名
+          <td><can-copy><cite data-field=package.summary.package.title data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></cite></can-copy>
+        <tr>
+          <th>提供者
+          <td data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode">
+            <bdi data-field=package.summary.package.org data-empty></bdi>
+            <bdi data-field=package.summary.package.author data-empty></bdi>
+        <tr>
+          <th>説明
+          <td>
+            <p data-field=package.summary.package.desc data-empty data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></p>
+            
+            <sw-if-defined data-field=package.summary.package.page_url>
+              [<a data-href-field=package.summary.package.page_url>配布サイト説明ページ</a>]
+            </sw-if-defined>
+            <sw-if-defined data-field=package.summary.package.ckan_api_url>
+              [<a data-href-field=package.summary.package.ckan_api_url>配布サイト CKAN API (パッケージ JSON)</a>]
+            </sw-if-defined>
+            <sw-if-true data-field=package.summary.insecure><span class=warning>安全な通信ではないため、改竄のおそれがあります。</span></sw-if-true>
+
+            <p class=note>当ページは、配布サイトの提供データに基づき、
+            独自の情報を補って表示しています。
+        <tr>
+          <th>版
+          <td><can-copy><code data-field=package.current.1></code></can-copy>
+        <tr>
+          <th>日時
+          <td><time data-field=package.summary.package.time></time>
+        <tr>
+          <th>サイズ
+          <td>
+            <unit-number type=bytes data-field=package.summary.length></unit-number>
+            (合計バイト数)
+
+            <sw-if-true data-field=package.summary.insecure><p class=warning>安全な通信で取得していないため、信頼できない値です。</p></sw-if-true>
+
+            <sw-if-true data-field=package.summary.broken><p class=warning>すべてのファイルを入手できていません。</p></sw-if-true>
+    </table>
+
+    <section id=files>
+      <h1>ファイル</h1>
+
+      <list-container loader=swPackageFileListLoader data-loader-path-field=package.pathKey data-filled=loader-path>
+        <template>
+          <section>
+            <h1><cite data-field=title data-empty=■ data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></cite></h1>
+
+            <table class=props>
+              <tbody>
+                <tr>
+                  <th>識別子
+                  <td>
+                    <can-copy><code data-field=fileKey></code></can-copy>
+                <tr>
+                  <th>ファイル名
+                  <td>
+                    <can-copy><code data-field=file_name data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></code></can-copy>
+                <tr>
+                  <th>題名
+                  <td><can-copy><cite data-field=title data-empty=■ data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></cite></can-copy>
+                <tr>
+                  <th>説明
+                  <td data-field=desc data-empty data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode">
+                <tr>
+                  <th>MIME型
+                  <td><can-copy><code data-field=mime></code></can-copy>
+                <tr>
+                  <th>日時
+                  <td><time data-field=time></time>
+                <tr>
+                  <th>サイズ
+                  <td><unit-number type=bytes data-field=length></unit-number>
+                <tr>
+                  <th>SHA-256 ハッシュ値
+                  <td>
+                    <can-copy><code data-field=sha256></code></can-copy>
+                    <sw-if-true data-field=insecure><p class=warning>安全な通信で取得していないため、信頼できない値です。</p></sw-if-true>
+                <tr>
+                  <th>配布URL
+                    <td>
+                      <can-copy><a data-href-field=url download><code data-field=url class=url></a></code></can-copy>
+
+                      [<a data-href-template=https://warp.ndl.go.jp/search/archivesearch/WE05-Search.do?searchCondition.contentCollectUrl={url:url}&searchCondition.collectType=02&searchCondition.collectType=04&searchCondition.collectType=09&searchCondition.collectType=05&searchCondition.collectType=201&searchCondition.collectType=10&searchCondition.collectType=06&searchCondition.collectType=07&searchCondition.collectType=12&searchCondition.collectType=08&searchCondition.collectType=01&searchCondition.collectType=03&searchCondition.contentFileType=html&searchCondition.contentFileType=pdf&searchCondition.contentFileType=doc&searchCondition.contentFileType=xls&searchCondition.contentFileType=ppt&searchCondition.contentFileType=others>WARP</a>,
+                      <a data-href-template=https://web.archive.org/web/1900/{url}>Internet Archive</a>]
+
+                      <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+            </table>
+          </section>
+        </template>
+        <list-main></list-main>
+      </list-container>
+    </section>
+    
+    <section id=revisions>
+      <h1>履歴</h1>
+      
+      <list-container loader=swPackageRevisionListLoader type=ol data-loader-path-field=package.pathKey data-filled=loader-path>
+        <ol>
+          <template>
+            <time data-field=0></time>
+            <can-copy><code data-field=1></code></can-copy>
+          </template>
+        </ol>
+      </list-container>
+    </section>
+    
+  </template>
+  
   <template data-name=page-about>
     <t-title>このウィキについて</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
@@ -2636,7 +2776,7 @@
   
 <!--
 
-Copyright 2014-2023 Wakaba <wakaba@suikawiki.org>.
+Copyright 2014-2024 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

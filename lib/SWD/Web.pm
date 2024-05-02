@@ -258,6 +258,7 @@ sub main ($$$) {
 
     if ($path->[0] eq 'y' or
         $path->[0] eq 'e' or
+        $path->[0] eq 'p' or
         $path->[0] eq 'tag' or
         $path->[0] eq 'spots' or
         $path->[0] eq 'world' or
@@ -273,6 +274,7 @@ sub main ($$$) {
         $path->[0] eq 'license') {
       # /e/...
       # /y/...
+      # /p/...
       # /tag/...
       # /spots/...
       # /world
@@ -436,6 +438,12 @@ sub main ($$$) {
            $path->[3] eq 'programs.json') {
     # /data/antenna/radio/programs.json
     return static $app, 'application/json; charset=utf-8', 'local/aggregated/'.$path->[2] . '/' . $path->[3];
+  }
+
+  if (@$path >= 3 and $path->[0] eq 'data' and $path->[1] eq 'packs' and
+      not grep { not /\A[0-9A-Za-z_][0-9A-Za-z_.-]*\z/ } @$path[2..$#$path]) {
+    # /data/packs/...
+    return static $app, 'application/octet-stream', 'local/packs/' . join '/', @$path[2..$#$path];
   }
 
   if (@$path == 2 and
