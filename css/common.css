@@ -2667,6 +2667,10 @@ page-main section section > h1 + .era-code-list {
   margin-top: 0;
 }
 
+page-main section section section {
+  padding: 0 1em;
+}
+
 page-side:not([hidden]) {
   display: block;
 }

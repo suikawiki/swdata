@@ -7975,6 +7975,15 @@ defineListLoader ('swPackageListLoader', async function (opts) {
 
   let pl = SWD.packageList.apply (null, p);
   let data = await pl.getAll ();
+  data = data.filter (_ => !! _);
+
+  data.forEach (d => {
+    if (d[11] === 'free') {
+      d.free = true;
+    } else {
+      d.nonFree = true;
+    }
+  });
   
   return {data};
 }); // swPackageListLoader
@@ -8021,6 +8030,12 @@ SWD.Package.prototype._load = async function () {
   ]);
 }; // _load
 
+Object.defineProperty (SWD.Package.prototype, 'nonFree', {
+  get: function () {
+    return this.summary.legal.is_free !== 'free';
+  },
+});
+
 defineListLoader ('swPackageFileListLoader', async function (opts) {
   let p = this.getAttribute ('loader-path').split (/\u001C/);
 
@@ -8040,9 +8055,92 @@ defineListLoader ('swPackageRevisionListLoader', async function (opts) {
 
   let pl = await SWD.package.apply (null, p);
   let data = await pl.revisions;
-  
+
+  data.forEach (d => {
+    if (d[2].is_free === 'free') {
+      d.free = true;
+    } else {
+      d.nonFree = true;
+    }
+  });
+
   return {data};
 }); // swPackageRevisionListLoader
+
+defineListLoader ('swPackageLegalListLoader', async function (opts) {
+  let p = this.getAttribute ('loader-path').split (/\u001C/);
+
+  let pl = await SWD.package.apply (null, p);
+  let data = await pl.summary.legal.legal;
+
+  data.forEach (d => SWD.Legal.initForView (d));
+
+  return {data};
+}); // swPackageLegalListLoader
+
+/* ------ Legal ------ */
+
+SWD.Legal = {};
+
+SWD.Legal.initForView = function (d) {
+  d.sourceTypePackage = d.source_type === 'package';
+  d.sourceTypeSite = (d.source_type === 'site' || d.source_type === 'site_legal');
+    d.linkURL = d.full_url || d.desc_url;
+    d.hasLink = d.linkURL || d.label;
+
+    if (d.notice && d.notice.template) {
+      let t = d.notice.template.value;
+      t = t.replace (/\{[a-z]+\}/g, _ => {
+        if (_ === '{holder}') {
+          return ((d.notice.holder || {}).value || _);
+        } else if (_ === '{title}') {
+          return ((d.notice.title || {}).value || _);
+        } else if (_ === '{url}') {
+          return d.notice.url || _;
+        } else {
+          return _;
+        }
+      });
+      d.text = t;
+    } else if (d.notice && d.notice.title && d.notice.holder && d.notice.url) {
+      d.text = d.notice.title.value + ", " + d.notice.holder.value + " <" + d.notice.url + ">";
+    } else {
+      d.noText = true;
+  }
+}; // initForView
+
+defineElement ({
+  name: 'sw-legal-sections',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value || [];
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue || [];
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      this.textContent = '';
+      
+      let ts = await $getTemplateSet ('legal-section-template');
+      let data = this.value;
+      data.forEach (d => {
+        SWD.Legal.initForView (d);
+        let e = ts.createFromTemplate ('div', d);
+        while (e.firstChild) {
+          this.appendChild (e.firstChild);
+        }
+      });
+    }, // swUpdate
+  },
+}); // <sw-legal-sections>
 
 /*
 
