@@ -1431,6 +1431,7 @@
             <time data-field=3></time>
 
             <sw-if-true data-field=6><span class=warning>非安全</span></sw-if-true>
+            <sw-if-true data-field=nonFree><span class=warning>不自由</span></sw-if-true>
         </template>
       </ul>
       <list-is-empty>該当するパッケージは見つかりませんでした。</list-is-empty>
@@ -1457,6 +1458,8 @@
         <tr>
           <th>説明
           <td>
+            <sw-if-true data-field=package.nonFree><p class=warning>自由ソフトウェアではありません。利用には制限があります。</p></sw-if-true>
+            
             <p data-field=package.summary.package.desc data-empty data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></p>
             
             <sw-if-defined data-field=package.summary.package.page_url>
@@ -1539,6 +1542,27 @@
         <list-main></list-main>
       </list-container>
     </section>
+
+    <section id=legal>
+      <h1>法的事項</h1>
+
+      <p><enum-value data-field=package.summary.legal.is_free
+          label-free="自由ソフトウェアです。"
+          label-sometimes="自由ソフトウェアの場合とそうでない場合があります。"
+          label-non_free="自由ソフトウェアではありません。"
+          label-unknown="自由ソフトウェアかどうか不明です。"
+      ></enum-value></p>
+
+      <p class=note>情報取得時点で機械的に判定した結果です。
+      正確には各自でご確認ください。</p>
+      
+      <list-container loader=swPackageLegalListLoader data-loader-path-field=package.pathKey data-filled=loader-path template=legal-section-template>
+        <list-main></list-main>
+      </list-container>
+
+      <p class=note>一部の情報を省略している場合があります。
+      正確には各自でご確認ください。</p>
+    </section>
     
     <section id=revisions>
       <h1>履歴</h1>
@@ -1548,12 +1572,72 @@
           <template>
             <time data-field=0></time>
             <can-copy><code data-field=1></code></can-copy>
+            <sw-if-true data-field=2.insecure><span class=warning>非保安</span></sw-if-true>
+            <sw-if-true data-field=2.broken><span class=warning>不完全</span></sw-if-true>
+            <sw-if-true data-field=nonFree><span class=warning>不自由</span></sw-if-true>
           </template>
         </ol>
       </list-container>
+
+      <p class=note>入手を確認できた時点での情報を示しています。
+      サーバー側の変更履歴とは異なります。
+      サーバー側での最新の変更は反映されていないことがあります。
     </section>
-    
+
   </template>
+  <template-set name=legal-section-template>
+    <template>
+      <section>
+        <h1><enum-value data-field=type
+            label-license="ライセンス"
+            label-db_license="ライセンス (データベース)"
+            label-site_terms="利用規約 (ウェブサイト)"
+            label-disclaimer="免責事項"
+            label-fallback_license="他の規定が適用されないときのライセンス"
+        ></enum-value></h1>
+
+        <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+
+        <sw-if-true data-field=sourceTypePackage>
+          <p class=note><a data-href-field=source_url>パッケージ</a>に記載された情報によります。</p>
+        </sw-if-true>
+
+            <sw-if-true data-field=sourceTypeSite>
+              <p class=note><a data-href-field=source_url>ウェブサイト利用規約</a>に記載された情報
+              (<time data-field=timestamps.0></time>時点)
+              によります。</p>
+            </sw-if-true>
+
+            <sw-if-true data-field=hasLink>
+              <p><a data-href-field=linkURL data-field=label data-empty=■ data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></a></p>
+            </sw-if-true>
+
+            <sw-if-true data-field=text>
+              <p><can-copy><data data-field=text data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
+            </sw-if-true>
+            <sw-if-true data-field=noText>
+              <sw-if-true data-field=holder>
+                <p>権利者: <can-copy><data data-field=holder.value data-lang-field=holder.lang data-dir-field=holder.dir data-data-writingmode-field=holder.writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
+              </sw-if-true>
+            </sw-if-true>
+
+        <sw-if-true data-field=conditions.length>
+          <p>条件により次のライセンスが適用されます。
+          詳しい条件は各自でご確認ください。</p>
+
+          <sw-legal-sections data-field=conditons></sw-legal-sections>
+        </sw-if-true>
+
+        <sw-if-true data-field=alt.length>
+          <p>条件により次のライセンスを適用できます。
+          詳しい条件は各自でご確認ください。</p>
+
+          <sw-legal-sections data-field=alt></sw-legal-sections>
+        </sw-if-true>
+        
+      </section>
+    </template>
+  </template-set>
   
   <template data-name=page-about>
     <t-title>このウィキについて</t-title>
@@ -1579,7 +1663,7 @@
     <section id=site lang=en>
       <h1>The site</h1>
 
-      <p>Copyright 2015-2023 Wakaba &lt;wakaba@suikawiki.org>.
+      <p>Copyright 2015-2024 Wakaba &lt;wakaba@suikawiki.org>.
 
       <p><a href=https://github.com/suikawiki/swdata>This program</a> is
       free software: you can redistribute it and/or modify it under the
@@ -1614,6 +1698,7 @@
         <li><a href=https://github.com/suikawiki/fonts/#:~:text=License><code>suikawiki/fonts</code></a>
         <li><a href=https://github.com/suikawiki/swdata/blob/master/fonts/LICENSE><code>fonts/LICENSE</code></a>
         <li><a href=https://fonts.suikawiki.org><code>fonts.suikawiki.org</code></a>
+        <li>Some pages have their own legal statements within the pages themselves.
       </ul>
       
     </section>
