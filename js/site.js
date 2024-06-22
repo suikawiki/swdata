@@ -612,6 +612,12 @@ SWD.tagsByIds = async function (ids) {
   return ids.map (_ => tags[_]);
 }; // SWD.tagsByIds
 
+SWD.tagByName = async function (name) {
+  return {
+    name,
+  };
+}; // SWD.tagByName
+
 var mod = (n, m) => ((n%m) + m) % m;
 
 SWD.openPage = function (url) {
@@ -651,14 +657,16 @@ SWD.openPage = function (url) {
           return args;
         }
 
-        // /tag/{}/
-        var m = path.match (/^\/tag\/([0-9]+)\/$/);
-        if (m) {
-          args.tagId = parseFloat (m[1]);
-          args.tag = await SWD.tag (args.tagId);
-          if (args.tag) args.name = 'page-tag-item-index';
-          return args;
-        }
+    // /tag/{}/
+    {
+      let m = path.match (/^\/tag\/([0-9]+)\/$/);
+      if (m) {
+        args.tagId = parseFloat (m[1]);
+        args.tag = await SWD.tag (args.tagId);
+        if (args.tag) args.name = 'page-tag-item-index';
+        return args;
+      }
+    }
 
         // /tag/{}/graph
         var m = path.match (/^\/tag\/([0-9]+)\/graph$/);
@@ -673,6 +681,16 @@ SWD.openPage = function (url) {
           return args;
         }
 
+    // /tag/name:{}/packages
+    {
+      let m = path.match (/^\/tag\/name:([^/]+)\/(packages)$/);
+      if (m) {
+        args.tag = await SWD.tagByName (decodeURIComponent (m[1]));
+        if (args.tag) args.name = 'page-tag-item-' + m[2];
+        return args;
+      }
+    }
+    
     if (/^\/spots\//.test (path)) {
       args.site = 'world';
     }
@@ -7839,7 +7857,7 @@ defineElement ({
         this.appendChild (document.createTextNode (' '));
         var a = this.appendChild (document.createElement ('a'));
         a.textContent = _;
-        a.href = '/p/tag/' + encodeURIComponent (_) + '/';
+        a.href = '/tag/name:' + encodeURIComponent (_) + '/packages';
       });
     }, // swUpdate
   },
@@ -7962,18 +7980,27 @@ SWD.ppEscape = function (_) { return _.replace (/([^0-9A-Za-z])/g, _ => '_' + _.
 SWD.packageList = function (a, b) {
   SWD._cached.packageList = SWD._cached.packageList || {};
   let key = [a, b].join ("\u001C");
-  return SWD._cached.packageList[key] = SWD._cached.packageList[key] || new SWD.PackageList (a, b);
+  return SWD._cached.packageList[key] = SWD._cached.packageList[key] || (() => {
+    let list = new SWD.PackageList;
+    list.path = [a, b];
+    list.pathKey = list.path.join ("\u001C");
+    return list;
+  }) ();
 }; // SWD.packageList
 
-SWD.PackageList = function (a, b) {
-  this.path = [a, b];
-  this.pathKey = this.path.join ("\u001C");
-}; // SWD.PackageList
+SWD.packageListByTagName = function (tagName) {
+  let list = new SWD.PackageList;
+  list.tagName = tagName;
+  return list;
+}; // SWD.packageListByTagName
+
+SWD.PackageList = function () {};
 
 defineListLoader ('swPackageListLoader', async function (opts) {
-  let p = this.getAttribute ('loader-path').split (/\u001C/);
+  let p = (this.getAttribute ('loader-path') || '').split (/\u001C/);
+  let t = this.getAttribute ('loader-tag');
 
-  let pl = SWD.packageList.apply (null, p);
+  let pl = t ? SWD.packageListByTagName (t) : SWD.packageList.apply (null, p);
   let data = await pl.getAll ();
   data = data.filter (_ => !! _);
 
@@ -7989,7 +8016,12 @@ defineListLoader ('swPackageListLoader', async function (opts) {
 }); // swPackageListLoader
 
 SWD.PackageList.prototype.getAll = async function () {
-  let list = await SWD.data ('packs/indexes/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/all.jsonl', {type: 'jsonlLined', allow404: true});
+  let list = await SWD.data (
+    'packs/indexes/' +
+      (this.path
+           ? SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/all.jsonl'
+       : 'tags/' + SWD.ppEscape (this.tagName) + '.jsonl')
+  , {type: 'jsonlLined', allow404: true});
   list = list.sort ((a, b) => {
     return b[3] - a[3];
   });
@@ -8029,6 +8061,12 @@ SWD.Package.prototype._load = async function () {
     SWD.data ('packs/snapshots/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/summaries/' + SWD.ppEscape (this.current[1]) + '.json', {type: 'json'}).then (json => this.summary = json),
   ]);
 }; // _load
+
+Object.defineProperty (SWD.Package.prototype, 'hasMirrorzip', {
+  get: function () {
+    return (this.summary.mirrorzip || {}).set === 'free';
+  },
+});
 
 Object.defineProperty (SWD.Package.prototype, 'nonFree', {
   get: function () {
@@ -8106,6 +8144,10 @@ SWD.Legal.initForView = function (d) {
       d.text = d.notice.title.value + ", " + d.notice.holder.value + " <" + d.notice.url + ">";
     } else {
       d.noText = true;
+  }
+
+  if (!d.hasLink && !d.text && !((d.alt || []).length) && !((d.conditions || []).length)) {
+    d.notKnown = true;
   }
 }; // initForView
 
