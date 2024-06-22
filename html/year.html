@@ -849,6 +849,35 @@
       </list-container>
     </section>
   </template>
+  
+  <template data-name=page-tag-item-packages>
+    <t-title>#<bdi data-field=tag.name></bdi></t-title>
+    <t-category>タグ</t-category>
+    <t-keyword data-field=tag.name></t-keyword>
+
+    <section>
+      <h1>パッケージ</h1>
+
+      <list-container loader=swPackageListLoader type=ul data-loader-tag-field=tag.name data-filled=loader-tag>
+      <ul>
+        <template>
+          <p>
+            <a data-href-template="/p/{url:0}/{url:1}/{url:2}/#rev={url:4}"><cite data-field=8 data-empty=■></cite></a>
+            <sw-if-true data-field=5>[不完全]</sw-if-true>
+          <p class=info>
+            <bdi data-field=10 data-empty></bdi>
+            <bdi data-field=9 data-empty></bdi>
+            <time data-field=3></time>
+
+            <sw-if-true data-field=6><span class=warning>非安全</span></sw-if-true>
+            <sw-if-true data-field=nonFree><span class=warning>不自由</span></sw-if-true>
+        </template>
+      </ul>
+      <list-is-empty>該当するパッケージは見つかりませんでした。</list-is-empty>
+    </list-container>
+
+    </section>
+  </template>
 
   <template data-name=page-geoobject-item-item>
     <t-title><span data-field=geoObject.name></span> - <span data-field=geoObject.goDef.name></span></t-title>
@@ -1482,8 +1511,11 @@
           <th>サイズ
           <td>
             <unit-number type=bytes data-field=package.summary.length></unit-number>
-            (合計バイト数)
 
+            <sw-if-true data-field=package.hasMirrorzip>
+              (ZIP圧縮: <unit-number type=bytes data-field=package.summary.mirrorzip.length></unit-number>)
+            </sw-if-true>
+            
             <sw-if-true data-field=package.summary.insecure><p class=warning>安全な通信で取得していないため、信頼できない値です。</p></sw-if-true>
 
             <sw-if-true data-field=package.summary.broken><p class=warning>すべてのファイルを入手できていません。</p></sw-if-true>
@@ -1633,6 +1665,10 @@
           詳しい条件は各自でご確認ください。</p>
 
           <sw-legal-sections data-field=alt></sw-legal-sections>
+        </sw-if-true>
+
+        <sw-if-true data-field=notKnown>
+          <p>利用条件が不明か、特殊な条件が設定されています。</p>
         </sw-if-true>
         
       </section>
