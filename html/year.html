@@ -1474,39 +1474,36 @@
 
     <sw-data-tag-list data-field=package.summary.package.tags></sw-data-tag-list>
 
+    <sw-if-true data-field=package.nonFree><p class=warning>これは自由ソフトウェアではありません。利用には制限があります。</p></sw-if-true>
+
+    <sw-if-true data-field=package.summary.insecure><p class=warning>提供方法が安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+    
+    <p data-field=package.summary.package.desc data-empty data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></p>
+
+    <p class=note>当ページは、配布サイトの提供データに基づき、
+    独自の情報を補って表示しています。</p>
+    
     <table class=props>
       <tbody>
-        <tr>
-          <th>題名
-          <td><can-copy><cite data-field=package.summary.package.title data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></cite></can-copy>
         <tr>
           <th>提供者
           <td data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode">
             <bdi data-field=package.summary.package.org data-empty></bdi>
             <bdi data-field=package.summary.package.author data-empty></bdi>
-        <tr>
-          <th>説明
-          <td>
-            <sw-if-true data-field=package.nonFree><p class=warning>自由ソフトウェアではありません。利用には制限があります。</p></sw-if-true>
-            
-            <p data-field=package.summary.package.desc data-empty data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-data-writingmode-field=package.summary.package.writing_mode data-filled="lang dir data-writingmode"></p>
-            
             <sw-if-defined data-field=package.summary.package.page_url>
               [<a data-href-field=package.summary.package.page_url>配布サイト説明ページ</a>]
             </sw-if-defined>
             <sw-if-defined data-field=package.summary.package.ckan_api_url>
               [<a data-href-field=package.summary.package.ckan_api_url>配布サイト CKAN API (パッケージ JSON)</a>]
             </sw-if-defined>
-            <sw-if-true data-field=package.summary.insecure><span class=warning>安全な通信ではないため、改竄のおそれがあります。</span></sw-if-true>
-
-            <p class=note>当ページは、配布サイトの提供データに基づき、
-            独自の情報を補って表示しています。
         <tr>
           <th>版
-          <td><can-copy><code data-field=package.current.1></code></can-copy>
+          <td><can-copy><a href=#revisions><code data-field=package.current.1></code></a></can-copy>
         <tr>
           <th>日時
-          <td><time data-field=package.summary.package.time></time>
+          <td>
+            <time data-field=package.summary.package.time data-format=datetime></time>
+            <p class=info><time data-field=package.summary.package.time data-format=deltatime></time>
         <tr>
           <th>サイズ
           <td>
@@ -1519,15 +1516,31 @@
             <sw-if-true data-field=package.summary.insecure><p class=warning>安全な通信で取得していないため、信頼できない値です。</p></sw-if-true>
 
             <sw-if-true data-field=package.summary.broken><p class=warning>すべてのファイルを入手できていません。</p></sw-if-true>
+        <tr>
+          <th>引用
+          <td>
+            <can-copy><data>『<bdi data-field=package.summary.package.title data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-filled="lang dir"></bdi>』、<bdi data-field=package.summary.package.author data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-filled="lang dir"></bdi>、<time data-field=package.summary.package.time data-format=date></time><sw-if-defined data-field=package.summary.package.page_url>、&lt;<span data-field=package.summary.package.page_url></span>&gt;</sw-if-defined>。</data></can-copy>
     </table>
 
-    <section id=files>
-      <h1>ファイル</h1>
+    <section id=items>
+      <h1>パッケージの内容</h1>
 
       <list-container loader=swPackageFileListLoader data-loader-path-field=package.pathKey data-filled=loader-path>
         <template>
           <section>
-            <h1><cite data-field=title data-empty=■ data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></cite></h1>
+            <h1>
+              <enum-value data-field=type
+                  label-file="ファイル"
+                  label-meta="メタ情報"
+                  label-dataset="データ集合"
+                  label-part="データ集合の構成要素"
+              ></enum-value>
+              <cite data-field=title data-empty=■ data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></cite>
+            </h1>
+
+            <p data-field=desc data-empty data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></p>
+
+            <sw-if-defined not data-field=sha256><p class=warning>このファイルは入手できていません。</p></sw-if-defined>
 
             <table class=props>
               <tbody>
@@ -1540,17 +1553,13 @@
                   <td>
                     <can-copy><code data-field=file_name data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></code></can-copy>
                 <tr>
-                  <th>題名
-                  <td><can-copy><cite data-field=title data-empty=■ data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode"></cite></can-copy>
-                <tr>
-                  <th>説明
-                  <td data-field=desc data-empty data-lang-field=package.lang data-dir-field=package.dir data-data-writingmode-field=package.writing_mode data-filled="lang dir data-writingmode">
-                <tr>
                   <th>MIME型
                   <td><can-copy><code data-field=mime></code></can-copy>
                 <tr>
                   <th>日時
-                  <td><time data-field=time></time>
+                  <td>
+                    <time data-field=time data-format=datetime></time>
+                    <p class=info><time data-field=time data-format=deltatime></time>
                 <tr>
                   <th>サイズ
                   <td><unit-number type=bytes data-field=length></unit-number>
@@ -1581,8 +1590,9 @@
       <p><enum-value data-field=package.summary.legal.is_free
           label-free="自由ソフトウェアです。"
           label-sometimes="自由ソフトウェアの場合とそうでない場合があります。"
-          label-non_free="自由ソフトウェアではありません。"
+          label-non-free="自由ソフトウェアではありません。"
           label-unknown="自由ソフトウェアかどうか不明です。"
+          data-class-template="is-free is-free-{package.summary.legal.is_free}"
       ></enum-value></p>
 
       <p class=note>情報取得時点で機械的に判定した結果です。
@@ -1600,13 +1610,17 @@
       <h1>履歴</h1>
       
       <list-container loader=swPackageRevisionListLoader type=ol data-loader-path-field=package.pathKey data-filled=loader-path>
-        <ol>
-          <template>
-            <time data-field=0></time>
-            <can-copy><code data-field=1></code></can-copy>
-            <sw-if-true data-field=2.insecure><span class=warning>非保安</span></sw-if-true>
-            <sw-if-true data-field=2.broken><span class=warning>不完全</span></sw-if-true>
-            <sw-if-true data-field=nonFree><span class=warning>不自由</span></sw-if-true>
+        <ol class=revision-list>
+          <template data-class-field=className>
+            <a data-href-template=./?rev={1}>
+              <div><time class=revision-main data-field=0 data-format=datetime></time>
+              <p class=info><time data-field=0 data-format=deltatime></time>
+              <p class=info><code data-field=1 class=revision-id></code>
+              <sw-if-true data-field=2.insecure><span class=warning>非保安</span></sw-if-true>
+              <sw-if-true data-field=2.broken><span class=warning>不完全</span></sw-if-true>
+              <sw-if-true data-field=nonFree><span class=warning>不自由</span></sw-if-true>
+              </div>
+            </a>
           </template>
         </ol>
       </list-container>
@@ -1635,9 +1649,9 @@
         </sw-if-true>
 
             <sw-if-true data-field=sourceTypeSite>
-              <p class=note><a data-href-field=source_url>ウェブサイト利用規約</a>に記載された情報
+              <p class=note><a data-href-field=source_url>ウェブサイト利用規約</a>に記載された情報<sw-if-true data-field=timestamps.0>
               (<time data-field=timestamps.0></time>時点)
-              によります。</p>
+              </>によります。</p>
             </sw-if-true>
 
             <sw-if-true data-field=hasLink>
