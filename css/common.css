@@ -228,6 +228,31 @@ code {
   white-space: pre-wrap;
 }
 
+pre {
+  margin: 0 0 .5em 0;
+}
+
+.lang-bash {
+  padding-left: 1.5em;
+}
+
+.lang-bash > code {
+  white-space: normal;
+  line-height: 1.0;
+}
+
+.lang-bash code-line:not([hidden]) {
+  display: block;
+}
+.lang-bash code-line {
+  text-indent: -1em;
+  white-space: pre-wrap;
+}
+
+.lang-bash code-line::before {
+  content: "$ ";
+}
+
 data {
   word-break: break-all;
   white-space: pre-wrap;
@@ -384,6 +409,14 @@ can-copy button {
   line-height: 1.4;
   background: var(--gray-background-color);
   color: var(--gray-color);
+}
+
+can-copy pre + button:not([hidden]) {
+  display: block;
+}
+can-copy pre + button {
+  margin-inline-start: auto;
+  text-align: end;  
 }
 
 td.copy button:not(:hover) {
