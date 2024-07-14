@@ -8091,6 +8091,18 @@ Object.defineProperty (SWD.Package.prototype, 'nonFree', {
   },
 });
 
+Object.defineProperty (SWD.Package.prototype, 'ddsdAdditionalArgs', {
+  get: function () {
+    return this.summary.insecure ? ' --insecure' : '';
+  },
+});
+
+Object.defineProperty (SWD.Package.prototype, 'packrefURL', {
+  get: function () {
+    return "https://raw.githubusercontent.com/geocol/ddsd-snapshots/master/data/snapshots/" + SWD.ppEscape (this.path[0]) + "/" + SWD.ppEscape (this.path[1]) + "/refs/" + SWD.ppEscape (this.selectedRevision) + ".json";
+  },
+});
+
 defineListLoader ('swPackageFileListLoader', async function (opts) {
   let p = this.getAttribute ('loader-path').split (/\u001C/);
 
@@ -8098,7 +8110,7 @@ defineListLoader ('swPackageFileListLoader', async function (opts) {
   let data = Object.keys (pl.summary.files).sort ((a, b) => a < b ? -1 : +1).map (_ => {
     let value = pl.summary.files[_];
     value.fileKey = _;
-    value.package = pl.summary.package;
+    value.package = pl;
     return value;
   });
   

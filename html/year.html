@@ -1520,6 +1520,23 @@
           <th>引用
           <td>
             <can-copy><data>『<bdi data-field=package.summary.package.title data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-filled="lang dir"></bdi>』、<bdi data-field=package.summary.package.author data-empty=■ data-lang-field=package.summary.package.lang data-dir-field=package.summary.package.dir data-filled="lang dir"></bdi>、<time data-field=package.summary.package.time data-format=date></time><sw-if-defined data-field=package.summary.package.page_url>、&lt;<span data-field=package.summary.package.page_url></span>&gt;</sw-if-defined>。</data></can-copy>
+        <tr>
+          <th>この版の取得 (<a href=https://github.com/geocol/ddsd>ddsd</a>)
+          <td>
+            <can-copy><pre class=lang-bash><code><code-line>curl -sSLf https://raw.githubusercontent.com/geocol/ddsd/staging/bin/booter.staging | bash</code-line>
+<code-line>./ddsd add <span data-field=package.packrefURL></span> --name <span data-field=package.path.2></span><span data-field=package.ddsdAdditionalArgs></span></code-line>
+<code-line>./ddsd ls <span data-field=package.path.2></span></code-line></code></pre></can-copy>
+        <tr>
+          <th>
+            <sw-if-defined data-field=package.summary.package.page_url>
+              最新版の取得 (<a href=https://github.com/geocol/ddsd>ddsd</a>)
+            </sw-if-defined>
+          <td>
+            <sw-if-defined data-field=package.summary.package.page_url>
+              <can-copy><pre class=lang-bash><code><code-line>curl -sSLf https://raw.githubusercontent.com/geocol/ddsd/staging/bin/booter.staging | bash</code-line>
+<code-line>./ddsd add <span data-field=package.summary.package.page_url></span> --name <span data-field=package.path.2></span><span data-field=package.ddsdAdditionalArgs></span></code-line>
+<code-line>./ddsd ls <span data-field=package.path.2></span></code-line></code></pre></can-copy>
+            </sw-if-defined>
     </table>
 
     <section id=items>
@@ -1570,13 +1587,20 @@
                     <sw-if-true data-field=insecure><p class=warning>安全な通信で取得していないため、信頼できない値です。</p></sw-if-true>
                 <tr>
                   <th>配布URL
-                    <td>
-                      <can-copy><a data-href-field=url download><code data-field=url class=url></a></code></can-copy>
+                  <td>
+                    <can-copy><a data-href-field=url download><code data-field=url class=url></a></code></can-copy>
 
-                      [<a data-href-template=https://warp.ndl.go.jp/search/archivesearch/WE05-Search.do?searchCondition.contentCollectUrl={url:url}&searchCondition.collectType=02&searchCondition.collectType=04&searchCondition.collectType=09&searchCondition.collectType=05&searchCondition.collectType=201&searchCondition.collectType=10&searchCondition.collectType=06&searchCondition.collectType=07&searchCondition.collectType=12&searchCondition.collectType=08&searchCondition.collectType=01&searchCondition.collectType=03&searchCondition.contentFileType=html&searchCondition.contentFileType=pdf&searchCondition.contentFileType=doc&searchCondition.contentFileType=xls&searchCondition.contentFileType=ppt&searchCondition.contentFileType=others>WARP</a>,
-                      <a data-href-template=https://web.archive.org/web/1900/{url}>Internet Archive</a>]
+                    [<a data-href-template=https://warp.ndl.go.jp/search/archivesearch/WE05-Search.do?searchCondition.contentCollectUrl={url:url}&searchCondition.collectType=02&searchCondition.collectType=04&searchCondition.collectType=09&searchCondition.collectType=05&searchCondition.collectType=201&searchCondition.collectType=10&searchCondition.collectType=06&searchCondition.collectType=07&searchCondition.collectType=12&searchCondition.collectType=08&searchCondition.collectType=01&searchCondition.collectType=03&searchCondition.contentFileType=html&searchCondition.contentFileType=pdf&searchCondition.contentFileType=doc&searchCondition.contentFileType=xls&searchCondition.contentFileType=ppt&searchCondition.contentFileType=others>WARP</a>,
+                    <a data-href-template=https://web.archive.org/web/1900/{url}>Internet Archive</a>]
 
-                      <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+                    <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+                <tr>
+                  <th>このファイルの取得 (<a href=https://github.com/geocol/ddsd>ddsd</a>)
+                  <td>
+                    <can-copy><pre class=lang-bash><code><code-line>curl -sSLf https://raw.githubusercontent.com/geocol/ddsd/staging/bin/booter.staging | bash</code-line>
+<code-line>./ddsd add <span data-field=package.packrefURL></span> --name <span data-field=package.path.2></span><span data-field=package.ddsdAdditionalArgs></span></code-line>
+<code-line>./ddsd use <span data-field=package.path.2></span> <span data-field=fileKey></span><span data-field=package.ddsdAdditionalArgs></span></code-line>
+<code-line>ls local/data/<span data-field=package.path.2></span>/files/<span data-field=file_name></span></code-line></code></pre></can-copy>
             </table>
           </section>
         </template>
