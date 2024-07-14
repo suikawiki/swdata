@@ -6,6 +6,7 @@ var SWD = {
 
 SWD.isReload = location.search === "?reload";
 SWD.isLocal = !! location.hostname.match (/local/);
+SWD.isTestData = location.search.match (/testdata/);
 
 SWD.Env = {workerMethodCode: [], workerMethodSI: [],
            workerMethodPostprocessor: [],
@@ -203,6 +204,12 @@ SWD._dataRes = function (name, opts) {
   if (!SWD.isLocal && /^charrels/.test (name)) {
     url = 'https://manakai.github.io/data-chars/local/generated/' + name + '.gz';
     gzipped = true;
+  } else if (/^packs\//.test (name)) {
+    if (SWD.isTestData) {
+      url = 'https://raw.githubusercontent.com/wakaba/nemuidata/master/data/' + name.replace (/^packs\//, '');
+    } else {
+      url = 'https://geocol.github.io/ddsd-data/' + name.replace (/^packs\//, '');
+    }
   } else if (opts.dsKey) {
     if (SWD.isLocal) {
       url = '/data/charrels/' + opts.dsKey + '/' + name;
@@ -815,6 +822,7 @@ SWD.openPage = function (url) {
           decodeURIComponent (m[1]),
           decodeURIComponent (m[2]),
           decodeURIComponent (m[3]),
+          url.searchParams.get ('rev'), // or null
         );
         if (args.package) {
           args.name = 'page-package-item-item-index';
@@ -8030,8 +8038,8 @@ SWD.PackageList.prototype.getAll = async function () {
 
 /* ------ Packages ------ */
 
-SWD.package = async function (a, b, c) {
-  let pathKey = [a, b, c].join ('\u001C');
+SWD.package = async function (a, b, c, rev) {
+  let pathKey = [a, b, c, rev || null].join ('\u001C');
   let pack = SWD._cached['package\u001C' + pathKey];
   if (pack) {
     await pack._load ();
@@ -8041,11 +8049,20 @@ SWD.package = async function (a, b, c) {
   let vers = await SWD.data ('packs/indexes/' + SWD.ppEscape (a) + '/' + SWD.ppEscape (b) + '/packages/' + SWD.ppEscape (c) + '.json', {type: 'json', null404: true});
   if (!vers) return null;
 
+  if (rev) {
+    if (vers[1].filter (_ => _[1] === rev).length) {
+      //
+    } else {
+      return null;
+    }
+  }
+
   pack = new SWD.Package;
   pack.path = [a, b, c];
   pack.pathKey = pathKey;
 
   pack.current = vers[0]; // [0] timestamp [1] sha
+  pack.selectedRevision = rev || vers[0][1];
   pack.revisions = vers[1];
 
   SWD._cached['package\u001C' + pack.pathKey] = pack;
@@ -8058,7 +8075,7 @@ SWD.Package = function () { };
 
 SWD.Package.prototype._load = async function () {
   return Promise.all ([
-    SWD.data ('packs/snapshots/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/summaries/' + SWD.ppEscape (this.current[1]) + '.json', {type: 'json'}).then (json => this.summary = json),
+    SWD.data ('packs/snapshots/' + SWD.ppEscape (this.path[0]) + '/' + SWD.ppEscape (this.path[1]) + '/summaries/' + SWD.ppEscape (this.selectedRevision) + '.json', {type: 'json'}).then (json => this.summary = json),
   ]);
 }; // _load
 
@@ -8100,6 +8117,7 @@ defineListLoader ('swPackageRevisionListLoader', async function (opts) {
     } else {
       d.nonFree = true;
     }
+    if (d[1] === pl.selectedRevision) d.className = 'active';
   });
 
   return {data};

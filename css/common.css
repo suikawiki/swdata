@@ -45,6 +45,8 @@ html {
   --dialog-color: black;
   --dialog-border-color: gray;
   --dialog-shadow-color: #eee;
+  --link-hover-background-color: #ffa;
+  --link-hover-color: black;
   --flavor-background-color: transparent;
   --flavor-background-foreground-color: black;
   --flavor-border-color: #004000;
@@ -212,6 +214,8 @@ button {
   cursor: pointer;
 }
 
+/* ------ Phrases ------ */
+
 output:lang(ar) {
   direction: rtl;
 }
@@ -228,6 +232,13 @@ data {
   word-break: break-all;
   white-space: pre-wrap;
 }
+
+cite {
+  font-style: normal;
+}
+
+cite::before { content: "『" }
+cite::after { content: "』"  }
 
 sw-data-char.active {
   background: var(--selected-background-color);
@@ -915,8 +926,8 @@ a[rel~=bookmark] {
 }
 
 :-webkit-any(a:not([rel~=bookmark]), button):-webkit-any(:hover, :active, :focus) {
-  background-color: #ffa;
-  color: black;
+  background-color: var(--link-hover-background-color);
+  color: var(--link-hover-color);
   text-decoration: underline;
 }
 
@@ -940,6 +951,12 @@ a[rel~=bookmark] {
   font-weight: bolder;
 }
 
+.is-free:not(.is-free-free) {
+  background: var(--warning-background-color);
+  color: var(--warning-color);
+  font-weight: bolder;
+}
+
 .note {
   margin-inline-start: 2em;
   margin-block-start: 0.5em;
@@ -953,7 +970,8 @@ a[rel~=bookmark] {
   content: "注意: ";
 }
 
-li p.info {
+li p.info,
+td p.info {
   margin: 0;
   font-size: smaller;
   background: var(--gray-background-color);
@@ -1025,6 +1043,9 @@ section.summary cite {
 section.summary cite::before {
   content: "\2015\2015  ";
 }
+section.summary cite::after {
+  content: "";
+}
 
 section.summary cite a {
   color: inherit;
@@ -1069,6 +1090,35 @@ form.input > button {
 .search-form button {
   min-width: 5em;
   font-size: 120%;
+}
+
+/* ------ Lists ------ */
+
+.revision-list {
+}
+
+.revision-list a:not([hidden]) {
+  display: block;
+}
+.revision-list a {
+  text-decoration: none;
+  padding: var(--data-cell-padding);
+}
+
+.revision-list a:-webkit-any(:hover, :active, :focus) {
+}
+
+.revision-list .revision-main {
+  text-decoration: underline;
+}
+
+.revision-list .active {
+  background: var(--selected-background-color);
+  color: var(--selected-color);
+}
+
+.revision-list .active .revision-id {
+  font-weight: bolder;
 }
 
 .nearby {
