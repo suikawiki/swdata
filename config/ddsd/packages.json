@@ -1,0 +1,6 @@
+{
+   "calendar-era" : {
+      "type" : "packref",
+      "url" : "https://raw.githubusercontent.com/manakai/data-locale/master/packref/calendar-era.json"
+   }
+}
