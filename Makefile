@@ -58,15 +58,17 @@ build-local: local/data \
     local/data/calendar-era-defs.json \
     local/data/calendar-era-systems.json \
     local/data/calendar-era-transitions.json \
-    local/data/calendar-era-relations.json \
-    local/data/calendar-era-labels.json \
     local/data/days.json local/data/numbers-kanshi.json \
-    local/data/tags.json \
     local/data/char-names.json \
     local/data/countries.json \
     local/data/macroregions.json \
     local/data/jp-regions-full-flatten.json \
-    local/data/sww-pages.json
+    local/data/sww-pages.json \
+    local/data/calendar-era-defs-0.json \
+    local/data/calendar-era-labels-0.json \
+    local/data/calendar-era-relations-0.json \
+    local/data/calendar-era-transitions-0.json \
+    local/data/tags-0.json
 
 build-repo: js/components.js js/kage.js js/opentype.js css/default.css
 local/data:
@@ -123,23 +125,34 @@ local/data/jp-flagdays.json:
 local/data/calendar-era-defs.json: \
     local/data/calendar-era/files/calendar-era-defs.json
 	cp $< $@
+local/data/calendar-era-defs-0.json: local/data/calendar-era-defs.json \
+    bin/split.pl
+	$(PERL) bin/split.pl $< local/data/calendar-era-defs
 local/data/calendar-era-transitions.json: \
     local/data/calendar-era/files/calendar-era-transitions.json
 	cp $< $@
-local/data/calendar-era-relations.json: \
-    local/data/calendar-era/files/calendar-era-relations.json
-	cp $< $@
-local/data/calendar-era-labels.json: \
-    local/data/calendar-era/files/calendar-era-labels.json
-	cp $< $@
+local/data/calendar-era-transitions-0.json: \
+    local/data/calendar-era-transitions.json \
+    bin/split.pl
+	$(PERL) bin/split.pl $< local/data/calendar-era-transitions
+local/data/calendar-era-relations-0.json: \
+    local/data/calendar-era/files/calendar-era-relations.json \
+    bin/split.pl
+	$(PERL) bin/split.pl $< local/data/calendar-era-relations
+local/data/calendar-era-labels-0.json: \
+    local/data/calendar-era/files/calendar-era-labels.json \
+    bin/split.pl
+	$(PERL) bin/split.pl $< local/data/calendar-era-labels
 local/data/calendar-era-systems.json: \
     local/data/calendar-era/files/calendar-era-systems.json
 	cp $< $@
+
 local/data/numbers-kanshi.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/numbers/kanshi.json
-local/data/tags.json: \
-    local/data/calendar-era/files/tags.json
-	cp $< $@
+
+local/data/tags-0.json: local/data/calendar-era/files/tags.json \
+    bin/split.pl
+	$(PERL) bin/split.pl $< local/data/tags
 
 local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json

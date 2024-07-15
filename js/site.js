@@ -306,17 +306,31 @@ SWD.dataAB = function (name, opts) {
 }; // SWD.dataAB
 
 SWD.era = async function (eraId) {
-  var list = await SWD.eraList ({});
-  return list[eraId]; // or undefined
+  if (!SWD._cached.eras) SWD._cached.eras = [];
+  if (!SWD._cached.eras[eraId]) {
+    let p = Math.floor (eraId / 100);
+    let list = [];
+    let pp = SWD.data ('calendar-era-defs-'+p+'.json', {allow404: true}).then (json => {
+      Object.values (json.eras || {}).forEach (_ => {
+        list[_.id] = _;
+      });
+    });
+    for (let i = 0; i < 100; i++) {
+      let id = p*100+i;
+      SWD._cached.eras[id] = pp.then (_ => list[id]);
+    }
+  }
+  return SWD._cached.eras[eraId]; // era or promise or undefined
 }; // SWD.era
 
 SWD.eraList = async function (opts) {
-  if (!SWD._eras) {
-    var json = await SWD.data ('calendar-era-defs.json');
-    SWD._eras = [];
+  if (!(SWD._cached.eras && SWD._cached.eras.loaded)) {
+    let json = await SWD.data ('calendar-era-defs.json');
+    SWD._cached.eras = [];
     Object.values (json.eras).forEach (_ => {
-      SWD._eras[_.id] = _;
+      SWD._cached.eras[_.id] = _;
     });
+    SWD._cached.eras.loaded = true;
 
     // XXX
     var XXXlist = {
@@ -359,11 +373,11 @@ SWD.eraList = async function (opts) {
         "-591" : 'Fasli+',
     };
     Object.keys (XXXlist).forEach (id => {
-      SWD._eras[20000 + parseFloat (id)] = {id: 20000 + parseFloat (id), name: XXXlist[id], offset: -parseFloat (id)};
+      SWD._cached.eras[20000 + parseFloat (id)] = {id: 20000 + parseFloat (id), name: XXXlist[id], offset: -parseFloat (id)};
     });
 
   }
-  var list = SWD._eras;
+  let list = SWD._cached.eras;
   if (opts.tagId) {
     list = list.filter (_ => (_.tag_ids || {})[opts.tagId]);
   }
@@ -380,28 +394,66 @@ SWD.eraTransitions = async function () {
 }; // SWD.eraTransitions
 
 SWD.eraTransitionsByEraId = async function (eraId) {
-  var list = await SWD.eraTransitions ();
-  return list.filter (_ => _.relevant_era_ids[eraId]);
+  if (!SWD._cached.eraTrs) SWD._cached.eraTrs = [];
+  if (!SWD._cached.eraTrs[eraId]) {
+    if (SWD._eraTransitions) {
+      return SWD._cached.eraTrs[eraId] = SWD.eraTransitions ().then (list => list.filter (_ => _.relevant_era_ids[eraId]));
+    } else {
+      let p = Math.floor (eraId / 100);
+      let list = [];
+      let pp = SWD.data ('calendar-era-transitions-'+p+'.json').then (json => {
+        Object.values (json.transitions).forEach (tr => {
+          Object.keys (tr.relevant_era_ids).forEach (id => {
+            let q = Math.floor (id / 100);
+            if (p === q) list[id].push (tr);
+          });
+        });
+      });
+      for (let i = 0; i < 100; i++) {
+        let id = p*100+i;
+        list[id] = [];
+        SWD._cached.eraTrs[id] = pp.then (_ => list[id]);
+      }
+      return SWD._cached.eraTrs[eraId];
+    }
+  }
+  return SWD._cached.eraTrs[eraId];
 }; // SWD.eraTransitionsByEraId
 
-SWD.eraLabelSets = async function (id) {
-  if (!SWD._eraLabels) {
-    SWD._eraLabels = SWD.data ('calendar-era-labels.json');
+SWD.eraLabelSets = async function (eraId) {
+  if (!SWD._cached.eraLSs) SWD._cached.eraLSs = [];
+  if (!SWD._cached.eraLSs[eraId]) {
+    let p = Math.floor (eraId / 100);
+    let list = [];
+    let pp = SWD.data ('calendar-era-labels-'+p+'.json', {allow404: true}).then (json => {
+      Object.values (json.eras || {}).forEach (_ => {
+        list[_.id] = _.label_sets;
+      });
+    });
+    for (let i = 0; i < 100; i++) {
+      let id = p*100+i;
+      SWD._cached.eraLSs[id] = pp.then (_ => list[id]);
+    }
   }
-
-  var all = await SWD._eraLabels;
-  var era = all.eras[id] || {};
-  return era.label_sets || {};
+  return SWD._cached.eraLSs[eraId];
 }; // SWD.eraLabelSets
 
-SWD.relatedEras = async function (id) {
-  if (!SWD._eraRelations) {
-    SWD._eraRelations = SWD.data ('calendar-era-relations.json');
+SWD.relatedEras = async function (eraId) {
+  if (!SWD._cached.eraRels) SWD._cached.eraRels = [];
+  if (!SWD._cached.eraRels[eraId]) {
+    let p = Math.floor (eraId / 100);
+    let list = [];
+    let pp = SWD.data ('calendar-era-relations-'+p+'.json', {allow404: true}).then (json => {
+      Object.keys (json.eras || {}).forEach (_ => {
+        list[_] = json.eras[_].relateds;
+      });
+    });
+    for (let i = 0; i < 100; i++) {
+      let id = p*100+i;
+      SWD._cached.eraRels[id] = pp.then (_ => list[id]);
+    }
   }
-
-  var all = await SWD._eraRelations;
-  var era = all.eras[id] || {};
-  return era.relateds || {};
+  return SWD._cached.eraRels[eraId];
 }; // SWD.relatedEras
 
 SWD.canonEra = async function (id) {
@@ -609,14 +661,26 @@ Object.defineProperty (SWDGeoObject.prototype, 'swName', {
 
 
 
-SWD.tag = async function (id) {
-  var tags = await SWD.tagsByIds ([id]);
-  return tags[0]; // or undefined
+SWD.tag = async function (tagId) {
+  if (!SWD._cached.tags) SWD._cached.tags = [];
+  if (!SWD._cached.tags[tagId]) {
+    let p = Math.floor (tagId / 100);
+    let list = [];
+    let pp = SWD.data ('tags-'+p+'.json', {allow404: true}).then (json => {
+      Object.values (json.tags || {}).forEach (_ => {
+        list[_.id] = _;
+      });
+    });
+    for (let i = 0; i < 100; i++) {
+      let id = p*100+i;
+      SWD._cached.tags[id] = pp.then (_ => list[id]);
+    }
+  }
+  return SWD._cached.tags[tagId];
 };
 
 SWD.tagsByIds = async function (ids) {
-  var tags = (await SWD.data ('tags.json')).tags;
-  return ids.map (_ => tags[_]);
+  return Promise.all (ids.map (id => SWD.tag (id)));
 }; // SWD.tagsByIds
 
 SWD.tagByName = async function (name) {
@@ -7930,9 +7994,6 @@ defineElement ({
           this.swUpdate ();
         },
       });
-
-      // preload
-      SWD.data ('tags.json');
     }, // pcInit
     swUpdate: async function () {
       var tags = await SWD.tagsByIds (Object.keys (this.value));
@@ -7969,6 +8030,13 @@ defineElement ({
     swUpdate: async function () {
       var v = this.value;
 
+      if (v == null) {
+        this.hidden = true;
+        return;
+      } else {
+        this.hidden = false;
+      }
+      
       var tags = await SWD.tagsByIds ([v]);
       
       var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
