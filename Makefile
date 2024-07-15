@@ -14,7 +14,7 @@ updatenightly: local/bin/pmbp.pl
 
 ## ------ Setup ------
 
-deps: git-submodules pmbp-install build
+deps: git-submodules pmbp-install ddsd-pull build
 deps-docker: pmbp-install build-local
 deps-lserver: deps local/charrels
 
@@ -34,6 +34,12 @@ pmbp-install: pmbp-upgrade ./lserver
 	perl local/bin/pmbp.pl $(PMBP_OPTIONS) --install \
             --create-perl-command-shortcut @perl \
             --create-perl-command-shortcut @prove
+
+ddsd-booter:
+#XXX	$(CURL) -sSLf https://raw.githubusercontent.com/geocol/ddsd/master/bin/booter | bash
+	$(CURL) -sSLf https://raw.githubusercontent.com/geocol/ddsd/staging/bin/booter.staging | bash
+ddsd-pull: ddsd-booter
+	./ddsd pull
 
 ./lserver:
 	echo '#!/bin/bash' > $@
@@ -114,20 +120,26 @@ local/data/ryukyu-holidays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/ryukyu-holidays.json
 local/data/jp-flagdays.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/jp-flagdays.json
-local/data/calendar-era-defs.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-defs.json
-local/data/calendar-era-transitions.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-transitions.json
-local/data/calendar-era-relations.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-relations.json
-local/data/calendar-era-labels.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-labels.json
-local/data/calendar-era-systems.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/calendar/era-systems.json
+local/data/calendar-era-defs.json: \
+    local/data/calendar-era/files/calendar-era-defs.json
+	cp $< $@
+local/data/calendar-era-transitions.json: \
+    local/data/calendar-era/files/calendar-era-transitions.json
+	cp $< $@
+local/data/calendar-era-relations.json: \
+    local/data/calendar-era/files/calendar-era-relations.json
+	cp $< $@
+local/data/calendar-era-labels.json: \
+    local/data/calendar-era/files/calendar-era-labels.json
+	cp $< $@
+local/data/calendar-era-systems.json: \
+    local/data/calendar-era/files/calendar-era-systems.json
+	cp $< $@
 local/data/numbers-kanshi.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/numbers/kanshi.json
-local/data/tags.json:
-	$(WGET) -O $@ https://raw.githubusercontent.com/manakai/data-locale/master/data/tags.json
+local/data/tags.json: \
+    local/data/calendar-era/files/tags.json
+	cp $< $@
 
 local/data/days-orig.json:
 	$(WGET) -O $@ https://raw.githubusercontent.com/geocol/data-days/master/data/days-ja.json
