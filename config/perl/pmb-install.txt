@@ -3,7 +3,6 @@ AnyEvent~7.17
 AnyEvent::AIO~1.1
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
-AnyEvent::Socket
 Canary::Stability~2013
 Capture::Tiny~0.48
 Carp~1.50
@@ -27,7 +26,7 @@ Path::Tiny~0.146
 Proc::FastSpawn~1.2
 Scalar::Util~1.64
 Socket~2.038
-Term::Table~0.018
+Term::Table~0.020
 Test::Differences~0.71
 Test::More~1.302200
 Text::Diff~1.45
