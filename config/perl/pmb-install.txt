@@ -28,7 +28,7 @@ Scalar::Util~1.65
 Socket~2.038
 Term::Table~0.022
 Test::Differences~0.71
-Test::More~1.302203
+Test::More~1.302204
 Text::Diff~1.45
 Time::HiRes~1.9764
 Time::Local~1.35
