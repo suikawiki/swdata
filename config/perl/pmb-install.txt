@@ -3,9 +3,9 @@ AnyEvent~7.17
 AnyEvent::AIO~1.1
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
-AnyEvent::Socket
+AnyEvent::IO
 Canary::Stability~2013
-Capture::Tiny~0.48
+Capture::Tiny~0.50
 Carp~1.50
 Cwd~3.75
 Data::Dumper~2.183
@@ -29,7 +29,7 @@ Scalar::Util~1.68
 Socket~2.038
 Term::Table~0.023
 Test::Differences~0.71
-Test::More~1.302204
+Test::More~1.302205
 Text::Diff~1.45
 Time::HiRes~1.9764
 Time::Local~1.35
