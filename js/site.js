@@ -208,7 +208,7 @@ SWD._dataRes = function (name, opts) {
     if (SWD.isTestData) {
       url = 'https://raw.githubusercontent.com/wakaba/nemuidata/master/data/' + name.replace (/^packs\//, '');
     } else {
-      url = 'https://geocol.github.io/ddsd-data/' + name.replace (/^packs\//, '');
+      url = 'https://geocol.github.io/ddsd-indexer/' + name.replace (/^packs\//, '');
     }
   } else if (opts.dsKey) {
     if (SWD.isLocal) {
