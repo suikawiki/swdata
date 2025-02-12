@@ -2,7 +2,6 @@ package SWD::Web;
 use strict;
 use warnings;
 use Path::Tiny;
-use POSIX qw(floor);
 use Time::HiRes qw(time);
 use Promise;
 use Promised::File;
@@ -11,16 +10,10 @@ use Web::DateTime::TimeZone;
 use Web::DateTime::Parser;
 use Web::URL::Encoding;
 use Kyuureki qw(kyuureki_to_gregorian);
-use Number::CJK::Parser;
 use JSON::PS;
 use Wanage::HTTP;
 use Warabe::App;
 use Temma;
-use SWD::Eras;
-use SWD::Kanshi;
-use Number;
-use Longitude;
-use TZOffset;
 
 sub psgi_app ($) {
   my ($class) = @_;
@@ -102,107 +95,6 @@ sub main ($$$) {
     return static $app, 'text/javascript; charset=utf-8', 'js/' . $path->[1];
   }
 
-  if (@$path == 2 and $path->[0] eq 'number') {
-    if ($path->[1] eq '') {
-      # /number/
-      return temma $app, ['number.index.html.tm'], {};
-    } elsif ($path->[1] =~ /\A[+-]?[0-9]+\z/) {
-      # /number/{sign}{integer}
-      my $v = $path->[1] eq '-0' ? (1/"-inf") : 0+$path->[1];
-      return temma $app, ['number.html.tm'], {
-        value => $v,
-        nvalue => Number->new_from_perl ($v),
-      };
-    } elsif ($path->[1] =~ /\A0x[0-9A-Fa-f]+\z/) {
-      # /number/0x{hex}
-      return temma $app, ['number.html.tm'], {
-        value => hex $path->[1],
-        nvalue => Number->new_from_perl (hex $path->[1]),
-      };
-    } elsif ($path->[1] =~ /\A0b[01]+\z/) {
-      # /number/0b{binary}
-      return temma $app, ['number.html.tm'], {
-        value => eval $path->[1],
-        nvalue => Number->new_from_perl (eval $path->[1]),
-      };
-    } elsif ($path->[1] =~ /\A[+-]?[0-9]+\.[0-9]+\z/) {
-      # /number/{sign}{integer}.{integer}
-      return temma $app, ['number.html.tm'], {
-        value => 0+$path->[1],
-        nvalue => Number->new_from_perl (0+$path->[1]),
-      };
-    } elsif ($path->[1] =~ s/\Acjk://) {
-      # /number/cjk:{number}
-      my $number = parse_cjk_number $path->[1];
-      return temma $app, ['number.html.tm'], {
-        value => $number,
-        nvalue => Number->new_from_perl ($number),
-      } if defined $number;
-    }
-  }
-
-  if (@$path == 2 and $path->[0] eq 'boolean') {
-    if ($path->[1] eq 'true' or $path->[1] eq 'false') {
-      # /boolean/true
-      # /boolean/false
-      return temma $app, ['boolean.html.tm'], {value => $path->[1] eq 'true'};
-    }
-  }
-
-  if (@$path == 2 and
-      ($path->[0] eq 'lat' or
-       $path->[0] eq 'lon' or
-       $path->[0] eq 'latlon')) {
-    use utf8;
-    my @value = map {
-      s/\s+//g;
-      if (/\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
-        0+$_;
-      } elsif (/\A([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([NnSsEeWw])\z/) {
-        (($4 eq 'S' or $4 eq 's' or $4 eq 'W' or $4 eq 'w') ? -1 : +1) *
-         ($1 +
-          ($2 || 0) / 60 +
-          ($3 || 0) / 3600);
-      } else {
-        undef;
-      }
-    } split /,/, $path->[1], -1;
-
-    if (@value == 1 and defined $value[0] and $path->[0] eq 'lat') {
-      return temma $app, ['lat.html.tm'], {value => $value[0]}
-          if -90 <= $value[0] and $value[0] <= +90;
-    }
-
-    if (@value == 1 and defined $value[0] and $path->[0] eq 'lon') {
-      my $n = Number->new_from_perl ($value[0]);
-      my $lon = Longitude->new_from_number ($n);
-      return temma $app, ['lon.html.tm'], {
-        value => $value[0],
-        lonvalue => $lon,
-      };
-    }
-
-    if (@value == 2 and defined $value[0] and defined $value[1] and
-        $path->[0] eq 'latlon') {
-      return temma $app, ['latlon.html.tm'], {lat => $value[0], lon => $value[1]}
-          if -90 <= $value[0] and $value[0] <= +90;
-    }
-  }
-
-  if (@$path == 2 and $path->[0] eq 'tzoffset') {
-    # /tzoffset/{offset}
-    my $tz = TZOffset->parse ($path->[1]);
-    return temma $app, ['tzoffset.html.tm'], {tzvalue => $tz} if defined $tz;
-  } elsif (@$path == 1 and $path->[0] eq 'tzoffset') {
-    # /tzoffset
-    return temma $app, ['tzoffset-list.html.tm'], {};
-  }
-
-  if (@$path == 2 and $path->[0] eq 'datetime' and $path->[1] eq '--mm-dd') {
-    # /datetime/--mm-dd
-    return temma $app, ['yearless-date-list.html.tm'], {};
-  }
-
   {
     my $dt;
     if (@$path == 2 and $path->[0] eq 'datetime') {
@@ -217,9 +109,6 @@ sub main ($$$) {
                 if defined $d->[0];
       } elsif ($path->[1] eq 'now' or $path->[1] eq '') {
         $dt = Web::DateTime->new_from_unix_time (time);
-      } elsif ($path->[1] =~ /\Ayear:([+-]?[0-9]+)\z/) {
-        my $parser = Web::DateTime::Parser->new;
-        $dt = $parser->parse_manakai_year_string ($1);
       } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
         $dt = Web::DateTime->new_from_jd ($1);
       } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
@@ -235,12 +124,6 @@ sub main ($$$) {
         my $parser = Web::DateTime::Parser->new;
         $dt = $parser->parse_html_datetime_value ($path->[1]);
       }
-    }
-
-    if (@$path == 2 and $path->[0] eq 'year') {
-      # /year/{year}
-      my $parser = Web::DateTime::Parser->new;
-      $dt = $parser->parse_manakai_year_string ($path->[1]);
     }
 
     if (@$path == 2 and $path->[0] eq 'spots') {
@@ -266,35 +149,27 @@ sub main ($$$) {
         $path->[0] eq 'chars' or
         $path->[0] eq 'char' or
         $path->[0] eq 'string' or
+        $path->[0] eq 'number' or
+        $path->[0] eq 'boolean' or
+        $path->[0] eq 'lat' or
+        $path->[0] eq 'lon' or
+        $path->[0] eq 'latlon' or
+        $path->[0] eq 'tzoffset' or
+        ($path->[0] eq 'datetime' and not defined $dt) or
+        $path->[0] eq 'year' or
+        $path->[0] eq 'era' or
+        $path->[0] eq 'kanshi' or
         $path->[0] eq '' or
         $path->[0] eq 'web' or
         $path->[0] eq 'radio' or
         $path->[0] eq 'houses' or
         $path->[0] eq 'about' or
         $path->[0] eq 'license') {
-      # /e/...
-      # /y/...
-      # /p/...
-      # /tag/...
-      # /spots/...
-      # /world
-      # /chars
-      # /char
-      # /string
-      # /antenna
-      # /radio
-      # /web
-      # /houses
-      # /about
-      # /license
       return static $app, 'text/html; charset=utf-8', 'html/year.html';
     }
 
     if (defined $dt and $dt->is_date_time) {
-      if ($dt->has_component ('year') and
-          not $dt->has_component ('month')) {
-        return temma $app, ['year.html.tm'], {value => $dt};
-      } elsif (not $dt->has_component ('year') and
+      if (not $dt->has_component ('year') and
                $dt->has_component ('month') and
                $dt->has_component ('day')) {
         return temma $app, ['yearless-date.html.tm'], {value => $dt};
@@ -302,41 +177,6 @@ sub main ($$$) {
         return temma $app, ['datetime.html.tm'], {value => $dt};
       }
     }
-  }
-
-  if (@$path == 1 and $path->[0] eq 'year') {
-    # /year
-    return temma $app, ['year-list.html.tm'], {};
-  }
-
-  if (@$path == 3 and $path->[0] eq 'era' and $path->[1] eq 'system') {
-    # /era/system/{key}
-    my $def = $SWD::Eras::Systems->{systems}->{$path->[2]};
-    return $app->throw_error (404) unless defined $def;
-    return temma $app, ['era.system.html.tm'], {system => $def, key => $path->[2]};
-  } elsif (@$path == 2 and $path->[0] eq 'era' and $path->[1] eq 'system') {
-    # /era/system
-    return temma $app, ['era.system-list.html.tm'], {};
-  }
-
-  if (@$path == 2 and $path->[0] eq 'era') {
-    # /era/{string}
-    my $def = SWD::Eras::get_era_by_string ($path->[1]);
-    return $app->throw_error (404) unless defined $def;
-    return temma $app, ['era.html.tm'], {era => $def};
-  } elsif (@$path == 1 and $path->[0] eq 'era') {
-    # /era
-    return temma $app, ['era-list.html.tm'], {};
-  }
-
-  if (@$path == 2 and $path->[0] eq 'kanshi') {
-    # /kanshi/{value}
-    my $def = $SWD::Kanshi::ValueToDef->{$path->[1]};
-    return $app->throw_error (404) unless defined $def;
-    return temma $app, ['kanshi.html.tm'], {def => $def};
-  } elsif (@$path == 1 and $path->[0] eq 'kanshi') {
-    # /kanshi
-    return temma $app, ['kanshi-list.html.tm'], {};
   }
 
   if ((@$path == 2 and $path->[0] eq 'lang') or

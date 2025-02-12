@@ -323,6 +323,11 @@ SWD.era = async function (eraId) {
   return SWD._cached.eras[eraId]; // era or promise or undefined
 }; // SWD.era
 
+SWD.eraByKey = async function (key) {
+  let list = await SWD.eraList ({});
+  return list.filter (_ => _.key === key) [0];
+}; // SWD.eraByKey
+
 SWD.eraList = async function (opts) {
   if (!(SWD._cached.eras && SWD._cached.eras.loaded)) {
     let json = await SWD.data ('calendar-era-defs.json');
@@ -383,6 +388,26 @@ SWD.eraList = async function (opts) {
   }
   return list;
 }; // SWD.eraList
+
+SWD.eraSystemByKey = async function (key) {
+  let list = await SWD.eraSystemList ({});
+  return list[key];
+}; // SWD.eraSystemByKey
+
+SWD.eraSystemList = async function (opts) {
+  if (!(SWD._cached.eraSystems && SWD._cached.eraSystems.loaded)) {
+    let json = await SWD.data ('calendar-era-systems.json');
+    SWD._cached.eraSystems = [];
+    Object.keys (json.systems).forEach (key => {
+      let _ = json.systems[key];
+      _.key = key;
+      SWD._cached.eraSystems[_.key] = _;
+    });
+    SWD._cached.eraSystems.loaded = true;
+  }
+  let list = SWD._cached.eraSystems;
+  return list;
+}; // SWD.eraSystemList
 
 SWD.eraTransitions = async function () {
   if (!SWD._eraTransitions) {
@@ -694,15 +719,140 @@ var mod = (n, m) => ((n%m) + m) % m;
 SWD.openPage = function (url) {
   return Promise.resolve ().then (async () => {
     var args = {};
-    var path = url.pathname;
+    var path = url.pathname.replace (/%2[Bb]/g, '+').replace (/%2[Aa]/g, ':');
 
-        var m = path.match (/^\/y\/(-?[0-9]+)\/$/);
+    {
+      let m = path.match (/^\/number\/((?:[+-]|%2[Bb]|)[0-9]+(?:\.[0-9]+|))$/);
+      if (m) {
+        args.name = 'page-number-item';
+        args.value = parseFloat (decodeURIComponent (m[1]));
+        // -0 is supported
+        return args;
+      }
+      m = path.match (/^\/number\/0x([0-9A-Fa-f]+)$/);
+      if (m) {
+        args.name = 'page-number-item';
+        args.value = parseInt (m[1], 16);
+        return args;
+      }
+      m = path.match (/^\/number\/0b([01]+)$/);
+      if (m) {
+        args.name = 'page-number-item';
+        args.value = parseInt (m[1], 2);
+        return args;
+      }
+
+      // XXX /number/cjk:{number}
+    }
+
+    {
+      if (path === '/boolean/true') {
+        args.name = 'page-boolean-item';
+        args.integerValue = 1;
+        args.valueLabel = '真';
+        return args;
+      } else if (path === '/boolean/false') {
+        args.name = 'page-boolean-item';
+        args.integerValue = 0;
+        args.valueLabel = '偽';
+        return args;
+      }
+    }
+
+    {
+      let m = path.match (/^\/lat\/((?:[+-]|%2[Bb]|)[0-9]+(?:\.[0-9]+|))$/);
+      if (m) {
+        args.name = 'page-lat-item';
+        args.value = parseFloat (decodeURIComponent (m[1]));
+        return args;
+      }
+      m = path.match (/^\/lat\/([^\/]+)$/);
+      if (m) {
+        let p = decodeURIComponent (m[1]);
+        m = p.match (/^([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([NnSs])$/);
         if (m) {
-          args.name = 'page-year-item-index';
-          args.year = parseFloat (m[1]);
+          args.name = 'page-lat-item';
+          args.value =
+            ((m[4] === 'S' || m[4] === 's') ? -1 : +1) *
+            (parseInt (m[1]) + parseInt (m[2] || 0) / 60 + parseFloat (m[3] || 0) / 3600);
           return args;
         }
+      }
+    }
+    {
+      let m = path.match (/^\/lon\/((?:[+-]|%2[Bb]|)[0-9]+(?:\.[0-9]+|))$/);
+      if (m) {
+        args.name = 'page-lon-item';
+        args.value = parseFloat (decodeURIComponent (m[1]));
+        args.tzOffsetSeconds = args.value * 3600 / 15;
+        return args;
+      }
+      m = path.match (/^\/lon\/([^\/]+)$/);
+      if (m) {
+        let p = decodeURIComponent (m[1]);
+        m = p.match (/^([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([EeWw])$/);
+        if (m) {
+          args.name = 'page-lon-item';
+          args.value =
+            ((m[4] === 'W' || m[4] === 'w') ? -1 : +1) *
+            (parseInt (m[1]) + parseInt (m[2] || 0) / 60 + parseFloat (m[3] || 0) / 3600);
+          args.tzOffsetSeconds = args.value * 3600 / 15;
+          return args;
+        }
+      }
+    }
+    {
+      let m = path.match (/^\/latlon\/([^\/]+),([^\/]+)$/);
+      if (m) {
+        let p = decodeURIComponent (m[1]);
+        let q = decodeURIComponent (m[2]);
+        let lat = null;
+        let lon = null;
+        m = p.match (/^((?:[+-]|)[0-9]+(?:\.[0-9]+|))$/);
+        if (m) lat = parseFloat (m[1]); 
+        m = p.match (/^([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([NnSs])$/);
+        if (m) lat =
+            ((m[4] === 'S' || m[4] === 's') ? -1 : +1) *
+            (parseInt (m[1]) + parseInt (m[2] || 0) / 60 + parseFloat (m[3] || 0) / 3600);
+        m = q.match (/^((?:[+-]|)[0-9]+(?:\.[0-9]+|))$/);
+        if (m) lon = parseFloat (m[1]); 
+        m = q.match (/^([0-9]+)(?:[.°]([0-9]+)(?:[.'′]([0-9]+(?:\.[0-9]+|))(?:''|″|)|)|)([EeWw])$/);
+        if (m) lon =
+            ((m[4] === 'W' || m[4] === 'w') ? -1 : +1) *
+            (parseInt (m[1]) + parseInt (m[2] || 0) / 60 + parseFloat (m[3] || 0) / 3600);
+        if (lat !== null && lon !== null) {
+          args.name = 'page-latlon-item';
+          args.latValue = lat;
+          args.lonValue = lon;
+          return args;
+        }
+      }
+    }
 
+    {
+      // /y/{}/
+      // /year/{}
+      // /datetime/year:{}
+      let m = path.match (/^\/y\/(-?[0-9]+)\/$/);
+      if (m) {
+        args.name = 'page-year-item-index';
+        args.year = parseFloat (m[1]);
+        return args;
+      }
+      m = path.match (/^\/year\/(-?[0-9]+)$/);
+      if (m) {
+        args.name = 'page-year-item-index';
+        args.year = parseFloat (m[1]);
+        return args;
+      }
+      m = path.match (/^\/datetime\/year:([+-]?[0-9]+)$/);
+      if (m) {
+        args.name = 'page-year-item-index';
+        args.year = parseFloat (m[1]);
+        return args;
+      }
+    }
+    
         // /e/{}/
         var m = path.match (/^\/e\/([0-9]+)\/$/);
         if (m) {
@@ -714,6 +864,32 @@ SWD.openPage = function (url) {
           }
           return args;
         }
+    {
+      // /era/{key}
+      let m = path.match (/^\/era\/([^\/]+)$/);
+      if (m) {
+        let key = decodeURIComponent (m[1]);
+        
+        args.era = await SWD.eraByKey (key);
+        if (args.era) {
+          args.eraId = args.era.id;
+          args.name = 'page-era-item-index';
+          args.canonEra = await SWD.canonEra (args.era.id);
+          return args;
+        }
+      }
+
+      // /era/system/{key}
+      m = path.match (/^\/era\/system\/([^\/]+)$/);
+      if (m) {
+        let key = decodeURIComponent (m[1]);
+        args.eraSystem = await SWD.eraSystemByKey (key);
+        if (args.eraSystem) {
+          args.name = 'page-era-system-item';
+          return args;
+        }
+      }
+    }
 
         // /e/{}/graph
         // /e/{}/kanshi
@@ -727,6 +903,57 @@ SWD.openPage = function (url) {
           }
           return args;
         }
+
+    {
+      let m = path.match (/^\/tzoffset\/([^\/]+)$/);
+      if (m) {
+        let p = decodeURIComponent (m[1]);
+        m = p.match (/^([+-])([0-9]+)(?::([0-9]+)(?::([0-9]+(?:\.[0-9]+|))|)|)$/);
+        if (m) {
+          args.seconds = (m[1] === "-" ? -1 : +1) *
+              parseInt (m[2]) * 60 * 60 +
+              parseInt (m[3] || 0) * 60 +
+              parseFloat (m[4] || 0);
+          args.lon = args.seconds * 15 / 3600;
+          {          
+            let v = args.seconds < 0 ? -args.seconds : args.seconds;
+            let h = Math.floor (v / 3600);
+            let m = Math.floor ((v % 3600) / 60);
+            let s = v % 60;
+            args.serialized = (args.seconds < 0 ? '-' : '+') +
+              (h < 10 ? '0' + h : h) + ':' +
+              (m < 10 ? '0' + m : m) + ':' +
+              (s < 10 ? '0' + s : s);
+          }
+          args.name = 'page-tzoffset-item';
+          return args;
+        }
+      }
+    }
+
+    {
+      // /kanshi/{}
+      let m = path.match (/^\/kanshi\/([^\/]+)$/);
+      if (m) {
+        let p = decodeURIComponent (m[1]);
+        let kanshi = await SWD.Kanshi.getByLabel (p);
+        if (kanshi) {
+          if (kanshi.isKanshi) {
+            args.kanshi = kanshi;
+            args.name = 'page-kanshi-itemkanshi';
+            return args;
+          } else if (kanshi.isJukkan) {
+            args.jukkan = kanshi;
+            args.name = 'page-kanshi-itemjukkan';
+            return args;
+          } else if (kanshi.isJuunishi) {
+            args.juunishi = kanshi;
+            args.name = 'page-kanshi-itemjuunishi';
+            return args;
+          }
+        }
+      }
+    }
 
     // /tag/{}/
     {
@@ -897,11 +1124,17 @@ SWD.openPage = function (url) {
 
     
     args.name = {
+      '/number/': 'page-number-index',
+      '/year': 'page-year-index',
       '/y/': 'page-year-index',
       '/y/determination': 'page-year-determination',
       '/y/determination/kanshi': 'page-year-determination-kanshi',
+      '/era': 'page-era-index',
       '/e/': 'page-era-index',
       '/e/first': 'page-era-first',
+      '/tzoffset': 'page-tzoffset',
+      '/datetime/--mm-dd': 'page-datetime-mmdd',
+      '/kanshi': 'page-kanshi',
     }[path]; // or undefined
     if (args.name) return args;
     
@@ -1305,7 +1538,26 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
-      var args = {name: v ? 'true' : 'false', class: this.className};
+
+      let op = this.getAttribute ('operation');
+      if (op === 'not') {
+        v = v ? 0 : 1;
+      } else if (op) {
+        console.log ("Bad |operation|: " + op);
+      }
+      
+      var args = {name: v ? 'true' : 'false', class: this.className,
+                  integerValue: v, booleanValue: v ? true : false};
+
+      let format = this.getAttribute ('format');
+      if (format === 'toString' || format === 'toLocaleString') {
+        args.formattedValue = args.booleanValue[format] ();
+      } else if (format === 'JSON.stringify') {
+        args.formattedValue = JSON.stringify (args.booleanValue);
+      } else if (format) {
+        console.log ("Bad |format|: " + format);
+      }
+      
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
       this.textContent = '';
@@ -1322,6 +1574,9 @@ defs (() => {
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'selectBooleanTemplate');
   def.pcHandler = function (templates, obj) {
+    if (obj.formattedValue != null && templates['formatted-' + obj.name]) {
+      return templates['formatted-' + obj.name];
+    }
     return templates[obj.class + '-' + obj.name] || templates[obj.name] || templates[""];
   };
   document.head.appendChild (def);
@@ -1347,10 +1602,38 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
+
+      let op = this.getAttribute ('operation');
+      if (op === 'floor' || op === 'ceil' ||
+          op === 'round' || op === 'fround' || op === 'abs') {
+        v = Math[op] (v);
+      } else if (op === 'prev') {
+        v = Math.ceil (v) - 1;
+      } else if (op === 'next') {
+        v = Math.floor (v) + 1;
+      } else if (op) {
+        console.log ("Bad |operation|: " + op);
+      }
+      
       var delta = parseFloat (this.getAttribute ('delta'));
       if (Number.isFinite (delta)) v += delta;
 
-      var args = {value: v};
+      var args = {value: v, formattedValue: v};
+      let format = this.getAttribute ('format');
+      if (format === 'toString' || format === 'toFixed' ||
+          format === 'toExponential' || format === 'toLocaleString') {
+        args.formattedValue = v[format] ();
+      } else if (format === 'toString2') {
+        args.formattedValue = v.toString (2);
+      } else if (format === 'toString8') {
+        args.formattedValue = v.toString (8);
+      } else if (format === 'toString16') {
+        args.formattedValue = v.toString (16);
+      } else if (format === 'JSON.stringify') {
+        args.formattedValue = JSON.stringify (v);
+      } else if (format) {
+        console.log ("Bad |format|: " + format);
+      }
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
       this.textContent = '';
@@ -1361,6 +1644,166 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-number>
+
+/* ------ Latitudes and Longitudes ------ */
+
+
+defineElement ({
+  name: 'sw-data-lat',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      let op = this.getAttribute ('operation');
+      if (op === 'invert') {
+        v = -v;
+      } else if (op) {
+        console.log ("Bad |operation|: " + op);
+      }
+      
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+
+      var args = {value: v, formattedValue: v, context: this};
+      let format = this.getAttribute ('format');
+      if (format === 'deg') {
+        if (args.value < 0) {
+          args.formattedValue = args.value;
+        } else {
+          args.formattedValue = '+' + args.value;
+        }
+      } else if (format === 'dmsen' || format === 'dmsja') {
+        let val = Math.abs (args.value);
+        let d = Math.floor (val);
+        let w = (val - d) * 60;
+        let m = Math.floor (w);
+        let s = (w - m) * 60;
+        if (format === 'dmsen') {
+          args.formattedValue = d + "° " + m + "' " + s + "'' " + (args.value < 0 ? "S" : "N");
+        } else {
+          args.formattedValue = (args.value < 0 ? "南緯" : "北緯") + d + "度" + m + "分" + s + "秒";
+        }
+      } else if (format) {
+        console.log ("Bad |format|: " + format);
+      }
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-lat>
+
+defineElement ({
+  name: 'sw-data-lon',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      let op = this.getAttribute ('operation');
+      if (op === 'invert') {
+        v = -v;
+      } else if (op === 'normalize') {
+        v = ((v + 180) % 360 + 360) % 360 - 180;
+      } else if (op) {
+        console.log ("Bad |operation|: " + op);
+      }
+      
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+
+      var args = {value: v, formattedValue: v, context: this};
+      let format = this.getAttribute ('format');
+      if (format === 'deg') {
+        if (args.value < 0) {
+          args.formattedValue = args.value;
+        } else {
+          args.formattedValue = '+' + args.value;
+        }
+      } else if (format === 'dmsen' || format === 'dmsja') {
+        let val = Math.abs (args.value);
+        let d = Math.floor (val);
+        let w = (val - d) * 60;
+        let m = Math.floor (w);
+        let s = (w - m) * 60;
+        if (format === 'dmsen') {
+          args.formattedValue = d + "° " + m + "' " + s + "'' " + (args.value < 0 ? "W" : "E");
+        } else {
+          args.formattedValue = (args.value < 0 ? "西経" : "東経") + d + "度" + m + "分" + s + "秒";
+        }
+      } else if (format) {
+        console.log ("Bad |format|: " + format);
+      }
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-lon>
+
+
+defineElement ({
+  name: 'sw-data-latlon',
+  props: {
+    pcInit: function () {
+      new MutationObserver ((mutations) => {
+        this.swUpdate ();
+      }).observe (this, {attributes: true, attributeFilter: ['lat', 'lon']});
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      let args = {
+        latValue: parseFloat (this.getAttribute ('lat')),
+        lonValue: parseFloat (this.getAttribute ('lon')),
+        context: this,
+      };
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-latlon>
+
 
 /* ------ Characters ------ */
 
@@ -4940,12 +5383,69 @@ SWD.Kanshi.labels10 = [
   '甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸',
 ];
 
+SWD.Kanshi.getByLabel = async function (label) {
+  let index = SWD.Kanshi.labels.indexOf (label);
+  if (index !== -1) {
+    return SWD.Kanshi.getKanshi (index);
+  }
+
+  index = SWD.Kanshi.labels12.indexOf (label);
+  if (index !== -1) {
+    return SWD.Kanshi.getJuunishi (index);
+  }
+
+  index = SWD.Kanshi.labels10.indexOf (label);
+  if (index !== -1) {
+    return SWD.Kanshi.getJukkan (index);
+  }
+
+  let m = label.match (/^12:0*([1-9]|1[012])$/);
+  if (m) {
+    return SWD.Kanshi.getJuunishi (parseInt (m[1]) - 1);
+  }
+  m = label.match (/^10:0*([1-9]|1[0])$/);
+  if (m) {
+    return SWD.Kanshi.getJukkan (parseInt (m[1]) - 1);
+  }
+  m = label.match (/^0*([1-9]|[1-5][0-9]|60)$/);
+  if (m) {
+    return SWD.Kanshi.getKanshi (parseInt (m[1]) - 1);
+  }
+
+  return null;
+}; // SWD.Kanshi.getByLabel
+
+SWD.Kanshi.getKanshi = async function (index) {
+  let json = await SWD.data ('numbers-kanshi.json');
+  let item = json.kanshi[index];
+  item.isKanshi = true;
+  item.index = index;
+  item.jukkan = SWD.Kanshi.labels10.indexOf (item.name.substring (0, 1));
+  item.juunishi = SWD.Kanshi.labels12.indexOf (item.name.substring (1, 2));
+  return item;
+}; // getKanshi
+SWD.Kanshi.getJukkan = async function (index) {
+  let json = await SWD.data ('numbers-kanshi.json');
+  let item = json.heavenly_stems[index];
+  item.isJukkan = true;
+  item.index = index;
+  return item;
+}; // getJukkan
+SWD.Kanshi.getJuunishi = async function (index) {
+  let json = await SWD.data ('numbers-kanshi.json');
+  let item = json.earthly_branches[index];
+  item.isJuunishi = true;
+  item.index = index;
+  return item;
+}; // getJuunishi
+
 defineElement ({
   name: 'sw-data-kanshi',
   fill: 'idlattribute',
   props: {
     pcInit: function () {
       var v = this.value;
+      if (v == null) v = parseFloat (this.getAttribute ('value'));
       Object.defineProperty (this, 'value', {
         get: function () {
           return v;
@@ -4959,6 +5459,10 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
+
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+      v = v % 60;
 
       var args = {value0: v, value1: v+1, context: this};
       args.label = SWD.Kanshi.labels[v];
@@ -4980,6 +5484,7 @@ defineElement ({
   props: {
     pcInit: function () {
       var v = this.value;
+      if (v == null) v = parseFloat (this.getAttribute ('value'));
       Object.defineProperty (this, 'value', {
         get: function () {
           return v;
@@ -4993,6 +5498,10 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
+
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+      v = v % 10;
 
       var args = {value0: v, value1: v+1, context: this};
       args.label = SWD.Kanshi.labels10[v];
@@ -5014,6 +5523,7 @@ defineElement ({
   props: {
     pcInit: function () {
       var v = this.value;
+      if (v == null) v = parseFloat (this.getAttribute ('value'));
       Object.defineProperty (this, 'value', {
         get: function () {
           return v;
@@ -5027,6 +5537,10 @@ defineElement ({
     }, // pcInit
     swUpdate: async function () {
       var v = this.value;
+
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+      v = v % 12;
 
       var args = {value0: v, value1: v+1, context: this};
       args.label = SWD.Kanshi.labels12[v];
@@ -5168,6 +5682,62 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-era>
+
+defineElement ({
+  name: 'sw-data-erasystem',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var id = this.value;
+      if (id == null) {
+        this.hidden = true;
+        return;
+      }
+      this.hidden = false;
+      
+      var args = {};
+      args.eraSystem = await SWD.eraSystemByKey (key);
+      if (!args.eraSystem) throw new Error ("Era system not found: " + key);
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+    }, // swUpdate
+  },
+}); // <sw-data-erasystem>
+
+
+defineListLoader ('swEraSystemLoader', async function (opts) {
+  let key = this.getAttribute ('loader-key');
+  let eraSystem = await SWD.eraSystemByKey (key);
+  for (let p of eraSystem.points) {
+    p.era = await SWD.eraByKey (p[2]);
+  }
+  let data = eraSystem.points.map (p => {
+    return {
+      day: p[0] === 'jd' ? {jd: p[1]} : undefined,
+      year: p[0] === 'y' ? p[1] : undefined,
+      eraId: p.era.id,
+    };
+  });
+  return {data};
+});
 
 defineElement ({
   name: 'sw-month-calendar',
@@ -5428,6 +5998,138 @@ defineListLoader ('swEraListLoader', function (opts) {
     return {data: eras};
   });
 });
+
+defineListLoader ('swEraSystemListLoader', function (opts) {
+  return SWD.eraSystemList ({
+  }).then (systems => {
+    return {data: systems};
+  });
+});
+
+
+/* ------ Yearless dates ------ */
+
+defineListLoader ('swYearlessDateListLoader', function (opts) {
+  let data = [];
+  for (let m = 1; m <= 12; m++) {
+    for (let d = 1; d <= [null, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m]; d++) {
+      data.push ({month: m, day: d});
+    }
+  }
+  return {data};
+});
+
+
+defineElement ({
+  name: 'sw-data-yearlessdate',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      new MutationObserver ((mutations) => {
+        this.swUpdate ();
+      }).observe (this, {attributes: true, attributeFilter: ['month', 'day']});
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      let args = {
+        month: parseFloat (this.getAttribute ('month')),
+        day: parseFloat (this.getAttribute ('day')),
+        context: this,
+      };
+
+      args.serialized = '--' +
+        (args.month < 10 ? '0' + args.month : args.month) + '-' +
+        (args.day < 10 ? '0' + args.day : args.day);
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-yearlessdate>
+
+/* ------ Time zones ------ */
+
+defineListLoader ('swTZOffsetListLoader', function (opts) {
+  let data = [];
+  for (let hour = -14; hour <= 14; hour++) {
+    [0, 15, 30, 45].forEach (minute => {
+      let offset = (hour * 60 + minute) * 60;
+      data.push ({seconds: offset, lon: offset / 60 / 4});
+    });
+  }
+  return {data};
+});
+
+
+defineElement ({
+  name: 'sw-data-tzoffset',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+
+      let op = this.getAttribute ('operation');
+      if (op === 'normalize') {
+        const x = 12 * 60 * 60;
+        v = ((v + x) % (2 * x) + (2 * x)) % (2 * x) - x;
+      } else if (op === 'invert') {
+        v = -v;
+      } else if (op) {
+        console.log ("Bad |operation|: " + op);
+      }
+      
+      var delta = parseFloat (this.getAttribute ('delta'));
+      if (Number.isFinite (delta)) v += delta;
+
+      var args = {seconds: v, formattedValue: v};
+      {
+        let v = args.seconds < 0 ? -args.seconds : args.seconds;
+        let h = Math.floor (v / 3600);
+        let m = Math.floor ((v % 3600) / 60);
+        let s = v % 60;
+        args.serialized = (args.seconds < 0 ? '-' : '+') +
+          (h < 10 ? '0' + h : h) + ':' +
+          (m < 10 ? '0' + m : m) + ':' +
+        (s < 10 ? '0' + s : s);
+      }
+      let format = this.getAttribute ('format');
+      if (format) {
+        console.log ("Bad |format|: " + format);
+      } else {
+        args.formattedValue = args.serialized;
+      }
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-tzoffset>
+
+
+
 
 SWD.wrefToImageURL = function (wref) {
   var fileName = wref.replace (/^[^:]+:/, '').replace (/ /g, '_');
@@ -7511,17 +8213,23 @@ defineElement ({
       if (!v) return;
 
       var args = {value: v};
+
+      if (args.value.mjd == null) args.value.mjd = args.value.jd - 2400000.5;
+      if (args.value.unix == null) args.value.unix = (args.value.jd - 2440587.5) * (24*60*60);
       args.weekday = mod (args.value.mjd - 4, 7);
-      
+      if (args.value.kanshi0 == null) args.value.kanshi0 = ((args.value.jd + 0.5 + 49) % 60);
+
+      if (args.value.gregorian == null) args.value.gregorian = new Date (args.value.unix * 1000).toISOString ().replace (/T.+/, '');
       var m = args.value.gregorian.match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
       args.gregorian = {year: parseFloat (m[1]),
                         month: parseFloat (m[2]),
                         day: parseFloat (m[3])};
       
-      var m = args.value.julian.match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
-      args.julian = {year: parseFloat (m[1]),
+      var m = (args.value.julian || '').match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
+      if (m) args.julian = {year: parseFloat (m[1]),
                      month: parseFloat (m[2]),
                      day: parseFloat (m[3])};
+      if (!m) args.julian_hidden = '';
 
       var m = (args.value.nongli_tiger || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
       if (m) args.nongli_tiger = {year: parseFloat (m[1]),
@@ -7564,6 +8272,7 @@ defineElement ({
                                   leap_month: !!m[3],
                                   day: parseFloat (m[4])};
       if (!m) args.kyuureki_hidden = '';
+      /* XXX fill by keyuureki.js */
       
       var ts = await $getTemplateSet (this.localName);
       var e = ts.createFromTemplate ('div', args);
