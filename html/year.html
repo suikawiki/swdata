@@ -75,6 +75,658 @@
     <p>見つかりませんでした。 <a href=/>トップページ</a>
   </template>
 
+  <template data-name=page-number-index>
+    <t-title>数値</t-title>
+
+  <form action=javascript: onsubmit="
+    location.href = '/number/' + elements.number.value;
+    return false;
+  " class=input>
+    <input type=number name=number step=any value=0 required>
+    <button type=submit>Decimal</button>
+  </form>
+
+  <form action=javascript: onsubmit="
+    location.href = '/number/0x' + encodeURIComponent (elements.number.value);
+    return false;
+  " class=input>
+    <input name=number pattern=[0-9A-Fa-f]+ value=0 required>
+    <button type=submit>Hexadecimal</button>
+  </form>
+
+  <form action=javascript: onsubmit="
+    location.href = '/number/0b' + encodeURIComponent (elements.number.value);
+    return false;
+  " class=input>
+    <input name=number pattern=[01]+ value=0 required>
+    <button type=submit>Binary</button>
+  </form>
+
+  <form action=javascript: onsubmit="
+    location.href = '/number/cjk:' + encodeURIComponent (elements.number.value);
+    return false;
+  " class=input>
+    <input name=number value=〇 required>
+    <button type=submit>CJK number</button>
+  </form>
+  
+  </template>
+
+  <template data-name=page-boolean-item>
+    <t-title>真偽値 <data data-field=valueLabel></data></t-title>
+    <t-keyword data-field=valueLabel></t-keyword>
+    <t-sw data-field=valueLabel></t-sw>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <section id=serializations-browser>
+        <h1>Your browser</h1>
+
+        <table class=nv>
+          <tbody>
+            <tr>
+              <th><code>toString</code>
+              <td><sw-data-boolean data-field=integerValue format=toString></sw-data-boolean>
+            <tr>
+              <th><code>toLocaleString</code>
+              <td><sw-data-boolean data-field=integerValue format=toLocaleString></sw-data-boolean>
+            <tr>
+              <th><code>JSON.stringify</code>
+              <td><sw-data-boolean data-field=integerValue format=JSON.stringify></sw-data-boolean>
+        </table>
+      </section>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Not
+            <td><sw-data-boolean data-field=integerValue operation=not></sw-data-boolean>
+          <tr>
+            <th>Integer
+            <td><sw-data-number data-field=integerValue></sw-data-number>
+      </table>
+    </section>
+    
+  </template>
+
+  <template data-name=page-number-item>
+    <t-title>数値 <data data-field=value></data></t-title>
+    <t-category><a href=/number/>数値</a></t-category>
+    <t-keyword data-field=value></t-keyword>
+    <t-sw data-field=value></t-sw>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <section id=serializations-browser>
+        <h1>Your browser</h1>
+
+        <table class=nv>
+          <tbody>
+            <tr>
+              <th><code>toString</code>
+              <td><sw-data-number data-field=value format=toString></sw-data-number>
+            <tr>
+              <th><code>toString</code> (<code>2</code>)
+              <td><sw-data-number data-field=value format=toString2></sw-data-number>
+            <tr>
+              <th><code>toString</code> (<code>8</code>)
+              <td><sw-data-number data-field=value format=toString8></sw-data-number>
+            <tr>
+              <th><code>toString</code> (<code>16</code>)
+              <td><sw-data-number data-field=value format=toString16></sw-data-number>
+            <tr>
+              <th><code>toFixed</code>
+              <td><sw-data-number data-field=value format=toFixed></sw-data-number>
+            <tr>
+              <th><code>toExponential</code>
+              <td><sw-data-number data-field=value format=toExponential></sw-data-number>
+            <tr>
+              <th><code>toLocaleString</code>
+              <td><sw-data-number data-field=value format=toLocaleString></sw-data-number>
+            <tr>
+              <th><code>JSON.stringify</code>
+              <td><sw-data-number data-field=value format=JSON.stringify></sw-data-number>
+        </table>
+      </section>
+    </section>
+
+    <!--
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Sign
+            <td><m:number m:value="$nvalue->sign"/>
+        <tr>
+          <th>Is integer?
+          <td><m:boolean m:value=$is_integer />
+      </table>
+    </section>
+    -->
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Previous integer
+            <td><sw-data-number data-field=value operation=prev></sw-data-number>
+          <tr>
+            <th>Next integer
+            <td><sw-data-number data-field=value operation=next></sw-data-number>
+          <tr>
+            <th><code>Math.floor</code>
+            <td><sw-data-number data-field=value operation=floor></sw-data-number>
+          <tr>
+            <th><code>Math.ceil</code>
+            <td><sw-data-number data-field=value operation=ceil></sw-data-number>
+          <tr>
+            <th><code>Math.round</code>
+            <td><sw-data-number data-field=value operation=round></sw-data-number>
+          <tr>
+            <th><code>Math.fround</code>
+            <td><sw-data-number data-field=value operation=fround></sw-data-number>
+          <tr>
+            <th><code>Math.abs</code>
+            <td><sw-data-number data-field=value operation=abs></sw-data-number>
+      </table>
+    </section>
+
+    <section id=cast>
+      <h1>Cast</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Latitude
+            <td><sw-data-lat data-field=value></sw-data-lat>
+          <tr>
+            <th>Longitude
+            <td><sw-data-lon data-field=value></sw-data-lon>
+              <!--<tr>
+          <th>Time (seconds)
+          <td><m:unixtime m:value="$value"/>
+        </tr>
+        -->
+          <tr>
+            <th>AD Year
+            <td><sw-data-year data-field=value></sw-data-year>
+          <tr>
+            <th>Code point
+            <td><sw-data-charcode data-field=value></sw-data-charcode>
+      </table>
+    </section>
+    
+  </template>
+
+  <template data-name=page-lat-item>
+    <t-title>Latitude <data data-field=value></data></t-title>
+    <t-category>Latitude</t-category>
+    <t-keyword data-field=value></t-keyword>
+    <t-sw data-field=value></t-sw>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>DEG
+            <td><sw-data-lat data-field=value format=deg></sw-data-lat>
+          <tr>
+            <th>DMS (English)
+            <td><sw-data-lat data-field=value format=dmsen></sw-data-lat>
+          <tr>
+            <th>DMS (日本語)
+            <td><sw-data-lat data-field=value format=dmsja></sw-data-lat>
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Sign-inverted
+            <td><sw-data-lat data-field=value operation=invert></sw-data-lat>
+        <tbody>
+          <tr>
+            <th>90°E
+            <td><sw-data-latlon lon=90 data-lat-field=value data-filled=lat></sw-data-latlon>
+          <tr>
+            <th>0°
+            <td><sw-data-latlon lon=0 data-lat-field=value data-filled=lat></sw-data-latlon>
+          <tr>
+            <th>90°W
+            <td><sw-data-latlon lon=-90 data-lat-field=value data-filled=lat></sw-data-latlon>
+          <tr>
+            <th>180°
+            <td><sw-data-latlon lon=180 data-lat-field=value data-filled=lat></sw-data-latlon>
+      </table>
+    </section>
+
+    <section id=cast>
+      <h1>Cast</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number
+            <td><sw-data-number data-field=value></sw-data-number>
+          <tr>
+            <th>Longitude
+            <td><sw-data-lon data-field=value></sw-data-lon>
+      </table>
+    </section>
+    
+  </template>
+
+  <template data-name=page-lon-item>
+    <t-title>Longitude <data data-field=value></data></t-title>
+    <t-category>Longitude</t-category>
+    <t-keyword data-field=value></t-keyword>
+    <t-sw data-field=value></t-sw>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>DEG
+            <td><sw-data-lon data-field=value format=deg></sw-data-lon>
+          <tr>
+            <th>DMS (English)
+            <td><sw-data-lon data-field=value format=dmsen></sw-data-lon>
+          <tr>
+            <th>DMS (日本語)
+            <td><sw-data-lon data-field=value format=dmsja></sw-data-lon>
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Local time
+            <td><sw-data-tzoffset data-field=tzOffsetSeconds></sw-data-tzoffset>
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Normalized
+            <td><sw-data-lon data-field=value operation=normalize></sw-data-lon>
+          <tr>
+            <th>Sign-inverted
+            <td><sw-data-lon data-field=value operation=invert></sw-data-lon>
+        <tbody>
+          <tr>
+            <th>90°N
+            <td><sw-data-latlon lat=90 data-lon-field=value data-filled=lon></sw-data-latlon>
+          <tr>
+            <th>0°
+            <td><sw-data-latlon lat=0 data-lon-field=value data-filled=lon></sw-data-latlon>
+          <tr>
+            <th>90°S
+            <td><sw-data-latlon lat=-90 data-lon-field=value data-filled=lon></sw-data-latlon>
+      </table>
+    </section>
+    
+    <section id=cast>
+      <h1>Cast</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number
+            <td><sw-data-number data-field=value></sw-data-number>
+          <tr>
+            <th>Latitude
+            <td><sw-data-lat data-field=value></sw-data-lon>
+      </table>
+    </section>
+    
+  </template>
+
+  <template data-name=page-latlon-item>
+    <t-title>Latitude &amp; Longitude <data data-field=latValue></data>, <data data-field=lonValue></data></t-title>
+    <t-category>Latitude, Longitude</t-category>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>DEG
+            <td>
+              <sw-data-lat data-field=latValue format=deg></sw-data-lat>,
+              <sw-data-lon data-field=lonValue format=deg></sw-data-lon>
+          <tr>
+            <th>DMS (English)
+            <td>
+              <sw-data-lat data-field=latValue format=dmsen></sw-data-lat>,
+              <sw-data-lon data-field=lonValue format=dmsen></sw-data-lon>
+          <tr>
+            <th>DMS (日本語)
+            <td>
+              <sw-data-lat data-field=latValue format=dmsja></sw-data-lat>
+              <sw-data-lon data-field=lonValue format=dmsja></sw-data-lon>
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Latitude
+            <td><sw-data-lat data-field=latValue></sw-data-lat>
+          <tr>
+            <th>Longitude
+            <td><sw-data-lon data-field=lonValue></sw-data-lon>
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Web sites
+            <td>
+              <a data-href-template="https://www.google.com/maps/@{latValue},{lonValue},8z">Google Maps</a>
+      </table>
+    </section>
+    
+  </template>
+
+
+  <template data-name=page-tzoffset>
+    <t-title>時間帯の一覧</t-title>
+    <t-category>日時</t-category>
+
+    <section>
+      <h1>Standard time</h1>
+
+      <ul>
+        <li><a href=/tzoffset/+00:00>UTC (<code>+00:00</code>)</a>
+      </ul>
+    </section>
+
+    <section>
+      <h1>Offsets</h1>
+
+      <list-container loader=swTZOffsetListLoader type=ul>
+        <ul class=item-list></ul>
+        <template>
+          <sw-data-tzoffset data-field=seconds></sw-data-tzoffset>
+          <sw-data-lon data-field=lon format=dmsja></sw-data-lon>
+        </template>
+      </list-container>
+      
+    </section>
+
+  </template>
+
+  <template data-name=page-tzoffset-item>
+    <t-title>Time-zone offset UTC <data data-field=serialized></data></t-title>
+    <t-category><a href=/tzoffset rel=up>Time zone offset</a></t-category>
+    <t-keyword data-field=serialized></t-keyword>
+    <t-sw data-field=serialized></t-sw>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Offset
+            <td><sw-data-tzoffset data-field=seconds></sw-data-tzoffset>
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Seconds
+            <td><sw-data-number data-field=seconds></sw-data-number><!-- XXX duration -->
+          <tr>
+            <th>Longitude
+            <td><sw-data-lon data-field=lon format=dmsja></sw-data-lon>
+      </table>
+    </section>
+
+    <!--
+
+          <section id=comparison>
+    <h1>Comparison</h1>
+
+    <t:my as=$tzoffsets x="[map { TZOffset->parse ($_) || TZOffset->new_from_seconds (0) } @{$app->bare_param_list ('compare')}]">
+    <table class=nv>
+      <tbody>
+        <t:for as=$tzoffset x=$tzoffsets>
+          <tr>
+            <th t:space=preserve>
+              <m:tzoffset m:tzvalue="$tzoffset"/>
+            <td>
+              <t:text value="
+                my $delta = TZOffset->new_from_seconds
+                    ($tzoffset->seconds - $tzvalue->seconds);
+                $delta->to_string;
+              ">
+        </t:for>
+      <tfoot>
+        <tr>
+          <t:for as=$tzoffset x=$tzoffsets>
+            <input type=hidden name=compare pl:value="$tzoffset->to_string" form=compare-form>
+          </t:for>
+          <t:for as=$time x="$app->bare_param_list ('time')">
+            <input type=hidden name=time pl:value=$time form=compare-form>
+          </t:for>
+          <td colspan=2>
+            <form method=get id=compare-form action=#comparison>
+              <input name=compare>
+              <button type=submit>Compare</button>
+            </form>
+    </table>
+
+    <table>
+      <t:my as=$tzs x="
+        my @list;
+        push @list, Web::DateTime::TimeZone->new_from_offset ($tzvalue->seconds);
+        push @list, map {
+          Web::DateTime::TimeZone->new_from_offset ($_->seconds);
+        } @$tzoffsets;
+        push @list, Web::DateTime::TimeZone->new_from_offset (0);
+        \@list;
+      ">
+      <thead>
+        <tr>
+          <th><m:tzoffset m:tzvalue="$tzvalue"/></th>
+          <t:for as=$tzoffset x=$tzoffsets>
+            <th><m:tzoffset m:tzvalue="$tzoffset"/>
+          </t:for>
+          <th>UTC
+        <tbody>
+          <t:for as=$date x="
+            my @d;
+            push @d, map {
+              Web::DateTime->new_from_unix_time ($_ + 12*3600 - $tzvalue->seconds);
+            }
+            -24  *3600,
+            -12  *3600,
+            -10  *3600,
+             -9  *3600,
+             -1  *3600,
+             -0.5*3600,
+              0  *3600,
+              0.5*3600,
+              1  *3600,
+              9  *3600,
+             10  *3600,
+             12  *3600,
+             24  *3600,
+            ;
+            push @d, map {
+              my $d = Web::DateTime::Parser->new->parse_time_string ($_);
+              $d = Web::DateTime->new_from_unix_time
+                  ((defined $d ? $d->to_unix_number : 0) - $tzvalue->seconds);
+              $d;
+            } @{$app->bare_param_list ('time')};
+            \@d;
+          ">
+            <tr>
+              <t:for as=$tz x=$tzs>
+                <td><t:text value="
+                  $date->set_time_zone ($tz);
+                  sprintf '%02d:%02d:%02d', $date->hour, $date->minute, $date->second;
+                ">
+                <t:if x="not ($date->day == 1 and $date->month == 1 and $date->year == 1970)" t:space=preserve>
+                  (Δday = <t:text value="
+                    my $d = Web::DateTime->new_from_components
+                        ($date->year, $date->month, $date->day);
+                    Number->new_from_perl ($d->to_jd - 2440587.5)->floor->to_perl;
+                  ">)
+                </t:if>
+              </t:for>
+          </t:for>
+        <tfoot>
+          <tr>
+            <t:for as=$tzoffset x=$tzoffsets>
+              <input type=hidden name=compare pl:value="$tzoffset->to_string" form=compare-time-form>
+            </t:for>
+            <t:for as=$time x="$app->bare_param_list ('time')">
+              <input type=hidden name=time pl:value=$time form=compare-time-form>
+            </t:for>
+            <td><input type=time name=time form=compare-time-form step=1>
+            <td pl:colspan="@$tzoffsets + 1">
+              <form method=get id=compare-time-form action=#comparison>
+                <button type=submit>Compare</button>
+              </form>
+    </table>
+
+    <hr>
+
+    <p t:space=preserve>If
+    <time>12:00</time> <m:tzoffset m:tzvalue=$tzvalue /> is
+    <var>hour</var>, <var>hour</var>'s <var>offset</var> is...
+
+    <table class=nv>
+      <thead>
+        <tr>
+          <th><var>hour</var>
+          <th colspan=2><var>offset</var>
+      <tbody>
+        <t:for as=$time x="
+          [map {
+            my $d = Web::DateTime::Parser->new->parse_time_string ($_);
+            $d = Web::DateTime->new_from_unix_time
+                (defined $d ? $d->to_unix_number : 0);
+            $d;
+          } '12:00', @{$app->bare_param_list ('time')}];
+        ">
+          <tr>
+            <td><t:text value="
+              sprintf '%02d:%02d:%02d', $time->hour, $time->minute, $time->second;
+            ">
+            <td><m:tzoffset m:tzvalue="
+              TZOffset->new_from_seconds ($time->to_unix_number - 12*60*60 + $tzvalue->seconds);
+            "/>
+        </t:for>
+    </table>
+  </section>
+
+          -->
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Normalized
+            <td><sw-data-tzoffset data-field=seconds operation=normalize></sw-data-tzoffset>
+          <tr>
+            <th>Sign-inverted
+            <td><sw-data-tzoffset data-field=seconds operation=invert></sw-data-tzoffset>
+          <tr>
+            <th>+1:00:00
+            <td><sw-data-tzoffset data-field=seconds delta=3600></sw-data-tzoffset>
+          <tr>
+            <th>+0:30:00
+            <td><sw-data-tzoffset data-field=seconds delta=1800></sw-data-tzoffset>
+          <tr>
+            <th>+0:15:00
+            <td><sw-data-tzoffset data-field=seconds delta=900></sw-data-tzoffset>
+          <tr>
+            <th>-0:15:00
+            <td><sw-data-tzoffset data-field=seconds delta=-900></sw-data-tzoffset>
+          <tr>
+            <th>-0:30:00
+            <td><sw-data-tzoffset data-field=seconds delta=-1800></sw-data-tzoffset>
+          <tr>
+            <th>-1:00:00
+            <td><sw-data-tzoffset data-field=seconds delta=-3600></sw-data-tzoffset>
+      </table>
+    </section>
+    
+    <section id=cast>
+      <h1>Cast</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number
+            <td><sw-data-number data-field=seconds></sw-data-number>
+      </table>
+    </section>
+    
+  </template>
+  
+
+  <template data-name=page-datetime-mmdd>
+    <t-title>Gregorian yearless dates</t-title>
+    <t-category>日時</t-category>
+    <t-sw>yearless date</t-sw>
+
+    <section>
+      <h1>グレゴリオ暦の月日</h1>
+
+      <!-- XXX id=month-{} -->
+      <list-container loader=swYearlessDateListLoader type=ul>
+        <ul class=item-list></ul>
+        <template>
+          <sw-data-yearlessdate data-month-field=month data-day-field=day data-filled="month day"></sw-data-yearlessdate>
+        </template>
+      </list-container>
+      
+    </section>
+
+  </template>
+
   <template data-name=page-year-index>
     <t-title>年の一覧</t-title>
     <t-category>日時</t-category>
@@ -104,17 +756,42 @@
       <table class=nv>
         <tbody>
           <tr>
-            <th>西暦
-            <td><data data-field=year></data>
+            <th>キリスト紀元
+            <td>
+              <sw-data-year data-field=year eraid=20></sw-data-year>
+              紀元前: <sw-algorithm name=before-epoch-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+<!--        <tr>
+          <th><m:era-system m:key="'jp-north'" m:text="'Japan (北朝)'"/>
+          <td><m:gengou-y m:value=$value m:context="'jp-north'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 />
+        <tr>
+          <th><m:era-system m:key="'jp-south'" m:text="'Japan (南朝)'"/>
+          <td><m:gengou-y m:value=$value m:context="'jp-south'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 />
+        <tr>
+          <th><m:era-system m:key="'ryuukyuu'" m:text="'Ryuukyuu'"/>
+            <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 />
+              -->
           <tr>
-            <th>西暦紀元前
-            <td><sw-algorithm name=before-epoch-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
+            <th lang=ja>日本
+            <td>
+              <sw-data-year data-field=year eraid=1></sw-data-year>
+              <sw-data-year data-field=year eraid=2></sw-data-year>
+              <sw-data-year data-field=year eraid=3></sw-data-year>
+              <sw-data-year data-field=year eraid=4></sw-data-year>
+              <sw-data-year data-field=year eraid=5></sw-data-year>
+              神武天皇即位紀元 (皇紀):
+              <sw-data-number data-field=year delta=660></sw-data-number>
+          <tr>
+            <th lang=ja>中華民国
+            <td>
+              <sw-data-year data-field=year eraid=971></sw-data-year>
+          <tr>
+            <th lang=ja>朝鮮民主主義人民共和国
+            <td>
+              <sw-data-year data-field=year eraid=474></sw-data-year>
+              
           <tr>
             <th>干支年
             <td><sw-algorithm name=kanshi-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
-        <tr>
-          <th lang=ja>神武天皇即位紀元 (皇紀)
-          <td><sw-data-number data-field=year delta=660></sw-data-number>
       </table>
     </section>
     
@@ -131,7 +808,35 @@
             <td><sw-algorithm name=is-proleptic-gregorian-leap-year data-arg-year-field=year data-filled=arg-year></sw-algorithm>
       </table>
     </section>
-    
+
+    <!--
+    <section id=serializations>
+    <h1>Serialization</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th>Year string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_year_string" rel=bookmark><time pl:datetime="$value->to_year_string"><t:text value="$value->to_year_string"></></a>
+    </table>
+  </section>
+
+  <section id=months>
+    <h1>Months (Gregorian calendar)</h1>
+
+    <ul class=item-list>
+      <t:for as=$m x="[1..12]">
+        <li><m:yearmonth m:year="$value->year" m:month=$m />
+      </t:for>
+    </ul>
+  </section>
+
+  <section id=days>
+    <h1>Days (Gregorian calendar)</h1>
+
+    </section>
+  -->
+  
     <section id=links>
       <h1>Links</h1>
 
@@ -189,6 +894,17 @@
         <li><a data-href-template="https://en.wikipedia.org/wiki/{year}" lang=en><cite>Wikipedia</cite> (English)</a>
         <li><a data-href-template="https://ja.wikipedia.org/wiki/{year}年" lang=ja><cite>Wikipedia</cite> (日本語)</a>
       </ul>
+    </section>
+
+    <section id=cast>
+      <h1>Cast</h1>
+      
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>AD number
+            <td><sw-data-number data-field=year></sw-data-number>
+      </table>
     </section>
     
   </template><!-- page-year-item-index -->
@@ -413,6 +1129,7 @@
 
     <ul>
       <li><a href=/y/>年の一覧</a>
+      <li><a href=/era/system>元号系の一覧</a>
     </ul>
 
     <p><a href=/e/ class=active>紀年法の一覧</a> / <a href=/e/first>元年別</a>
@@ -426,6 +1143,11 @@
         <sw-data-era data-field=id template=sw-data-era-in-menu></sw-data-era>
       </template>
     </list-container>
+
+    <p>Extracted from
+    <a href=https://github.com/manakai/data-locale/blob/master/data/calendar/era-defs.json>a
+    JSON data file</a>
+    (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-defs.txt>documentation</a>).
   </template>
 
   <template data-name=page-era-first>
@@ -775,7 +1497,477 @@
     </section>
 
   </template>
-  
+
+
+
+  <template data-name=page-era-system>
+    <t-title>Era systems</t-title>
+    <t-category><a href=/e/>紀年法</a></t-category>
+    <t-sw>元号系</t-sw>
+
+    <list-container loader=swEraSystemListLoader class=menu-list>
+      <action-status></action-status>
+      <list-main></list-main>
+      <template>
+        <sw-data-erasystem data-field=key></sw-data-erasystem>
+      </template>
+    </list-container>
+
+    <p>Extracted from
+    <a href=https://github.com/manakai/data-locale/blob/master/data/calendar/era-systems.json>a
+    JSON data file</a>
+    (<a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-era-systems.txt>documentation</a>).
+  </template>
+
+  <template data-name=page-era-system-item>
+    <t-title>Era system <code data-field=eraSystem.key></code></t-title>
+    <t-category><a href=/era/system>元号系</a></t-category>
+    <t-keyword data-field=eraSystem.key></t-keyword>
+    <t-sw data-field=eraSystem.key></t-sw>
+
+    <list-container loader=swEraSystemLoader type=table data-loader-key-field=eraSystem.key data-filled=loader-key>
+      <action-status></action-status>
+      <table>
+        <template>
+          <td>
+            <sw-if-defined data-field=day>
+              <sw-data-day data-field=day></sw-data-day>
+            </sw-if-defined>
+            <sw-if-defined data-field=year>
+              <sw-data-year data-field=year></sw-data-year>
+            </sw-if-defined>
+          <td>
+            <sw-data-era data-field=eraId></sw-data-era>
+        </template>
+        <thead>
+          <tr>
+            <th>開始
+            <th>元号
+        <tbody>
+      </table>
+    </list-container>
+
+  </template>
+
+
+  <template data-name=page-kanshi>
+    <t-title>干支</t-title>
+
+    <section id=stems>
+      <h1>Heavenly stems (十干, celestial stems)</h1>
+
+      <ul class=item-list>
+        <li><sw-data-jukkan value=0></sw-data-jukkan>
+        <li><sw-data-jukkan value=1></sw-data-jukkan>
+        <li><sw-data-jukkan value=2></sw-data-jukkan>
+        <li><sw-data-jukkan value=3></sw-data-jukkan>
+        <li><sw-data-jukkan value=4></sw-data-jukkan>
+        <li><sw-data-jukkan value=5></sw-data-jukkan>
+        <li><sw-data-jukkan value=6></sw-data-jukkan>
+        <li><sw-data-jukkan value=7></sw-data-jukkan>
+        <li><sw-data-jukkan value=8></sw-data-jukkan>
+        <li><sw-data-jukkan value=9></sw-data-jukkan>
+      </ul>
+    </section>
+
+    <section id=branches>
+      <h1>Earthly branches (十二支, 地支)</h1>
+      
+      <ul class=item-list>
+        <li><sw-data-juunishi value=0></sw-data-juunishi>
+        <li><sw-data-juunishi value=1></sw-data-juunishi>
+        <li><sw-data-juunishi value=2></sw-data-juunishi>
+        <li><sw-data-juunishi value=3></sw-data-juunishi>
+        <li><sw-data-juunishi value=4></sw-data-juunishi>
+        <li><sw-data-juunishi value=5></sw-data-juunishi>
+        <li><sw-data-juunishi value=6></sw-data-juunishi>
+        <li><sw-data-juunishi value=7></sw-data-juunishi>
+        <li><sw-data-juunishi value=8></sw-data-juunishi>
+        <li><sw-data-juunishi value=9></sw-data-juunishi>
+        <li><sw-data-juunishi value=10></sw-data-juunishi>
+        <li><sw-data-juunishi value=11></sw-data-juunishi>
+        <li><sw-data-juunishi value=12></sw-data-juunishi>
+      </ul>
+    </section>
+
+    <section id=kanshi>
+      <h1>Kanshi (干支, 十干十二支, 六十花甲, sexagenary cycle)</h1>
+      
+      <ul class=item-list>
+        <li><sw-data-kanshi value=0></sw-data-kanshi>
+        <li><sw-data-kanshi value=1></sw-data-kanshi>
+        <li><sw-data-kanshi value=2></sw-data-kanshi>
+        <li><sw-data-kanshi value=3></sw-data-kanshi>
+        <li><sw-data-kanshi value=4></sw-data-kanshi>
+        <li><sw-data-kanshi value=5></sw-data-kanshi>
+        <li><sw-data-kanshi value=6></sw-data-kanshi>
+        <li><sw-data-kanshi value=7></sw-data-kanshi>
+        <li><sw-data-kanshi value=8></sw-data-kanshi>
+        <li><sw-data-kanshi value=9></sw-data-kanshi>
+        <li><sw-data-kanshi value=10></sw-data-kanshi>
+        <li><sw-data-kanshi value=11></sw-data-kanshi>
+        <li><sw-data-kanshi value=12></sw-data-kanshi>
+        <li><sw-data-kanshi value=13></sw-data-kanshi>
+        <li><sw-data-kanshi value=14></sw-data-kanshi>
+        <li><sw-data-kanshi value=15></sw-data-kanshi>
+        <li><sw-data-kanshi value=16></sw-data-kanshi>
+        <li><sw-data-kanshi value=17></sw-data-kanshi>
+        <li><sw-data-kanshi value=18></sw-data-kanshi>
+        <li><sw-data-kanshi value=19></sw-data-kanshi>
+        <li><sw-data-kanshi value=20></sw-data-kanshi>
+        <li><sw-data-kanshi value=21></sw-data-kanshi>
+        <li><sw-data-kanshi value=22></sw-data-kanshi>
+        <li><sw-data-kanshi value=23></sw-data-kanshi>
+        <li><sw-data-kanshi value=24></sw-data-kanshi>
+        <li><sw-data-kanshi value=25></sw-data-kanshi>
+        <li><sw-data-kanshi value=26></sw-data-kanshi>
+        <li><sw-data-kanshi value=27></sw-data-kanshi>
+        <li><sw-data-kanshi value=28></sw-data-kanshi>
+        <li><sw-data-kanshi value=29></sw-data-kanshi>
+        <li><sw-data-kanshi value=30></sw-data-kanshi>
+        <li><sw-data-kanshi value=31></sw-data-kanshi>
+        <li><sw-data-kanshi value=32></sw-data-kanshi>
+        <li><sw-data-kanshi value=33></sw-data-kanshi>
+        <li><sw-data-kanshi value=34></sw-data-kanshi>
+        <li><sw-data-kanshi value=35></sw-data-kanshi>
+        <li><sw-data-kanshi value=36></sw-data-kanshi>
+        <li><sw-data-kanshi value=37></sw-data-kanshi>
+        <li><sw-data-kanshi value=38></sw-data-kanshi>
+        <li><sw-data-kanshi value=39></sw-data-kanshi>
+        <li><sw-data-kanshi value=40></sw-data-kanshi>
+        <li><sw-data-kanshi value=41></sw-data-kanshi>
+        <li><sw-data-kanshi value=42></sw-data-kanshi>
+        <li><sw-data-kanshi value=43></sw-data-kanshi>
+        <li><sw-data-kanshi value=44></sw-data-kanshi>
+        <li><sw-data-kanshi value=45></sw-data-kanshi>
+        <li><sw-data-kanshi value=46></sw-data-kanshi>
+        <li><sw-data-kanshi value=47></sw-data-kanshi>
+        <li><sw-data-kanshi value=48></sw-data-kanshi>
+        <li><sw-data-kanshi value=49></sw-data-kanshi>
+        <li><sw-data-kanshi value=50></sw-data-kanshi>
+        <li><sw-data-kanshi value=51></sw-data-kanshi>
+        <li><sw-data-kanshi value=52></sw-data-kanshi>
+        <li><sw-data-kanshi value=53></sw-data-kanshi>
+        <li><sw-data-kanshi value=54></sw-data-kanshi>
+        <li><sw-data-kanshi value=55></sw-data-kanshi>
+        <li><sw-data-kanshi value=56></sw-data-kanshi>
+        <li><sw-data-kanshi value=57></sw-data-kanshi>
+        <li><sw-data-kanshi value=58></sw-data-kanshi>
+        <li><sw-data-kanshi value=59></sw-data-kanshi>
+      </ul>
+    </section>
+
+    <p>Extracted from
+    <a href=https://github.com/manakai/data-locale/blob/master/data/numbers/kanshi.json>a
+    JSON data file</a>
+    (<a href=https://github.com/manakai/data-locale/blob/master/doc/numbers-kanshi.txt>documentation</a>).
+
+  </template>
+
+  <template data-name=page-kanshi-itemkanshi>
+    <t-title>Stem and branch <data data-field=kanshi.name></data></t-title>
+    <t-category><a href=/kanshi>干支</a></t-category>
+    <t-keyword data-field=kanshi.name></t-keyword>
+    <t-sw data-field=kanshi.name></t-sw>
+
+
+    <section id=names>
+      <h1>Name</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Name
+            <td><data data-field=kanshi.name></data>
+          <tr>
+            <th>Chinese (Pinyin)
+            <td><data data-field=kanshi.zh_pinyin></data>
+          <tr>
+            <th>Chinese (Bopomofo)
+            <td><data data-field=kanshi.zh_zhuyin></data>
+          <tr>
+            <th>Japanese on-yomi
+            <td><data data-field=kanshi.ja_on></data>
+                (<data data-field=kanshi.ja_on_latn></data>)
+          <tr>
+            <th>Japanese kun-yomi
+            <td><data data-field=kanshi.ja_kun></data>
+                (<data data-field=kanshi.ja_kun_latn></data>)
+          <tr>
+            <th>Manchu
+            <td><data data-field=kanshi.manchu></data>
+                (<data data-field=kanshi.manchu_latn></data>)
+          <tr>
+            <th>Vietnamese
+            <td><data data-field=kanshi.vi></data>
+          <tr>
+            <th>Korean
+            <td><data data-field=kanshi.kr></data>
+                (<data data-field=kanshi.kr_latn></data>)
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number (0-based)
+            <td><sw-data-number data-field=kanshi.index></sw-data-number>
+          <tr>
+            <th>Number (1-based)
+            <td><sw-data-number data-field=kanshi.value></sw-data-number>
+          <tr>
+            <th>Heavenly stem
+            <td><sw-data-jukkan data-value-field=kanshi.jukkan></sw-data-jukkan>
+          <tr>
+            <th>Earthly branch
+            <td><sw-data-juunishi data-value-field=kanshi.juunishi></sw-data-juunishi>
+          <!--XXX<tr>
+            <th>Years
+            <td>
+              <t:for as=$x x="[-12..40]" t:space=preserve>
+                <m:year m:value="$def->{value} + $x * 60 + 3" />
+              </t:for>-->
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Wikipedia
+            <td>
+              <sw-if-defined data-field=kanshi.wref_ja>
+                <a data-href-template="https://ja.wikipedia.org/wiki/{kanshi.wref_ja}" lang=ja>日本語</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=kanshi.wref_zh>
+                <a data-href-template="https://zh.wikipedia.org/wiki/{kanshi.wref_zh}" lang=zh>中文</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=kanshi.wref_ko>
+                <a data-href-template="https://ko.wikipedia.org/wiki/{kanshi.wref_ko}" lang=ko>한국어</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=kanshi.wref_en>
+                <a data-href-template="https://en.wikipedia.org/wiki/{kanshi.wref_en}" lang=en>English</a>
+              </sw-if-defined>
+          <tr>
+            <th>Previous
+            <td>
+              -1 <sw-data-kanshi data-field=kanshi.index delta=-1></sw-data-kanshi>
+              -10 <sw-data-kanshi data-field=kanshi.index delta=-10></sw-data-kanshi>
+              -12 <sw-data-kanshi data-field=kanshi.index delta=-12></sw-data-kanshi>
+          <tr>
+            <th>Next
+            <td>
+              +1 <sw-data-kanshi data-field=kanshi.index delta=1></sw-data-kanshi>
+              +10 <sw-data-kanshi data-field=kanshi.index delta=10></sw-data-kanshi>
+              +12 <sw-data-kanshi data-field=kanshi.index delta=12></sw-data-kanshi>
+      </table>
+    </section>
+
+  </template>
+
+  <template data-name=page-kanshi-itemjukkan>
+    <t-title>Heavenly stem <data data-field=jukkan.name></data></t-title>
+    <t-category><a href=/kanshi>十干</a></t-category>
+    <t-keyword data-field=jukkan.name></t-keyword>
+    <t-sw data-field=jukkan.name></t-sw>
+
+    <section id=names>
+      <h1>Name</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Name
+            <td><data data-field=jukkan.name></data>
+          <tr>
+            <th>Chinese (Pinyin)
+            <td><data data-field=jukkan.zh_pinyin></data>
+          <tr>
+            <th>Chinese (Bopomofo)
+            <td><data data-field=jukkan.zh_zhuyin></data>
+          <tr>
+            <th>Japanese on-yomi
+            <td><data data-field=jukkan.ja_on></data>
+                (<data data-field=jukkan.ja_on_latn></data>)
+          <tr>
+            <th>Japanese kun-yomi
+            <td><data data-field=jukkan.ja_kun></data>
+                (<data data-field=jukkan.ja_kun_latn></data>)
+          <tr>
+            <th>Manchu
+            <td><data data-field=jukkan.manchu></data>
+                (<data data-field=jukkan.manchu_latn></data>)
+          <tr>
+            <th>Vietnamese
+            <td><data data-field=jukkan.vi></data>
+          <tr>
+            <th>Korean
+            <td><data data-field=jukkan.kr></data>
+                (<data data-field=jukkan.kr_latn></data>)
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number (0-based)
+            <td><sw-data-number data-field=jukkan.index></sw-data-number>
+          <tr>
+            <th>Number (1-based)
+            <td><sw-data-number data-field=jukkan.value></sw-data-number>
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Stems and branches
+            <td>
+              <sw-data-kanshi data-field=jukkan.index delta=00></sw-data-kanshi>
+              <sw-data-kanshi data-field=jukkan.index delta=10></sw-data-kanshi>
+              <sw-data-kanshi data-field=jukkan.index delta=20></sw-data-kanshi>
+              <sw-data-kanshi data-field=jukkan.index delta=30></sw-data-kanshi>
+              <sw-data-kanshi data-field=jukkan.index delta=40></sw-data-kanshi>
+              <sw-data-kanshi data-field=jukkan.index delta=50></sw-data-kanshi>
+                  
+        <tbody>
+          <tr>
+            <th>Wikipedia
+            <td>
+              <sw-if-defined data-field=jukkan.wref_ja>
+                <a data-href-template="https://ja.wikipedia.org/wiki/{jukkan.wref_ja}" lang=ja>日本語</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=jukkan.wref_zh>
+                <a data-href-template="https://zh.wikipedia.org/wiki/{jukkan.wref_zh}" lang=zh>中文</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=jukkan.wref_ko>
+                <a data-href-template="https://ko.wikipedia.org/wiki/{jukkan.wref_ko}" lang=ko>한국어</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=jukkan.wref_en>
+                <a data-href-template="https://en.wikipedia.org/wiki/{jukkan.wref_en}" lang=en>English</a>
+              </sw-if-defined>
+          <tr>
+            <th>Previous
+            <td>
+              <sw-data-jukkan data-field=jukkan.index delta=-1></sw-data-jukkan>
+          <tr>
+            <th>Next
+            <td>
+              <sw-data-jukkan data-field=jukkan.index delta=1></sw-data-jukkan>
+      </table>
+    </section>
+
+  </template>
+
+  <template data-name=page-kanshi-itemjuunishi>
+    <t-title>Heavenly stem <data data-field=juunishi.name></data></t-title>
+    <t-category><a href=/kanshi>十二支</a></t-category>
+    <t-keyword data-field=juunishi.name></t-keyword>
+    <t-sw data-field=juunishi.name></t-sw>
+
+    <section id=names>
+      <h1>Name</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Name
+            <td><data data-field=juunishi.name></data>
+          <tr>
+            <th>Chinese (Pinyin)
+            <td><data data-field=juunishi.zh_pinyin></data>
+          <tr>
+            <th>Chinese (Bopomofo)
+            <td><data data-field=juunishi.zh_zhuyin></data>
+          <tr>
+            <th>Japanese on-yomi
+            <td><data data-field=juunishi.ja_on></data>
+                (<data data-field=juunishi.ja_on_latn></data>)
+          <tr>
+            <th>Japanese kun-yomi
+            <td><data data-field=juunishi.ja_kun></data>
+                (<data data-field=juunishi.ja_kun_latn></data>)
+          <tr>
+            <th>Manchu
+            <td><data data-field=juunishi.manchu></data>
+                (<data data-field=juunishi.manchu_latn></data>)
+          <tr>
+            <th>Vietnamese
+            <td><data data-field=juunishi.vi></data>
+          <tr>
+            <th>Korean
+            <td><data data-field=juunishi.kr></data>
+                (<data data-field=juunishi.kr_latn></data>)
+      </table>
+    </section>
+
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Number (0-based)
+            <td><sw-data-number data-field=juunishi.index></sw-data-number>
+          <tr>
+            <th>Number (1-based)
+            <td><sw-data-number data-field=juunishi.value></sw-data-number>
+      </table>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Stems and branches
+            <td>
+              <sw-data-kanshi data-field=juunishi.index delta=00></sw-data-kanshi>
+              <sw-data-kanshi data-field=juunishi.index delta=12></sw-data-kanshi>
+              <sw-data-kanshi data-field=juunishi.index delta=24></sw-data-kanshi>
+              <sw-data-kanshi data-field=juunishi.index delta=36></sw-data-kanshi>
+              <sw-data-kanshi data-field=juunishi.index delta=48></sw-data-kanshi>
+                  
+        <tbody>
+          <tr>
+            <th>Wikipedia
+            <td>
+              <sw-if-defined data-field=juunishi.wref_ja>
+                <a data-href-template="https://ja.wikipedia.org/wiki/{juunishi.wref_ja}" lang=ja>日本語</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=juunishi.wref_zh>
+                <a data-href-template="https://zh.wikipedia.org/wiki/{juunishi.wref_zh}" lang=zh>中文</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=juunishi.wref_ko>
+                <a data-href-template="https://ko.wikipedia.org/wiki/{juunishi.wref_ko}" lang=ko>한국어</a>
+              </sw-if-defined>
+              <sw-if-defined data-field=juunishi.wref_en>
+                <a data-href-template="https://en.wikipedia.org/wiki/{juunishi.wref_en}" lang=en>English</a>
+              </sw-if-defined>
+          <tr>
+            <th>Previous
+            <td><sw-data-juunishi data-field=juunishi.index delta=-1></sw-data-juunishi>
+          <tr>
+            <th>Next
+            <td><sw-data-juunishi data-field=juunishi.index delta=1></sw-data-juunishi>
+      </table>
+    </section>
+
+  </template>
+
+
   <template data-name=page-tag-item-index>
     <t-title>#<bdi data-field=tag.label></bdi></t-title>
     <t-keyword data-field=tag.label></t-keyword>
@@ -1655,63 +2847,6 @@
     </section>
 
   </template>
-  <template-set name=legal-section-template>
-    <template>
-      <section>
-        <h1><enum-value data-field=type
-            label-license="ライセンス"
-            label-db_license="ライセンス (データベース)"
-            label-site_terms="利用規約 (ウェブサイト)"
-            label-disclaimer="免責事項"
-            label-fallback_license="他の規定が適用されないときのライセンス"
-        ></enum-value></h1>
-
-        <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
-
-        <sw-if-true data-field=sourceTypePackage>
-          <p class=note><a data-href-field=source_url>パッケージ</a>に記載された情報によります。</p>
-        </sw-if-true>
-
-            <sw-if-true data-field=sourceTypeSite>
-              <p class=note><a data-href-field=source_url>ウェブサイト利用規約</a>に記載された情報<sw-if-true data-field=timestamps.0>
-              (<time data-field=timestamps.0></time>時点)
-              </>によります。</p>
-            </sw-if-true>
-
-            <sw-if-true data-field=hasLink>
-              <p><a data-href-field=linkURL data-field=label data-empty=■ data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></a></p>
-            </sw-if-true>
-
-            <sw-if-true data-field=text>
-              <p><can-copy><data data-field=text data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
-            </sw-if-true>
-            <sw-if-true data-field=noText>
-              <sw-if-true data-field=holder>
-                <p>権利者: <can-copy><data data-field=holder.value data-lang-field=holder.lang data-dir-field=holder.dir data-data-writingmode-field=holder.writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
-              </sw-if-true>
-            </sw-if-true>
-
-        <sw-if-true data-field=conditions.length>
-          <p>条件により次のライセンスが適用されます。
-          詳しい条件は各自でご確認ください。</p>
-
-          <sw-legal-sections data-field=conditons></sw-legal-sections>
-        </sw-if-true>
-
-        <sw-if-true data-field=alt.length>
-          <p>条件により次のライセンスを適用できます。
-          詳しい条件は各自でご確認ください。</p>
-
-          <sw-legal-sections data-field=alt></sw-legal-sections>
-        </sw-if-true>
-
-        <sw-if-true data-field=notKnown>
-          <p>利用条件が不明か、特殊な条件が設定されています。</p>
-        </sw-if-true>
-        
-      </section>
-    </template>
-  </template-set>
   
   <template data-name=page-about>
     <t-title>このウィキについて</t-title>
@@ -1778,6 +2913,64 @@
     </section>
   </template>
 </template-set>
+
+  <template-set name=legal-section-template>
+    <template>
+      <section>
+        <h1><enum-value data-field=type
+            label-license="ライセンス"
+            label-db_license="ライセンス (データベース)"
+            label-site_terms="利用規約 (ウェブサイト)"
+            label-disclaimer="免責事項"
+            label-fallback_license="他の規定が適用されないときのライセンス"
+        ></enum-value></h1>
+
+        <sw-if-true data-field=insecure><p class=warning>安全な通信ではないため、改竄のおそれがあります。</p></sw-if-true>
+
+        <sw-if-true data-field=sourceTypePackage>
+          <p class=note><a data-href-field=source_url>パッケージ</a>に記載された情報によります。</p>
+        </sw-if-true>
+
+            <sw-if-true data-field=sourceTypeSite>
+              <p class=note><a data-href-field=source_url>ウェブサイト利用規約</a>に記載された情報<sw-if-true data-field=timestamps.0>
+              (<time data-field=timestamps.0></time>時点)
+              </>によります。</p>
+            </sw-if-true>
+
+            <sw-if-true data-field=hasLink>
+              <p><a data-href-field=linkURL data-field=label data-empty=■ data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></a></p>
+            </sw-if-true>
+
+            <sw-if-true data-field=text>
+              <p><can-copy><data data-field=text data-lang-field=lang data-dir-field=dir data-data-writingmode-field=writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
+            </sw-if-true>
+            <sw-if-true data-field=noText>
+              <sw-if-true data-field=holder>
+                <p>権利者: <can-copy><data data-field=holder.value data-lang-field=holder.lang data-dir-field=holder.dir data-data-writingmode-field=holder.writing_mode data-filled="lang dir data-writingmode"></data></can-copy></p>
+              </sw-if-true>
+            </sw-if-true>
+
+        <sw-if-true data-field=conditions.length>
+          <p>条件により次のライセンスが適用されます。
+          詳しい条件は各自でご確認ください。</p>
+
+          <sw-legal-sections data-field=conditons></sw-legal-sections>
+        </sw-if-true>
+
+        <sw-if-true data-field=alt.length>
+          <p>条件により次のライセンスを適用できます。
+          詳しい条件は各自でご確認ください。</p>
+
+          <sw-legal-sections data-field=alt></sw-legal-sections>
+        </sw-if-true>
+
+        <sw-if-true data-field=notKnown>
+          <p>利用条件が不明か、特殊な条件が設定されています。</p>
+        </sw-if-true>
+        
+      </section>
+    </template>
+  </template-set>
 
 <template-set name=pageHeaderTemplate templateselector=selectPageTemplate>
   <template>
@@ -2128,11 +3321,48 @@
   </template>
   <template data-name=leap-true><strong>閏年</strong></template>
   <template data-name=leap-false>平年</template>
+  <template data-name=formatted-true>
+    <a href=/boolean/true data-field=formattedValue></a>
+  </template>
+  <template data-name=formatted-false>
+    <a href=/boolean/false data-field=formattedValue></a>
+  </template>
 </template-set>
 
 <template-set name=sw-data-number>
   <template>
-    <a data-href-template=/number/{value}><data data-field=value></data></a>
+    <a data-href-template=/number/{value}><data data-field=formattedValue data-value-field=value></data></a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-lat templateselector=swDataValueSelector>
+  <template>
+    <a data-href-template=/lat/{value}><data data-field=formattedValue data-value-field=value></data></a>
+  </template>
+  <template data-name=text><data data-field=formattedValue data-value-field=value></data></template>
+</template-set>
+<template-set name=sw-data-lon templateselector=swDataValueSelector>
+  <template>
+    <a data-href-template=/lon/{value}><data data-field=formattedValue data-value-field=value></data></a>
+  </template>
+  <template data-name=text><data data-field=formattedValue data-value-field=value></data></template>
+</template-set>
+
+<template-set name=sw-data-latlon templateselector=swDataValueSelector>
+  <template>
+    <a data-href-template=/latlon/{latValue},{lonValue}><sw-data-lat data-field=latValue text></sw-data-lat>, <sw-data-lon data-field=lonValue text></sw-data-lon></a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-yearlessdate>
+  <template>
+    <a data-href-template=/datetime/{serialized}><data data-field=serialized></data></a>
+  </template>
+</template-set>
+
+<template-set name=sw-data-tzoffset>
+  <template>
+    <a data-href-template=/tzoffset/{serialized}><data data-field=formattedValue data-value-field=serialized></data></a>
   </template>
 </template-set>
 
@@ -2149,7 +3379,7 @@
 
 <template-set name=sw-data-jukkan templateselector=swDataValueSelector>
   <template>
-    <a data-href-template=/jukkan/{value1}>
+    <a data-href-template=/kanshi/10:{value1}>
       <data data-field=label></data>
       (<data data-field=value0></data><sub>0</sub>,
        <data data-field=value1></data><sub>1</sub>)<!--
@@ -2160,7 +3390,7 @@
 
 <template-set name=sw-data-juunishi templateselector=swDataValueSelector>
   <template>
-    <a data-href-template=/juunishi/{value1}>
+    <a data-href-template=/kanshi/12:{value1}>
       <data data-field=label></data>
       (<data data-field=value0></data><sub>0</sub>,
        <data data-field=value1></data><sub>1</sub>)<!--
@@ -2781,6 +4011,12 @@
   </template>
 </template-set>
 
+<template-set name=sw-data-erasystem>
+  <template>
+    <a data-href-template=/era/system/{eraSystem.key}><code data-field=eraSystem.key></code></a>
+  </template>
+</template-set>
+
 <template-set name=sw-data-day>
   <template>
     <p class=info>
@@ -2797,7 +4033,7 @@
           label-6=土曜日
       ></enum-value></data></can-copy>
     <p class=full-date>グレゴリオ暦 <span data-field=gregorian.year></span>年<span data-field=gregorian.month></span>月<span data-field=gregorian.day></span>日
-    <p class=full-date>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
+    <p class=full-date data-hidden-field=julian_hidden data-filled=hidden>ユリウス暦 <span data-field=julian.year></span>年<span data-field=julian.month></span>月<span data-field=julian.day></span>日
     <p class=full-date data-hidden-field=nongli_tiger_hidden data-filled=hidden>農暦(寅) <span data-field=nongli_tiger.year></span>年<enum-value class=leap data-field=nongli_tiger.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_tiger.month></span>月<span data-field=nongli_tiger.day></span>日
     <p class=full-date data-hidden-field=nongli_ox_hidden data-filled=hidden>農暦(丑) <span data-field=nongli_ox.year></span>年<enum-value class=leap data-field=nongli_ox.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_ox.month></span>月<span data-field=nongli_ox.day></span>日
     <p class=full-date data-hidden-field=nongli_rat_hidden data-filled=hidden>農暦(子) <span data-field=nongli_rat.year></span>年<enum-value class=leap data-field=nongli_rat.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_rat.month></span>月<span data-field=nongli_rat.day></span>日
