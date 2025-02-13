@@ -2,18 +2,12 @@ package SWD::Web;
 use strict;
 use warnings;
 use Path::Tiny;
-use Time::HiRes qw(time);
 use Promise;
 use Promised::File;
-use Web::DateTime;
-use Web::DateTime::TimeZone;
-use Web::DateTime::Parser;
 use Web::URL::Encoding;
-use Kyuureki qw(kyuureki_to_gregorian);
 use JSON::PS;
 use Wanage::HTTP;
 use Warabe::App;
-use Temma;
 
 sub psgi_app ($) {
   my ($class) = @_;
@@ -30,23 +24,6 @@ sub psgi_app ($) {
     });
   };
 } # psgi_app
-
-use Path::Class; # XXX
-my $TemplatesD = file (__FILE__)->dir->parent->parent->subdir ('templates');
-sub temma ($$$) {
-  my ($app, $template_path, $args) = @_;
-  my $http = $app->http;
-  $http->response_mime_type->set_value ('text/html');
-  $http->response_mime_type->set_param (charset => 'utf-8');
-  my $fh = SWD::Web::Temma::Printer->new_from_http ($http);
-  $args->{app} = $app;
-  return Promise->new (sub {
-    my $ok = $_[0];
-    Temma->process_html
-        ($TemplatesD->file (@$template_path), $args => $fh,
-         sub { undef $fh; $http->close_response_body; $ok->() });
-  });
-} # temma
 
 my $RootPath = path (__FILE__)->parent->parent->parent;
 
@@ -95,96 +72,17 @@ sub main ($$$) {
     return static $app, 'text/javascript; charset=utf-8', 'js/' . $path->[1];
   }
 
-  {
-    my $dt;
-    if (@$path == 2 and $path->[0] eq 'datetime') {
-      # /datetime/{...}
-      if ($path->[1] =~ /\A[+-]?[0-9]+(?:\.[0-9]+|)\z/) {
-        $dt = Web::DateTime->new_from_unix_time ($path->[1]);
-      } elsif ($path->[1] =~ /\Akyuureki:([0-9]+)-([0-9]+)('?)-([0-9]+)\z/) {
-        my $parser = Web::DateTime::Parser->new;
-        my $d = [kyuureki_to_gregorian $1, $2, $3, $4];
-        $dt = $parser->parse_date_string
-            (sprintf '%04d-%02d-%02d', $d->[0], $d->[1], $d->[2])
-                if defined $d->[0];
-      } elsif ($path->[1] eq 'now' or $path->[1] eq '') {
-        $dt = Web::DateTime->new_from_unix_time (time);
-      } elsif ($path->[1] =~ /\Ajd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-        $dt = Web::DateTime->new_from_jd ($1);
-      } elsif ($path->[1] =~ /\Amjd:([+-]?[0-9]+(?:\.[0-9]+|))\z/) {
-        $dt = Web::DateTime->new_from_mjd ($1);
-      } elsif ($path->[1] =~ /\Ajulian:(.+)\z/) {
-        my $parser = Web::DateTime::Parser->new;
-        $dt = $parser->parse_julian_ymd_string ($1);
-      } elsif ($path->[1] =~ /\A([+-]?[0-9]+-[0-9]+-[0-9]+)\z/) {
-        my $parser = Web::DateTime::Parser->new;
-        $dt = $parser->parse_ymd_string ($1);
-      } else {
-        $path->[1] =~ s/\s+([+-][0-9]{2}:[0-9]{2})$/$1/;
-        my $parser = Web::DateTime::Parser->new;
-        $dt = $parser->parse_html_datetime_value ($path->[1]);
-      }
+  if (@$path == 2 and $path->[0] eq 'spots') {
+    # //WORLD/spots/{spot_id}
+    my $mapped = $SWWPages->{$path->[1]};
+    if (defined $mapped) {
+      return $app->throw_redirect ('https://wiki.suikawiki.org/n/' . $mapped);
     }
 
-    if (@$path == 2 and $path->[0] eq 'spots') {
-      # //WORLD/spots/{spot_id}
-      my $mapped = $SWWPages->{$path->[1]};
-      if (defined $mapped) {
-        return $app->throw_redirect ('https://wiki.suikawiki.org/n/' . $mapped);
-      }
-
-      if ($path->[1] eq 'search') {
-        # //WORLD/spots/search?q={text}
-        return $app->throw_redirect ('https://wiki.suikawiki.org/n/Wiki%2F%2FSearch?q=' . percent_encode_c ($app->text_param ('q') // ''));
-      }
+    if ($path->[1] eq 'search') {
+      # //WORLD/spots/search?q={text}
+      return $app->throw_redirect ('https://wiki.suikawiki.org/n/Wiki%2F%2FSearch?q=' . percent_encode_c ($app->text_param ('q') // ''));
     }
-
-    if ($path->[0] eq 'y' or
-        $path->[0] eq 'e' or
-        $path->[0] eq 'p' or
-        $path->[0] eq 'tag' or
-        $path->[0] eq 'spots' or
-        $path->[0] eq 'world' or
-        $path->[0] eq 'antenna' or
-        $path->[0] eq 'chars' or
-        $path->[0] eq 'char' or
-        $path->[0] eq 'string' or
-        $path->[0] eq 'number' or
-        $path->[0] eq 'boolean' or
-        $path->[0] eq 'lat' or
-        $path->[0] eq 'lon' or
-        $path->[0] eq 'latlon' or
-        $path->[0] eq 'tzoffset' or
-        ($path->[0] eq 'datetime' and not defined $dt) or
-        $path->[0] eq 'year' or
-        $path->[0] eq 'era' or
-        $path->[0] eq 'kanshi' or
-        $path->[0] eq '' or
-        $path->[0] eq 'web' or
-        $path->[0] eq 'radio' or
-        $path->[0] eq 'houses' or
-        $path->[0] eq 'about' or
-        $path->[0] eq 'license') {
-      return static $app, 'text/html; charset=utf-8', 'html/year.html';
-    }
-
-    if (defined $dt and $dt->is_date_time) {
-      if (not $dt->has_component ('year') and
-               $dt->has_component ('month') and
-               $dt->has_component ('day')) {
-        return temma $app, ['yearless-date.html.tm'], {value => $dt};
-      } else {
-        return temma $app, ['datetime.html.tm'], {value => $dt};
-      }
-    }
-  }
-
-  if ((@$path == 2 and $path->[0] eq 'lang') or
-      (@$path == 1 and $path->[0] eq 'lang')) {
-    # /lang/{langtag}
-    # /lang?tag={langtag}
-    my $tag = $path->[1] // $app->text_param ('tag') // '';
-    return temma $app, ['lang.html.tm'], {tag => $tag};
   }
 
   if (@$path == 4 and
@@ -303,33 +201,20 @@ sub main ($$$) {
     return $app->send_redirect ('https://wiki.suikawiki.org/favicon.ico');
   }
 
+  unless ({
+    data => 1, fonts => 1, css => 1, js => 1,
+  }->{$path->[0]}) {
+    return static $app, 'text/html; charset=utf-8', 'html/year.html';
+  }
+
   return $app->send_error (404);
 } # main
-
-package SWD::Web::Temma::Printer;
-
-sub new_from_http ($$) {
-  return bless {http => $_[1], value => ''}, $_[0];
-} # new_from_http
-
-sub print ($$) {
-  $_[0]->{value} .= $_[1];
-  if (length $_[0]->{value} > 1024*10 or length $_[1] == 0) {
-    $_[0]->{http}->send_response_body_as_text ($_[0]->{value});
-    $_[0]->{value} = '';
-  }
-} # print
-
-sub DESTROY {
-  $_[0]->{http}->send_response_body_as_text ($_[0]->{value})
-      if length $_[0]->{value};
-} # DESTROY
 
 1;
 
 =head1 LICENSE
 
-Copyright 2015-2017 Wakaba <wakaba@suikawiki.org>.
+Copyright 2015-2025 Wakaba <wakaba@suikawiki.org>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

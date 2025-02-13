@@ -727,6 +727,552 @@
 
   </template>
 
+  <template data-name=page-datetime-itemmd>
+    <t-title>Gregorian yearless dates, month <span data-field=month></span>, day <span data-field=day></span></t-title>
+    <t-category><a href=/datetime/--mm-dd>Gregorian yearless date</a></t-category>
+    <t-sw data-field=serialized></t-sw>
+    <t-keyword data-field=serialized></t-keyword>
+
+    <div id=yearless-date>
+
+      <section id=components>
+        <h1>Components</h1>
+
+        <table class="nv">
+          <tbody>
+            <tr>
+              <th>Month
+              <td><sw-data-number data-field=month></sw-data-number>
+            <tr>
+              <th>Day
+              <td><sw-data-number data-field=day></sw-data-number>
+        </table>
+      </section>
+
+      <section id=memorials>
+        <h1>Memorial days</h1>
+        <list-container loader=swDayMemorialListLoader type=ul data-loader-day-field=serialized data-filled=loader-day>
+          <ul></ul>
+          <template>
+              <a data-href-template="https://ja.wikipedia.org/wiki/{wref}" data-title-field=desc data-filled=title data-field=name data-empty=■></a>
+              <span class=desc data-field=desc></span>
+          </template>
+        </list-container>
+      </section>
+
+      <section id=birthday>
+        <h1>Birthday</h1>
+        <list-container loader=swDayBirthListLoader type=ul data-loader-day-field=serialized data-filled=loader-day>
+          <ul></ul>
+          <template>
+              <a data-href-template="https://ja.wikipedia.org/wiki/{wref}" data-title-field=desc data-filled=title data-field=name data-empty=■></a>
+              <sw-if-defined data-field=day>
+                (<sw-data-day data-field=day link></sw-data-day>)
+              </sw-if-defined>
+          </template>
+        </list-container>
+      </section>
+
+      <section id=events>
+        <h1>Events</h1>
+        <list-container loader=swDayEventListLoader type=ul data-loader-day-field=serialized data-filled=loader-day>
+          <ul></ul>
+          <template>
+            <sw-data-day data-field=day link></sw-data-day>
+            <span data-field=desc></span>
+          </template>
+        </list-container>
+      </section>
+
+      <section id=serializations>
+        <h1>Serialization</h1>
+
+        <table class=nv>
+          <tbody>
+            <tr>
+              <th>Yearless date string
+              <td><code data-field=serialized></code>
+        </table>
+      </section>
+
+      <!--
+      <section id=links>
+        <h1>Links</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>
+          <th>Previous
+          <th>Next
+      <tbody>
+        <tr>
+          <th>100 days
+          <td><m:yearless-date m:value="$value->to_unix_number -100*24*60*60"/>
+          <td><m:yearless-date m:value="$value->to_unix_number +100*24*60*60"/>
+        <tr>
+          <th>31 days
+          <td><m:yearless-date m:value="$value->to_unix_number - 31*24*60*60"/>
+          <td><m:yearless-date m:value="$value->to_unix_number + 31*24*60*60"/>
+        <tr>
+          <th>30 days
+          <td><m:yearless-date m:value="$value->to_unix_number - 30*24*60*60"/>
+          <td><m:yearless-date m:value="$value->to_unix_number + 30*24*60*60"/>
+        <tr>
+          <th>7 days
+          <td><m:yearless-date m:value="$value->to_unix_number - 7*24*60*60" />
+          <td><m:yearless-date m:value="$value->to_unix_number + 7*24*60*60" />
+        <tr>
+          <th>A day
+          <td><m:yearless-date m:value="$value->to_unix_number - 24*60*60"  />
+          <td><m:yearless-date m:value="$value->to_unix_number + 24*60*60"  />
+    </table>
+    -->
+
+    <!--
+    <ul>
+      <li><a pl:href="sprintf 'https://en.wikipedia.org/wiki/%s_%d', [undef, 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']->[$value->month], $value->day">Wikipedia (English)</a>
+      <li><a pl:href="sprintf 'https://ja.wikipedia.org/wiki/%d月%d日', $value->month, $value->day">Wikipedia (日本語)</a>
+    </ul>
+      </section>
+      -->
+
+    </div>
+  </template>
+
+  <template data-name=page-datetime-item>
+    <t-title>日時 <span data-field=time.serialized></span></t-title>
+    <t-category>日時</t-category>
+    <t-sw data-field=time.daySerialized></t-sw>
+    <t-keyword data-field=time.daySerialized></t-keyword>
+
+    <!--
+    <section id=components>
+      <h1>Components</h1>
+
+    <table class="nv">
+      <tbody>
+        <tr>
+          <th>Year
+          <td><m:year m:value="$value->year"/>
+        <tr>
+          <th>Month
+          <td><t:text value="$value->month">
+        <tr>
+          <th>Day
+          <td><t:text value="$value->day">
+        <tr>
+          <th>Hour
+          <td><t:text value="$value->hour">
+        <tr>
+          <th>Minute
+          <td><t:text value="$value->minute">
+        <tr>
+          <th>Second (integer part)
+          <td><t:text value="$value->second">
+        <tr>
+          <th>Second (fraction part)
+          <td><t:text value="'0'.$value->second_fraction_string">
+        <tr>
+          <th>Time zone offset
+          <td>
+            <t:if x="defined $value->time_zone">
+              <m:tzoffset m:tzvalue="TZOffset->new_from_seconds ($value->time_zone->offset_as_seconds)"/>
+            <t:else>
+              None
+            </t:if>
+    </table>
+    </section>
+    -->
+
+    <section id=day>
+      <h1>Day (<time data-datetime-field=time.daySerialized data-filled=datetime></time>)</h1>
+
+      <section id=calendars>
+        <h1>Calendars</h1>
+
+        <!--
+    <t:macro name=gengou-y t:params="$unix $year $context $link?">
+      <t:my as=$x x="[SWD::Eras::get_era_and_era_year ($context, $unix, $year)]">
+      <t:if x=$link>
+        <m:era m:key="$x->[0]" m:inline=1 />
+      <t:else>
+        <t:text value="$x->[0]">
+      </t:if><t:text value="$x->[1] == 1 ? '元' : $x->[1]">年
+    </>
+
+    <t:macro name=kyuureki-ymd t:params=$value>
+      <t:if x="defined $value->[0]">
+        <t:attr name="'lang'" value="'ja'">
+        <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                    $value->[0],
+                    $value->[1],
+                    $value->[2] ? q{'} : '',
+                    $value->[3]" rel=bookmark><t:text value="
+          sprintf '%s年%s%s月%s日',
+              $value->[0],
+              $value->[2] ? '閏' : '',
+              $value->[1] == 1 ? '正' : $value->[1],
+              $value->[3] == 1 ? '朔' : $value->[3];
+        "></a>
+      <t:else>
+        <t:attr name="'lang'" value="'en'">
+          Unknown
+      </t:if>
+    </>
+
+    <t:macro name=kyuureki-gengou-ymd t:params="$value $unix $context">
+      <t:if x="defined $value->[0]">
+        <t:attr name="'lang'" value="'ja'">
+        <a pl:href="sprintf '/datetime/kyuureki:%04d-%02d%s-%02d',
+                    $value->[0],
+                    $value->[1],
+                    $value->[2] ? q{'} : '',
+                    $value->[3]" rel=bookmark><m:gengou-y m:unix=$unix m:year="$value->[0]" m:context=$context /><t:text value="
+          sprintf '%s%s月%s日',
+              $value->[2] ? '閏' : '',
+              $value->[1] == 1 ? '正' : $value->[1],
+              $value->[3] == 1 ? '朔' : $value->[3];
+        "></a>
+      <t:else>
+        <t:attr name="'lang'" value="'en'">
+          Unknown
+      </t:if>
+    </>
+-->
+
+      <table class=nnv>
+        <tbody>
+          <tr>
+            <th rowspan=3>Proleptic Gregorian calendar
+            <th>AD
+            <td><code data-field=time.daySerialized></code>
+              <!--
+        <tr>
+          <th>Japan
+          <td><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 /><t:text value="$value->month">月<t:text value="$value->day">日
+        <tr>
+          <th>Ryuukyuu
+          <td><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->year" m:link=1 /><t:text value="$value->month">月<t:text value="$value->day">日
+        </tr>
+
+        <tr>
+          <th rowspan=3>Proleptic Julian calendar
+          <th>AD
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><t:text value="$value->to_julian_ymd_string"></a>
+        <tr>
+          <th>Japan
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><m:gengou-y m:value=$value m:context="'jp'" m:unix="$value->to_unix_number" m:year="$value->julian_year" /><t:text value="$value->julian_month">月<t:text value="$value->julian_day">日</a>
+        <tr>
+          <th>Ryuukyuu
+          <td><a pl:href="'/datetime/julian:' . $value->to_julian_ymd_string" rel=bookmark><m:gengou-y m:value=$value m:context="'ryuukyuu'" m:unix="$value->to_unix_number" m:year="$value->julian_year" /><t:text value="$value->julian_month">月<t:text value="$value->julian_day">日</a>
+
+        <tr>
+          <th rowspan=3><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Japan)
+          <th>AD
+          <td><m:kyuureki-ymd m:value=$kyuureki />
+        <tr>
+          <th>Japan (北朝)
+          <td><m:kyuureki-gengou-ymd m:value=$kyuureki m:context="'jp-north'" m:unix="$value->to_unix_number"/>
+        <tr>
+          <th>Japan (南朝)
+          <td><m:kyuureki-gengou-ymd m:value=$kyuureki m:context="'jp-south'" m:unix="$value->to_unix_number"/>
+        </tr>
+
+        <tr>
+          <th rowspan=2><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-kyuureki.txt lang=ja><ruby>旧暦<rt>Kyuureki</ruby></a> (Ryuukyuu)
+          <th>AD
+          <td><m:kyuureki-ymd m:value=$rkyuureki />
+        <tr>
+          <th>Ryuukyuu
+            <td><m:kyuureki-gengou-ymd m:value=$rkyuureki m:context="'ryuukyuu'" m:unix="$value->to_unix_number"/>
+                -->
+      </table>
+    </section>
+
+<!--
+    <section id=holidays>
+      <h1>Holidays</h1>
+
+    <table class=nv>
+      <tbody>
+        <tr>
+          <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Japan</a>
+          <td>
+            <t:if x="$SWD::Holidays::JPFlagdays->{$day}">
+              <span class=flag>&#x1F1EF;&#x1F1F5;</span>
+            </t:if>
+            <t:if x="defined $SWD::Holidays::JPHolidays->{$day}">
+              <span style=color:red lang=ja>
+                <t:text value="$SWD::Holidays::JPHolidays->{$day}">
+              </span>
+            <t:else>
+              <t:if x="$value->year > 1876 or
+                     ($value->year == 1876 and $value->month >= 4)">
+                <t:if x="$value->day_of_week == 0">
+                  <span style=color:red>Sunday</span>
+                <t:elsif x="$value->day_of_week == 6">
+                  <span style=color:blue>Saturday</span>
+                <t:else>
+                  Normal day
+                </t:if>
+              <t:else>
+                Normal day
+              </t:if>
+            </t:if>
+        </tr>
+        <t:if x="1945 <= $value->year and $value->year <= 1972">
+          <tr>
+            <th lang=ja><a href=https://github.com/manakai/data-locale/blob/master/doc/calendar-holidays.txt>Ryukyu</a>
+            <td>
+              <t:if x="defined $SWD::Holidays::RyukyuHolidays->{$day}">
+                <span style=color:red lang=ja>
+                  <t:text value="$SWD::Holidays::RyukyuHolidays->{$day}">
+                </span>
+              <t:elsif x="$value->day_of_week == 0">
+                <span style=color:red>Sunday</span>
+              <t:else>
+                Normal day
+              </t:if>
+        </t:if>
+    </table>
+  </section>
+    -->
+    
+    <section id=props>
+      <h1>Properties</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Yearless date
+            <td><sw-data-yearlessdate data-month-field=time.month data-day-field=time.day data-filled="month day"></sw-data-yearlessdate>
+          <tr>
+            <th>Day of week (number)
+            <td>
+              <code data-field=time.dow></code>
+              (English:
+              <enum-value data-field=time.dow
+                          label-0=Sunday
+                          label-1=Monday
+                          label-2=Tuesday
+                          label-3=Wednesday
+                          label-4=Thursday
+                          label-5=Friday
+                          label-6=Saturday></enum-value>,
+              日本語:
+              <enum-value data-field=time.dow
+                          label-0=日
+                          label-1=月
+                          label-2=火
+                          label-3=水
+                          label-4=木
+                          label-5=金
+                          label-6=土></enum-value>)
+          <tr>
+            <th><a href=/kanshi>Kanshi</a>
+            <td><sw-data-kanshi data-field=time.kanshi0></sw-data-kanshi>
+         <!--
+        <tr lang=ja>
+          <th>六曜 (Japan)
+          <td>
+            <t:if x="defined $kyuureki->[0]">
+              <t:text value="
+                use utf8;
+                qw(大安 赤口 先勝 友引 先負 仏滅)[($kyuureki->[1] + $kyuureki->[3]) % 6];
+              ">
+            <t:else>
+              <t:attr name="'lang'" value="'en'">
+              Unknown
+            </t:if>
+            -->
+      </table>
+    </section>
+  </section>
+
+    <section id=cast>
+      <h1>Cast</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Unix number
+            <td><sw-data-number data-field=time.unix></sw-data-number>
+          <tr>
+            <th>Unix integer
+            <td><sw-data-number data-field=time.unix operation=floor></sw-data-number>
+        <!--
+        <tr>
+          <th>HTML number
+          <td><m:number m:value="$value->to_html_number"/>
+        <tr>
+          <th>HTML month number
+            <td><m:number m:value="$value->to_html_month_number"/>
+                -->
+          <tr>
+            <th>Julian Day
+            <td><sw-data-number data-field=time.jd></sw-data-number>
+          <tr>
+            <th>Julian Day (integer of day)
+            <td><sw-data-number data-field=time.jd delta=0.5></sw-data-number>
+          <tr>
+            <th>Modified Julian Day
+            <td><sw-data-number data-field=time.mjd></sw-data-number>
+          <!--
+        <tr>
+          <th>Rata Die
+            <td><m:number m:value="$value->to_rd"/>
+                -->
+      </table>
+    </section>
+
+    <section id=serializations>
+      <h1>Serializations</h1>
+
+      <table class=nv>
+        <tbody>
+          <!--
+          <tr>
+          <th>Global date and time string (time zone offset preserved)
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_time_zoned_global_date_and_time_string" rel=bookmark><time pl:datetime="$value->to_time_zoned_global_date_and_time_string"><t:text value="$value->to_time_zoned_global_date_and_time_string"></></a>
+        <tr>
+          <th>Global date and time string (UTC)
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_global_date_and_time_string" rel=bookmark><time pl:datetime="$value->to_global_date_and_time_string"><t:text value="$value->to_global_date_and_time_string"></></a>
+        <tr>
+          <th>Normalized forced-UTC global date and time string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_normalized_forced_utc_global_date_and_time_string" rel=bookmark><time pl:datetime="$value->to_normalized_forced_utc_global_date_and_time_string"><t:text value="$value->to_normalized_forced_utc_global_date_and_time_string"></></a>
+        <tr>
+          <th>HTTP date
+          <td><code><t:text value="$value->to_http_date_string"></code>
+        <tr>
+          <th>RSS2 date-time
+          <td><code><t:text value="$value->to_rss2_date_time_string"></code>
+        <tr>
+          <th><code>document.lastModified</code> format
+          <td><code><t:text value="$value->to_document_last_modified_string"></code>
+        <tr>
+          <th>Local date and time string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_local_date_and_time_string" rel=bookmark><time pl:datetime="$value->to_local_date_and_time_string"><t:text value="$value->to_local_date_and_time_string"></></a>
+        <tr>
+          <th>Normalized local date and time string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_normalized_local_date_and_time_string" rel=bookmark><time pl:datetime="$value->to_normalized_local_date_and_time_string"><t:text value="$value->to_normalized_local_date_and_time_string"></></a>
+        <tr>
+          <th>Date string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_date_string" rel=bookmark><time pl:datetime="$value->to_date_string"><t:text value="$value->to_date_string"></></a>
+        <tr>
+          <th>Date string with optional time
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_date_string_with_optional_time" rel=bookmark><time pl:datetime="$value->to_date_string_with_optional_time"><t:text value="$value->to_date_string_with_optional_time"></></a>
+        <tr>
+          <th>Year string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_year_string" rel=bookmark><time pl:datetime="$value->to_year_string"><t:text value="$value->to_year_string"></></a>
+        <tr>
+          <th>Month string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_month_string" rel=bookmark><time pl:datetime="$value->to_month_string"><t:text value="$value->to_month_string"></></a>
+        <tr>
+          <th>Yearless date string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_yearless_date_string" rel=bookmark><time pl:datetime="$value->to_yearless_date_string"><t:text value="$value->to_yearless_date_string"></></a>
+        <tr>
+          <th>Week string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_week_string" rel=bookmark><time pl:datetime="$value->to_week_string"><t:text value="$value->to_week_string"></></a>
+        <tr>
+          <th>Time string
+          <td><a pl:href="sprintf '/datetime/%s', $value->to_time_string" rel=bookmark><time pl:datetime="$value->to_time_string"><t:text value="$value->to_time_string"></></a>
+        <tr>
+          <th>Shortest time string
+            <td><a pl:href="sprintf '/datetime/%s', $value->to_shortest_time_string" rel=bookmark><time pl:datetime="$value->to_shortest_time_string"><t:text value="$value->to_shortest_time_string"></></a>
+<tbody>
+-->
+          <tr>
+            <th><code>toISOString</code>
+            <td><code data-field=time.serialized></code>
+          <tr>
+            <th><code>toString</code>
+            <td><code data-field=time.toString></code>
+          <tr>
+            <th><code>toDateString</code>
+            <td><code data-field=time.toDateString></code>
+          <tr>
+            <th><code>toTimeString</code>
+            <td><code data-field=time.toTimeString></code>
+          <tr>
+            <th><code>toGMTString</code>
+            <td><code data-field=time.toGMTString></code>
+          <tr>
+            <th><code>toUTCString</code>
+            <td><code data-field=time.toUTCString></code>
+          <tr>
+            <th><code>toJSON</code>
+            <td><code data-field=time.toJSON></code>
+      </table>
+
+<!--
+      <table class=nnv>
+        <tbody>
+          <t:my as=$locales x="[qw(en en-US en-GB fr fr-CA es es-US it de ja ja-JP ja-JP-u-ca-japanese zh zh-CN zh-TW zh-HK zh-MO zh-SG zh-Hant zh-Hani zh-u-ca-chinese zh-TW-u-ca-roc ko th th-u-ca-buddhist-nu-thai th-u-nu-arab ar-EG ar-SA ar-SA-u-ca-islamic-nu-latn)]">
+          <tr>
+            <th pl:rowspan=1+@$locales><code>toLocaleString</code>
+            <th><m:undefined/>
+            <td><output/>
+          </tr>
+          <t:for as=$locale x=$locales>
+            <tr>
+              <th><code><t:text value=$locale></code>
+              <td pl:lang=$locale><output/>
+          </t:for>
+          <tr>
+            <th><code>toLocaleDateString</code>
+            <th><m:undefined/>
+            <td><output/>
+          <tr>
+            <th><code>toLocaleTimeString</code>
+            <th><m:undefined/>
+            <td><output/>
+      </table>
+      -->
+      </section>
+    </section>
+
+<!--
+  <section id=links>
+    <h1>Links</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>
+          <th>Previous
+          <th>Next
+      <tbody>
+        <tr>
+          <th>365 days
+          <td><m:unixtime m:value="$value->to_unix_number - 365*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 365*24*60*60" m:formatted=1 />
+        <tr>
+          <th>30 days
+          <td><m:unixtime m:value="$value->to_unix_number - 30*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 30*24*60*60" m:formatted=1 />
+        <tr>
+          <th>7 days
+          <td><m:unixtime m:value="$value->to_unix_number - 7*24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 7*24*60*60" m:formatted=1 />
+        <tr>
+          <th>Day
+          <td><m:unixtime m:value="$value->to_unix_number - 24*60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 24*60*60" m:formatted=1 />
+        <tr>
+          <th>Hour
+          <td><m:unixtime m:value="$value->to_unix_number - 60*60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 60*60" m:formatted=1 />
+        <tr>
+          <th>Minute
+          <td><m:unixtime m:value="$value->to_unix_number - 60" m:formatted=1 />
+          <td><m:unixtime m:value="$value->to_unix_number + 60" m:formatted=1 />
+    </table>
+  </section>
+  -->
+
+  </template>
+
   <template data-name=page-year-index>
     <t-title>年の一覧</t-title>
     <t-category>日時</t-category>
@@ -2040,6 +2586,223 @@
         </template>
       </list-container>
     </section>
+  </template>
+
+  <template data-name=page-lang-item>
+    <t-title>言語タグ <code data-field=tag></code></t-title>
+    <t-category>言語タグ</t-category>
+    <t-keyword data-field=tag></t-keyword>
+
+    <form method=get action=/lang class=input>
+      <input name=tag data-field=tag>
+      <button type=submit>Go</button>
+    </form>
+
+    <section id=ids>
+      <h1>Identifiers</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Input
+            <td><code data-field=tag></code>
+              <!--
+        <tr>
+          <th>Normalized
+          <td><m:lang m:value="Web::LangTag->new->normalize_tag ($tag)"/>
+        <tr>
+          <th>Canonicalized
+          <td><m:lang m:value="Web::LangTag->new->canonicalize_tag ($tag)"/>
+        <tr>
+          <th>Extlang form
+          <td><m:lang m:value="Web::LangTag->new->to_extlang_form_tag ($tag)"/>
+-->
+      </table>
+    </section>
+
+  <!--
+  <t:my as=$versions x="[
+    {name => 'rfc5646', label => 'RFC 5646', parsible => 1, validity => 1},
+    {name => 'rfc4646', label => 'RFC 4646', parsible => 1, validity => 1},
+    {name => 'rfc3066', label => 'RFC 3066'},
+    {name => 'rfc1766', label => 'RFC 1766'},
+  ]">
+  <section id=parsing>
+    <h1>Components</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th/>
+          <t:for as=$version x=$versions>
+            <th><a pl:href="'https://tools.ietf.org/html/' . $version->{name}"><t:text value="$version->{label}"></a>
+          </t:for>
+      <tbody>
+      <t:my as=$data x="
+        my $data = {};
+        for my $version (@$versions) {
+          my $result;
+          my $lt = Web::LangTag->new;
+          $result->{errors} = my $errors = [];
+          $lt->onerror (sub {
+            push @$errors, {@_};
+          });
+
+          if ($version->{parsible}) {
+            my $method = 'parse_' . $version->{name} . '_tag';
+            $result->{parsed} = my $parsed = $lt->$method ($tag);
+            $method = 'check_' . $version->{name} . '_parsed_tag';
+            $result->{result} = $lt->$method ($parsed);
+          } else {
+            my $method = 'check_' . $version->{name} . '_tag';
+            $result->{result} = $lt->$method ($tag);
+          }
+
+          $data->{$version->{name}} = $result;
+        }
+        $is_valid = $data->{$versions->[0]->{name}}->{result}->{valid};
+        $data;
+      ">
+
+        <tr>
+          <th>Language subtag</>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{language}">
+              <t:if x="defined $value">
+                <code><t:text value=$value></code>
+              </>
+          </t:for>
+        <tr>
+          <th>Extlang subtags</th>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{extlang}">
+              <t:for as=$value x=$value>
+                <code><t:text value=$value></code>
+              <t:sep>
+                <t:text value="', '">
+              </t:for>
+          </t:for>
+        <tr>
+          <th>Script subtag</>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{script}">
+              <t:if x="defined $value">
+                <code><t:text value=$value></code>
+              </>
+          </t:for>
+        <tr>
+          <th>Region subtag</>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{region}">
+              <t:if x="defined $value">
+                <code><t:text value=$value></code>
+              </>
+          </t:for>
+        <tr>
+          <th>Variant subtags</th>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{variant}">
+              <t:for as=$value x=$value>
+                <code><t:text value=$value></code>
+              <t:sep>
+                <t:text value="', '">
+              </t:for>
+          </t:for>
+        <tr>
+          <th>Privateuse subtags</th>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{privateuse}">
+              <t:for as=$value x=$value>
+                <code><t:text value=$value></code>
+              <t:sep>
+                <t:text value="', '">
+              </t:for>
+          </t:for>
+        <tr class=extlang>
+          <th>Extension <code>u</code></th>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{u}">
+              <t:for as=$value x=$value>
+                <p>
+                  <t:for as=$value x=$value>
+                    <code><t:text value=$value></code>
+                  <t:sep>
+                    <t:text value="', '">
+                  </t:for>
+              </t:for>
+          </t:for>
+        <tr class=extlang>
+          <th>Extension <code>t</code></th>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:my as=$value x="$data->{$version->{name}}->{parsed}->{t}">
+              <t:for as=$value x=$value>
+                <p>
+                  <t:for as=$value x=$value>
+                    <code><t:text value=$value></code>
+                  <t:sep>
+                    <t:text value="', '">
+                  </t:for>
+              </t:for>
+          </t:for>
+
+        <tr class=test-result>
+          <th>Well-formed</>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:if x="$version->{validity}">
+                <m:boolean m:value="$data->{$version->{name}}->{result}->{well_formed}"/>
+              </t:if>
+          </t:for>
+        <tr class=test-result>
+          <th>Valid</>
+          <t:for as=$version x=$versions>
+            <td>
+              <t:if x="$version->{validity}">
+                <m:boolean m:value="$data->{$version->{name}}->{result}->{valid}"/>
+              </t:if>
+          </t:for>
+        <tr>
+          <th>Errors</th>
+          <t:for as=$version x=$versions>
+            <td class=long>
+              <t:if x="0+@{$data->{$version->{name}}->{errors}}">
+                <ul class=error-list>
+                  <t:for as=$error x="$data->{$version->{name}}->{errors}">
+                    <li pl:data-level="$error->{level}">
+                      <t:if x="$error->{level} eq 'm'">
+                        <strong><em class=rfc2119>MUST</em>-level error</>:
+                      <t:elsif x="$error->{level} eq 's'">
+                        <strong><em class=rfc2119>SHOULD</em>-level error</>:
+                      <t:elsif x="$error->{level} eq 'w'">
+                        <strong>Warning</strong>:
+                      <t:elsif x="$error->{level} eq 'i'">
+                        <strong>Information</strong>:
+                      </t:if>
+
+                      <t:if x="defined $error->{value}">
+                        Value <code><t:text value="$error->{value}"></code>:
+                      </t:if>
+                      <data><t:text value="$error->{type}"></data>
+                      <t:if x="defined $error->{text}">
+                        (<data><t:text value="$error->{text}"></data>)
+                      </t:if>
+                  </t:for>
+                </ul>
+              <t:else>
+                No error.
+              </t:if>
+          </t:for>
+</section>
+-->
+
   </template>
   
   <template data-name=page-tag-item-packages>
@@ -4017,7 +4780,7 @@
   </template>
 </template-set>
 
-<template-set name=sw-data-day>
+<template-set name=sw-data-day templateselector=swDataValueSelector>
   <template>
     <p class=info>
       <can-copy><a data-href-template=/datetime/jd:{value.jd}>JD:<data data-field=value.jd></data></a></can-copy>
@@ -4041,6 +4804,7 @@
     <p class=full-date data-hidden-field=nongli_wuzhou_hidden data-filled=hidden>農暦(武周) <span data-field=nongli_wuzhou.year></span>年<enum-value class=leap data-field=nongli_wuzhou.leap_month label-true=閏 label-false></enum-value><span data-field=nongli_wuzhou.month></span>月<span data-field=nongli_wuzhou.day></span>日
     <p class=full-date data-hidden-field=kyuureki_hidden data-filled=hidden>旧暦 <span data-field=kyuureki.year></span>年<enum-value class=leap data-field=kyuureki.leap_month label-true=閏 label-false></enum-value><span data-field=kyuureki.month></span>月<span data-field=kyuureki.day></span>日
   </template>
+  <template data-name=link><a data-href-template=/datetime/{value.gregorian}><time data-datetime-field=value.gregorian data-filled=datetime></time></a></template>
 </template-set>
 
 <template-set name=sw-data-tag-text>

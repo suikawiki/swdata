@@ -852,6 +852,96 @@ SWD.openPage = function (url) {
         return args;
       }
     }
+
+      // /datetime/now
+      // /datetime/
+      if (path === '/datetime/' || path === '/datetime/now') {
+        args.time = SWD.time ({unix: new Date ().valueOf () / 1000}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+    if (path.match (/^\/datetime\/[^\/]+$/)) {
+      let p = decodeURIComponent (path.replace (/^\/datetime\//, ''));
+      
+      // /datetime/--{m}-{d}
+      let m = p.match (/^--0*([1-9]+|1[0-2])-0*([1-9]+|[12][0-9]|3[01])$/);
+      if (m) {
+        args.month = parseFloat (m[1]);
+        args.day = parseFloat (m[2]);
+        args.serialized = "--" + (args.month < 10 ? "0" + args.month : args.month) + "-" + (args.day < 10 ? "0" + args.day : args.day);
+        args.name = 'page-datetime-itemmd';
+        return args;
+      }
+
+      // /datetime/{unix}
+      m = p.match (/^([+-]?[0-9]+(?:\.[0-9]+|))$/);
+      if (m) {
+        args.time = SWD.time ({unix: parseFloat (m[1])}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{}:{}
+      m = p.match (/^(jd|mjd|unix):([+-]?[0-9]+(?:\.[0-9]+|))$/);
+      if (m) {
+        args.time = {}
+        args.time[m[1]] = parseFloat (m[2]);
+        args.time = SWD.time (args.time, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/kyuureki:{y}-{m}-{d}
+      m = p.match (/^kyuureki:([+-]?[0-9]+-[0-9]+'?-[0-9]+)$/);
+      if (m) {
+        args.time = SWD.time ({kyuureki: m[1]}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/julian:{y}-{m}-{d}
+      m = p.match (/^julian:([+-]?[0-9]+-[0-9]+-[0-9]+)$/);
+      if (m) {
+        args.time = SWD.time ({julian: m[1]}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{y}-{m}-{d}
+      m = p.match (/^\s*([+-]?[0-9]+-[0-9]+-[0-9]+)\s*$/);
+      if (m) {
+        args.time = SWD.time ({gregorian: m[1]}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{y}-{m}
+      m = p.match (/^\s*([+-]?[0-9]+-[0-9]+)\s*$/);
+      if (m) {
+        args.time = SWD.time ({gregorian: m[1] + "-01"}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{y}-W{w}
+      m = p.match (/^\s*([+-]?[0-9]+)-[Ww]([0-9]+)\s*$/);
+      if (m) {
+        args.time = SWD.time ({year: parseInt (m[1]), week: parseInt (m[2])}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{y}-{m}-{d}T{h}:{m}:{s}{zone}
+      m = p.match (/^\s*([+-]?[0-9]+-[0-9]+-[0-9]+)[Tt\s]+([0-9]+:[0-9]+(?::[0-9]+(?:\.[0-9]+|)|))\s*([+-][0-9]+:[0-9]+\s*|[Zz]\s*|)$/);
+      if (m) {
+        let dt = new Date (m[1] + "T" + m[2] + m[3]);
+        args.time = SWD.time ({unix: dt.valueOf () / 1000}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      // /datetime/{h}:{m}:{s}
+      m = p.match (/^\s*([0-9]+:[0-9]+(?::[0-9]+(?:\.[0-9]+|)|))\s*$/);
+      if (m) {
+        let dt = new Date ("1970-01-01T" + m[1] + "Z");
+        args.time = SWD.time ({unix: dt.valueOf () / 1000}, {view: true});
+        args.name = 'page-datetime-item';
+        return args;
+      }
+      
+    }
     
         // /e/{}/
         var m = path.match (/^\/e\/([0-9]+)\/$/);
@@ -986,6 +1076,27 @@ SWD.openPage = function (url) {
         args.tag = await SWD.tagByName (decodeURIComponent (m[1]));
         if (args.tag) args.name = 'page-tag-item-' + m[2];
         return args;
+      }
+    }
+
+    {
+      // /lang/{}
+      let m = path.match (/^\/lang\/([^\/]+)$/);
+      if (m) {
+        args.tag = decodeURIComponent (m[1]);
+        args.isSensitive = true; // XXX ! isValid
+        args.name = 'page-lang-item';
+        return args;
+      }
+      // /lang?tag={}
+      if (path === '/lang') {
+        let sp = new window.URL (location).searchParams;
+        args.tag = sp.get ('tag');
+        if (args.tag) {
+          args.isSensitive = true; // XXX ! isValid
+          args.name = 'page-lang-item';
+          return args;
+        }
       }
     }
     
@@ -5639,6 +5750,8 @@ defs (() => {
   def.pcHandler = function (templates, obj) {
     if (obj.context.hasAttribute ('text')) {
       return templates.text;
+    } else if (obj.context.hasAttribute ('link')) {
+      return templates.link;
     } else {
       return templates[""];
     }
@@ -6007,6 +6120,102 @@ defineListLoader ('swEraSystemListLoader', function (opts) {
 });
 
 
+
+/* ------ Days ------ */
+
+defineElement ({
+  name: 'sw-data-day',
+  fill: 'idlattribute',
+  props: {
+    pcInit: function () {
+      var v = this.value;
+      if (v) v = SWD.time (v, {});
+      Object.defineProperty (this, 'value', {
+        get: function () {
+          return v;
+        },
+        set: function (newValue) {
+          v = newValue;
+          if (v) v = SWD.time (v, {});
+          this.swUpdate ();
+        },
+      });
+      this.swUpdate ();
+    }, // pcInit
+    swUpdate: async function () {
+      var v = this.value;
+      this.hidden = !v;
+      if (!v) return;
+
+      var args = {value: v, context: this};
+
+      args.weekday = mod (args.value.mjd - 4, 7);
+      
+      var m = (args.value.gregorian || '').match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
+      if (m)args.gregorian = {year: parseFloat (m[1]),
+                        month: parseFloat (m[2]),
+                        day: parseFloat (m[3])};
+      
+      var m = (args.value.julian || '').match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
+      if (m) args.julian = {year: parseFloat (m[1]),
+                     month: parseFloat (m[2]),
+                     day: parseFloat (m[3])};
+      if (!m) args.julian_hidden = '';
+
+      var m = (args.value.nongli_tiger || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_tiger = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_tiger_hidden = '';
+
+      var m = (args.value.nongli_ox || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_ox = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_ox_hidden = '';
+      
+      var m = (args.value.nongli_rat || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_rat = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_rat_hidden = '';
+
+      var m = (args.value.nongli_qin || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_qin = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_qin_hidden = '';
+
+      var m = (args.value.nongli_wuzhou || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
+      if (m) args.nongli_wuzhou = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.nongli_wuzhou_hidden = '';
+      
+      var m = (args.value.kyuureki || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
+      if (m) args.kyuureki = {year: parseFloat (m[1]),
+                                  month: parseFloat (m[2]),
+                                  leap_month: !!m[3],
+                                  day: parseFloat (m[4])};
+      if (!m) args.kyuureki_hidden = '';
+      /* XXX fill by keyuureki.js */
+      
+      var ts = await $getTemplateSet (this.localName);
+      var e = ts.createFromTemplate ('div', args);
+      this.textContent = '';
+      while (e.firstChild) {
+        this.appendChild (e.firstChild);
+      }
+      
+    }, // swUpdate
+  },
+}); // <sw-data-day>
+
 /* ------ Yearless dates ------ */
 
 defineListLoader ('swYearlessDateListLoader', function (opts) {
@@ -6051,6 +6260,88 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-yearlessdate>
+
+
+defineListLoader ('swDayMemorialListLoader', async function (opts) {
+  let json = await SWD.data ('days.json');
+  let key = this.getAttribute ('loader-day').replace (/^--/, '');
+  let item = json[key] || {};
+  let data = item.memorials || [];
+  data.forEach (item => {
+    item.wref = item.wref || item.name;
+  });
+  return {data};
+});
+
+defineListLoader ('swDayBirthListLoader', async function (opts) {
+  let json = await SWD.data ('days.json');
+  let key = this.getAttribute ('loader-day').replace (/^--/, '');
+  let item = json[key] || {};
+  let data = (item.birthdays || []).concat (item.fictional_birthday || []);
+  data.forEach (item => {
+    item.wref = item.wref || item.name;
+    if (item.date_gregorian) {
+      item.day = {gregorian: item.date_gregorian};
+    }
+  });
+  return {data};
+});
+
+defineListLoader ('swDayEventListLoader', async function (opts) {
+  let json = await SWD.data ('days.json');
+  let key = this.getAttribute ('loader-day').replace (/^--/, '');
+  let item = json[key] || {};
+  let data = (item.historicals || []).concat (item.jp_towns || []).concat (item.fictionals || []);
+  data.forEach (item => {
+    if (item.date_gregorian) {
+      item.day = {gregorian: item.date_gregorian};
+    }
+  });
+  return {data};
+});
+
+/* ------ Time ------ */
+
+
+SWD.time = function (v, opts) {
+  // XXX kyuureki
+  // XXX julian
+  // XXX year & week
+  
+  if (v.jd == null && v.gregorian) {
+    v.unix = new Date (v.gregorian).valueOf () / 1000;
+    v.jd = v.unix / (24*60*60) + 2440587.5;
+  }
+  if (v.jd == null && v.unix) {
+    v.jd = v.unix / (24*60*60) + 2440587.5;
+  }
+
+  if (v.mjd == null) v.mjd = v.jd - 2400000.5;
+  if (v.mjd != null && v.jd == null) v.jd = v.mjd - 2400000.5;
+  if (v.unix == null) v.unix = (v.jd - 2440587.5) * (24*60*60);
+  if (v.kanshi0 == null) v.kanshi0 = (Math.floor (v.jd + 0.5 + 49) % 60);
+
+  if (v.gregorian == null && v.unix != null) v.gregorian = new Date (v.unix * 1000).toISOString ().replace (/T.+/, '');
+
+  if (opts.view) {
+    let dt = new Date (v.unix * 1000);
+    v.serialized = dt.toISOString ();
+    v.daySerialized = v.serialized.replace (/T.+/, '');
+    v.month = dt.getMonth () + 1;
+    v.day = dt.getDate ();
+    v.dow = dt.getDay ();
+    v.toString = dt.toString ();
+    v.toDateString = dt.toDateString ();
+    v.toTimeString = dt.toTimeString ();
+    v.toLocaleString = dt.toLocaleString ();
+    v.toGMTString = dt.toGMTString ();
+    v.toUTCString = dt.toUTCString ();
+    v.toJSON = dt.toJSON ();
+  }
+
+  return v;
+}; // SWD.time
+
 
 /* ------ Time zones ------ */
 
@@ -8189,101 +8480,6 @@ defineElement ({
     }, // swRender
   }, 
 }); // <table is=sw-era-kanshi-years>
-
-defineElement ({
-  name: 'sw-data-day',
-  fill: 'idlattribute',
-  props: {
-    pcInit: function () {
-      var v = this.value;
-      Object.defineProperty (this, 'value', {
-        get: function () {
-          return v;
-        },
-        set: function (newValue) {
-          v = newValue;
-          this.swUpdate ();
-        },
-      });
-      this.swUpdate ();
-    }, // pcInit
-    swUpdate: async function () {
-      var v = this.value;
-      this.hidden = !v;
-      if (!v) return;
-
-      var args = {value: v};
-
-      if (args.value.mjd == null) args.value.mjd = args.value.jd - 2400000.5;
-      if (args.value.unix == null) args.value.unix = (args.value.jd - 2440587.5) * (24*60*60);
-      args.weekday = mod (args.value.mjd - 4, 7);
-      if (args.value.kanshi0 == null) args.value.kanshi0 = ((args.value.jd + 0.5 + 49) % 60);
-
-      if (args.value.gregorian == null) args.value.gregorian = new Date (args.value.unix * 1000).toISOString ().replace (/T.+/, '');
-      var m = args.value.gregorian.match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
-      args.gregorian = {year: parseFloat (m[1]),
-                        month: parseFloat (m[2]),
-                        day: parseFloat (m[3])};
-      
-      var m = (args.value.julian || '').match (/^(-?[0-9]+)-([0-9]+)-([0-9]+)$/);
-      if (m) args.julian = {year: parseFloat (m[1]),
-                     month: parseFloat (m[2]),
-                     day: parseFloat (m[3])};
-      if (!m) args.julian_hidden = '';
-
-      var m = (args.value.nongli_tiger || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
-      if (m) args.nongli_tiger = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.nongli_tiger_hidden = '';
-
-      var m = (args.value.nongli_ox || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
-      if (m) args.nongli_ox = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.nongli_ox_hidden = '';
-      
-      var m = (args.value.nongli_rat || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
-      if (m) args.nongli_rat = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.nongli_rat_hidden = '';
-
-      var m = (args.value.nongli_qin || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
-      if (m) args.nongli_qin = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.nongli_qin_hidden = '';
-
-      var m = (args.value.nongli_wuzhou || '').match (/^(-?[0-9]+)-(-?[0-9]+)('|)-([0-9]+)$/);
-      if (m) args.nongli_wuzhou = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.nongli_wuzhou_hidden = '';
-      
-      var m = (args.value.kyuureki || '').match (/^(-?[0-9]+)-([0-9]+)('|)-([0-9]+)$/);
-      if (m) args.kyuureki = {year: parseFloat (m[1]),
-                                  month: parseFloat (m[2]),
-                                  leap_month: !!m[3],
-                                  day: parseFloat (m[4])};
-      if (!m) args.kyuureki_hidden = '';
-      /* XXX fill by keyuureki.js */
-      
-      var ts = await $getTemplateSet (this.localName);
-      var e = ts.createFromTemplate ('div', args);
-      this.textContent = '';
-      while (e.firstChild) {
-        this.appendChild (e.firstChild);
-      }
-      
-    }, // swUpdate
-  },
-}); // <sw-data-day>
 
 defineElement ({
   name: 'form',
