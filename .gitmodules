@@ -34,17 +34,9 @@
 	path = modules/promised-file
 	url = https://github.com/wakaba/perl-promised-file
 	track = master
-[submodule "modules/kyuureki"]
-	path = modules/kyuureki
-	url = https://github.com/wakaba/perl-kyuureki
-	track = master
 [submodule "modules/web-datetime"]
 	path = modules/web-datetime
 	url = https://github.com/manakai/perl-web-datetime
-	track = master
-[submodule "modules/web-langtag"]
-	path = modules/web-langtag
-	url = https://github.com/manakai/perl-web-langtag
 	track = master
 [submodule "modules/sarze"]
 	path = modules/sarze
@@ -57,8 +49,4 @@
 [submodule "modules/streams"]
 	path = modules/streams
 	url = https://github.com/manakai/perl-streams
-	track = master
-[submodule "modules/number-cjk"]
-	path = modules/number-cjk
-	url = https://github.com/wakaba/perl-number-cjk
 	track = master
