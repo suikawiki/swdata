@@ -18,10 +18,6 @@
 	path = modules/json-ps
 	url = https://github.com/wakaba/perl-json-ps
 	track = master
-[submodule "modules/temma"]
-	path = modules/temma
-	url = https://github.com/wakaba/temma
-	track = master
 [submodule "modules/web-dom"]
 	path = modules/web-dom
 	url = https://github.com/manakai/perl-web-dom

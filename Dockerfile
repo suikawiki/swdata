@@ -7,7 +7,6 @@ ADD bin/ /app/bin/
 ADD lib/ /app/lib/
 ADD config/ /app/config/
 ADD modules/ /app/modules/
-ADD templates/ /app/templates/
 ADD css/ /app/css/
 ADD js/ /app/js/
 ADD fonts/ /app/fonts/
