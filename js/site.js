@@ -2129,6 +2129,21 @@ Object.defineProperty (SWD.Char.prototype, 'url', {
   },
 }); // char.url
 
+Object.defineProperty (SWD.Char.prototype, 'charinfoURL', {
+  get: function () {
+    if (this.type === 'unicode') {
+      return 'https://charinfo-cgi.onrender.com/char/' + SWD.Char.hex4 (this.unicode);
+    } else {
+      let s = this.text;
+      if (s != null) {
+        return 'https://charinfo-cgi.onrender.com/string?s=' + encodeURIComponent (s);
+      } else {
+        return 'https://charinfo-cgi.onrender.com/string?s=' + encodeURIComponent (this.char);
+      }
+    }
+  },
+}); // char.charinfoURL
+
 SWD.Char.prototype._getNames = async function () {
   if (this.type === 'unicode') {
     var names = await SWD.data ('char-names.json');
