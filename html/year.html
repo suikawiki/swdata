@@ -58,6 +58,8 @@
 
 <page-area template=pageFootAdsTemplate class=ads-footer></page-area>
 
+<page-area template=pageFootTemplate class=site-page-footer></page-area>
+
 <footer class=site>
   <a href=/ rel=top data-field=siteLabel>Data.SuikaWiki.org</a>
   <a href=/about>About</a>
@@ -3106,11 +3108,88 @@
     <list-container loader=swRecentListLoader loader-key=chars type=ul template=swRecentListItem>
       <ul class=menu-list></ul>
     </list-container>
+
+    <ul class=menu-list>
+        <li><a href="/char">文字</a>
+        <li><a href="/seq">Character sequences</a>
+        <li><a href="/string">文字列</a>
+          <form action=/string method=get>
+            <p><input type=search name=s placeholder=String><button type=submit>表示</button>
+          </form>
+        <li><a href="/set">文字の集合</a>
+        <li><a href="/map">文字の写像</a>
+        <li><a href="/keys">Key to character mappings</a>
+
+    </ul>
     
     <form action="https://wiki.suikawiki.org/n/Wiki%2F%2FSearch" method=get class=search-form>
       <input type=search name=q required placeholder="SuikaWiki 等の記事から検索">
       <button type="submit" data-icon="search" class="lsf-icon">検索</button>
     </form>
+  </template>
+  
+  <template data-name=page-char>
+    <t-title>文字</t-title>
+    <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
+
+    <section>
+      <h1>Unicode文字</h1>
+      
+      <ul class=menu-list>
+        <li><a href="/char/U+0%3F%3F%3F%3F">[U+00000, U+0FFFF]</a>
+        <li><a href="/char/U+1%3F%3F%3F%3F">[U+10000, U+1FFFF]</a>
+        <li><a href="/char/U+2%3F%3F%3F%3F">[U+20000, U+2FFFF]</a>
+        <li><a href="/char/U+3%3F%3F%3F%3F">[U+30000, U+3FFFF]</a>
+        <li><a href="/char/U+4%3F%3F%3F%3F">[U+40000, U+4FFFF]</a>
+        <li><a href="/char/U+5%3F%3F%3F%3F">[U+50000, U+5FFFF]</a>
+        <li><a href="/char/U+6%3F%3F%3F%3F">[U+60000, U+6FFFF]</a>
+        <li><a href="/char/U+7%3F%3F%3F%3F">[U+70000, U+7FFFF]</a>
+        <li><a href="/char/U+8%3F%3F%3F%3F">[U+80000, U+8FFFF]</a>
+        <li><a href="/char/U+9%3F%3F%3F%3F">[U+90000, U+9FFFF]</a>
+        <li><a href="/char/U+A%3F%3F%3F%3F">[U+A0000, U+AFFFF]</a>
+        <li><a href="/char/U+B%3F%3F%3F%3F">[U+B0000, U+BFFFF]</a>
+        <li><a href="/char/U+C%3F%3F%3F%3F">[U+C0000, U+CFFFF]</a>
+        <li><a href="/char/U+D%3F%3F%3F%3F">[U+D0000, U+DFFFF]</a>
+        <li><a href="/char/U+E%3F%3F%3F%3F">[U+E0000, U+EFFFF]</a>
+        <li><a href="/char/U+F%3F%3F%3F%3F">[U+F0000, U+FFFFF]</a>
+        <li><a href="/char/U+10%3F%3F%3F%3F">[U+100000, U+10FFFF]</a>
+      </ul>
+    </section>
+    
+  </template>
+
+  <template data-name=page-char-uplane>
+    <t-title>Unicode 面 <span data-field=plane></span></t-title>
+    <t-category><a href=/char>文字</a></t-category>
+    <t-sw>U+<span data-field=serialized></span></t-sw>
+    <t-keyword>U+<span data-field=serialized></span></t-keyword>
+
+    <section>
+      <h1>Unicode 面 <span data-field=plane></span> の文字</h1>
+
+      <list-container loader=swUnicodePointListLoader type=ul data-loader-plane-field=plane data-filled=loader-plane>
+        <ul class=menu-list>
+        </ul>
+        <template>
+          <a data-href-template=/set/{url:serialized}><code>U+<span data-field=serialized></span></code></a>
+        </template>
+      </list-container>
+    </section>
+
+    <section id=links>
+      <h1>Links</h1>
+
+      <table class=nv>
+        <tbody>
+          <tr>
+            <th>Previous plane
+            <td><a data-href-template=/char/U+{url:prevSerialized}><code>U+<span data-field="prevSerialized"></span></code></a>
+          <tr>
+            <th>Next plane
+            <td><a data-href-template=/char/U+{url:nextSerialized}><code>U+<span data-field="nextSerialized"></span></code></a>
+      </table>
+    </section>
+    
   </template>
   
   <template data-name=page-char-index>
@@ -3791,6 +3870,23 @@
     <ul>
       <li><a data-href-template="/{antennaCategory.type}/">今日</a>
     </ul>
+  </template>
+</template-set>
+
+<template-set name=pageFootTemplate templateselector=selectPageTemplate>
+  <template></template>
+
+  <template data-name=site-chars>
+    <footer class=site>
+
+      <a href=/char>Characters</a>
+      <a href=/seq>Sequences</a>
+      <a href=/string>Strings</a>
+      <a href=/set>Sets</a>
+      <a href=/map>Maps</a>
+      <a href=/keys>Keys</a>
+
+    </footer>
   </template>
 </template-set>
 

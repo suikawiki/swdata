@@ -1191,6 +1191,24 @@ SWD.openPage = function (url) {
       } catch (e) { }
     }
 
+    {
+      let m = path.match (/^\/char\/U\+([0-9A-Fa-f]|10)%3[Ff]%3[Ff]%3[Ff]%3[Ff]$/);
+      if (m) {
+        // /char/U+{h}%3F%3F%3F%3F
+        args.name = 'page-char-uplane';
+        args.site = 'chars';
+        args.plane = parseInt (m[1], 16);
+        args.serialized = args.plane.toString (16).toUpperCase () + "????";
+        let prev = args.plane - 1;
+        if (prev < 0) prev = 0x10;
+        let next = args.plane + 1;
+        if (next > 0x10) next = 0;
+        args.prevSerialized = prev.toString (16).toUpperCase () + "????";
+        args.nextSerialized = next.toString (16).toUpperCase () + "????";
+        return args;
+      }
+    }
+
     // XXX /char/{name}
     // XXX /string
 
@@ -1256,6 +1274,11 @@ SWD.openPage = function (url) {
     }
     if (path === '/chars') {
       args.name = 'page-chars';
+      args.site = 'chars';
+      return args;
+    }
+    if (path === '/char') {
+      args.name = 'page-char';
       args.site = 'chars';
       return args;
     }
@@ -1432,6 +1455,7 @@ defs (() => {
   def.setAttribute ('name', 'selectPageTemplate');
   def.pcHandler = function (templates, obj) {
     if (templates[obj.name]) return templates[obj.name];
+    if (templates["site-" + obj.site]) return templates["site-" + obj.site];
     return templates[""];
   };
   document.head.appendChild (def);
@@ -4626,6 +4650,21 @@ defineElement ({
     }, // swUpdate
   },
 }); // <sw-data-char-rel>
+
+/* ------ Unicode ------ */
+
+
+defineListLoader ('swUnicodePointListLoader', async function (opts) {
+  let plane = this.getAttribute ('loader-plane');
+  if (plane === "0") plane = "";
+  let data = [];
+  for (let i = 0; i <= 0xFF; i++) {
+    let h = i.toString (16).toUpperCase ();
+    let serialized = plane + (h.length === 1 ? "0" + h : h) + "??";
+    data.push ({serialized});
+  }
+  return {data};
+});
 
 /* ------ Fonts ------ */
 
