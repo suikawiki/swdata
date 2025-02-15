@@ -2424,6 +2424,7 @@ body {
       "main        main        side        side"        1fr
       "pager2      pager2      side        side"
       "fads        fads        side        side"
+      "footer2     footer2     side        side"      
       "footer      footer      footer      footer"      
     /  2fr 1fr calc(var(--page-side-width) - var(--site-logo-width))
                                            var(--site-logo-width);
@@ -2440,6 +2441,7 @@ body.has-large {
       "pager2      pager2      pager2"        
       "fads        fads        fads"
       "side        side        side"
+      "footer2     footer2     footer2"      
       "footer      footer      footer"      
     /  2fr         1fr         var(--site-logo-width);
   --page-header-margin-right: 0;
@@ -2804,6 +2806,11 @@ page-side .ads-rectangle {
 
 .ads-footer {
   grid-area: fads;
+}
+
+.site-page-footer {
+  grid-area: footer2;
+  padding: 0.3rem;
 }
 
 footer.site {
