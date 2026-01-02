@@ -994,6 +994,14 @@ SWD.openPage = function (url) {
           return args;
         }
 
+    if (path === '/numtime/ranges') {
+      args.name = 'page-numtime-ranges';
+      args.datatype = url.searchParams.get ('datatype') || 'int64';
+      args.step = url.searchParams.get ('step') || '1s';
+      args.epoch = url.searchParams.get ('epoch') || 'unix';
+      return args;
+    }
+
     {
       let m = path.match (/^\/tzoffset\/([^\/]+)$/);
       if (m) {
@@ -1263,6 +1271,7 @@ SWD.openPage = function (url) {
       '/e/first': 'page-era-first',
       '/tzoffset': 'page-tzoffset',
       '/datetime/--mm-dd': 'page-datetime-mmdd',
+      '/numtime/': 'page-numtime-index',
       '/kanshi': 'page-kanshi',
     }[path]; // or undefined
     if (args.name) return args;

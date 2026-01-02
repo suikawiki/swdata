@@ -2098,6 +2098,230 @@
   </template>
 
 
+  <template data-name=page-numtime-index>
+    <t-title>単一数値時刻系</t-title>
+    <t-keyword>単一数値時刻系</t-keyword>
+    <t-sw>単一数値時刻系</t-sw>
+
+    <ul>
+      <li><a href=ranges>単一数値時刻系の表現できる範囲</a>
+    </ul>
+
+  </template>
+
+  <template data-name=page-numtime-ranges>
+    <t-title>単一数値時刻系の表現できる範囲</t-title>
+    <t-category><a href=/numtime/>単一数値時刻系</a></t-category>
+    <t-keyword>単一数値時刻系</t-keyword>
+    <t-sw>単一数値時刻系</t-sw>
+
+    <form action=javascript: method=post>
+      <section class=app-input>
+
+        <table class=config>
+          <tbody>
+            <tr>
+              <th><label for=input-datatype>データ型</label>
+              <td>
+                <style>optgroup option{text-align: right}</style>
+                <select name=datatype id=input-datatype data-field=datatype required>
+    <optgroup label="signed integer">
+      <option value="int16">int16</option>
+      <option value="int32">int32</option>
+      <option value="int64" selected>int64</option>
+    </optgroup>
+    <optgroup label="unsigned integer">
+      <option value="uint16">uint16</option>
+      <option value="uint32">uint32</option>
+      <option value="uint64">uint64</option>
+    </optgroup>
+    <optgroup label="floating point">
+      <option value="float">float (24bit mantissa)</option>
+      <option value="double">double (53bit mantissa)</option>
+    </optgroup>
+                </select>
+
+            <tr>
+              <th><label for=input-step>刻み</label>
+              <td>
+                <select name=step id=input-step style="text-align: right" data-field=step required>
+                  <option value="1d">86400 s (1日)</option>
+                  <option value="1s" selected>1 s</option>
+                  <option value="100ms">100 ms</option>
+                  <option value="10ms">10 ms</option>
+                  <option value="1ms">1 ms</option>
+                  <option value="100us">100 µs</option>
+                  <option value="10us">10 µs</option>
+                  <option value="1us">1 µs</option>
+                  <option value="100ns">100 ns</option>
+                  <option value="10ns">10 ns</option>
+                  <option value="1ns">1 ns</option>
+                </select>
+
+            <tr>
+              <th><label for=input-epoch>元期</label>
+              <td>
+                <select name=epoch id=input-epoch style="text-align: right" data-field=epoch required>
+                  <option value="ratadie">Rata Die (AD 0001-01-01)</option>
+                  <option value="unix" selected>Unix (AD 1970-01-01)</option>
+                  <option value="ntfs">NTFS (AD 1601-01-01)</option>
+                  <option value="lotus">Lotus (AD 1900-01-00)</option>
+                  <option value="hfs">HFS (AD 1904-01-01)</option>
+                  <option value="zigbee">ZigBee (AD 2000-01-01)</option>
+                  <option value="ebml">EBML (AD 2001-01-01)</option>
+                </select>
+        </table>
+      </section>
+
+      <section class=app-output>
+        <table class=config>
+          <tbody>
+            <tr>
+              <th>最小値
+              <td>
+                <can-copy><output data-field=min.ja></output></can-copy>
+                [<time data-datetime-field=min.html data-tzoffset=0 data-filled=datetime></time>]
+            <tr>
+              <th>最大値
+              <td>
+                <can-copy><output data-field=max.ja></output></can-copy>
+                [<time data-datetime-field=max.html data-tzoffset=0 data-filled=datetime></time>]
+        </table>
+      </section>
+
+      <script>
+      (function (app) {
+      
+        const NS = 1n;
+        const US = 1_000n;
+        const MS = 1_000_000n;
+        const S  = 1_000_000_000n;
+        const DAY = 86400n * S;
+
+const STEP = {
+  "1d":   DAY,
+  "1s":   S,
+  "100ms":100n * MS,
+  "10ms": 10n * MS,
+  "1ms":  1n * MS,
+  "100us":100n * US,
+  "10us": 10n * US,
+  "1us":  1n * US,
+  "100ns":100n,
+  "10ns": 10n,
+  "1ns":  1n
+};
+
+const TYPES = {
+  int16:  { kind:"int", bits:16 },
+  int32:  { kind:"int", bits:32 },
+  int64:  { kind:"int", bits:64 },
+  uint16: { kind:"uint", bits:16 },
+  uint32: { kind:"uint", bits:32 },
+  uint64: { kind:"uint", bits:64 },
+  float:  { kind:"float", mant:24 },
+  double: { kind:"float", mant:53 }
+};
+
+const EPOCH = {
+  unix: 0n,
+  ntfs: -11644473600n * S,
+  hfs:  -2082844800n * S,
+  ebml:  978307200n * S,
+  lotus: -2209161600n * S,
+  ratadie: -62135596800n * S,
+  zigbee: 946684800n * S,
+};
+
+        function pow2(n) { return 1n << BigInt(n); }
+
+        function floorDiv(a, b) {
+          let q = a / b;
+          if (a < 0n && a % b !== 0n) q -= 1n;
+          return q;
+        }
+
+        function civilFromDays(z) {
+          z += 719468n;
+          const era = floorDiv(z, 146097n);
+          const doe = z - era * 146097n;
+          const yoe = floorDiv(
+            doe - floorDiv(doe,1460n) + floorDiv(doe,36524n) - floorDiv(doe,146096n),
+            365n
+          );
+          let y = yoe + era * 400n;
+          const doy = doe - (365n*yoe + floorDiv(yoe,4n) - floorDiv(yoe,100n));
+          const mp = floorDiv(5n*doy + 2n, 153n);
+          const d = doy - floorDiv(153n*mp + 2n,5n) + 1n;
+          let m = mp + 3n;
+          if (m > 12n) m -= 12n;
+          if (m <= 2n) y += 1n;
+          return {y,m,d};
+        }
+
+        function formatDate(ns) {
+          const days = floorDiv(ns, DAY);
+          let rem = ns - days * DAY;
+
+          const {y,m,d} = civilFromDays(days);
+
+          const sod = floorDiv(rem, S);
+          rem -= sod * S;
+
+          const h = floorDiv(sod, 3600n);
+          const mi = floorDiv(sod - h*3600n, 60n);
+          const s = sod - h*3600n - mi*60n;
+
+          const ms = floorDiv(rem, MS);
+          rem -= ms * MS;
+          const us = floorDiv(rem, US);
+          const ns2 = rem - us * US;
+
+          return {
+            html: `${y.toString ().padStart (4, '0')}-${m.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}T${h.toString().padStart(2,'0')}:${mi.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms.toString ().padStart (3, '0')}${us.toString ().padStart (3, '0')}${ns2.toString ().padStart (3, '0')}Z`,
+            ja: `キリスト紀元 ${y.toString ().padStart (4, '0')}年 ${m.toString().padStart(2,'0')}月 ${d.toString().padStart(2,'0')}日 ${h.toString().padStart(2,'0')}時 ${mi.toString().padStart(2,'0')}分 ${s.toString().padStart(2,'0')}秒 ${ms.toString ().padStart (3, '0')}ms ${us.toString ().padStart (3, '0')}μs ${ns2.toString ().padStart (3, '0')}ns`,
+          };
+        } // formatDate
+
+        function render (form) {
+          const t = TYPES[form.elements.datatype.value];
+          const step = STEP[form.elements.step.value];
+          const epoch = EPOCH[form.elements.epoch.value];
+
+          let vmin, vmax;
+          if (t.kind === 'int') {
+            vmin = -pow2(t.bits - 1);
+            vmax =  pow2(t.bits - 1) - 1n;
+          } else if (t.kind === 'uint') {
+            vmin = 0n;
+            vmax = pow2(t.bits) - 1n;
+          } else { // float
+            vmin = -(pow2(t.mant) - 1n);
+            vmax =  (pow2(t.mant) - 1n);
+          }
+  
+          const min = epoch + vmin * step;
+          const max = epoch + vmax * step;
+
+          form.querySelectorAll ('.app-output').forEach (_ => {
+            $fill (_, {
+              min: formatDate (min),
+              max: formatDate (max),
+            });
+          });
+
+          history.replaceState (null, null, location.pathname + '?datatype=' + encodeURIComponent (form.elements.datatype.value) + '&step=' + encodeURIComponent (form.elements.step.value) + '&epoch=' + encodeURIComponent (form.elements.epoch.value));
+        } // render
+
+        app.onchange = () => render (app);
+        render (app);
+      }) (document.currentScript.parentNode);
+      </script>
+    </form>
+
+  </template>
+
+
   <template data-name=page-kanshi>
     <t-title>干支</t-title>
 
@@ -3055,6 +3279,7 @@
       <li><a href=/era>Eras</a>
       <li><a href=/e/>紀年法</a>
       <li><a href=/era/system>Era systems</a>
+      <li><a href=/numtime/>単一数値時刻系</a>
       <li><a href=https://chars.suikawiki.org>Characters</a>
         <form action=https://chars.suikawiki.org/string class=input>
           <input name=s required>
