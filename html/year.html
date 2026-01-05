@@ -3551,6 +3551,8 @@ const EPOCH = {
     <t-title>アンテナ</t-title>
     <t-category><a href=https://suikawiki.org>SuikaWiki</a></t-category>
 
+    <p>各分野の新着情報です。</p>
+
     <list-container loader=swAntennaCategoryListLoader type=ul>
       <ul class=menu-list></ul>
       <template>
@@ -3561,7 +3563,16 @@ const EPOCH = {
       </template>
     </list-container>
 
+    <ul class=menu-list>
+      <li><a href=/tag/name:new/packages>新着パッケージ</a>
+      <li><a href=https://wiki.suikawiki.org/n/%E6%97%A5%E4%BB%98%E3%81%A8%E6%99%82%E5%88%BB%E3%81%AE%E3%83%8B%E3%83%A5%E3%83%BC%E3%82%B9>日付と時刻のニュース</a>
+    </ul>
+
     <list-container loader=swRecentListLoader loader-key=antenna type=ul template=swRecentListItem>
+      <ul class=menu-list></ul>
+    </list-container>
+
+    <list-container loader=swRecentListLoader loader-key type=ul template=swRecentListItem>
       <ul class=menu-list></ul>
     </list-container>
     
@@ -3932,7 +3943,7 @@ const EPOCH = {
       <a href=https://suikawiki.org><cite>SuikaWiki</cite></a>
       の一部です。
 
-      <p>くわしくは<a href=https://wiki.suikawiki.org/n/SuikaWiki>SuikaWikiのご案内</a>をご参照ください。
+      <p>くわしくは<a href=https://wiki.suikawiki.org/n/SuikaWiki$21916>SuikaWikiのご案内</a>をご参照ください。
 
       <p>記事のご利用については <a href=/license>License</a> ページを、
       お問い合わせは
@@ -3947,7 +3958,7 @@ const EPOCH = {
     <section id=site lang=en>
       <h1>The site</h1>
 
-      <p>Copyright 2015-2024 Wakaba &lt;wakaba@suikawiki.org>.
+      <p>Copyright 2015-2026 Wakaba &lt;wakaba@suikawiki.org>.
 
       <p><a href=https://github.com/suikawiki/swdata>This program</a> is
       free software: you can redistribute it and/or modify it under the
