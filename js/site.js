@@ -1172,31 +1172,60 @@ SWD.openPage = function (url) {
       }
     }
 
-    var m = path.match (/^\/char\/([0-9A-Fa-f]{4,8})$/);
-    if (m) { // /char/{code}
-      args.char = SWD.char ('unicode', parseInt (m[1], 16));
-      args.name = 'page-char-index';
-      args.site = 'chars';
-      args.isSensitive = args.char.isSensitive;
-      return args;
-    }
-    var m = path.match (/^\/char\/([0-9A-Fa-f]{4,6}(?::[0-9A-Fa-f]{4,6})+)$/);
-    if (m) { // /char/{code}:{code}:...:{code}
-      args.char = SWD.char ('text', m[1].split (/:/).map (_ => String.fromCodePoint (parseInt (_, 16))).join (''));
-      args.name = 'page-char-index';
-      args.site = 'chars';
-      args.isSensitive = args.char.isSensitive;
-      return args;
-    }
-    var m = path.match (/^\/char\/char:([^/]+)$/);
-    if (m) { // /char/char:{char}
-      try {
-        args.char = SWD.char ('char', decodeURIComponent (m[1]));
+    {
+      var m = path.match (/^\/char\/([0-9A-Fa-f]{4,8})$/);
+      if (m) { // /char/{code}
+        args.char = SWD.char ('unicode', parseInt (m[1], 16));
         args.name = 'page-char-index';
         args.site = 'chars';
         args.isSensitive = args.char.isSensitive;
         return args;
-      } catch (e) { }
+      }
+      var m = path.match (/^\/char\/([0-9A-Fa-f]{4,6}(?::[0-9A-Fa-f]{4,6})+)$/);
+      if (m) { // /char/{code}:{code}:...:{code}
+        args.char = SWD.char ('text', m[1].split (/:/).map (_ => String.fromCodePoint (parseInt (_, 16))).join (''));
+        args.name = 'page-char-index';
+        args.site = 'chars';
+        args.isSensitive = args.char.isSensitive;
+        return args;
+      }
+      var m = path.match (/^\/char\/char:([^/]+)$/);
+      if (m) { // /char/char:{char}
+        try {
+          args.char = SWD.char ('char', decodeURIComponent (m[1]));
+          args.name = 'page-char-index';
+          args.site = 'chars';
+          args.isSensitive = args.char.isSensitive;
+          return args;
+        } catch (e) { }
+      }
+
+      var m = path.match (/^\/char\/([0-9A-Fa-f]{4,8})\/tc1$/);
+      if (m) { // /char/{code}/tc1
+        args.char = SWD.char ('unicode', parseInt (m[1], 16));
+        args.name = 'page-char-tc1';
+        args.site = 'chars';
+        args.isSensitive = args.char.isSensitive;
+        return args;
+      }
+      var m = path.match (/^\/char\/([0-9A-Fa-f]{4,6}(?::[0-9A-Fa-f]{4,6})+)\/tc1$/);
+      if (m) { // /char/{code}:{code}:...:{code}/tc1
+        args.char = SWD.char ('text', m[1].split (/:/).map (_ => String.fromCodePoint (parseInt (_, 16))).join (''));
+        args.name = 'page-char-tc1';
+        args.site = 'chars';
+        args.isSensitive = args.char.isSensitive;
+        return args;
+      }
+      var m = path.match (/^\/char\/char:([^/]+)\/tc1$/);
+      if (m) { // /char/char:{char}/tc1
+        try {
+          args.char = SWD.char ('char', decodeURIComponent (m[1]));
+          args.name = 'page-char-tc1';
+          args.site = 'chars';
+          args.isSensitive = args.char.isSensitive;
+          return args;
+        } catch (e) { }
+      }
     }
 
     {
@@ -2012,21 +2041,33 @@ Object.defineProperty (SWD.Char.prototype, 'localId', {
       m = this._char.match (/^:MJ-v[0-9]+-([0-9]+)$/);
       if (m) return 'MJ' + m[1];
 
-      m = this._char.match (/^:((?:J[A-FT]|I[ABP]|FT|HG|KS|JMK|AR)[0-9A-F]+S*)$/);
+      m = this._char.match (/^:((?:J[A-FT]|I[ABP]|FT|HG|KS|TK|JMK|AR)[0-9A-F]+S*)$/);
       if (m) return m[1];
 
       m = this._char.match (/^:(?:ac|ag|aj|ak|aj2-|ak1-|aj-shs-|aj-ext-)([0-9]+)$/);
       if (m) return 'CID+' + m[1];
+
+      m = this._char.match (/^:(?:tron)([0-9]+-[0-9a-f]+)$/);
+      if (m) return m[1].toUpperCase ();
+
+      m = this._char.match (/^:(?:m|kx)([0-9].*)$/);
+      if (m) return m[1];
+
+      m = this._char.match (/^:(?:ninjal|gtk?|mh|koseki|touki|chise-hdic-ktb-seal-|chise-shuowen-jiguge-|chise-kangxi-|shinjigen|daijiten)([0-9]+)$/);
+      if (m) return m[1];
+
+      m = this._char.match (/^:(?:gw|tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei|hyougai)-(.+)$/);
+      if (m) return m[1];
     }
 
     return null;
   },
-}); // char.mj
+}); // char.localId
 
 Object.defineProperty (SWD.Char.prototype, 'mkt', {
   get: function () {
     if (this.type === 'char') {
-      var m = this._char.match (/^:(?:cns|cnsold|gb|jis|ks|kps|cccii)(?:-[a-z]+-|)([0-9]+-[0-9]+-[0-9]+)$/);
+      var m = this._char.match (/^:(?:cns|cnsold|gb|jis|ks|kps|cccii)(?:-[A-Za-z0-9]+-|)([0-9]+-[0-9]+-[0-9]+)$/);
       if (m) return m[1];
 
       m = this._char.match (/^:(J[A-F]|HG|FT|I[AB])([0-9]{2})([0-9]{2})S*$/);
@@ -2044,7 +2085,11 @@ Object.defineProperty (SWD.Char.prototype, 'gl', {
   get: function () {
     let mkt = this.mkt;
     if (mkt) {
-      return "0x" + mkt.split (/-/).slice (1, 3).map (_ => (parseInt (_) + 0x20) . toString (16) . toUpperCase ()).join ('');
+      if (this.char.match (/^:(?:cns|cccii)/)) {
+        return "0x" + mkt.split (/-/).map (_ => (parseInt (_) + 0x20) . toString (16) . toUpperCase ()).join ('');
+      } else {
+        return "0x" + mkt.split (/-/).slice (1, 3).map (_ => (parseInt (_) + 0x20) . toString (16) . toUpperCase ()).join ('');
+      }
     }
 
     return null;
@@ -2055,7 +2100,11 @@ Object.defineProperty (SWD.Char.prototype, 'gr', {
   get: function () {
     let mkt = this.mkt;
     if (mkt) {
-      return "0x" + mkt.split (/-/).slice (1, 3).map (_ => (parseInt (_) + 0xA0) . toString (16) . toUpperCase ()).join ('');
+      if (this.char.match (/^:(?:cns|cccii)/)) {
+        return "0x" + mkt.split (/-/).map (_ => (parseInt (_) + 0xA0) . toString (16) . toUpperCase ()).join ('');
+      } else {
+        return "0x" + mkt.split (/-/).slice (1, 3).map (_ => (parseInt (_) + 0xA0) . toString (16) . toUpperCase ()).join ('');
+      }
     }
 
     return null;
@@ -2183,22 +2232,31 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
     var t = m ? {
       ac: "Adobe-CNS",
       ag: "Adobe-GB",
-      aj: "Adobe-Japan1",
       AR: '平成明朝',
-      ak: "Adobe-Korea",
+      ak: "Adobe-KR",
+      cbeta: 'CBETA',
       cccii: "CCCII",
+      chise: "CHISE",
       cns: 'CNS 11643',
+      daijiten: '大字典',
       dsf: "Droid Sans Fallback",
       dsffull: "Droid Sans Fallback",
       dsfff: "Droid Sans Fallback",
       FT: '平成明朝',
       gb: "GB",
+      gt: 'GTフォント',
+      gtk: 'GTフォント',
       gw: 'GlyphWiki',
       HG: '平成明朝 (『表外漢字字体表』)',
       hyougai: '『表外漢字字体表』',
       IA: '平成明朝',
       IB: '平成明朝',
       inherited: '傳承字形推薦形體表',
+      isolatin: 'ISO/IEC 8859',
+      isogreek: 'ISO/IEC 8859',
+      isocyrillic: 'ISO/IEC 8859',
+      isoarabic: 'ISO/IEC 8859',
+      isohebrew: 'ISO/IEC 8859',
       JA: '平成明朝',
       JB: '平成明朝',
       JC: '平成明朝',
@@ -2206,7 +2264,6 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       JE: '平成明朝',
       JF: '平成明朝',
       jinmei: '人名用漢字',
-      jis: "JIS漢字",
       jisfusai: "JIS X 0213:2000",
       jistype: "機械彫刻用標準書体",
       JMK: '平成明朝',
@@ -2217,10 +2274,12 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       kuzushiji: "日本古典籍くずし字データセット",
       kx: "康熙字典",
       m: '大漢和辞典',
+      mh: '大漢和辞典',
       MJ: "文字情報基盤",
       modmag: "近代雑誌OCR学習用データセット",
       muleethiopic: "MuleEthiopic",
       ninjal: "学術情報交換用変体仮名",
+      shinjigen: '新字源',
       swc: "Wiki//外字",
       swg: 'Wiki//外字',
       tensho: '篆書字体データセット',
@@ -2232,7 +2291,28 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       wakan: "『和翰名苑』仮名字体データベース",
       wm: "Wikimedia",
       wmc: "Wikimedia Commons",
+      zinbunoracle: '京大人文研所蔵甲骨文字索引',
     }[m[1]] : null;
+
+    if (!t) m = this.char.match (/^:([A-Za-z0-9]*[G-Zg-z])/);
+    if (!t) t = m ? {
+      x: 'バイト',
+    }[m[1]] : null;
+
+    if (m && m[1] === 'jis') {
+      m = this.char.match (/^:jis-([A-Za-z0-9]+)-/);
+      if (m) {
+        t = {
+          dos: 'Windows-31J',
+          dot16: 'JIS X 9051',
+          dot24: 'JIS X 9052',
+          heisei: '平成明朝',
+        }[m[1]];
+        if (t) return t;
+      } else {
+        return "JIS漢字";
+      }
+    }
 
     if (!t) m = this.char.match (/^:u-([A-Za-z0-9]+)-/);
     if (!t) t = m ? {
@@ -2251,13 +2331,16 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
 
     if (m && m[1] === 'aj') {
       m = this.char.match (/^:aj-([A-Za-z0-9]+)-/);
-      if (m) t = {
-        ext: '霧明朝',
-        shs: '原ノ味明朝',
-      }[m[1]];
-
-      if (this.char.match (/^:aj2-/)) {
+      if (m) {
+        t = {
+          ext: '霧明朝',
+          shs: '原ノ味明朝',
+        }[m[1]];
+        if (t) return t;
+      } else if (this.char.match (/^:aj2-/)) {
         return 'Adobe-Japan2';
+      } else if (this.char.match (/^:aj[0-9]+$/)) {
+        return "Adobe-Japan1";
       }
     }
 
@@ -2281,6 +2364,199 @@ Object.defineProperty (SWD.Char.prototype, 'categoryURL', {
   },
 }); // categoryURL
 
+Object.defineProperty (SWD.Char.prototype, 'categoryShortName', {
+  get: function () {
+    if (this.type === 'unicode') {
+      return 'Unicode';
+    }
+
+    var m = this.char.match (/^:([A-Za-z]+)/);
+    var t = m ? {
+      ac: "Adobe-CNS1",
+      ag: "Adobe-GB1",
+      ak: "Adobe-KR",
+      AR: '平成明朝',
+      cbeta: 'CB碼',
+      cccii: "CCCII",
+      cns: 'CNS 11643',
+      daijiten: '大字典',
+      dsf: "Droid Sans Fallback",
+      dsffull: "Droid Sans Fallback",
+      dsfff: "Droid Sans Fallback",
+      FT: '平成明朝',
+      gb: "GB",
+      gt: "GT",
+      gtk: 'GT (部品)',
+      gw: 'GlyphWiki',
+      HG: "平成明朝 (表外漢字字体表)",
+      hyougai: '国語審議会表外漢字',
+      IA: '平成明朝 (JA)',
+      IB: '平成明朝',
+      inherited: '傳承字形推薦形體表',
+      isoarabic: 'ISO 8859-6',
+      isocyrillic: 'ISO 8859-5',
+      isohebrew: 'ISO 8859-8',
+      isogreek: 'ISO 8859-7',
+      JA: '平成明朝 (0208)',
+      JB: '平成明朝 (0212)',
+      JC: '平成明朝 (0213)',
+      JD: '平成明朝 (0213)',
+      JE: '平成明朝 (0208)',
+      JF: '平成明朝 (0213)',
+      JMK: '平成明朝 (MK)',
+      jouyou: '常用漢字',
+      koseki: '戸籍統一文字',
+      kps: 'KPS',
+      KS: '平成明朝 (戸籍統一文字)',
+      ks: "KS",
+      kx: "康煕字典",
+      m: '大漢和辞典',
+      mh: '大漢和辞典 補',
+      MJ: "文字情報基盤",
+      muleethiopic: "MuleEthiopic",
+      ninjal: "学術情報交換用変体仮名",
+      shinjigen: '新字源',
+      swc: "SuikaWiki",
+      swg: 'SuikaWiki',
+      kuzushiji: "日本古典籍くずし字",
+      modmag: "近代雑誌",
+      tensho: '篆書字体',
+      TK: '平成明朝 (登記統一文字)',
+      touki: '登記統一文字',
+      touyou: "当用漢字",
+      UTC: "出典U",
+      wm: "Wikimedia",
+      wmc: "Wikimedia Commons",
+      zinbunoracle: '京大人文研甲骨', 
+    }[m[1]] : null;
+    if (t) return t;
+
+    if (m && m[1] === 'jis') {
+      m = this.char.match (/^:jis-([A-Za-z0-9]+)-/);
+      if (m) {
+        t = {
+          dos: 'DOS',
+          dot16: 'JIS16ドット',
+          dot24: 'JIS24ドット',
+          heisei: '平成明朝',
+        }[m[1]];
+        if (t) return t;
+      } else {
+        return "JIS";
+      }
+    }
+
+    if (m && m[1] === 'aj') {
+      m = this.char.match (/^:aj-([A-Za-z0-9]+)-/);
+      if (m) {
+        t = {
+          ext: 'Adobe-Japan1 拡張',
+          shs: '原ノ味明朝',
+        }[m[1]];
+        if (t) return t;
+      } else if (this.char.match (/^:aj2-/)) {
+        return 'Adobe-Japan2';
+      } else if (this.char.match (/^:aj[0-9]+$/)) {
+        return "Adobe-Japan1";
+      }
+    }
+
+    if (m && m[1] === 'chise') {
+      m = this.char.match (/^:chise-(\w+)\./);
+      if (m && m[1]) {
+        t = {
+          a2: '超抽象文字',
+          a: '抽象文字',
+          rep: '抽象字体',
+          g2: '抽象字形',
+          repi: '例示字形',
+          o: '統合字体',
+          g: '詳細字体',
+        }[m[1]];
+        if (t) return 'CHISE ' + t;
+      }
+      m = this.char.match (/^:(chise-hdic-ktb-seal|chise-shuowen-jiguge|chise-kangxi)-/);
+      if (m && m[1]) {
+        t = {
+          'chise-hdic-ktb-seal': '篆隷万象名義',
+          'chise-shuowen-jiguge': '説文解字',
+          'chise-kangxi': '康煕字典',
+        }[m[1]];
+        return 'CHISE ' + t;
+      }
+      return 'CHISE';
+    }
+
+    {
+      let m;
+      if (!t && (m = this.char.match (/^:tron([0-9]+)-([0-9a-f]{2})([0-9a-f]{2})$/))) {
+        t = 'TRON';
+        let p = parseInt (m[1]);
+        let r = parseInt (m[2], 16);
+        let c = parseInt (m[3], 16);
+        if (p === 0) {
+          t += '制御';
+        } else if (p === 1) {
+          if (c < 0x80) {
+            if (r < 0x80) {
+              t += '日本基本';
+            } else if (r === 0x80) {
+              t += '六点点字';
+            } else if (r < 0x87) {
+              t += '八点点字';
+            } else if (r < 0xA1) {
+              t += '日本基本';
+            } else {
+              t += '日本補助';
+            }
+          } else if (r < 0xB7) {
+            t += '中国基本';
+          } else {
+            t += '韓国';
+          }
+        } else if (p === 2 || p === 3) {
+          t += ' GT';
+        } else if (p === 6 || p === 7) {
+          t += '台湾';
+        } else if (p === 8) {
+          t += '大漢和';
+        } else if (p === 9) {
+          if (c < 0x80) {
+            if (r < 0x80) {
+              t += '大漢和';
+            } else if (r < 0x83) {
+              t += '濁点仮名';
+            } else if (r < 0x85) {
+              t += '住基仮名';
+            } else if (r < 0x91) {
+              t += '変体仮名';
+            } else if (r < 0x94) {
+              t += ' iモード';
+            } else if (r < 0x96) {
+              t += 'ホツマ';
+            } else if (r < 0x97) {
+              t += '陰陽五行';
+            } else if (r < 0x98) {
+              t += '序数';
+            } else if (r < 0x99) {
+              t += 'アーヴ';
+            }
+          }
+        } else if (p === 10) {
+          t += 'トンパ';
+        } else if (p === 16 || p === 17) {
+          t += '各国';
+        } else if (p === 22 || p === 23) {
+          t += '中国拡張';
+        }
+        return t;
+      }
+    }
+
+    return this.categoryName;
+  },
+}); // categoryShortName
+
 Object.defineProperty (SWD.Char.prototype, 'categoryName', {
   get: function () {
     if (this.type === 'unicode') {
@@ -2289,24 +2565,32 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
 
     var m = this.char.match (/^:([A-Za-z]+)/);
     var t = m ? {
-      ac: "Adobe-CNS CID",
-      ag: "Adobe-GB CID",
-      aj: "Adobe-Japan1 CID",
-      ak: "Adobe-Korea CID",
+      ac: "Adobe-CNS1 CID",
+      ag: "Adobe-GB1 CID",
+      ak: "Adobe-KR CID",
       AR: '平成明朝グリフ',
+      ascii: 'ASCII',
+      cbeta: 'CBETA CB碼',
       cccii: "CCCII面区点位置",
       cns: 'CNS 11643面区点位置',
+      daijiten: '『大字典』 漢字',
       dsf: "『Droid Sans Fallback』グリフ",
       dsffull: "『Droid Sans Fallback』グリフ",
       dsfff: "『Droid Sans Fallback』グリフ",
       FT: '平成明朝グリフ',
       gb: "GB区点位置",
-      gw: 'GlyphWiki グリフ',
+      gt: "GT書体フォント 文字", // GT番号
+      gtk: "GT書体フォント 検索用部品",
+      gw: 'GlyphWiki (R5.9.30) グリフ',
       HG: "平成明朝グリフ (『表外漢字字体表』)",
       hyougai: '国語審議会表外漢字',
       IA: '平成明朝グリフ (JA)',
       IB: '平成明朝グリフ',
       inherited: '『傳承字形推薦形體表』 字形',
+      isoarabic: 'ISO/IEC 8859-6',
+      isocyrillic: 'ISO/IEC 8859-5',
+      isohebrew: 'ISO/IEC 8859-8',
+      isogreek: 'ISO/IEC 8859-7',
       JA: '平成明朝グリフ (JIS X 0208)',
       JB: '平成明朝グリフ (JIS X 0212)',
       JC: '平成明朝グリフ (JIS X 0213)',
@@ -2314,29 +2598,34 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       JE: '平成明朝グリフ (JIS X 0208)',
       JF: '平成明朝グリフ (JIS X 0213)',
       jinmei: '人名用漢字',
-      jis: "JIS面区点位置",
       jisfusai: "『新JIS漢字公開レビュー資料-非漢字不採録文字一覧』文字",
       jistype: "『機械彫刻用標準書体』文字",
-      JMK: '平成明朝グリフ',
+      JMK: '平成明朝グリフ (JMK)',
       jouyou: '常用漢字',
       koseki: '戸籍統一文字',
+      kps: 'KPS区点位置',
       KS: '平成明朝グリフ (戸籍統一文字)',
       ks: "KS区点位置",
       kx: "『康熙字典』漢字",
       m: '『大漢和辞典』漢字',
-      MJ: "文字情報基盤",
+      mh: '『大漢和辞典』 補巻 漢字',
+      MJ: "文字情報基盤 MJ文字図形",
       muleethiopic: "MuleEthiopic 文字",
       ninjal: "学術情報交換用変体仮名",
+      shinjigen: '『新字源』 漢字',
       swc: "『SuikaWiki』 外字",
       swg: '『SuikaWiki』 明朝体字形',
       TK: '平成明朝 (登記統一文字)',
       touki: '登記統一文字',
       touyou: "当用漢字",
-      tron: 'TRONコード文字',
       UTC: "U-source ideograph",
+      viscii: 'VISCII',
+      vscii: 'VSCII',
       wm: "Wikimedia 内の文字表現",
       wmc: "『Wikimedia Commons』 画像",
+      zinbunoracle: '京大人文研所蔵甲骨文字 甲骨字体', // 京大人文研甲骨字体番号
     }[m[1]] : null;
+    if (t) return t;
 
     if (m && m[1] === 'wakan') {
       if (this.char.match (/^:wakan-.[0-9]{3}$/)) {
@@ -2369,17 +2658,66 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       }
     }
 
-    if (m && m[1] === 'aj') {
-      m = this.char.match (/^:aj-([A-Za-z0-9]+)-/);
-      if (m) t = {
-        ext: 'Adobe-Japan1 拡張 (霧明朝)',
-        shs: '原ノ味明朝グリフ',
-      }[m[1]];
-
-      if (this.char.match (/^:aj2-/)) {
-        return 'Adobe-Japan2 CID';
+    if (m && m[1] === 'jis') {
+      m = this.char.match (/^:jis-([A-Za-z0-9]+)-/);
+      if (m) {
+        t = {
+          dos: 'DOS 文字',
+          dot16: 'JIS16ドットフォント 文字',
+          dot24: 'JIS24ドットフォント 文字',
+          heisei: '平成明朝グリフ (JIS)',
+        }[m[1]];
+        if (t) return t;
+      } else {
+        return "JIS面区点位置";
       }
     }
+
+    if (m && m[1] === 'aj') {
+      m = this.char.match (/^:aj-([A-Za-z0-9]+)-/);
+      if (m) {
+        t = {
+        ext: 'Adobe-Japan1 拡張 (霧明朝) CID',
+        shs: '原ノ味明朝グリフ',
+        }[m[1]];
+        if (t) return t;
+      } else if (this.char.match (/^:aj2-/)) {
+        return 'Adobe-Japan2 CID';
+      } else if (this.char.match (/^:aj[0-9]+$/)) {
+        return "Adobe-Japan1 CID";
+      }
+    }
+
+    if (m && m[1] === 'chise') {
+      m = this.char.match (/^:chise-(\w+)\./);
+      if (m && m[1]) {
+        t = {
+          a2: '超抽象文字',
+          a: '抽象文字',
+          rep: '抽象字体',
+          g2: '抽象字形',
+          repi: '例示字形',
+          o: '統合字体',
+          g: '詳細字体',
+        }[m[1]];
+        if (t) return 'CHISE文字オントロジー ' + t;
+      }
+      m = this.char.match (/^:(chise-hdic-ktb-seal|chise-shuowen-jiguge|chise-kangxi)-/);
+      if (m && m[1]) {
+        t = {
+          'chise-hdic-ktb-seal': '『篆隷万象名義』 篆書',
+          'chise-shuowen-jiguge': '『説文解字』 小篆',
+          'chise-kangxi': '『康煕字典』 漢字',
+        }[m[1]];
+        return 'CHISE文字オントロジー ' + t;
+      }
+      return 'CHISE文字オントロジー 文字';
+    }
+
+    m = this.char.match (/^:([A-Za-z0-9]*[G-Zg-z])/);
+    if (m) t = {
+      x: 'バイト',
+    }[m[1]];
 
     m = this.char.match (/^:u-([A-Za-z0-9]+)-/);
     if (m) t = {
@@ -2406,6 +2744,78 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
     
     if (m = this.char.match (/^:(.)([甲乙])$/)) {
       return '上代特殊仮名遣 ('+m[2]+'類)';
+    }
+
+    {
+      let m;
+      if (!t && (m = this.char.match (/^:tron([0-9]+)-([0-9a-f]{2})([0-9a-f]{2})$/))) {
+        t = 'TRONコード ';
+        let p = parseInt (m[1]);
+        let r = parseInt (m[2], 16);
+        let c = parseInt (m[3], 16);
+        if (p === 0) {
+          t += '制御コード';
+        } else if (p === 1) {
+          if (c < 0x80) {
+            if (r < 0x80) {
+              t += '日本基本';
+            } else if (r === 0x80) {
+              t += '六点点字';
+            } else if (r < 0x87) {
+              t += '八点点字';
+            } else if (r < 0xA1) {
+              t += '日本基本';
+            } else {
+              t += '日本補助';
+            }
+          } else if (r < 0xB7) {
+            t += '中国基本';
+          } else {
+            t += '韓国';
+          }
+        } else if (p === 2 || p === 3) {
+          t += 'GT';
+        } else if (p === 6 || p === 7) {
+          t += '台湾';
+        } else if (p === 8) {
+          t += '大漢和';
+        } else if (p === 9) {
+          if (c < 0x80) {
+            if (r < 0x80) {
+              t += '大漢和';
+            } else if (r < 0x83) {
+              t += '濁点仮名';
+            } else if (r < 0x85) {
+              t += '住基仮名';
+            } else if (r < 0x91) {
+              t += '変体仮名';
+            } else if (r < 0x94) {
+              t += 'iモード';
+            } else if (r < 0x96) {
+              t += 'ホツマ';
+            } else if (r < 0x97) {
+              t += '陰陽五行';
+            } else if (r < 0x98) {
+              t += '序数';
+            } else if (r < 0x99) {
+              t += 'アーヴ';
+            } else {
+              t += '文字';
+            }
+          } else {
+            t += '文字';
+          }
+        } else if (p === 10) {
+          t += 'トンパ';
+        } else if (p === 16 || p === 17) {
+          t += '各国';
+        } else if (p === 22 || p === 23) {
+          t += '中国拡張';
+        } else {
+          t += '文字';
+        }
+        return t;
+      }
     }
     
     return '文字';
@@ -2630,6 +3040,7 @@ defineElement ({
 
       if (!v.names) v.names = await v._getNames ();
       v.idPrefix = this.getAttribute ('idprefix');
+      v.urlSuffix = this.getAttribute ('urlsuffix') || '';
 
       var ts = await $getTemplateSet (this.getAttribute ('template') || this.localName);
       var e = ts.createFromTemplate ('div', v);
@@ -2647,8 +3058,10 @@ defs (() => {
   var def = document.createElementNS ('data:,pc', 'templateselector');
   def.setAttribute ('name', 'swDataCharItemSelector');
   def.pcHandler = function (templates, obj) {
-    if (obj.type === 'unicode' || obj.type === 'vs') {
-      return templates.text || templates[""];
+    if (obj.type === 'unicode') {
+      return templates.unicode || templates.text || templates[""];
+    } else if (obj.type === 'vs') {
+      return templates.vs || templates.text || templates[""];
     } else if (obj.type === 'string') {
       if (/^[\u2FF0-\u2FFB]/.test (obj.string)) {
         return templates.ids || templates.text || templates[""];
@@ -2657,29 +3070,19 @@ defs (() => {
       }
     } else if (obj.type === 'char') {
       var char = obj.char;
-      if (/^:MJ[0-9]+$/.test (char)) {
-        return templates.mj || templates[""];
+      if (/^:(?:MJ)/.test (char)) {
+        return templates.qLocalId || templates.localId || templates[""];
+      } else if (/^:(?:gw-|tron|gt[0-9]|gtk|m[0-9]|mh[0-9]|ninjal|koseki|touki|kx|tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei|hyougai|aj[0-9-]|ac[0-9]|ag[0-9]|ak[0-9]|chise-|shinjigen|daijiten|zinbunoracle)/.test (char)) {
+        return templates.localId || templates[""];
       } else if (/^:MJ-v[0-9]+-[0-9]+$/.test (char)) {
         return templates.mjVariant || templates.mj || templates[""];
-      } else if (/^:koseki90[01][0-9]{3}$/.test (char)) {
-        return templates.touki || templates[""];
       } else if (/^:(?:J[ABCDEF]|FT|HG|I[AB])[0-9]{4}S*$/.test (char)) {
-        return templates.heisei94 || templates.heisei || templates.gw || templates[""];
+        return templates.heisei94 || templates.heisei || templates.qLocalId || templates[""];
       } else if (/^:(?:KS|TK|IP|JT)[0-9A-F]+S*$/.test (char)) {
-        return templates.heisei || templates.gw || templates[""];
-      } else if (/^:aj/.test (char)) {
-        return templates.mjVariant || templates.mj || templates.gw || templates[""];
-      } else if (/^:(?:ninjal)[0-9]+$/.test (char)) {
-        return templates.touki || templates[""];
-      } else if (/^:(?:cns|cns-[a-z]+-)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
-        return templates.cns || templates[""];
-      } else if (/^:(?:jis)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
-        return templates.jis || templates[""];
-      } else if (/^:(?:jis-[a-z][0-9a-z]*-)[12]-[0-9]+-[0-9]+$/.test (char)) {
-        return templates.jisVariant || templates[""];
-      } else if (/^:(?:ac|ag|ak|ak1-)[0-9]+$/.test (char)) {
-        return templates.cid || templates[""];
-      } else if (/^:(?:gw-.|mh?[0-9]|b5-cdp-|extf|irg2017-|kx|kps|sat|gtk?[0-9]|koseki[0-9]|touki[0-9]|jis|u-nom-|u-rcv-|u-uk[ab]-|u-gbdot|u-dakuten|u-jitaichou|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi|wingreek|dsf|wakan|tensho|kuzushiji|modmag|tron|inherited|wmc|u-gothic|u-minh|u-hannomkhai|jouyou|jinmei|hyougai|touyou|swc|swg|UTC-|UCI-)/.test (char)) {
+        return templates.heisei || templates.qLocalId || templates[""];
+      } else if (/^:(?:jis|cns|cccii|gb|ks|kps)(?:-[a-z][a-z0-9]*-|)[0-9]+-[0-9]+-[0-9]+$/.test (char)) {
+        return templates.mkt || templates[""];
+      } else if (/^:(?:b5-cdp-|extf|irg2017-|kx|sat|gtk?[0-9]|u-nom-|u-rcv-|u-uk[ab]-|u-gbdot|u-dakuten|u-jitaichou|UK-|gb[0-9]|ks0-|omron|mule|iscii|tis|viscii|isolatin|isogreek|isocyrillic|isoarabic|isohebrew|koi|wingreek|dsf|wakan|wmc|u-gothic|u-minh|u-hannomkhai|swc|swg|UTC-|UCI-)/.test (char)) {
         return templates.gw || templates[""];
       } else if (/^:u-(?:juki|immi)-[0-9a-f]+$/.test (char)) {
         return templates.juki || templates[""];
@@ -2689,6 +3092,8 @@ defs (() => {
         return templates.big5 || templates[""];
       } else if (/^:b5-[a-z]+-[0-9a-f]+$/.test (char)) {
         return templates.big5 || templates[""];
+      } else if (/^:x[0-9a-f]+$/.test (char)) {
+        return templates.byte || templates[""];
       }
     }
     
@@ -2700,11 +3105,13 @@ defs (() => {
 
 SWD.Char._relDataSets = {
   chars: {key: 'chars'},
+  /*
   hans: {key: 'hans'},
   kanas: {key: 'kanas'},
   kchars: {key: 'kchars'},
   glyphs: {key: 'glyphs'},
   descs: {key: 'descs'},
+  */
   components: {key: 'components'},
 };
 
@@ -3274,35 +3681,6 @@ SWD.Char._dsGetCluster = function (ds, level, char) {
   }
 }; // SWD.Char._dsGetCluster
 
-
-defineWorkerMethod ('SWDCharGetClusterChars', (level, char, dsKey) => {
-  return [level, char, dsKey];
-}, (level, char, dsKey) => {
-  return SWD.Char.getClusterChars (level, char, dsKey);
-});
-//
-SWD.Char.getClusterChars = hasWorkerMethod ('SWDCharGetClusterChars', async function (level, char, dsKey) {
-  var ds = SWD.Char._relDataSets[dsKey];
-
-  await SWD.Char._relDataRoot (ds);
-  await SWD.Char._relDataClusters (ds);
-    
-  var chars = [];
-  
-  var r = SWD.Char._dsGetCluster (ds, level, char);
-  if (!r) return chars;
-  
-  var index = r.index;
-  for (var _ in (ds.dataRoot.others[level] || {})) {
-    if (ds.dataRoot.others[level][_] === index) {
-      chars.push (_);
-    }
-  }
-
-  return chars.concat (SWD.Char._charsFromTbl (ds, level, index));
-}); // SWD.Char.getClusterChars
-
-
 defineWorkerMethod ('SWDCharGetRels', (dsKey, c) => {
   return [dsKey, c];
 }, (dsKey, c) => {
@@ -3347,37 +3725,13 @@ SWD.Char.getRelsAll = hasWorkerMethod ('SWDCharGetRelsAll', async function (char
 }); // SWD.Char.getRelsAll
 
 
-defineWorkerMethod ('SWDCharGetLeaders', (c, d) => [c, d], (c, d) => {
-  return SWD.Char.getLeaders (c, d);
-}, {
-  postprocessor: (args, rv) => {
-    var ds = SWD.Char._relDataSets[args[1]];
-    var otherValues = {
-      leaderTypes: ds.dataRoot.leader_types,
-    };
-    return {value: rv, otherValues};
-  },
-  handleOtherValues: (args, ov) => {
-    var ds = SWD.Char._relDataSets[args[1]];
-    ds.leaderTypes = ov.leaderTypes;
-  },
-});
-//
-SWD.Char.getLeaders = hasWorkerMethod ('SWDCharGetLeaders', async function (char, dsKey) {
-  var ds = SWD.Char._relDataSets[dsKey];
-  await SWD.Char._relDataRoot (ds);
-  await SWD.Char._relDataLeaders (ds);
-  
-  return SWD.Char._leadersFromTbl (ds, char) || [char];
-}); // SWD.Char.getLeaders
-
 
 SWD.Char._mjc = {};
 SWD.Char.getMJChar = async function (char) {
   if (SWD.Char._mjc[char]) return SWD.Char._mjc[char];
 
   return SWD.Char._mjc[char] = Promise.resolve ().then (async () => {
-    var keys = ['hans', 'kanas', 'chars'];
+    var keys = [/*'hans', 'kanas',*/ 'chars'];
     for (var i = 0; i < keys.length; i++) {
       var ds = SWD.Char._relDataSets[keys[i]];
       var rr = await SWD.Char.getRels (ds.key, char);
@@ -3403,7 +3757,7 @@ SWD.Char.getCNSChar = async function (char) {
   if (SWD.Char._cnsc[char]) return SWD.Char._cnsc[char];
 
   return SWD.Char._cnsc[char] = Promise.resolve ().then (async () => {
-    var keys = ['hans', 'kanas', 'kchars', 'chars'];
+    var keys = [/*'hans', 'kanas', 'kchars',*/ 'chars'];
     for (var i = 0; i < keys.length; i++) {
       var ds = SWD.Char._relDataSets[keys[i]];
       var rr = await SWD.Char.getRels (ds.key, char);
@@ -3442,7 +3796,9 @@ SWD.Char.RelData._charToIndex = function (index, char) {
       return 0xFF;
     }
   } else if (m = char.match (/([\u2FF0-\u2FFF])/)) {
-    return 0x300 - 0x30 - 0x2FF0 + m[1].codePointAt (0) + (([...m].at (-2) || "").codePointAt (0) || 0) % 0x10 + [...m].at (-1).codePointAt (0) % 0x10;
+    let x = (([...char].at (-2) || "").codePointAt (0) || 0) % 0x10 + [...char].at (-1).codePointAt (0) % 0x10;
+    let y = 0x300 - 0x30 - 0x2FF0 + m[1].codePointAt (0) + x;
+    return y;
   } else if (m = char.match (index.prefixPattern)) {
     return index.prefix_to_index[m[1]];
   } else if (/^:u-/.test (char)) {
@@ -3493,8 +3849,14 @@ SWD.Char.RelData.getClusterChars = hasWorkerMethod ('SWDCharRelDataGetClusterCha
 
   var clusterIndex = index.clusterLevels[level].index;
   var clusterId = clusters[clusterIndex];
-  if (clusterId === undefined) return [];
-
+  if (clusterId === undefined) {
+    if ((dsKey === 'chars' || dsKey === 'components') &&
+        /^(?::x(?:[1-9a-f][0-9a-f]*|0)){1,4}$/.test (char)) {
+      return [char];
+    }
+    return [];
+  }
+  
   const cPartSize = 1000;
   var cFileIndex = Math.floor (clusterId / cPartSize);
   var part = await SWD.data ('cluster-chars/part-' + clusterIndex + '-' + cFileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
@@ -3536,6 +3898,18 @@ SWD.Char.RelData.getRelDefs = hasWorkerMethod ('SWDCharRelDataGetRelDefs', async
   return index.relDefs;
 }); // SWD.Char.RelData.getRelDefs
 
+SWD.Char.RelData.getRelDefIndex = async function (dsKey, relKey) {
+  let defs = await SWD.Char.RelData.getRelDefs (dsKey);
+  for (let i in defs) {
+    let def = defs[i];
+    if (def.key === relKey) return def.id;
+  }
+  
+  let id = defs.length;
+  defs.push ({id, key: relKey, weight: -1, mergeable_weight: -1});
+  return id;
+}; // SWD.Char.RelData.getRelDefIndex
+
 defineWorkerMethod ('SWDCharRelDataGetRels', (dsKey, c) => [dsKey, c], (dsKey, c) => {
   return SWD.Char.RelData.getRels (dsKey, c);
 });
@@ -3546,6 +3920,60 @@ SWD.Char.RelData.getRels = hasWorkerMethod ('SWDCharRelDataGetRels', async funct
   var fileIndex = SWD.Char.RelData._charToIndex (index, char);
   var part = await SWD.data ('merged-rels/part-' + fileIndex + '.jsonl?' + index.timestamp, {dsKey, type: 'jsonlKeyed', allow404: true});
 
+  if (dsKey === 'chars') {
+    let m = char.match (/^(?::x(?:[1-9a-f][0-9a-f]*|0))+$/);
+    if (m) {
+      let left = 0;
+      let right = 0;
+      let char2 = char.replace (/:x([0-9a-f]+)/g, (_, x) => {
+        let xx = parseInt (x, 16);
+        if (0x00 <= xx && xx <= 0x7F) {
+          left++;
+          return ':x' + (xx + 0x80) .toString (16);
+        } else {
+          right++;
+          return ':x' + (xx - 0x80) .toString (16);
+        }
+      });
+      if (left > 0 && right === 0) {
+        let ix = await SWD.Char.RelData.getRelDefIndex (dsKey, 'iso2022:right');
+        let rels = (part[char] ??= {})[char2] ??= [];
+        if (!rels.includes (ix)) rels.push (ix);
+      } else if (right > 0 && left === 0) {
+        let ix = await SWD.Char.RelData.getRelDefIndex (dsKey, 'iso2022:left');
+        let rels = (part[char] ??= {})[char2] ??= [];
+        if (!rels.includes (ix)) rels.push (ix);
+      }
+    }
+  } else if (dsKey === 'components') {
+    if (/^(?::x([1-9a-f][0-9a-f]*|0)){2,}$/.test (char)) {
+      for (let char2 of char.split (/(:x(?:[1-9a-f][0-9a-f]*|0))/)) {
+        if (!char2.length) continue;
+        let ix = await SWD.Char.RelData.getRelDefIndex (dsKey, 'byte:contains');
+        let rels = (part[char] ??= {})[char2] ??= [];
+        if (!rels.includes (ix)) rels.push (ix);
+      }
+    }
+    {
+      let m = char.match (/^(?::x([1-9a-f][0-9a-f]*|0)){1,3}$/);
+      if (m) {
+        let x = parseInt (m[1], 16);
+        for (let y = 0x00; y <= 0xFF; y++) {
+          let char2 = char + ':x' + y.toString (16);
+          let ix = await SWD.Char.RelData.getRelDefIndex (dsKey, 'byte:containedby');
+          let rels = (part[char] ??= {})[char2] ??= [];
+          if (!rels.includes (ix)) rels.push (ix);
+        }
+        for (let y = 0x00; y <= 0xFF; y++) {
+          let char2 = ':x' + y.toString (16) + char;
+          let ix = await SWD.Char.RelData.getRelDefIndex (dsKey, 'byte:containedby');
+          let rels = (part[char] ??= {})[char2] ??= [];
+          if (!rels.includes (ix)) rels.push (ix);
+        }
+      }
+    }
+  }
+  
   return part[char] || {};
 }); // SWD.Char.RelData.getRels
 
@@ -3586,13 +4014,71 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
   let m;
 
   if (opts.mapper === 'auto') {
+    if (/^:chise-/.test (char)) {
+      let m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'ucdpGlyphInfo.chise:' + char,
+        dsKeys: ['chars'],
+        code: (c2, rel) => {
+          if (/^chise:===(?:cns|adobe-japan)/.test (rel.key)) {
+            return {char: c2, priority: 1};
+          } else if (/^chise:===(?:daikanwa)/.test (rel.key)) {
+            return {char: c2, priority: 1.2};
+          } else if (/^chise:===(?:jis)/.test (rel.key)) {
+            return {char: c2, priority: 1.3, approximate: true};
+          } else if (/^chise:[=+>]+.+-(?:var|itaiji)-/.test (rel.key)) {
+            return {char: c2, priority: 0.5};
+          } else if (/^chise:[=+>]+adobe-japan/.test (rel.key)) {
+            return {char: c2, priority: 2, approximate: true};
+          } else if (/^chise:[=+>]+daikanwa/.test (rel.key)) {
+            return {char: c2, priority: 4, approximate: true};
+          } else if (/^chise:[=+>]+cns/.test (rel.key)) {
+            return {char: c2, priority: 3, approximate: true};
+          } else if (/^chise:[=+>]+jis/.test (rel.key)) {
+            return {char: c2, priority: 7, approximate: true};
+          } else if (/^chise:[=+>]+gb/.test (rel.key)) {
+            return {char: c2, priority: 8, approximate: true};
+          } else if (/^chise:=/.test (rel.key)) {
+            return {char: c2, priority: 9, approximate: true};
+          }
+          return null;
+        },
+        priority: true,
+      });
+      if (m1) {
+        char = m1.char;
+        if (m1.approximate) approximate = true;
+      } else {
+        //
+      }
+    }
+
+    if (/^:tron/.test (char)) {
+      var m1 = await SWD.Char.RelData._relGlyphInfo ({
+        char: char,
+        key: 'ucdpGlyphInfo.tron:' + char,
+        dsKeys: ['chars'],
+        code: (c2, rel) => {
+          if (rel.key === 'tron:definition') {
+            return {char: c2};
+          }
+          return null;
+        },
+      });
+      if (m1) {
+        char = m1.char
+      } else {
+        //
+      }
+    }
+    
     if (m = char.match (/^:jis-(dot16v?|dot24v?)-1-([0-9]+)-([0-9]+)$/)) {
       var glyphId = (m[2] - 1) * 94 + (m[3] - 1);
       var fontName = /16/.test (m[1]) ? 'jiskan16' : 'jiskan24';
       return {
         fontName,
         glyphId,
-        approximate: (!! /v/.test (m[1])),
+        approximate: approximate || (!! /v/.test (m[1])),
       };
     }
 
@@ -3600,7 +4086,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'ucdpGlyphInfo.GW:' + char,
-        dsKeys: ['hans'],
+        dsKeys: [/*'hans'*/'chars'],
         code: (c2, rel) => {
           if (rel.key === 'manakai:same' && /^:b5-cdp-/.test (c2)) {
             return {char: c2};
@@ -3619,7 +4105,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'cnsOldGlyphInfo.GW:' + char,
-        dsKeys: ['hans'],
+        dsKeys: [/*'hans'*/'chars'],
         code: (c2, rel) => {
           if (rel.key === 'cns11643:moved') {
             return {char: c2};
@@ -3667,13 +4153,14 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       return {
         fontName,
         string,
+        approximate,
       };
     } else if (m = char.match (/^:u-gbdot16-([0-9a-f]+)$/)) {
       var code = parseInt (m[1], 16);
       if ((0x3400 <= code && code <= 0x4DB5) ||
           (0x4E00 <= code && code <= 0x9FA5)) {
         return {string: String.fromCodePoint (code),
-                fontName: 'wqy-unibit'};
+                fontName: 'wqy-unibit', approximate};
       }
     } else if (m = char.match (/^:u-uk([ab])-([0-9a-f]+)$/)) {
       var string = String.fromCodePoint (parseInt (m[2], 16));
@@ -3681,6 +4168,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       return {
         fontName,
         string,
+        approximate,
       };
     }
 
@@ -3692,7 +4180,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
           inherited: 'I.Ming',
         }[m[1]],
         string: m[2],
-        approximate: {
+        approximate: approximate || {
           jistype: true,
           'jistype-jouyou': true,
         }[m[1]],
@@ -3769,6 +4257,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       return {
         fontName,
         glyphId: (m[2] - 1) * 94 + (m[3] - 1),
+        approximate,
       };
     }
   }
@@ -3786,7 +4275,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         minhnguyen: "Minh Nguyen",
         cjksym: "CJK Symbols",
       }[m[1]];
-      approximate = {
+      approximate = approximate || {
         csur: true,
       }[m[1]];
     }
@@ -3798,7 +4287,6 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
 
   if (m = char.match (/^:u-([a-z]+)-([0-9a-f]+)-([0-9a-f]+)$/)) {
     let fontName = null;
-    let approximate = false;
     if (opts.mapper === 'auto') {
       fontName = {
         hannomkhai: "Han-Nom Khai",
@@ -3822,6 +4310,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
         dsffull: "DroidSansFallbackFull",
       }[m[1]],
       glyphId: parseInt (m[2]),
+      approximate,
     };
   }
 
@@ -3830,6 +4319,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     return {
       fontName: 'taipei16',
       glyphId: (parseInt (m[1], 16) - 0x8140),
+      approximate,
     };
   } else if ((opts.mapper === 'auto' || opts.mapper === 'right') &&
              (m = char.match (/^:(?:tis)-([0-9a-f]+)$/))) {
@@ -3842,6 +4332,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     } else {
       return {
         glyphId: (parseInt (m[1], 16) + 0x80),
+        approximate,
       };
     }
   } else if (opts.mapper === 'auto' &&
@@ -3862,6 +4353,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
              (m = char.match (/^:\w+-([0-9]+)-([0-9]+)$/))) {
     return {
       glyphId: (parseInt (m[1]) - 1) * 94 + parseInt (m[2]) - 1,
+      approximate,
     };
   }
 
@@ -3870,7 +4362,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       var m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'cnsGlyphInfo.b5:' + char,
-        dsKeys: ['hans', 'kanas', 'chars'],
+        dsKeys: [/*'hans', 'kanas',*/ 'chars'],
         code: (c2, rel) => {
           if (rel.key === 'rev:cns:big5' ||
               rel.key === 'rev:cns:big5:符號') {
@@ -3898,7 +4390,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     return SWD.Char.RelData._relGlyphInfo ({
       char: char,
       key: 'cnsGlyphInfo:' + char + ':' + fontName + ':' + approximate,
-      dsKeys: ['hans', 'kanas', 'kchars', 'chars'],
+      dsKeys: [/*'hans', 'kanas', 'kchars',*/ 'chars'],
       code: (c2, rel) => {
         if (rel.key === 'cns:unicode') {
           if (m = c2.match (/^:u-cns-([0-9a-f]+)$/)) {
@@ -3917,7 +4409,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     let m1 = await SWD.Char.RelData._relGlyphInfo ({
       char: char,
       key: 'jouyouGlyphInfo:' + char + ':' + approximate,
-      dsKeys: ['hans'],
+      dsKeys: [/*'hans'*/'chars'],
       code: (c2, rel) => {
         if (rel.key === 'manakai:hasglyph' ||
             rel.key === 'rev:mj:常用漢字') {
@@ -3940,7 +4432,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     let m1 = await SWD.Char.RelData._relGlyphInfo ({
       char: char,
       key: 'jinmeiGlyphInfo:' + char + ':' + approximate,
-      dsKeys: ['hans'],
+      dsKeys: [/*'hans'*/'chars'],
       code: (c2, rel) => {
         if (rel.key === 'glyphwiki:koseki') {
           return {char: c2};
@@ -3959,7 +4451,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     return SWD.Char.RelData._relGlyphInfo ({
       char: char,
       key: 'gbGlyphInfo:' + char + ':' + approximate,
-      dsKeys: ['hans'],
+      dsKeys: [/*'hans'*/'chars'],
       code: (c2, rel) => {
         if (/^rev:unihan(?:3\.0|):k(?:IRG_GSource|GB)/.test (rel.key) &&
             c2.length === 1) {
@@ -3979,7 +4471,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       let m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'mjGlyphInfo.jis:' + char,
-        dsKeys: ['hans', 'kanas', 'chars'],
+        dsKeys: [/*'hans', 'kanas',*/ 'chars'],
         code: (c2, rel) => {
           if (rel.key === 'jisx0213:2004:glyph' ||
               rel.key === 'jisx0213:2000:cor:correct') {
@@ -4010,7 +4502,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       let m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'mjGlyphInfo.heisei:' + char,
-        dsKeys: ['hans', 'kanas', 'chars'],
+        dsKeys: [/*'hans', 'kanas',*/ 'chars'],
         code: (c2, rel) => {
           if (rel.key === 'manakai:equivglyph') {
             return {char: c2};
@@ -4029,7 +4521,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       let m1 = await SWD.Char.RelData._relGlyphInfo ({
         char: char,
         key: 'mjGlyphInfo.KS:' + char,
-        dsKeys: ['hans', 'kanas', 'chars'],
+        dsKeys: [/*'hans', 'kanas',*/ 'chars'],
         code: (c2, rel) => {
           if ((rel.key === 'manakai:implements') &&
               /^:(?:jis[12]|u-juki|koseki|touki)/.test (c2)) {
@@ -4126,7 +4618,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     return SWD.Char.RelData._relGlyphInfo ({
       char: char,
       key: 'mjGlyphInfo:' + opts.char + ':' + approximate,
-      dsKeys: ['hans', 'kanas', 'chars'],
+      dsKeys: [/*'hans', 'kanas',*/ 'chars'],
       code: (c2, rel) => {
         if (rel.key === 'rev:mj:X0213' ||
             rel.key === 'rev:mj:X0212' ||
@@ -4186,15 +4678,16 @@ defineElement ({
 
       var dsKey = this.getAttribute ('type');
       if (!dsKey) return;
-      var relDefs = await SWD.Char.RelData.getRelDefs (dsKey);
 
       var progress = document.createElement ('progress');
       this.appendChild (progress);
 
-      var chars = await SWD.Char.RelData.getClusterChars ("EQUIV", v.char, dsKey);
+      let level = this.getAttribute ('level') || 'EQUIV';
+      let chars = await SWD.Char.RelData.getClusterChars (level, v.char, dsKey);
       var inCluster = new Set (chars);
       var leaders = await SWD.Char.RelData.getLeaders (v.char, dsKey);
       var idPrefix = this.id;
+      let urlsuffix = this.getAttribute ('urlsuffix');
 
       if (chars.length === 0 && leaders.length <= 1) {
         this.parentNode.hidden = true;
@@ -4214,6 +4707,14 @@ defineElement ({
       } else if (leaders.length) {
         SWD.Font.loadFontsCSS ();
         var c = document.createElement ('sw-char-leaders');
+
+        var ts = await $getTemplateSet ('sw-char-leader-single');
+        var e = ts.createFromTemplate ('figure', {
+          char: SWD.char ('char', leaders[0]),
+          idPrefix,
+        });
+        c.appendChild (e);
+        
         var ts = await $getTemplateSet ('sw-char-leader-item');
         var tse = await $getTemplateSet ('sw-char-leader-empty-item');
         var lts = await SWD.Char.RelData.getLeaderTypes (dsKey);
@@ -4253,8 +4754,10 @@ defineElement ({
 
         if (schar.hasImageSet) insertImageSet (li, schar);
 
-        var relItems = await SWD.Char.RelData.getRels (dsKey, char);
+        let relItems = await SWD.Char.RelData.getRels (dsKey, char);
+        let relDefs = await SWD.Char.RelData.getRelDefs (dsKey); // can be modified by |getRels|
         var ul = document.createElement ('ul');
+
         Object.keys (relItems).map (rc => {
           var rds = relItems[rc].map (_ => relDefs[_] || console.log ("RelDef not found", relDefs, relItems[rc], char, rc, _));
           var mw = Math.max (...rds.map (_ => _.weight));
@@ -4272,6 +4775,7 @@ defineElement ({
           } else {
             f.setAttribute ('template', 'sw-data-char-item-in-rel-external');
           }
+          if (urlsuffix) f.setAttribute ('urlsuffix', urlsuffix);
           li2.appendChild (f);
           acts.neighbor (_.rc);
 
@@ -4356,7 +4860,7 @@ defineElement ({
         added.add (char);
         await insertCharItem (c, char, acts);
       }
-      
+
       for (var i = 0; i < chars.length; i++) {
         var char = chars[i];
         if (added.has (char)) continue;
@@ -4417,10 +4921,10 @@ SWD.Char.routes = async function (char1, char2, opts) {
       var route = current[i];
       var char = route.at (-1)[0];
       var relItems = [];
-      //for (let dsKey in SWD.Char._relDataSets) {
-      for (let dsKey of ['hans', 'kanas', 'chars', 'kchars']) {
-        var relDefs = await SWD.Char.RelData.getRelDefs (dsKey);
-        var items = await SWD.Char.RelData.getRels (dsKey, char.char)
+      for (let dsKey in SWD.Char._relDataSets) {
+      //for (let dsKey of ['hans', 'kanas', 'chars', 'kchars']) {
+        let items = await SWD.Char.RelData.getRels (dsKey, char.char)
+        let relDefs = await SWD.Char.RelData.getRelDefs (dsKey); // modified by getRels
         for (let c2 in items) {
           relItems[c2] = (relItems[c2] || []).concat (items[c2].map (_ => relDefs[_]));
         }
@@ -4663,10 +5167,26 @@ defineElement ({
       this.swUpdate ();
     },
     swUpdate: async function () {
-      var args = this.value;
+      let value = this.value;
+      let relPrefix = '';
+      let relMain = value.key;
+
+      let classes = [];
+      relMain = relMain.replace (/^((?:rev:|componentin:)+)/, (_, types) => {
+        classes.push (types.replace (/:/g, ' '));
+        relPrefix = _;
+        return '';
+      });
+      
+      let sw = relMain;
+      if (/^chise:/.test (relMain)) sw = 'CHISE';
       
       var ts = await $getTemplateSet (this.localName);
-      var e = ts.createFromTemplate ('div', args);
+      var e = ts.createFromTemplate ('div', {
+        class: classes.join (' '),
+        relPrefix, relMain, sw,
+        value,
+      });
       this.textContent = '';
       while (e.firstChild) {
         this.appendChild (e.firstChild);
