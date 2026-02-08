@@ -6,6 +6,7 @@
 <script src=/js/components.js async data-export="$fill $getTemplateSet $paco" data-time-selector=time></script>
 <script src=/js/site.js async></script>
 <script src=https://fonts.suikawiki.org/swcf/composite.js data-install async></script>
+<script src=https://fonts.suikawiki.org/swcf/kana/swcfk.js async></script>
 <title>SuikaWiki</title>
 
 <header class=site itemscope itemtype=http://schema.org/WebSite>
@@ -3444,6 +3445,7 @@ const EPOCH = {
     <section id=neighbors>
       <h1>関連</h1>
 
+      <!--
       <section>
         <h1>関係する漢字</h1>
         <sw-char-cluster data-field=char type=hans id=neighbors-hans-></sw-char-cluster>
@@ -3456,10 +3458,12 @@ const EPOCH = {
         <h1>関係する諺文</h1>
         <sw-char-cluster data-field=char type=kchars id=neighbors-kchars-></sw-char-cluster>
       </section>
+      -->
       <section>
         <h1>関係する文字</h1>
         <sw-char-cluster data-field=char type=chars id=neighbors-chars-></sw-char-cluster>
       </section>
+      <!--
       <section>
         <h1>関係する字形</h1>
         <sw-char-cluster data-field=char type=glyphs id=neighbors-glyphs-></sw-char-cluster>
@@ -3468,6 +3472,7 @@ const EPOCH = {
         <h1>関係する記述</h1>
         <sw-char-cluster data-field=char type=descs id=neighbors-descs-></sw-char-cluster>
       </section>
+      -->
       <section>
         <h1>関係する部品</h1>
         <sw-char-cluster data-field=char type=components id=neighbors-components-></sw-char-cluster>
@@ -3508,6 +3513,56 @@ const EPOCH = {
       </ul>
     </section>
   </template>
+  
+  <template data-name=page-char-tc1>
+    <t-title><sw-data-char data-field=char template=sw-data-char-text></sw-data-char></t-title>
+    <t-category><a data-href-field=char.categoryURL data-field=char.categoryName></a></t-category>
+    <t-keyword data-field=char.char></t-keyword>
+    <t-sw data-field=char.swName></t-sw>
+
+    <table class=props>
+      <tbody>
+        <tr>
+          <th>Unicode
+          <td><sw-data-char data-field=char template=sw-data-char-prop-value></sw-data-char>
+    </table>
+
+    <section>
+      <h1>フォントの字形</h1>
+
+      <sw-char-fonts data-field=char></sw-char-fonts>
+    </section>
+
+    <section id=neighbors>
+      <h1>関連</h1>
+
+      <section>
+        <h1>関係する文字</h1>
+        <sw-char-cluster data-field=char type=tc1 id=neighbors-chars- urlsuffix=/tc1></sw-char-cluster>
+      </section>
+
+      <section>
+        <h1>関係する部品</h1>
+        <sw-char-cluster data-field=char type=tc2 id=neighbors-chars- urlsuffix=/tc1></sw-char-cluster>
+      </section>
+
+      <form action=/char/routes method=get class=search-form>
+        <table class=config>
+          <tbody>
+            <tr>
+              <th>文字1
+              <td>
+                <sw-data-char data-field=char></sw-data-char>
+                <input type=hidden name=char1 data-field=char.char>
+            <tr>
+              <th><label for=route-input-char2>文字2</label>
+              <td><input type=search name=char2 id=route-input-char2>
+        </table>
+        <p class=buttons>
+          <button type=submit data-icon="search" class=lsf-icon>経路を探す</button>
+      </form>
+    </section>
+  </template>
 
   <template data-name=page-char-routes>
     <t-title><sw-data-char data-field=char1 template=sw-data-char-text-compact></sw-data-char>から<sw-data-char data-field=char2 template=sw-data-char-text-compact></sw-data-char></t-title>
@@ -3523,13 +3578,25 @@ const EPOCH = {
           <tr>
             <th><label for=input-char2>文字2</label>
             <td><input type=search name=char2 id=input-char2 data-field=char2.text>
+          <tr>
+            <th><label for=input-minWeight>重み</label>
+            <td>
+              <label>
+                最小
+                <input type=number name=minWeight id=input-minWeight value=0 min=0 step=1 required list=input-minWeight-list data-field=minWeight>
+                <datalist id=input-minWeight-list>
+                  <option value=0>0 (制限なし)
+                  <option value=500>500 (equiv)
+                  <option value=600>600 (unified)
+                </datalist>
+              </label>
       </table>
       <p class=buttons>
         <button type=submit data-icon="search" class=lsf-icon>経路を探す</button>
       </p>
     </form>
 
-    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。" nomatch=絞り込み条件に一致する経路は見つかりませんでした。 continue="続く">
+    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。" nomatch=絞り込み条件に一致する経路は見つかりませんでした。 continue="続く" data-minweight-field=minWeight data-filled=minweight>
       <table class=props>
         <tbody>
           <tr>
@@ -3540,7 +3607,8 @@ const EPOCH = {
             <td><sw-data-char data-field=char2 template=sw-data-char-prop-value></sw-data-char>
           <tr>
             <th><label for=routes-filterChar>絞り込み</label>
-            <td><input type=search name=filterChar id=routes-filterChar>
+            <td>
+              <input type=search name=filterChar id=routes-filterChar placeholder=文字>
       </table>
 
       <list-main></list-main>
@@ -4555,10 +4623,15 @@ const EPOCH = {
     <can-copy class=charcode-hex>GR <sw-data-charcode data-field=gr></sw-data-charcode></can-copy>
   </template>
 </template-set>
+<template-set name=sw-data-charcode-mkt-text>
+  <template>
+    <unit-number><number-value data-field=men></number-value><number-unit>面</number-unit><number-value data-field=ku></number-value><number-unit>区</number-unit><number-value data-field=ten></number-value><number-unit>点</number-unit></unit-number>
+  </template>
+</template-set>
 
 <template-set name=sw-data-char>
   <template>
-    <a data-href-field=url>
+    <a data-href-template={url}{urlSuffix}>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
       (<data class="char-sample" data-field=text></data>)
@@ -4585,7 +4658,17 @@ const EPOCH = {
     IDS <code data-field=uplus></code>
     (<data class="char-sample approximate" data-field=text></data>)
   </template>
-  <template data-name=mj>
+  <template data-name=mkt>
+    <bdi data-field=categoryShortName></bdi>
+    <sw-data-charcode type=mkt data-field=mkt template=sw-data-charcode-mkt-text></sw-data-charcode>
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=localId>
+    <bdi data-field=categoryShortName></bdi>
+    <code data-field=localId></code>
+    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
+  </template>
+  <template data-name=qLocalId>
     <code data-field=localId></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
@@ -4594,30 +4677,9 @@ const EPOCH = {
     <code data-field=char></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
-  <template data-name=heisei>
-    <code data-field=localId></code>
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=jis>
-    JIS <code data-field=mkt></code>
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=jisVariant>
-    <code data-field=char></code>
-    <!--XXX<code data-field=mkt></code>-->
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=touki>
-    <code data-field=char></code>
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
   <template data-name=juki>
     <code data-field=char></code>
     <!--XXX<code data-field=uplus></code>-->
-    (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=cns>
-    CNS <code data-field=mkt></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
   </template>
   <template data-name=big5>
@@ -4627,11 +4689,6 @@ const EPOCH = {
   <template data-name=u>
     <code data-field=char></code>
     (<sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>)
-  </template>
-  <template data-name=cid>
-    <!--XXX<code>CID+<span data-field=cid></span></code>-->
-    <code data-field=char></code>
-    (<sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>)
   </template>
   <template data-name=gw>
     <code data-field=char></code>
@@ -4641,7 +4698,7 @@ const EPOCH = {
 
 <template-set name=sw-data-char-item-header templateselector=swDataCharItemSelector>
   <template>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <data class="char-sample" data-field=text></data>
     </a>
     <p>
@@ -4651,22 +4708,36 @@ const EPOCH = {
     </p>
   </template>
   <template data-name=text>
-    <a data-href-field=url class=char-item>
-      <data class="char-sample approximate" data-field=text></data>
-    </a>
+    <can-copy>
+      <a data-href-template={url}{urlSuffix} class=char-item>
+        <data class="char-sample approximate" data-field=text></data>
+      </a>
+    </can-copy>
     <p>
       <can-copy><code data-field=uplus></code></can-copy>
       <can-copy><code class=charname data-field=names.name lang=en></code></can-copy>
     </p>
   </template>
+  <template data-name=unicode>
+    <can-copy>
+      <a data-href-template={url}{urlSuffix} class=char-item>
+        <data class="char-sample approximate" data-field=text></data>
+      </a>
+    </can-copy>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=uplus></code></can-copy>
+      <can-copy><code class=charname data-field=names.name lang=en></code></can-copy>
+    </p>
+  </template>
   <template data-name=ids>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <data class="char-sample approximate ids" data-field=text></data>
       <code data-field=uplus></code>
     </a>
   </template>
-  <template data-name=mj>
-    <a data-href-field=url class=char-item>
+  <template data-name=localId>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
@@ -4676,7 +4747,7 @@ const EPOCH = {
     </p>
   </template>
   <template data-name=heisei>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
@@ -4686,76 +4757,50 @@ const EPOCH = {
     </p>
   </template>
   <template data-name=heisei94>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
       <bdi data-field=categoryName></bdi>
       <can-copy><code data-field=localId></code></can-copy>
-      <can-copy><code data-field=mkt></code></can-copy>
-      <can-copy>GL <code data-field=gl></code></can-copy>
-      <can-copy>GR <code data-field=gr></code></can-copy>
+      <sw-data-charcode type=mkt data-field=mkt template=sw-data-charcode-mkt></sw-data-charcode>
       <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
-  <template data-name=jis>
-    <a data-href-field=url class=char-item>
+  <template data-name=mkt>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
       <bdi data-field=categoryName></bdi>
-      <can-copy><code data-field=mkt></code></can-copy>
-      <can-copy>GL <code data-field=gl></code></can-copy>
-      <can-copy>GR <code data-field=gr></code></can-copy>
-      <can-copy><code data-field=char></code></can-copy>
-    </p>
-  </template>
-  <template data-name=jisVariant>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-    </a>
-    <p>
-      <bdi data-field=categoryName></bdi>
-      <can-copy><code data-field=mkt></code></can-copy>
-      <can-copy>GL <code data-field=gl></code></can-copy>
-      <can-copy>GR <code data-field=gr></code></can-copy>
-      <can-copy><code data-field=char></code></can-copy>
-    </p>
-  </template>
-  <template data-name=touki>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-    </a>
-    <p>
-      <bdi data-field=categoryName></bdi>
+      <sw-data-charcode type=mkt data-field=mkt></sw-data-charcode>
       <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
   <template data-name=juki>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=cns>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-    </a>
-    <p>
-      <bdi data-field=categoryName></bdi>
-      <can-copy><code data-field=mkt></code></can-copy>
-      <can-copy><code data-field=char></code></can-copy>
-    </p>                                          
-  </template>
   <template data-name=big5>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
+  <template data-name=byte>
+    <a data-href-template={url}{urlSuffix} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+    </a>
+    <p>
+      <bdi data-field=categoryName></bdi>
+      <can-copy><code data-field=char></code></can-copy>
+    </p>
+  </template>
   <template data-name=u>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
@@ -4764,18 +4809,8 @@ const EPOCH = {
       <can-copy><code data-field=char></code></can-copy>
     </p>
   </template>
-  <template data-name=cid>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
-    </a>
-    <p>
-      <bdi data-field=categoryName></bdi>
-      <can-copy><code>CID+<span data-field=cid></span></ccode></can-copy>
-      <can-copy><code data-field=char></code></can-copy>
-    </p>
-  </template>
   <template data-name=gw>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
     </a>
     <p>
@@ -4787,94 +4822,74 @@ const EPOCH = {
 
 <template-set name=sw-data-char-item-in-rel-external templateselector=swDataCharItemSelector>
   <template>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <data class="char-sample" data-field=text></data>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
   <template data-name=text>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <data class="char-sample approximate" data-field=text></data>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
   <template data-name=ids>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <data class="char-sample approximate ids" data-field=text></data>
       <code data-field=uplus></code>
     </a>
   </template>
-  <template data-name=mj>
-    <a data-href-field=url class=char-item>
+  <template data-name=localId>
+    <a data-href-template={url}{urlSuffix} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <bdi data-field=categoryShortName></bdi>
+      <code data-field=localId></code>
+    </a>
+  </template>
+  <template data-name=qLocalId>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=localId></code>
     </a>
   </template>
   <template data-name=mjVariant>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=localId></code>
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=jis>
-    <a data-href-field=url class=char-item>
+  <template data-name=mkt>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=jisVariant>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=touki>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=char></code>
+      <bdi data-field=categoryShortName></bdi>
+      <sw-data-charcode type=mkt data-field=mkt template=sw-data-charcode-mkt-text></sw-data-charcode>
     </a>
   </template>
   <template data-name=juki>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=cns>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
-    </a>
-  </template>
   <template data-name=big5>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
   </template>
   <template data-name=u>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
     </a>
   </template>
-  <template data-name=cid>
-    <a data-href-field=url class=char-item>
-      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
-      <code>CID+<span data-field=cid></span></code>
-      <code data-field=char></code>
-    </a>
-  </template>
   <template data-name=gw>
-    <a data-href-field=url class=char-item>
+    <a data-href-template={url}{urlSuffix} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=char></code>
     </a>
@@ -4902,7 +4917,14 @@ const EPOCH = {
       <code data-field=uplus></code>
     </a>
   </template>
-  <template data-name=mj>
+  <template data-name=localId>
+    <a data-href-template=#{idPrefix}char-{char} class=char-item>
+      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
+      <bdi data-field=categoryShortName></bdi>
+      <code data-field=localId></code>
+    </a>
+  </template>
+  <template data-name=qLocalId>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=localId></code>
@@ -4915,18 +4937,11 @@ const EPOCH = {
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=jis>
+  <template data-name=mkt>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
-    </a>
-  </template>
-  <template data-name=jisVariant>
-    <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
+      <bdi data-field=categoryShortName></bdi>
+      <sw-data-charcode type=mkt data-field=mkt template=sw-data-charcode-mkt-text></sw-data-charcode>
     </a>
   </template>
   <template data-name=touki>
@@ -4942,13 +4957,6 @@ const EPOCH = {
       <code data-field=char></code>
     </a>
   </template>
-  <template data-name=cns>
-    <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
-      <code data-field=mkt></code>
-      <code data-field=char></code>
-    </a>
-  </template>
   <template data-name=big5>
     <a data-href-template=#{idPrefix}char-{char} class=char-item>
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
@@ -4960,13 +4968,6 @@ const EPOCH = {
       <sw-font-glyph class="char-sample" mapper=auto data-char-field=char data-filled=char></sw-font-glyph>
       <code data-field=uplus></code>
       <code class=charname data-field=names.name lang=en></code>
-    </a>
-  </template>
-  <template data-name=cid>
-    <a data-href-template=#{idPrefix}char-{char} class=char-item>
-      <sw-font-glyph class="char-sample" data-name-field=cidFontKey data-glyphid-field=cid data-filled="name glyphid"></sw-font-glyph>
-      <code>CID+<span data-field=cid></span></code>
-      <code data-field=char></code>
     </a>
   </template>
   <template data-name=gw>
@@ -5011,8 +5012,8 @@ const EPOCH = {
 
 <template-set name=sw-data-char-rel>
   <template>
-    <a data-href-template="https://wiki.suikawiki.org/n/{url:key}"><code data-field=key></code></a>
-    (<data data-field=weight></data> / <data data-field=mergeable_weight></data>)
+    <code data-class-field=class><span data-field=relPrefix></span><a data-href-template="https://wiki.suikawiki.org/n/{url:sw}"><span data-field=relMain></span></a></code>
+    <span class=info>(<data data-field=value.weight></data> / <data data-field=value.mergeable_weight></data>)</span>
   </template>
 </template-set>
 

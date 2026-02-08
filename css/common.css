@@ -480,6 +480,18 @@ sw-char-fonts .char-sample {
   background: transparent;
 }
 
+can-copy > .char-item:not([hidden]) {
+  display: inline-block;
+}
+
+can-copy > .char-item {
+  min-width: 4em;
+}
+
+can-copy > .char-item + button {
+  writing-mode: vertical-rl;
+}
+
 .char-item .char-sample {
   font-size: 200%;
 }
@@ -494,12 +506,25 @@ sw-char-fonts .char-sample {
   background: var(--active-background-color);
 }
 
-.char-item > code:not([hidden]) {
+.char-item > code:not([hidden]),
+.char-item > sw-data-charcode:not([hidden]),
+.char-item > bdi:not([hidden]) {
   display: block;
 }
-.char-item > code {
+.char-item > bdi {
+  font-size: 60%;
+  line-height: 1.1;
+}
+.char-item > code,
+.char-item > sw-data-charcode {
   font-size: 80%;
-  line-height: 1;
+  line-height: 1.1;
+}
+
+.char-item > sw-data-charcode number-unit {
+  font-size: 80%;
+  background: var(--gray-background-color);
+  color: var(--gray-color);
 }
 
 
@@ -541,7 +566,7 @@ sw-char-cluster > ul > li > ul > li:not([hidden]) {
 }
 sw-char-cluster > ul > li > ul > li {
   flex-direction: row-reverse;
-  align-items: center;
+  align-items: start;
   width: fit-content;
   margin-left: auto;
   border-bottom: var(--row-border);
@@ -553,11 +578,19 @@ sw-char-cluster > ul > li > ul > li > .char-rel-list {
   text-align: end;
 }
 
-sw-char-cluster > ul > li > ul > li > .char-rel-list code::before {
-  content: " → ";
+sw-data-char-rel code:not(.rev)::after {
+  content: " ⇛";
 }
-sw-char-cluster > ul > li > ul > li > .char-rel-list code::after {
-  content: " → ";
+sw-data-char-rel code.rev::before {
+  content: "⇚ ";
+}
+sw-data-char-rel .info:not([hidden]) {
+  display: block;
+}
+
+sw-char-cluster .cluster-item:target {
+  outline: 1px orange dashed;
+  scroll-margin: .5em;
 }
 
 sw-char-cluster .cluster-item > sw-data-char:not([hidden]) {
@@ -584,6 +617,13 @@ sw-char-cluster .cluster-item > sw-data-char p {
   font-size: 80%;
   line-height: 1.5;
   vertical-align: middle;
+}
+
+sw-data-char[template=sw-data-char-item-header] code[data-field=uplus],
+sw-data-char[template=sw-data-char-item-header] code[data-field=localId],
+sw-data-char[template=sw-data-char-item-header] sw-data-charcode number-value {
+  font-weight: bolder;
+  font-size: 120%;
 }
 
 sw-char-cluster .cluster-item > sw-data-char p can-copy {
