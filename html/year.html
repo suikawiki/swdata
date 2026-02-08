@@ -6,6 +6,7 @@
 <script src=/js/components.js async data-export="$fill $getTemplateSet $paco" data-time-selector=time></script>
 <script src=/js/site.js async></script>
 <script src=https://fonts.suikawiki.org/swcf/composite.js data-install async></script>
+<script src=https://fonts.suikawiki.org/swcf/kana/swcfk.js async></script>
 <title>SuikaWiki</title>
 
 <header class=site itemscope itemtype=http://schema.org/WebSite>
@@ -3577,13 +3578,25 @@ const EPOCH = {
           <tr>
             <th><label for=input-char2>文字2</label>
             <td><input type=search name=char2 id=input-char2 data-field=char2.text>
+          <tr>
+            <th><label for=input-minWeight>重み</label>
+            <td>
+              <label>
+                最小
+                <input type=number name=minWeight id=input-minWeight value=0 min=0 step=1 required list=input-minWeight-list data-field=minWeight>
+                <datalist id=input-minWeight-list>
+                  <option value=0>0 (制限なし)
+                  <option value=500>500 (equiv)
+                  <option value=600>600 (unified)
+                </datalist>
+              </label>
       </table>
       <p class=buttons>
         <button type=submit data-icon="search" class=lsf-icon>経路を探す</button>
       </p>
     </form>
 
-    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。" nomatch=絞り込み条件に一致する経路は見つかりませんでした。 continue="続く">
+    <sw-char-routes data-field=chars notfound="経路は見つかりませんでした。" nomatch=絞り込み条件に一致する経路は見つかりませんでした。 continue="続く" data-minweight-field=minWeight data-filled=minweight>
       <table class=props>
         <tbody>
           <tr>
@@ -3594,7 +3607,8 @@ const EPOCH = {
             <td><sw-data-char data-field=char2 template=sw-data-char-prop-value></sw-data-char>
           <tr>
             <th><label for=routes-filterChar>絞り込み</label>
-            <td><input type=search name=filterChar id=routes-filterChar>
+            <td>
+              <input type=search name=filterChar id=routes-filterChar placeholder=文字>
       </table>
 
       <list-main></list-main>

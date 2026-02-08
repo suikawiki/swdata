@@ -176,14 +176,14 @@
     "url": "bdf/intlfonts-1.4.2/Japanese/j78-16.dat",
     "label": "j78-16",
     "size": 16,
-    "has_local": true
+    "has_local": false
   },
   "j90-16": {
     "type": "bitmap",
     "url": "bdf/intlfonts-1.4.2/Japanese/j90-16.dat",
     "label": "j90-16",
     "size": 16,
-    "has_local": true
+    "has_local": false
   },
   "jiskan24": {
     "type": "bitmap",
@@ -196,21 +196,21 @@
     "url": "bdf/intlfonts-1.4.2/Japanese/jksp16.dat",
     "label": "jksp16",
     "size": 16,
-    "has_local": true
+    "has_local": false
   },
   "j00-1-16": {
     "type": "bitmap",
     "url": "bdf/intlfonts-1.4.2/Japanese/j00-1-16.dat",
     "label": "j00-1-16",
     "size": 16,
-    "has_local": true
+    "has_local": false
   },
   "j00-2-16": {
     "type": "bitmap",
     "url": "bdf/intlfonts-1.4.2/Japanese/j00-2-16.dat",
     "label": "j00-2-16",
     "size": 16,
-    "has_local": true
+    "has_local": false
   },
   "taipei16": {
     "type": "bitmap",
@@ -299,7 +299,7 @@
     "label": "visc16-etl",
     "size": 16,
     "halfwidth": true,
-    "has_local": true
+    "has_local": false
   },
   "tib1c24-mule": {
     "type": "bitmap",
@@ -493,5 +493,10 @@
     "type": "webfont",
     "css": "var(--suikawiki-composed-font-family)",
     "label": "SuikaWiki Composed (Han Min)"
+  },
+  "swcf-k": {
+    "type": "customelement",
+    "element_name": "swcf-k",
+    "label": "SuikaWiki 文字 (swk)"
   }
 }

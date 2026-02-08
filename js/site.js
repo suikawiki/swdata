@@ -1252,6 +1252,7 @@ SWD.openPage = function (url) {
     if (path === '/char/routes') {
       args.char1 = SWD.char ('char', url.searchParams.get ('char1') || '');
       args.char2 = SWD.char ('char', url.searchParams.get ('char2') || '');
+      args.minWeight = url.searchParams.get ('minWeight') || 0;
       args.chars = [args.char1, args.char2];
       args.name = 'page-char-routes';
       args.site = 'chars';
@@ -1991,6 +1992,8 @@ SWD.Char.hex4 = function (n) {
 }; // SWD.Char.hex4
 
 SWD.Char.uplus = function (n) {
+  if (n > 0x10FFFF) return 'U-' + n.toString (16).toUpperCase ().padStart (8, '0');
+  
   var hex = n.toString (16).toUpperCase ();
   if (hex.length < 4) {
     hex = ('000' + hex).substr (-4);
@@ -2024,7 +2027,7 @@ Object.defineProperty (SWD.Char.prototype, 'uplus', {
     } else if (this.type === 'char') {
       var m = this._char.match (/^:u-([a-z]+)-([0-9a-f]+)$/);
       if (m) {
-        return SWD.Char.uplus (m[2]);
+        return SWD.Char.uplus (parseInt (m[2], 16));
       }
     }
 
@@ -2053,13 +2056,46 @@ Object.defineProperty (SWD.Char.prototype, 'localId', {
       m = this._char.match (/^:(?:m|kx)([0-9].*)$/);
       if (m) return m[1];
 
+      m = this._char.match (/^:(?:hyougai)([0-9]+)k?$/);
+      if (m) return m[1];
+
       m = this._char.match (/^:(?:ninjal|gtk?|mh|koseki|touki|chise-hdic-ktb-seal-|chise-shuowen-jiguge-|chise-kangxi-|shinjigen|daijiten)([0-9]+)$/);
       if (m) return m[1];
 
-      m = this._char.match (/^:(?:gw|tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei|hyougai)-(.+)$/);
+      m = this._char.match (/^:(?:tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei)-(.+)?$/);
       if (m) return m[1];
-    }
 
+      m = this._char.match (/^:(?:gw)-(.+)$/);
+      if (m) return m[1];
+
+      m = this._char.match (/^:(?:u-swk)-(.+)$/);
+      if (m) {
+        const parts = m[1].split('-');
+        let unicodeParts = [];
+        let restParts = [];
+        let isUnicodePhase = true;
+        for (const part of parts) {
+          if (isUnicodePhase && /^[0-9a-f]{4,}$/.test(part)) {
+            const code = parseInt(part, 16);
+            if (code <= 0x9f) {
+              unicodeParts.push(`u${code.toString(16)}`);
+            } else {
+              unicodeParts.push(String.fromCodePoint(code));
+            }
+          } else {
+            isUnicodePhase = false;
+            restParts.push(part);
+          }
+        }
+
+        const unicodeStr = unicodeParts.join('');
+        const restStr = restParts.join('.');
+        const body = restStr ? `${unicodeStr}.${restStr}` : unicodeStr;
+
+        return `__&&swk:${body}&&__`;
+      }
+    }
+    
     return null;
   },
 }); // char.localId
@@ -2247,8 +2283,8 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       gt: 'GTフォント',
       gtk: 'GTフォント',
       gw: 'GlyphWiki',
-      HG: '平成明朝 (『表外漢字字体表』)',
-      hyougai: '『表外漢字字体表』',
+      HG: '平成明朝',
+      hyougai: '表外漢字字体表',
       IA: '平成明朝',
       IB: '平成明朝',
       inherited: '傳承字形推薦形體表',
@@ -2267,7 +2303,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       jisfusai: "JIS X 0213:2000",
       jistype: "機械彫刻用標準書体",
       JMK: '平成明朝',
-      jouyou: '『常用漢字表』',
+      jouyou: '常用漢字表',
       koseki: '戸籍統一文字',
       KS: '平成明朝',
       ks: "出典K",
@@ -2285,7 +2321,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       tensho: '篆書字体データセット',
       TK: '平成明朝',
       touki: '登記統一文字',
-      touyou: "『当用漢字表』",
+      touyou: "当用漢字表",
       tron: "TRONコード",
       UTC: "UAX #45",
       wakan: "『和翰名苑』仮名字体データベース",
@@ -2307,6 +2343,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
           dot16: 'JIS X 9051',
           dot24: 'JIS X 9052',
           heisei: '平成明朝',
+          tcm: 'TCM神代文字',
         }[m[1]];
         if (t) return t;
       } else {
@@ -2327,6 +2364,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       jitaichou: '字躰帳変体仮名',
       minhnguyen: "Minh Nguyen",
       rcv: '榜𡨸漢喃準常用',
+      swk: 'Wiki//外字',
     }[m[1]] : null;
 
     if (m && m[1] === 'aj') {
@@ -2389,7 +2427,6 @@ Object.defineProperty (SWD.Char.prototype, 'categoryShortName', {
       gtk: 'GT (部品)',
       gw: 'GlyphWiki',
       HG: "平成明朝 (表外漢字字体表)",
-      hyougai: '国語審議会表外漢字',
       IA: '平成明朝 (JA)',
       IB: '平成明朝',
       inherited: '傳承字形推薦形體表',
@@ -2410,7 +2447,6 @@ Object.defineProperty (SWD.Char.prototype, 'categoryShortName', {
       KS: '平成明朝 (戸籍統一文字)',
       ks: "KS",
       kx: "康煕字典",
-      m: '大漢和辞典',
       mh: '大漢和辞典 補',
       MJ: "文字情報基盤",
       muleethiopic: "MuleEthiopic",
@@ -2439,6 +2475,7 @@ Object.defineProperty (SWD.Char.prototype, 'categoryShortName', {
           dot16: 'JIS16ドット',
           dot24: 'JIS24ドット',
           heisei: '平成明朝',
+          tcm: 'TCM神代文字',
         }[m[1]];
         if (t) return t;
       } else {
@@ -2458,6 +2495,21 @@ Object.defineProperty (SWD.Char.prototype, 'categoryShortName', {
         return 'Adobe-Japan2';
       } else if (this.char.match (/^:aj[0-9]+$/)) {
         return "Adobe-Japan1";
+      }
+    }
+
+    if (m && m[1] === 'm') {
+      m = this.char.match (/^:m([0-9]+)('{0,2})$/);
+      if (m && m[1] < 50000) {
+        return '大漢和辞典';
+      }
+    }
+
+    if (m && m[1] === 'hyougai') {
+      if (this.char.match (/^:hyougai[0-9]+$/)) {
+        return "印刷標準字体";
+      } else if (this.char.match (/^:hyougai[0-9]+k$/)) {
+        return "簡易慣用字体";
       }
     }
 
@@ -2583,7 +2635,6 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       gtk: "GT書体フォント 検索用部品",
       gw: 'GlyphWiki (R5.9.30) グリフ',
       HG: "平成明朝グリフ (『表外漢字字体表』)",
-      hyougai: '国語審議会表外漢字',
       IA: '平成明朝グリフ (JA)',
       IB: '平成明朝グリフ',
       inherited: '『傳承字形推薦形體表』 字形',
@@ -2607,7 +2658,6 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       KS: '平成明朝グリフ (戸籍統一文字)',
       ks: "KS区点位置",
       kx: "『康熙字典』漢字",
-      m: '『大漢和辞典』漢字',
       mh: '『大漢和辞典』 補巻 漢字',
       MJ: "文字情報基盤 MJ文字図形",
       muleethiopic: "MuleEthiopic 文字",
@@ -2666,6 +2716,7 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
           dot16: 'JIS16ドットフォント 文字',
           dot24: 'JIS24ドットフォント 文字',
           heisei: '平成明朝グリフ (JIS)',
+          tcm: 'TCM神代文字 文字',
         }[m[1]];
         if (t) return t;
       } else {
@@ -2685,6 +2736,21 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
         return 'Adobe-Japan2 CID';
       } else if (this.char.match (/^:aj[0-9]+$/)) {
         return "Adobe-Japan1 CID";
+      }
+    }
+
+    if (m && m[1] === 'm') {
+      m = this.char.match (/^:m([0-9]+)('{0,2})$/);
+      if (m && m[1] < 50000) {
+        return '『大漢和辞典』 漢字';
+      }
+    }
+
+    if (m && m[1] === 'hyougai') {
+      if (this.char.match (/^:hyougai[0-9]+$/)) {
+        return "国語審議会『表外漢字字体表』 印刷標準字体";
+      } else if (this.char.match (/^:hyougai[0-9]+k$/)) {
+        return "国語審議会『表外漢字字体表』 簡易慣用字体";
       }
     }
 
@@ -2732,6 +2798,7 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       jitaichou: "『字躰帳変体仮名』グリフ",
       minhnguyen: "『Minh Nguyen』グリフ",
       rcv: '『榜𡨸漢喃準常用』 𡨸漢喃',
+      swk: 'SuikaWiki (swk) 字形',
     }[m[1]];
 
     if (!t && this.char.match (/^:JT/)) {
@@ -3070,7 +3137,7 @@ defs (() => {
       }
     } else if (obj.type === 'char') {
       var char = obj.char;
-      if (/^:(?:MJ)/.test (char)) {
+      if (/^:(?:MJ|u-swk)/.test (char)) {
         return templates.qLocalId || templates.localId || templates[""];
       } else if (/^:(?:gw-|tron|gt[0-9]|gtk|m[0-9]|mh[0-9]|ninjal|koseki|touki|kx|tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei|hyougai|aj[0-9-]|ac[0-9]|ag[0-9]|ak[0-9]|chise-|shinjigen|daijiten|zinbunoracle)/.test (char)) {
         return templates.localId || templates[""];
@@ -4285,6 +4352,30 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     }
   }
 
+  if (m = char.match (/^:u-swk-(.+)$/)) {
+    const parts = m[1].split('-');
+    let unicodeParts = [];
+    let restParts = [];
+    let isUnicodePhase = true;
+    for (const part of parts) {
+      if (isUnicodePhase && /^[0-9a-f]{4,}$/.test(part)) {
+        const code = parseInt(part, 16);
+        unicodeParts.push(String.fromCodePoint(code));
+      } else {
+        isUnicodePhase = false;
+        restParts.push(part);
+      }
+    }
+
+    return {
+      fontName: "swcf-k", approximate,
+      attrs: {
+        features: restParts.join ('.'),
+      },
+      textContent: unicodeParts.join (''),
+    };
+  }
+
   if (m = char.match (/^:u-([a-z]+)-([0-9a-f]+)-([0-9a-f]+)$/)) {
     let fontName = null;
     if (opts.mapper === 'auto') {
@@ -4874,7 +4965,8 @@ defineElement ({
 }); // <sw-char-cluster>
 
 SWD.Char.routes = async function (char1, char2, opts) {
-  var maxDistance = opts.maxDistance || 30;
+  let maxDistance = opts.maxDistance || 30;
+  let minWeight = opts.minWeight || -Infinity;
   var p = [];
 
   if (char1.char === char2.char && char1.char !== null) {
@@ -4930,26 +5022,13 @@ SWD.Char.routes = async function (char1, char2, opts) {
         }
       }
       Object.keys (relItems).forEach (relChar => {
-      /*
-      var relItems = await SWD.Char.getRelsAll (char.char);
-      var relTypeSets = {};
-      for (let j = 0; j < relItems.length; j++) {
-        var relItem = relItems[j];
-        var relChar = relItem[0];
-        var relTypes = [];
-        for (let k = 0; k < relItem[1].length; k++) {
-          var relDSKey = relItem[1][k][0];
-          if (!relTypeSets[relDSKey]) {
-            relTypeSets[relDSKey] = await SWD.Char.getRelationIndexMap (relDSKey);
-          }
-          relTypes.push (relTypeSets[relDSKey][relItem[1][k][1]]);
-        }
+        let ris = relItems[relChar];
+        let risWeight = Math.max (...ris.map (_ => _.weight));
+        console.log("XXXX", risWeight, minWeight)
+        if (risWeight < minWeight) return;
+        
         var item = route.concat ([
-          [SWD.char ('char', relChar), relTypes]
-        ]);
-        */
-        var item = route.concat ([
-          [SWD.char ('char', relChar), relItems[relChar]]
+          [SWD.char ('char', relChar), ris]
         ]);
         item.seen = new Set (route.seen);
         //if (currentSeen[relChar]) {
@@ -4974,7 +5053,6 @@ SWD.Char.routes = async function (char1, char2, opts) {
           item.seen.add (relChar);
         }
         nextSeen[relChar] = true;
-      //} // relItems
       }); // relItems
 
       await new Promise (_ => setTimeout (_, 0));
@@ -5000,6 +5078,7 @@ defineElement ({
     swInit: async function () {
       var char1 = this.value[0];
       var char2 = this.value[1];
+      let minWeight = parseInt (this.getAttribute ('minweight') || 0) || -Infinity;
 
       var as = document.createElement ('action-status');
       as.innerHTML = '<progress></progress><action-status-message></action-status-message>';
@@ -5021,6 +5100,7 @@ defineElement ({
       this.swRoutes = [];
       var results = await SWD.Char.routes (char1, char2, {
         maxDistance,
+        minWeight,
         onhop: hop => {
           progress.value = hop;
         },
@@ -5319,6 +5399,8 @@ SWD.Font.Font.prototype._load = async function () {
       url = 'https://fonts.suikawiki.org/' + url;
     }
     this.patchJSONURL = url;
+  } else if (info.type === 'customelement') {
+    //
   } else if (info.type === 'webfont') {
     //
   } else if (info.type === 'native') {
@@ -5601,6 +5683,8 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
   if (this.info.type === 'webfont') {
     gd = {string: opts.string,
           fontFamily: this.info.fontFamily, css: this.info.css};
+  } else if (this.info.type === 'customelement') {
+    gd = {...opts, customElement: this.info.element_name};
   } else {
     gd = await this.getGlyphData (opts);
     if (!gd) return null;
@@ -5687,6 +5771,13 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
     } else {
       return img;
     }
+  } else if (gd.customElement) {
+    let e = document.createElement (gd.customElement);
+    for (let n in gd.attrs) {
+      e.setAttribute (n, gd.attrs[n]);
+    }
+    e.textContent = gd.textContent;
+    return e;
   } else {
     throw ["getGlyphElement", this];
   }
