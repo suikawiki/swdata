@@ -5677,6 +5677,46 @@ SWD.Font.Font.prototype.getGlyphData = hasWorkerMethod ('GetFontGlyphData', asyn
   return [this.info, opts];
 }); // getGlyphData
 
+SWD.Font.Font.prototype.getGlyphImageURL = async function (opts) {
+  let info = this.info;
+  if (info.type === 'opentype') {
+    let url = info.url;
+    if (SWD.isLocal && info.has_local) {
+      return null;
+    } else {
+      url = 'https://fonts.suikawiki.org/' + url;
+    }
+    url = 'https://swdata-objects.suika.deno.net/ot/'+encodeURIComponent (url)+'/'
+    if (opts.glyphId != null && opts.glyphId !== "") {
+      url += 'id/' + encodeURIComponent (opts.glyphId);
+    } else if (opts.glyphName != null && opts.glyphName !== "") {
+      url += 'name/' + encodeURIComponent (opts.glyphName);
+    } else if (opts.string != null && opts.string.length === 1) {
+      url += 'char/' + opts.string.codePointAt (0).toString (16);
+    } else {
+      return null;
+    }
+    url += '/glyph.svg';
+    return url;
+  } else if (info.type === 'opentype-ranged') {
+    if (opts.string != null && opts.string.length === 1) {
+      let c = opts.string.codePointAt (0);
+      var item;
+      for (var i = 0; i < this.info.files.length; i++) {
+        var r = this.info.files[i];
+        if (parseInt (r.range[0], 16) <= c && c <= parseInt (r.range[1], 16)) {
+          item = r;
+          break;
+        }
+      }
+      if (!item) return null;
+
+      let font = await SWD.Font.load ({type: 'opentype', url: item.url});
+      return font.getGlyphImageURL ({string: opts.string});
+    }
+  }
+  return null;
+}; // getGlyphImageURL
 
 SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
   let gd;
@@ -5686,6 +5726,16 @@ SWD.Font.Font.prototype.getGlyphElement = async function (opts) {
   } else if (this.info.type === 'customelement') {
     gd = {...opts, customElement: this.info.element_name};
   } else {
+    let imgURL = await this.getGlyphImageURL (opts);
+    if (imgURL !== null) {
+      let img = await new Promise ((ok, ng) => {
+        let img = document.createElement ('img');
+        img.onload = () => ok (img);
+        img.onerror = ng;
+        img.src = imgURL;
+      }).catch (e => {});
+      if (img) return img;
+    }
     gd = await this.getGlyphData (opts);
     if (!gd) return null;
   }
