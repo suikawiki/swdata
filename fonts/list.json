@@ -451,14 +451,16 @@
     "label": "和翰名苑",
     "index_url": "https://fonts.suikawiki.org/imageset/wakan/image-index.json",
     "image_url_prefix": "https://fonts.suikawiki.org/imageset/wakan/wakan-kokkai_",
-    "image_url_suffix": ".jpg"
+    "image_url_suffix": ".jpg",
+    "char_need_font_name_prefix": true
   },
   "tensho": {
     "type": "imageset",
     "label": "篆書字体データセット",
     "index_url": "https://fonts.suikawiki.org/imageset/tensho/image-index.json",
     "image_url_prefix": "https://swdata-items-1.netlify.app/tensho/",
-    "image_url_suffix": ".png"
+    "image_url_suffix": ".png",
+    "char_need_font_name_prefix": true
   },
   "kuzushiji": {
     "type": "imageset",
@@ -466,7 +468,8 @@
     "index_url_prefix": "https://fonts.suikawiki.org/imageset/kuzushiji/image-index/",
     "index_parted": "0x100",
     "image_url_prefix": "https://swdata-items-2.suikawiki.org/kuzushiji/",
-    "image_url_suffix": ".png"
+    "image_url_suffix": ".png",
+    "char_need_font_name_prefix": true
   },
   "modmag": {
     "type": "imageset",
@@ -475,7 +478,17 @@
     "index_parted": "0x100",
     "image_url_prefix": "https://swdata-items-1.netlify.app/modmag/",
     "image_url_suffix": ".png",
+    "char_need_font_name_prefix": true,
     "image_is_line": true
+  },
+  "swir": {
+    "type": "imageset",
+    "label": "SuikaWiki 画像の領域",
+    "index_url_prefix": "https://suikawiki.github.io/swcf/current/swir-indexes/imageindex/",
+    "index_parted": "0x10",
+    "image_url_prefix": "https://chars.suikawiki.org/swdata-items-swir/",
+    "image_url_suffix": ".jpeg",
+    "image_url_type": "swir"
   },
   "swc": {
     "type": "images",

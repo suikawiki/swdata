@@ -2065,6 +2065,9 @@ Object.defineProperty (SWD.Char.prototype, 'localId', {
       m = this._char.match (/^:(?:tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei)-(.+)?$/);
       if (m) return m[1];
 
+      m = this._char.match (/^(:(?:ep)-.+)$/);
+      if (m) return m[1];
+
       m = this._char.match (/^:(?:gw)-(.+)$/);
       if (m) return m[1];
 
@@ -2278,6 +2281,7 @@ Object.defineProperty (SWD.Char.prototype, 'categorySWName', {
       dsf: "Droid Sans Fallback",
       dsffull: "Droid Sans Fallback",
       dsfff: "Droid Sans Fallback",
+      ep: 'SuikaWiki',
       FT: '平成明朝',
       gb: "GB",
       gt: 'GTフォント',
@@ -2629,6 +2633,7 @@ Object.defineProperty (SWD.Char.prototype, 'categoryName', {
       dsf: "『Droid Sans Fallback』グリフ",
       dsffull: "『Droid Sans Fallback』グリフ",
       dsfff: "『Droid Sans Fallback』グリフ",
+      ep: 'SuikaWiki 画像の領域',
       FT: '平成明朝グリフ',
       gb: "GB区点位置",
       gt: "GT書体フォント 文字", // GT番号
@@ -2907,7 +2912,7 @@ Object.defineProperty (SWD.Char.prototype, 'swName', {
 
 Object.defineProperty (SWD.Char.prototype, 'hasImageSet', {
   get: function () {
-    return !! this.char.match (/^:(?:cns[1-9].+|wakan-[\u3042-\u3093][0-9]+|tensho-..?|kuzushiji-.|modmag-.)$/);
+    return !! this.char.match (/^:(?:cns[1-9].+|wakan-[\u3042-\u3093][0-9]+|tensho-..?|kuzushiji-.|modmag-.|u-swk-.+)$/);
   },
 }); // char.hasImageSet
 
@@ -2930,13 +2935,22 @@ SWD.Char.prototype.getImageSetInfo = function () {
   if (m) return SWD.Font.load ({name: m[1]}).then (async (font) => {
     await font._load ();
     var keys = (await font._getImageIndexPart (m[2])).images[m[2]] || [];
-    return {name: m[1], keys};
+    return {name: m[1], keys, font};
+  });
+
+  m = this.char.match (/^(:u-swk-([0-9a-f]+)-.+)$/);
+  if (m) return SWD.Font.load ({name: 'swir'}).then (async (font) => {
+    await font._load ();
+    var keys = (await font._getImageIndexPart (String.fromCodePoint (parseInt (m[2], 16)))).images[m[1]] || [];
+    return {name: 'swir', keys, font};
   });
 
   m = this.char.match (/^:cns([0-9]+-[0-9]+-[0-9]+)$/);
   if (m) {
     return {keys: [':cns-kai-' + m[1], ':cns-sung-' + m[1]]};
   }
+
+  return {};
 }; // char.getImageSetInfo
 
 SWD.Char.prototype.applyDelta = function (delta) {
@@ -3137,7 +3151,7 @@ defs (() => {
       }
     } else if (obj.type === 'char') {
       var char = obj.char;
-      if (/^:(?:MJ|u-swk)/.test (char)) {
+      if (/^:(?:MJ|u-swk|ep-)/.test (char)) {
         return templates.qLocalId || templates.localId || templates[""];
       } else if (/^:(?:gw-|tron|gt[0-9]|gtk|m[0-9]|mh[0-9]|ninjal|koseki|touki|kx|tensho|kuzushiji|modmag|inherited|touyou|jouyou|jinmei|hyougai|aj[0-9-]|ac[0-9]|ag[0-9]|ak[0-9]|chise-|shinjigen|daijiten|zinbunoracle)/.test (char)) {
         return templates.localId || templates[""];
@@ -4691,6 +4705,16 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
       };
     }
     
+    if (m = char.match (/^(:(ep)-.+)$/)) {
+      return {
+        fontName: {
+          ep: 'swir',
+        }[m[2]],
+        glyphName: m[1],
+        approximate,
+      };
+    }
+    
     if (m = char.match (/^:((swc)[0-9]+)$/)) {
       return {
         fontName: m[2],
@@ -4900,17 +4924,18 @@ defineElement ({
         var is = await schar.getImageSetInfo ();
         var ts1 = await getISTemplate;
         var ts2 = await getISMTemplate;
-        _insertImageList (ul, is.name, is.keys.slice (), ts1, ts2, null);
+        if (is.name) _insertImageList (ul, is.name, is.keys.slice (), ts1, ts2, null, is.font);
       }; // insertImageSet
-      var _insertImageList = (ul, fontName, keys, ts1, ts2, more) => {
+      var _insertImageList = (ul, fontName, keys, ts1, ts2, more, font) => {
         var nextKeys = keys.splice (100);
 
         if (fontName) {
           keys.forEach (key => {
+            let char = font.info.char_need_font_name_prefix ? ':' + fontName + '-' + key : key;
             var li = ts1.createFromTemplate ('li', {
               fontName,
               glyphName: key,
-              char: ':' + fontName + '-' + key,
+              char,
             });
             ul.appendChild (li);
           });
@@ -5411,10 +5436,17 @@ SWD.Font.Font.prototype._load = async function () {
 }; // _load
 
 SWD.Font.Font.prototype._getImageIndexPart = async function (string) {
-  if (this.info.index_parted !== '0x100') throw "Unknown |index_parted|: |"+this.info.index_parted+"|";
-  var n = Math.floor (string.codePointAt (0) / 0x100);
-  var url = this.info.index_url_prefix + 'part-' + n + '.json';
-  var key = 'imageIndexPart:' + url;
+  let url;
+  if (this.info.index_parted === '0x100') {
+    let n = Math.floor (string.codePointAt (0) / 0x100);
+    url = this.info.index_url_prefix + 'part-' + n + '.json';
+  } else if (this.info.index_parted === '0x10') {
+    let n = Math.floor (string.codePointAt (0) / 0x10);
+    url = this.info.index_url_prefix + 'part-' + n + '.json';
+  } else {
+    throw "Unknown |index_parted|: |"+this.info.index_parted+"|";
+  }
+  let key = 'imageIndexPart:' + url;
   if (SWD._cached[key]) return SWD._cached[key];
   return SWD._cached[key] = (fetch (url, {
     referrerPolicy: 'no-referrer',
@@ -5485,7 +5517,40 @@ SWD.Font.Font.prototype._getGlyphDataByName = async function (glyphName) {
       var list = part.images[glyphName];
       if (list) glyphName = list[0];
     }
-    if (this.info.image_is_line) {
+    if (this.info.image_url_type === 'swir') {
+      let m = glyphName.match (/^:ep-(.+)-([^-]+)$/);
+      if (!m) throw ['Bad resolved glyph name', glyphName, this];
+
+      async function buildImagePath (identifier) {
+        const sha1Async = async (str) => {
+          if (typeof self !== 'undefined' && self.crypto && self.crypto.subtle) {
+            const data = new TextEncoder().encode(str);
+            const hashBuffer = await self.crypto.subtle.digest('SHA-1', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          } else {
+            const crypto = await import('crypto');
+            return crypto.createHash('sha1').update(str).digest('hex');
+          }
+        };
+        
+        const epRegex = /^:ep-(x[A-Za-z0-9]+-[A-Za-z0-9_-]+)-([0-9a-f]+)$/;
+        const match = identifier.match(epRegex);
+        if (match && match[1].length <= 100 && match[2].length <= 100) {
+          const [, group1, group2] = match;
+          return `${group1}/${group2}`;
+        } else {
+          const hash = await sha1Async(identifier);
+          const dir = `sha-${hash.substring(0, 2)}`;
+          const filename = `${hash.substring(2)}`;
+          return `${dir}/${filename}`;
+        }
+      } // buildImagePath
+        
+      return {
+        imageURL: this.info.image_url_prefix + (await buildImagePath (glyphName)) + this.info.image_url_suffix,
+      };
+    } else if (this.info.image_is_line) {
       var m = glyphName.match (/^(.+)-([0-9]+)\/([0-9]+)$/);
       if (!m) throw ['Bad resolved glyph name', glyphName, this];
       
