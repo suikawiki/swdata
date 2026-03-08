@@ -2078,7 +2078,7 @@ Object.defineProperty (SWD.Char.prototype, 'localId', {
         let restParts = [];
         let isUnicodePhase = true;
         for (const part of parts) {
-          if (isUnicodePhase && /^[0-9a-f]{4,}$/.test(part)) {
+          if (isUnicodePhase && /^[0-9a-f]+$/.test(part)) {
             const code = parseInt(part, 16);
             if (code <= 0x9f) {
               unicodeParts.push(`u${code.toString(16)}`);
@@ -4372,7 +4372,7 @@ SWD.Char.RelData._getGlyphInfo = hasWorkerMethod ('SWDCharRelDataGetGlyphInfo', 
     let restParts = [];
     let isUnicodePhase = true;
     for (const part of parts) {
-      if (isUnicodePhase && /^[0-9a-f]{4,}$/.test(part)) {
+      if (isUnicodePhase && /^[0-9a-f]+$/.test(part)) {
         const code = parseInt(part, 16);
         unicodeParts.push(String.fromCodePoint(code));
       } else {
