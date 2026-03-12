@@ -104,7 +104,7 @@
                "run" : "rm -fr modules/*/bin modules/*/.git modules/*/t modules/*/t_deps"
             },
             {
-               "run" : "docker build -t quay\u005C.io\u005C/suikawiki\u005C/swdata \u005C."
+               "run" : "docker build --cache-from quay\u005C.io\u005C/suikawiki\u005C/swdata -t quay\u005C.io\u005C/suikawiki\u005C/swdata \u005C."
             },
             {
                "run" : "docker run --name server -d -p 5511:8080 quay.io/suikawiki/swdata /server; sleep 10"
