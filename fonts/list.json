@@ -458,7 +458,7 @@
     "type": "imageset",
     "label": "篆書字体データセット",
     "index_url": "https://fonts.suikawiki.org/imageset/tensho/image-index.json",
-    "image_url_prefix": "https://swdata-items-1.netlify.app/tensho/",
+    "image_url_prefix": "https://swdata-items-1.suikawiki.org/tensho/",
     "image_url_suffix": ".png",
     "char_need_font_name_prefix": true
   },
@@ -476,7 +476,7 @@
     "label": "近代雑誌OCR学習用データセット",
     "index_url_prefix": "https://fonts.suikawiki.org/imageset/modmag/image-index/",
     "index_parted": "0x100",
-    "image_url_prefix": "https://swdata-items-1.netlify.app/modmag/",
+    "image_url_prefix": "https://swdata-items-1.suikawiki.org/modmag/",
     "image_url_suffix": ".png",
     "char_need_font_name_prefix": true,
     "image_is_line": true
@@ -487,7 +487,7 @@
     "index_url_prefix": "https://suikawiki.github.io/swcf/current/swir-indexes/imageindex/",
     "index_parted": "0x10",
     "image_url_prefix": "https://chars.suikawiki.org/swdata-items-swir/",
-    "image_url_suffix": ".jpeg",
+    "image_url_suffix": ".png",
     "image_url_type": "swir"
   },
   "swc": {
