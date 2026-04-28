@@ -214,7 +214,7 @@ SWD._dataRes = function (name, opts) {
     if (SWD.isLocal) {
       url = '/data/charrels/' + opts.dsKey + '/' + name;
     } else {
-      url = 'https://swdata-items-3.netlify.app/chars/charrels/' + opts.dsKey + '/' + name;
+      url = 'https://swdata-items-3.suikawiki.org/chars/charrels/' + opts.dsKey + '/' + name;
     }
   }
 
@@ -5326,7 +5326,7 @@ SWD.Font._otjs = function () {
 SWD.Font.info = async function (opts) {
   var info = opts;
   if (!info.type && info.name) {
-    var json = await SWD.data ('fonts.json');
+    var json = await SWD.data ('fonts.json?');
     info = json[opts.name] || opts;
   }
   return info;
