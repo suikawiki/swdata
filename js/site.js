@@ -5751,7 +5751,7 @@ SWD.Font.Font.prototype.getGlyphImageURL = async function (opts) {
     } else {
       url = 'https://fonts.suikawiki.org/' + url;
     }
-    url = 'https://swdata-objects.suika.deno.net/ot/'+encodeURIComponent (url)+'/'
+    url = 'https://swdata-objects.suikawiki.org/ot/'+encodeURIComponent (url)+'/'
     if (opts.glyphId != null && opts.glyphId !== "") {
       url += 'id/' + encodeURIComponent (opts.glyphId);
     } else if (opts.glyphName != null && opts.glyphName !== "") {
