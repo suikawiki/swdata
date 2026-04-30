@@ -138,8 +138,8 @@ SWD.Env.startWorker = function () {
       var timer;
       if (to) timer = setTimeout (ng, 300);
 
-      var url = '/js/site.js';
-      if (SWD.isReload) url += '?reload';
+      var url = '/js/site.js?';
+      if (SWD.isReload) url += 'reload';
       this._worker = new w (url, {name});
       this._worker.onerror = ng;
       
