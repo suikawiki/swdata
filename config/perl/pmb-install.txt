@@ -23,7 +23,7 @@ Proc::FastSpawn~1.2
 Scalar::Util~1.70
 Socket~2.041
 Term::Table~0.028
-Test::More~1.302221
+Test::More~1.302222
 Time::HiRes~1.9764
 Time::Local~1.35
 common::sense~3.75
