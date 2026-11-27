@@ -2,13 +2,14 @@ AnyEvent~7.17
 AnyEvent::AIO~1.1
 AnyEvent::FileLock~0.06
 AnyEvent::Fork~1.32
+AnyEvent::IO
 Canary::Stability~2013
 Carp~1.50
 Cwd~3.75
 Data::Dumper~2.183
 Digest::SHA~6.04
 Exporter::Lite~0.09
-File::Path~2.18
+File::Path~2.19
 File::Temp~0.2312
 IO::AIO~4.81
 IO::FDPass~1.3
